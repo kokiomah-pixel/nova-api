@@ -57,13 +57,18 @@ export NOVA_KEYS_JSON='{"mykey":{"owner":"dev","tier":"admin","status":"active",
 
 ## 🧪 Endpoints
 
-- `GET /health` – public healthcheck
+### Billable (counts toward monthly quota)
 - `GET /v1/regime` – protected; returns current regime + signature
 - `GET /v1/epoch` – protected; returns epoch hash + signature
 - `GET /v1/context` – protected; returns guardrail/memory context + signature
+
+### Non-billable (does NOT count toward quota)
+- `GET /health` – public healthcheck
 - `GET /v1/key-info` – protected; returns info for the authenticated key
 - `GET /v1/usage` – protected; returns accumulated usage stats for the key
-- `POST /v1/usage/reset` – protected; clears usage stats for the key
+
+### Admin-only (non-billable)
+- `POST /v1/usage/reset` – protected; clears usage stats for the key (admin tier only)
 
 ---
 

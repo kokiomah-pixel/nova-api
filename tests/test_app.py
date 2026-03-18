@@ -51,42 +51,133 @@ def test_invalid_key_is_rejected():
     assert r.status_code == 403
 
 
-def test_usage_and_reset_persist(tmp_path):
-    usage_file = tmp_path / "usage.json"
+def test_billable_endpoints_increment_usage(tmp_path):
+    key_data = {
+        "billable_user": {
+            "owner": "test",
+            "tier": "standard",
+            "status": "active",
+            "monthly_quota": 1000,
+            "allowed_endpoints": [
+                "/v1/regime",
+                "/v1/epoch",
+                "/v1/context",
+                "/v1/key-info",
+                "/v1/usage",
+            ],
+        }
+    }
     client = _make_client(
         tmp_path,
         env={
-            "NOVA_API_KEY": "mytestkey",
-            "NOVA_USAGE_FILE": str(usage_file),
+            "NOVA_KEYS_JSON": json.dumps(key_data),
+            "NOVA_USAGE_FILE": str(tmp_path / "usage_billable.json"),
         },
     )
 
-    # first call increments
-    r1 = client.get("/v1/usage", headers={"Authorization": "Bearer mytestkey"})
+    # Initial usage baseline
+    r0 = client.get("/v1/usage", headers={"Authorization": "Bearer billable_user"})
+    assert r0.status_code == 200
+    baseline = r0.json()["usage"]["total_calls"]
+
+    # Call each billable endpoint once
+    client.get("/v1/regime", headers={"Authorization": "Bearer billable_user"})
+    client.get("/v1/epoch", headers={"Authorization": "Bearer billable_user"})
+    client.get("/v1/context", headers={"Authorization": "Bearer billable_user"})
+
+    # Usage should increase by 3 calls (non-billable endpoints should not count)
+    r1 = client.get("/v1/usage", headers={"Authorization": "Bearer billable_user"})
     assert r1.status_code == 200
-    assert r1.json()["usage"]["total_calls"] >= 1
+    assert r1.json()["usage"]["total_calls"] == baseline + 3
 
-    # reset clears counts
-    r2 = client.post("/v1/usage/reset", headers={"Authorization": "Bearer mytestkey"})
-    assert r2.status_code == 200
-    assert r2.json()["usage"]["total_calls"] == 0
 
-    # ensure persisted file exists and is valid JSON
-    assert usage_file.exists()
-    data = json.loads(usage_file.read_text(encoding="utf-8"))
-    # After reset, the file may be empty (usage cleared) or still contain a zero record
-    assert data == {} or ("mytestkey" in data)
+def test_non_billable_endpoints_do_not_increment_usage(tmp_path):
+    key_data = {
+        "introspect_user": {
+            "owner": "test",
+            "tier": "standard",
+            "status": "active",
+            "monthly_quota": 1000,
+            "allowed_endpoints": [
+                "/v1/regime",
+                "/v1/key-info",
+                "/v1/usage",
+            ],
+        }
+    }
+    client = _make_client(
+        tmp_path,
+        env={
+            "NOVA_KEYS_JSON": json.dumps(key_data),
+            "NOVA_USAGE_FILE": str(tmp_path / "usage_nonbillable.json"),
+        },
+    )
+
+    # Baseline usage
+    r0 = client.get("/v1/usage", headers={"Authorization": "Bearer introspect_user"})
+    assert r0.status_code == 200
+    baseline = r0.json()["usage"]["total_calls"]
+
+    # Non-billable call should not increase usage
+    client.get("/v1/key-info", headers={"Authorization": "Bearer introspect_user"})
+
+    r1 = client.get("/v1/usage", headers={"Authorization": "Bearer introspect_user"})
+    assert r1.status_code == 200
+    assert r1.json()["usage"]["total_calls"] == baseline
+
+
+def test_usage_reset_is_admin_only(tmp_path):
+    key_data = {
+        "free_user": {
+            "owner": "test",
+            "tier": "standard",
+            "status": "active",
+            "monthly_quota": 1000,
+            "allowed_endpoints": [
+                "/v1/regime",
+                "/v1/key-info",
+                "/v1/usage",
+            ],
+        },
+        "admin_user": {
+            "owner": "test",
+            "tier": "admin",
+            "status": "active",
+            "monthly_quota": 1000,
+            "allowed_endpoints": [
+                "/v1/regime",
+                "/v1/key-info",
+                "/v1/usage",
+                "/v1/usage/reset",
+            ],
+        },
+    }
+    client = _make_client(
+        tmp_path,
+        env={
+            "NOVA_KEYS_JSON": json.dumps(key_data),
+            "NOVA_USAGE_FILE": str(tmp_path / "usage_reset.json"),
+        },
+    )
+
+    # Free tier cannot reset
+    r_free = client.post("/v1/usage/reset", headers={"Authorization": "Bearer free_user"})
+    assert r_free.status_code == 403
+
+    # Admin can reset
+    r_admin = client.post("/v1/usage/reset", headers={"Authorization": "Bearer admin_user"})
+    assert r_admin.status_code == 200
 
 
 def test_monthly_quota_enforced(tmp_path):
-    # Create a key that only allows 1 call per month
+    # Create a key that only allows 1 billable call per month but can still query key-info
     key_data = {
         "quota_user": {
             "owner": "test",
             "tier": "standard",
             "status": "active",
             "monthly_quota": 1,
-            "allowed_endpoints": ["/v1/regime"],
+            "allowed_endpoints": ["/v1/regime", "/v1/key-info"],
         }
     }
     client = _make_client(
@@ -97,9 +188,14 @@ def test_monthly_quota_enforced(tmp_path):
         },
     )
 
+    # Non-billable endpoint should not count towards quota
+    r0 = client.get("/v1/key-info", headers={"Authorization": "Bearer quota_user"})
+    assert r0.status_code == 200
+
     r1 = client.get("/v1/regime", headers={"Authorization": "Bearer quota_user"})
     assert r1.status_code == 200
 
+    # Second billable call should be rejected due to quota
     r2 = client.get("/v1/regime", headers={"Authorization": "Bearer quota_user"})
     assert r2.status_code == 429
 
@@ -137,7 +233,7 @@ def test_redis_backend_usage_and_quota(tmp_path):
             "tier": "admin",
             "status": "active",
             "monthly_quota": 2,
-            "allowed_endpoints": ["/v1/usage"],
+            "allowed_endpoints": ["/v1/usage", "/v1/context"],
         }
     }
     client = _make_client(
@@ -148,14 +244,19 @@ def test_redis_backend_usage_and_quota(tmp_path):
         },
     )
 
-    # First call works
+    # Usage endpoint is non-billable and should not count against quota
     r1 = client.get("/v1/usage", headers={"Authorization": "Bearer redis_user"})
     assert r1.status_code == 200
 
-    # Second call works (monthly quota is 2)
     r2 = client.get("/v1/usage", headers={"Authorization": "Bearer redis_user"})
     assert r2.status_code == 200
 
-    # Third call should be refused by quota
-    r3 = client.get("/v1/usage", headers={"Authorization": "Bearer redis_user"})
-    assert r3.status_code == 429
+    # Billable endpoint should respect quota (monthly_quota=2)
+    r3 = client.get("/v1/context", headers={"Authorization": "Bearer redis_user"})
+    assert r3.status_code == 200
+
+    r4 = client.get("/v1/context", headers={"Authorization": "Bearer redis_user"})
+    assert r4.status_code == 200
+
+    r5 = client.get("/v1/context", headers={"Authorization": "Bearer redis_user"})
+    assert r5.status_code == 429

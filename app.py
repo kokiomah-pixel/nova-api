@@ -38,6 +38,11 @@ NOVA_KEYS_JSON = os.getenv("NOVA_KEYS_JSON", "")
 USAGE_TRACKING: Dict[str, Dict[str, Any]] = {}
 USAGE_FILE = Path(os.getenv("NOVA_USAGE_FILE", ".usage.json")).expanduser()
 
+# Billing policy
+BILLABLE_ENDPOINTS = {"/v1/context", "/v1/regime", "/v1/epoch"}
+NON_BILLABLE_ENDPOINTS = {"/health", "/v1/key-info", "/v1/usage"}
+ADMIN_ONLY_ENDPOINTS = {"/v1/usage/reset"}
+
 NOVA_REDIS_URL = os.getenv("NOVA_REDIS_URL", "")
 REDIS_CLIENT: Optional[redis.Redis] = None
 
@@ -230,17 +235,23 @@ def require_entitlement(
     if path not in allowed:
         raise HTTPException(status_code=403, detail="API key not allowed for this endpoint")
 
-    monthly_quota = record.get("monthly_quota")
-    if isinstance(monthly_quota, int) and monthly_quota >= 0:
-        total_calls = 0
-        client = _get_redis_client()
-        if client:
-            total_calls = int(client.hget(f"usage:{api_key}", "total_calls") or 0)
-        else:
-            total_calls = USAGE_TRACKING.get(api_key, {}).get("total_calls", 0)
+    if path in ADMIN_ONLY_ENDPOINTS and record.get("tier") != "admin":
+        raise HTTPException(status_code=403, detail="Admin tier required for this endpoint")
 
-        if total_calls >= monthly_quota:
-            raise HTTPException(status_code=429, detail="Monthly quota exceeded")
+    monthly_quota = record.get("monthly_quota")
+
+    # Monthly quota only applies to billable endpoints
+    if path in BILLABLE_ENDPOINTS:
+        if isinstance(monthly_quota, int) and monthly_quota >= 0:
+            total_calls = 0
+            client = _get_redis_client()
+            if client:
+                total_calls = int(client.hget(f"usage:{api_key}", "total_calls") or 0)
+            else:
+                total_calls = USAGE_TRACKING.get(api_key, {}).get("total_calls", 0)
+
+            if total_calls >= monthly_quota:
+                raise HTTPException(status_code=429, detail="Monthly quota exceeded")
 
     # Optional per-key rate limiting
     rate_limit = record.get("rate_limit")
@@ -276,7 +287,9 @@ def require_entitlement(
 
                 state["count"] += 1
 
-    track_usage(api_key, path)
+    # Billable endpoints count towards quota and usage
+    if path in BILLABLE_ENDPOINTS:
+        track_usage(api_key, path)
 
     return {
         "api_key": api_key,
