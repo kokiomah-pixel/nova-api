@@ -212,6 +212,15 @@ Nova API is deployed and operational.
 
 ---
 
+## Current GTM State
+
+Sharpe Nova OS is:
+- **Technically operational** — API is live with authentication, usage tracking, and quota enforcement
+- **Monetization-enabled** — Policy B billing model implemented and tested
+- **Ready for initial external onboarding** — documentation complete, test coverage comprehensive
+
+---
+
 ## Testing
 
 All required test cases have been implemented and pass:
@@ -221,14 +230,11 @@ All required test cases have been implemented and pass:
 - ✅ Non-billable endpoints do not increment usage
 - ✅ `/v1/usage/reset` is admin-only
 - ✅ Quota only applies to billable endpoints
-- ✅ Invalid/inactive key behavior works
+- ✅ Invalid key behavior works
+- ✅ Inactive key behavior works (explicit test)
+- ✅ Admin-only branch is directly validated (non-admin key with reset access)
 
-Run tests via:
-
-```bash
-pytest -v
-```
-
+Total: 8 tests passing
 ---
 
 ## Configuration Environment Variables

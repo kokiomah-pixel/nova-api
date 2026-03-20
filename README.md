@@ -1,6 +1,16 @@
-# nova-api
+# Sharpe Nova OS
 
-A small FastAPI service that provides a “Nova” decision context API with signed payloads and API-key gating.
+Sharpe Nova OS is a decision infrastructure layer that sits before capital execution.
+
+Today, programmable capital systems move from intent to execution without a standardized checkpoint. That’s where uncoordinated risk enters the system.
+
+Nova inserts directly into that flow. Before capital moves, systems call Nova to establish regime, constraints, and decision context.
+
+We’re not a data API or prediction engine. We shape behavior before execution.
+
+That’s the control point in capital systems.
+
+**Not a data API. Not a prediction engine.** Nova is decision infrastructure.
 
 ---
 
@@ -72,6 +82,49 @@ export NOVA_KEYS_JSON='{"mykey":{"owner":"dev","tier":"admin","status":"active",
 
 ---
 
+## 💰 Policy B — Billing Model
+
+Nova meters **decision value**, not introspection or system management.
+
+### Billable Endpoints
+These endpoints represent decision checkpoints and count toward monthly quota:
+- `/v1/context` — guardrails and memory context for deployments
+- `/v1/regime` — current regime assessment
+- `/v1/epoch` — epoch hash and constitution snapshot
+
+### Non-Billable Endpoints
+These endpoints are operational and do **not** consume quota:
+- `/health` — public healthcheck (no auth required)
+- `/v1/key-info` — key metadata and entitlements (auth required)
+- `/v1/usage` — accumulated usage statistics (auth required)
+
+### Admin-Only Endpoint
+This endpoint requires admin tier and does **not** consume quota:
+- `/v1/usage/reset` — clears usage counters for an API key
+
+---
+---
+
+## Why This Exists
+
+Most systems today:
+- generate signals
+- run strategies
+- execute trades
+
+But they do not standardize **decision context before execution**.
+
+Nova provides:
+- regime awareness
+- guardrails
+- memory context
+
+This allows systems to:
+- adapt behavior
+- reduce uncoordinated risk
+- operate with shared decision context
+
+Nova is designed to become a required checkpoint before capital moves.
 ## 🧩 Notes
 
 - Payload signatures are HMAC-SHA256 using `NOVA_SIGNING_SECRET` (default: `replace_me`).
@@ -89,10 +142,32 @@ export NOVA_KEYS_JSON='{"mykey":{"owner":"dev","tier":"admin","status":"active",
 
 ## ✅ Quick verification
 
+### Health check (no auth required)
 ```bash
 curl -i http://127.0.0.1:8000/health
 ```
 
+### API call examples
+
+#### curl
+```bash
+curl -H "Authorization: Bearer YOUR_API_KEY" \
+  "https://YOUR_API_DOMAIN/v1/context?intent=trade&asset=ETH&size=10000"
+```
+
+#### Python
+```python
+import requests
+
+response = requests.get(
+    f"{NOVA_API_URL}/v1/context",
+    headers={"Authorization": f"Bearer {NOVA_API_KEY}"},
+    params={"intent": "trade", "asset": "ETH", "size": 10000}
+)
+data = response.json()
+```
+
+### Usage and reset examples
 ```bash
 export NOVA_API_KEY="mytestkey"
 curl -i -H "Authorization: Bearer mytestkey" http://127.0.0.1:8000/v1/regime
