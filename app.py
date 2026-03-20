@@ -315,26 +315,67 @@ def epoch_hash(epoch: int, timestamp_utc: str, constitution_version: str, regime
 
 
 def build_guardrail(intent: Optional[str], asset: Optional[str], size: Optional[float]) -> dict:
+    """
+    Build guardrail with explicit action policy.
+
+    Core rule:
+    Stress = no new risk
+    """
+
+    # -----------------------------
+    # STRESS REGIME (HARD VETO)
+    # -----------------------------
     if DEFAULT_REGIME == "Stress":
         return {
             "severity": "high",
-            "advisory": "Avoid new risk and reduce exposure."
+            "advisory": "Do not initiate new risk. Only reduce or exit existing exposure.",
+            "action_policy": {
+                "allow_new_risk": False,
+                "allow_risk_reduction": True,
+                "allow_position_increase": False,
+                "allow_position_decrease": True
+            }
         }
 
+    # -----------------------------
+    # ELEVATED FRAGILITY (CONSTRAIN)
+    # -----------------------------
     if DEFAULT_REGIME == "Elevated Fragility":
         if intent == "deploy_liquidity":
             return {
                 "severity": "medium",
-                "advisory": "Reduce size and avoid low-liquidity venues."
+                "advisory": "Reduce size and avoid low-liquidity venues.",
+                "action_policy": {
+                    "allow_new_risk": True,
+                    "allow_risk_reduction": True,
+                    "allow_position_increase": False,
+                    "allow_position_decrease": True
+                }
             }
+
         return {
             "severity": "medium",
-            "advisory": "Tighten risk and reduce deployment pace."
+            "advisory": "Proceed with caution. Reduce exposure and tighten controls.",
+            "action_policy": {
+                "allow_new_risk": True,
+                "allow_risk_reduction": True,
+                "allow_position_increase": False,
+                "allow_position_decrease": True
+            }
         }
 
+    # -----------------------------
+    # STABLE (FULL PERMISSION)
+    # -----------------------------
     return {
         "severity": "low",
-        "advisory": "Proceed under normal risk controls."
+        "advisory": "Proceed under normal risk controls.",
+        "action_policy": {
+            "allow_new_risk": True,
+            "allow_risk_reduction": True,
+            "allow_position_increase": True,
+            "allow_position_decrease": True
+        }
     }
 
 
