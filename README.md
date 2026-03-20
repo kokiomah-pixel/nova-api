@@ -102,6 +102,41 @@ curl -i -H "Authorization: Bearer mytestkey" http://127.0.0.1:8000/v1/usage
 curl -i -X POST -H "Authorization: Bearer mytestkey" http://127.0.0.1:8000/v1/usage/reset
 ```
 
+---
+
+## 🔑 Getting an API Key
+
+To use the Nova API, you need a valid API key.
+
+### Request Access
+
+Contact the Nova operations team to request an API key. Provide:
+
+- Your organization name
+- Intended use case
+- Expected monthly request volume
+
+### Tier Selection
+
+API keys are provisioned at one of three tiers:
+
+- **Free** – up to 1,000 billable calls/month; good for evaluation
+- **Pro** – up to 100,000 billable calls/month; for production use  
+- **Admin** – unlimited; for internal operations and testing
+
+Each tier allows unlimited calls to non-billable endpoints (`/health`, `/v1/key-info`, `/v1/usage`).
+
+### Using Your Key
+
+Once provisioned, include your key in the `Authorization` header as a Bearer token:
+
+```bash
+curl -H "Authorization: Bearer your-api-key-here" \
+  https://your-api-domain.com/v1/regime
+```
+
+---
+
 ## 🧪 Running tests
 
 ```bash
