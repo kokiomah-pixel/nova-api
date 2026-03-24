@@ -270,7 +270,7 @@ def get_nova_context(intent: str, asset: str, size: float) -> dict:
     return response.json()
 
 def can_execute(context: dict, intent: str) -> bool:
-    policy = context.get("action_policy", {})
+    policy = context["guardrail"]["action_policy"]
     if not policy.get("allow_new_risk", False):
         return False  # VETO
     if intent == "increase" and not policy.get("allow_position_increase", False):
@@ -291,22 +291,6 @@ else:
 curl -H "Authorization: Bearer YOUR_API_KEY" \
   "https://YOUR_API_DOMAIN/v1/context?intent=trade&asset=ETH&size=10000"
 ```
-
----
-
-## Evidence
-
-Controlled behavior evidence is documented in [`NOVA_EVIDENCE_PACK_V1.md`](NOVA_EVIDENCE_PACK_V1.md).
-
-This includes verified output captures for all three behavior outcomes across regimes:
-
-| Outcome | Regime | Verified |
-|---------|--------|---------|
-| VETO | Stress | yes |
-| CONSTRAIN | Elevated Fragility | yes |
-| ALLOW | Stable | yes |
-
-Evidence was captured under controlled conditions with locked epoch, regime, and action policy values. All outputs are machine-verifiable via HMAC-SHA256 payload signatures.
 
 ---
 
@@ -349,6 +333,22 @@ This runs the same scenarios twice:
 - once with Nova
 
 It shows exactly how execution changes when Nova is in the loop.
+
+---
+
+## Evidence
+
+Controlled behavior evidence is documented in [`NOVA_EVIDENCE_PACK_V1.md`](NOVA_EVIDENCE_PACK_V1.md).
+
+This includes verified output captures for all three behavior outcomes across regimes:
+
+| Outcome | Regime | Verified |
+|---------|--------|---------|
+| VETO | Stress | yes |
+| CONSTRAIN | Elevated Fragility | yes |
+| ALLOW | Stable | yes |
+
+Evidence was captured under controlled conditions with locked epoch, regime, and action policy values. All outputs are machine-verifiable via HMAC-SHA256 payload signatures.
 
 ---
 
