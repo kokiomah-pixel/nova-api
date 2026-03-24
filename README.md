@@ -310,6 +310,48 @@ Evidence was captured under controlled conditions with locked epoch, regime, and
 
 ---
 
+## Execution Visibility
+
+Nova should not only be called before execution.
+
+Its decision should remain visible after execution.
+
+A Nova-gated system should be able to show:
+
+- what action was requested
+- what Nova state was active
+- whether execution was allowed, constrained, or blocked
+- how execution changed as a result
+
+### Example
+
+```json
+{
+  "intent": "trade",
+  "asset": "ETH",
+  "size_requested": 10000,
+  "size_executed": 5000,
+  "nova_regime": "Elevated Fragility",
+  "nova_decision": "CONSTRAIN",
+  "reason": "position increase blocked"
+}
+```
+
+### Comparison Demo
+
+See:
+
+`examples/nova_comparison_agent.py`
+
+This runs the same scenarios twice:
+
+- once without Nova
+- once with Nova
+
+It shows exactly how execution changes when Nova is in the loop.
+
+---
+
 ## Notes
 
 - Payload signatures are HMAC-SHA256 using `NOVA_SIGNING_SECRET` (default: `replace_me`).
