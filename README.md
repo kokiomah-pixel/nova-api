@@ -31,6 +31,51 @@ That's the control point in capital systems.
 
 ---
 
+## What Happens When Agents Don't Have This
+
+Agents already execute capital decisions in loops.
+
+Without a pre-execution control point:
+
+- they increase exposure during fragile conditions
+- they continue deploying risk after the environment degrades
+- they compound behavior across systems without shared constraints
+
+This is not a model failure.
+
+It is a control failure.
+
+Nova exists to stop execution from remaining unconditional.
+
+If your agent cannot determine whether it is allowed to increase risk before acting, it is incomplete.
+
+## 1-Click Control Check
+
+Paste this into your system before any capital action:
+
+```python
+import requests
+
+def nova_gate(intent, asset, size):
+    res = requests.get(
+        "https://YOUR_API_DOMAIN/v1/context",
+        headers={"Authorization": f"Bearer YOUR_API_KEY"},
+        params={"intent": intent, "asset": asset, "size": size}
+    ).json()
+
+    policy = res["guardrail"]["action_policy"]
+
+    if not policy["allow_new_risk"]:
+        raise Exception("Nova VETO: execution blocked")
+
+    if not policy["allow_position_increase"]:
+        raise Exception("Nova CONSTRAINT: cannot increase exposure")
+
+    return True
+```
+
+---
+
 ## Nova Decision State (Live)
 
 Nova provides a pre-execution decision checkpoint for capital systems.
