@@ -60,7 +60,7 @@ def run_with_nova(scenario: Scenario) -> Dict[str, str]:
         decision = "VETO"
         result = "Action blocked by Nova guardrail"
     elif not allow_position_increase and is_risk_increasing_intent(scenario.intent):
-        reduced_size = max(scenario.size * 0.25, 1)
+        reduced_size = max(scenario.size * 0.5, 1)
         decision = "CONSTRAIN"
         result = f"{scenario.intent} executes at reduced size ({reduced_size:g} vs {scenario.size:g})"
     else:
@@ -69,13 +69,13 @@ def run_with_nova(scenario: Scenario) -> Dict[str, str]:
 
     return {
         "regime": regime,
-        "action_policy": json.dumps(action_policy, sort_keys=True),
+        "action_policy": json.dumps(action_policy, indent=2, sort_keys=True),
         "decision": decision,
         "result": result,
     }
 
 
-def print_scenario_comparison(scenario: Scenario) -> None:
+def print_scenario_comparison(scenario: Scenario) -> Dict[str, str]:
     print("=" * 50)
     print(f"Scenario: {scenario.intent} | {scenario.asset} | {scenario.size:g}")
     print()
@@ -95,12 +95,20 @@ def print_scenario_comparison(scenario: Scenario) -> None:
         print(f"Result: {with_nova['result']}")
     except Exception as exc:
         # Fail-safe behavior is explicit so demo output stays understandable.
+        with_nova = {
+            "decision": "VETO",
+            "result": f"Failed to fetch Nova context ({exc})",
+        }
         print("Regime: Unknown")
         print("Action Policy: unavailable")
-        print("Decision: VETO")
-        print(f"Result: Failed to fetch Nova context ({exc})")
+        print(f"Decision: {with_nova['decision']}")
+        print(f"Result: {with_nova['result']}")
 
     print("=" * 50)
+    return {
+        "without_nova_decision": without_nova["decision"],
+        "with_nova_decision": with_nova["decision"],
+    }
 
 
 def main() -> None:
@@ -111,9 +119,39 @@ def main() -> None:
         Scenario("trade", "ETH", 500),
     ]
 
+    without_nova_execute_count = 0
+    with_nova_counts = {"ALLOW": 0, "CONSTRAIN": 0, "VETO": 0}
+    changed_behavior_count = 0
+    validated_behavior_count = 0
+
     for scenario in scenarios:
-        print_scenario_comparison(scenario)
+        decisions = print_scenario_comparison(scenario)
+        if decisions["without_nova_decision"] == "EXECUTE":
+            without_nova_execute_count += 1
+
+        with_decision = decisions["with_nova_decision"]
+        if with_decision in with_nova_counts:
+            with_nova_counts[with_decision] += 1
+
+        if with_decision in {"CONSTRAIN", "VETO"}:
+            changed_behavior_count += 1
+        if with_decision == "ALLOW":
+            validated_behavior_count += 1
+
         print()
+
+    print("SUMMARY")
+    print("Without Nova:")
+    print(f"- {without_nova_execute_count}/{len(scenarios)} scenarios executed at full size")
+    print()
+    print("With Nova:")
+    print(f"- {with_nova_counts['ALLOW']} ALLOW")
+    print(f"- {with_nova_counts['CONSTRAIN']} CONSTRAIN")
+    print(f"- {with_nova_counts['VETO']} VETO")
+    print()
+    print("Conclusion:")
+    print(f"Nova changed execution behavior in {changed_behavior_count}/{len(scenarios)} scenarios.")
+    print(f"Nova validated full execution in {validated_behavior_count}/{len(scenarios)} scenarios.")
 
 
 if __name__ == "__main__":
