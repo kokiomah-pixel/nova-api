@@ -2,7 +2,7 @@
 
 ## Stop. Run This First.
 
-If you are building an agent or system that moves capital, run this before reading anything else:
+If your system moves capital, run this before reading anything else:
 
 ```bash
 curl -H "Authorization: Bearer YOUR_API_KEY" \
@@ -14,22 +14,6 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \
 If your execution system does not call a machine-readable control point before placing risk, it is guessing at regime, constraints, and allowed action.
 
 Nova turns that guess into a deterministic checkpoint your system can read before execution.
-
-## Sharpe Nova OS Positioning
-
-Sharpe Nova OS is a decision infrastructure layer that sits before capital execution.
-
-Today, programmable capital systems move from intent to execution without a standardized checkpoint. That's where uncoordinated risk enters the system.
-
-Nova inserts directly into that flow. Before capital moves, systems call Nova to establish regime, constraints, and decision context.
-
-We're not a data API or prediction engine. We shape behavior before execution.
-
-That's the control point in capital systems.
-
-**Not a data API. Not a prediction engine.** Nova is decision infrastructure.
-
----
 
 ## What Happens When Agents Don't Have This
 
@@ -73,6 +57,20 @@ def nova_gate(intent, asset, size):
 
     return True
 ```
+
+## Sharpe Nova OS Positioning
+
+Sharpe Nova OS is a decision infrastructure layer that sits before capital execution.
+
+Today, programmable capital systems move from intent to execution without a standardized checkpoint. That's where uncoordinated risk enters the system.
+
+Nova inserts directly into that flow. Before capital moves, systems call Nova to establish regime, constraints, and decision context.
+
+We're not a data API or prediction engine. We shape behavior before execution.
+
+That's the control point in capital systems.
+
+**Not a data API. Not a prediction engine.** Nova is decision infrastructure.
 
 ---
 
