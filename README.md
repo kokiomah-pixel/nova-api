@@ -1,20 +1,109 @@
 # Sharpe Nova OS
 
+## Stop. Run This First.
+
+If you are building an agent or system that moves capital, run this before reading anything else:
+
+```bash
+curl -H "Authorization: Bearer YOUR_API_KEY" \
+"https://YOUR_API_DOMAIN/v1/context?intent=trade&asset=ETH&size=10000"
+```
+
+## You Are Currently Guessing
+
+If your execution system does not call a machine-readable control point before placing risk, it is guessing at regime, constraints, and allowed action.
+
+Nova turns that guess into a deterministic checkpoint your system can read before execution.
+
+## Sharpe Nova OS Positioning
+
 Sharpe Nova OS is a decision infrastructure layer that sits before capital execution.
 
-Today, programmable capital systems move from intent to execution without a standardized checkpoint. That’s where uncoordinated risk enters the system.
+Today, programmable capital systems move from intent to execution without a standardized checkpoint. That's where uncoordinated risk enters the system.
 
 Nova inserts directly into that flow. Before capital moves, systems call Nova to establish regime, constraints, and decision context.
 
-We’re not a data API or prediction engine. We shape behavior before execution.
+We're not a data API or prediction engine. We shape behavior before execution.
 
-That’s the control point in capital systems.
+That's the control point in capital systems.
 
 **Not a data API. Not a prediction engine.** Nova is decision infrastructure.
 
 ---
 
-## ✅ Quick start
+## Nova Decision State (Live)
+
+Nova provides a pre-execution decision checkpoint for capital systems.
+
+Before executing, agents call:
+
+`GET /v1/context`
+
+### Current State
+
+```json
+{
+  "epoch": 2461,
+  "regime": "Elevated Fragility",
+  "action_policy": {
+    "allow_new_risk": true,
+    "allow_risk_reduction": true,
+    "allow_position_increase": false,
+    "allow_position_decrease": true
+  }
+}
+```
+
+This response is machine-readable. Agent logic reads `action_policy` directly and gates execution accordingly.
+
+---
+
+## Behavior Model
+
+Nova produces one of three outcomes per decision call:
+
+| Outcome | Condition | Agent behavior |
+|---------|-----------|----------------|
+| **ALLOW** | `allow_new_risk=true`, `allow_position_increase=true` | Proceed under normal controls |
+| **CONSTRAIN** | `allow_new_risk=true`, `allow_position_increase=false` | Proceed with reduced size; no position increases |
+| **VETO** | `allow_new_risk=false` | Do not initiate new risk; reduce or exit only |
+
+### Regime to outcome mapping
+
+| Regime | Severity | Outcome |
+|--------|----------|---------|
+| Stable | low | ALLOW |
+| Elevated Fragility | medium | CONSTRAIN |
+| Stress | high | VETO |
+
+The current regime (`Elevated Fragility`) maps to **CONSTRAIN**: new risk is allowed, but position increases are blocked.
+
+---
+
+## Why This Exists
+
+Most systems today:
+- generate signals
+- run strategies
+- execute trades
+
+But they do not standardize **decision context before execution**.
+
+Nova provides:
+- regime awareness
+- guardrails
+- memory context
+
+This allows systems to:
+- adapt behavior
+- reduce uncoordinated risk
+- operate with shared decision context
+
+Nova is designed to become a required checkpoint before capital moves.
+
+---
+
+## Quick Start
 
 ```bash
 python3 -m venv .venv
@@ -37,7 +126,7 @@ docker run --rm -p 8000:8000 -e NOVA_API_KEY=mytestkey nova-api
 
 ---
 
-## 🔐 Auth (API key)
+## Auth / API keys
 
 The service protects `/v1/*` endpoints with a bearer token.
 
@@ -63,69 +152,122 @@ You may instead supply a JSON key registry via `NOVA_KEYS_JSON`. It must be a JS
 export NOVA_KEYS_JSON='{"mykey":{"owner":"dev","tier":"admin","status":"active","monthly_quota":1000000,"allowed_endpoints":["/v1/regime","/v1/epoch","/v1/context","/v1/key-info","/v1/usage","/v1/usage/reset","/health"]}}'
 ```
 
+### Getting an API Key
+
+Contact the Nova operations team to request an API key. Provide your organization name, intended use case, and expected monthly request volume.
+
+API keys are provisioned at one of three tiers:
+
+- **Free** - up to 1,000 billable calls/month; good for evaluation
+- **Pro** - up to 100,000 billable calls/month; for production use
+- **Admin** - unlimited; for internal operations and testing
+
+Each tier allows unlimited calls to non-billable endpoints (`/health`, `/v1/key-info`, `/v1/usage`).
+
 ---
 
-## 🧪 Endpoints
+## Endpoints
 
 ### Billable (counts toward monthly quota)
-- `GET /v1/regime` – protected; returns current regime + signature
-- `GET /v1/epoch` – protected; returns epoch hash + signature
-- `GET /v1/context` – protected; returns guardrail/memory context + signature
+- `GET /v1/regime` - protected; returns current regime + signature
+- `GET /v1/epoch` - protected; returns epoch hash + signature
+- `GET /v1/context` - protected; returns guardrail/memory context + signature
 
 ### Non-billable (does NOT count toward quota)
-- `GET /health` – public healthcheck
-- `GET /v1/key-info` – protected; returns info for the authenticated key
-- `GET /v1/usage` – protected; returns accumulated usage stats for the key
+- `GET /health` - public healthcheck
+- `GET /v1/key-info` - protected; returns info for the authenticated key
+- `GET /v1/usage` - protected; returns accumulated usage stats for the key
 
 ### Admin-only (non-billable)
-- `POST /v1/usage/reset` – protected; clears usage stats for the key (admin tier only)
+- `POST /v1/usage/reset` - protected; clears usage stats for the key (admin tier only)
 
 ---
 
-## 💰 Policy B — Billing Model
+## Policy B - Billing Model
 
 Nova meters **decision value**, not introspection or system management.
 
 ### Billable Endpoints
 These endpoints represent decision checkpoints and count toward monthly quota:
-- `/v1/context` — guardrails and memory context for deployments
-- `/v1/regime` — current regime assessment
-- `/v1/epoch` — epoch hash and constitution snapshot
+- `/v1/context` - guardrails and memory context for deployments
+- `/v1/regime` - current regime assessment
+- `/v1/epoch` - epoch hash and constitution snapshot
 
 ### Non-Billable Endpoints
 These endpoints are operational and do **not** consume quota:
-- `/health` — public healthcheck (no auth required)
-- `/v1/key-info` — key metadata and entitlements (auth required)
-- `/v1/usage` — accumulated usage statistics (auth required)
+- `/health` - public healthcheck (no auth required)
+- `/v1/key-info` - key metadata and entitlements (auth required)
+- `/v1/usage` - accumulated usage statistics (auth required)
 
 ### Admin-Only Endpoint
 This endpoint requires admin tier and does **not** consume quota:
-- `/v1/usage/reset` — clears usage counters for an API key
+- `/v1/usage/reset` - clears usage counters for an API key
 
 ---
+
+## 60-Second Integration
+
+Call `/v1/context` before any capital action. Read `action_policy` and gate execution.
+
+### Python
+
+```python
+import requests
+
+NOVA_API_URL = "https://your-api-domain.com"
+NOVA_API_KEY = "your-api-key"
+
+def get_nova_context(intent: str, asset: str, size: float) -> dict:
+    response = requests.get(
+        f"{NOVA_API_URL}/v1/context",
+        headers={"Authorization": f"Bearer {NOVA_API_KEY}"},
+        params={"intent": intent, "asset": asset, "size": size}
+    )
+    response.raise_for_status()
+    return response.json()
+
+def can_execute(context: dict, intent: str) -> bool:
+    policy = context.get("action_policy", {})
+    if not policy.get("allow_new_risk", False):
+        return False  # VETO
+    if intent == "increase" and not policy.get("allow_position_increase", False):
+        return False  # CONSTRAIN - position increase blocked
+    return True       # ALLOW
+
+# Before executing:
+context = get_nova_context(intent="trade", asset="ETH", size=10000)
+if can_execute(context, intent="increase"):
+    pass  # proceed
+else:
+    pass  # halt or reduce
+```
+
+### curl
+
+```bash
+curl -H "Authorization: Bearer YOUR_API_KEY" \
+  "https://YOUR_API_DOMAIN/v1/context?intent=trade&asset=ETH&size=10000"
+```
+
 ---
 
-## Why This Exists
+## Evidence
 
-Most systems today:
-- generate signals
-- run strategies
-- execute trades
+Controlled behavior evidence is documented in [`NOVA_EVIDENCE_PACK_V1.md`](NOVA_EVIDENCE_PACK_V1.md).
 
-But they do not standardize **decision context before execution**.
+This includes verified output captures for all three behavior outcomes across regimes:
 
-Nova provides:
-- regime awareness
-- guardrails
-- memory context
+| Outcome | Regime | Verified |
+|---------|--------|---------|
+| VETO | Stress | yes |
+| CONSTRAIN | Elevated Fragility | yes |
+| ALLOW | Stable | yes |
 
-This allows systems to:
-- adapt behavior
-- reduce uncoordinated risk
-- operate with shared decision context
+Evidence was captured under controlled conditions with locked epoch, regime, and action policy values. All outputs are machine-verifiable via HMAC-SHA256 payload signatures.
 
-Nova is designed to become a required checkpoint before capital moves.
-## 🧩 Notes
+---
+
+## Notes
 
 - Payload signatures are HMAC-SHA256 using `NOVA_SIGNING_SECRET` (default: `replace_me`).
 - Usage is persisted between restarts in a JSON file (default `.usage.json`). You can override via `NOVA_USAGE_FILE`.
@@ -140,34 +282,20 @@ Nova is designed to become a required checkpoint before capital moves.
 
 ---
 
-## ✅ Quick verification
+## Verification / Tests
 
 ### Health check (no auth required)
 ```bash
 curl -i http://127.0.0.1:8000/health
 ```
 
-### API call examples
-
-#### curl
+### Live decision call
 ```bash
 curl -H "Authorization: Bearer YOUR_API_KEY" \
   "https://YOUR_API_DOMAIN/v1/context?intent=trade&asset=ETH&size=10000"
 ```
 
-#### Python
-```python
-import requests
-
-response = requests.get(
-    f"{NOVA_API_URL}/v1/context",
-    headers={"Authorization": f"Bearer {NOVA_API_KEY}"},
-    params={"intent": "trade", "asset": "ETH", "size": 10000}
-)
-data = response.json()
-```
-
-### Usage and reset examples
+### Usage and reset
 ```bash
 export NOVA_API_KEY="mytestkey"
 curl -i -H "Authorization: Bearer mytestkey" http://127.0.0.1:8000/v1/regime
@@ -177,43 +305,7 @@ curl -i -H "Authorization: Bearer mytestkey" http://127.0.0.1:8000/v1/usage
 curl -i -X POST -H "Authorization: Bearer mytestkey" http://127.0.0.1:8000/v1/usage/reset
 ```
 
----
-
-## 🔑 Getting an API Key
-
-To use the Nova API, you need a valid API key.
-
-### Request Access
-
-Contact the Nova operations team to request an API key. Provide:
-
-- Your organization name
-- Intended use case
-- Expected monthly request volume
-
-### Tier Selection
-
-API keys are provisioned at one of three tiers:
-
-- **Free** – up to 1,000 billable calls/month; good for evaluation
-- **Pro** – up to 100,000 billable calls/month; for production use  
-- **Admin** – unlimited; for internal operations and testing
-
-Each tier allows unlimited calls to non-billable endpoints (`/health`, `/v1/key-info`, `/v1/usage`).
-
-### Using Your Key
-
-Once provisioned, include your key in the `Authorization` header as a Bearer token:
-
-```bash
-curl -H "Authorization: Bearer your-api-key-here" \
-  https://your-api-domain.com/v1/regime
-```
-
----
-
-## 🧪 Running tests
-
+### Run tests
 ```bash
 ./.venv/bin/pytest -q
 ```
