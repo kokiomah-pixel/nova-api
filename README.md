@@ -371,6 +371,12 @@ It is a regime-aware execution layer.
 
 ### Reference
 
+Run:
+
+```bash
+python examples/nova_comparison_agent.py
+```
+
 See:
 
 `examples/nova_comparison_agent.py`
