@@ -8,7 +8,7 @@ from typing import Any, Dict
 import httpx
 
 
-DEFAULT_API_URL = os.getenv("NOVA_API_URL", "http://127.0.0.1:8000")
+DEFAULT_API_URL = os.getenv("NOVA_API_URL", "https://nova-api-ipz6.onrender.com")
 DEFAULT_API_KEY = os.getenv("NOVA_API_KEY", "")
 
 RISK_INCREASING_INTENTS = {
@@ -47,6 +47,7 @@ def get_nova_context(
     return {
         "regime": regime,
         "action_policy": action_policy,
+        "timestamp_utc": payload.get("timestamp_utc"),
         "raw": payload,
     }
 
@@ -86,12 +87,14 @@ def get_nova_decision(
         "decision": decision,
         "regime": context["regime"],
         "action_policy": action_policy,
+        "timestamp_utc": context.get("timestamp_utc"),
         "reason": reason,
     }
 
 
 if __name__ == "__main__":
     decision = get_nova_decision(intent="trade", asset="ETH", size=10000)
+    print(f"timestamp: {decision['timestamp_utc']}")
     print(f"regime: {decision['regime']}")
     print(f"decision: {decision['decision']}")
     print(f"reason: {decision['reason']}")

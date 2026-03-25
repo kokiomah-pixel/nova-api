@@ -294,6 +294,39 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \
 
 ---
 
+## Fastest Adoption Path
+
+If you want the simplest way to integrate Nova, use the client wrapper:
+
+`examples/nova_client.py`
+
+```python
+from examples.nova_client import get_nova_decision
+
+decision = get_nova_decision("trade", "ETH", 10000)
+
+if decision["decision"] == "VETO":
+    # stop execution
+    pass
+
+elif decision["decision"] == "CONSTRAIN":
+    # reduce size or adjust behavior
+    pass
+
+else:
+    # proceed normally
+    pass
+```
+
+This wrapper:
+- calls `/v1/context`
+- reads `action_policy`
+- returns a top-level decision: ALLOW, CONSTRAIN, or VETO
+
+Use this if you want to integrate Nova in under 60 seconds.
+
+---
+
 ## Execution Visibility
 
 Nova should not only be called before execution.
