@@ -9,68 +9,120 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \
 "https://YOUR_API_DOMAIN/v1/context?intent=trade&asset=ETH&size=10000"
 ```
 
-## You Are Currently Guessing
+## Your System Is Increasing Size Into Volatility
 
-If your execution system does not call a machine-readable control point before placing risk, it is guessing at regime, constraints, and allowed action.
+Most execution systems do this:
 
-Nova turns that guess into a deterministic checkpoint your system can read before execution.
+signal → confidence ↑ → size ↑ → execute
 
-## What Happens When Agents Don't Have This
+That works in stable conditions.
 
-Agents already execute capital decisions in loops.
+It fails in fragile ones.
 
-Without a pre-execution control point:
+Because rising volatility is not strength.
 
-- they increase exposure during fragile conditions
-- they continue deploying risk after the environment degrades
-- they compound behavior across systems without shared constraints
+It is instability.
 
-This is not a model failure.
+---
 
-It is a control failure.
+## What Happens Without a Control Check
 
-Nova exists to stop execution from remaining unconditional.
+Your system:
+- increases exposure as conditions deteriorate
+- continues deploying risk during regime shifts
+- executes at full size because nothing tells it not to
 
-If your agent cannot determine whether it is allowed to increase risk before acting, it is incomplete.
+This is not a model problem.
 
-## 1-Click Control Check
+It is an execution control failure.
 
-Paste this into your system before any capital action:
+---
 
-```python
-import requests
+## The Missing Step
 
-def nova_gate(intent, asset, size):
-    res = requests.get(
-        "https://YOUR_API_DOMAIN/v1/context",
-        headers={"Authorization": f"Bearer YOUR_API_KEY"},
-        params={"intent": intent, "asset": asset, "size": size}
-    ).json()
+Every system has:
 
-    policy = res["guardrail"]["action_policy"]
+intent → size → execute
 
-    if not policy["allow_new_risk"]:
-        raise Exception("Nova VETO: execution blocked")
+What's missing is:
 
-    if not policy["allow_position_increase"]:
-        raise Exception("Nova CONSTRAINT: cannot increase exposure")
+intent → size → [CHECK: is this permitted right now?] → execute or halt
 
-    return True
+## What Nova Does
+
+Nova inserts that check.
+
+Before execution, your system calls:
+
+```
+GET /v1/context
 ```
 
-## Sharpe Nova OS Positioning
+And receives:
+- current regime
+- execution constraints
+- allowed actions
 
-Sharpe Nova OS is a decision infrastructure layer that sits before capital execution.
+Your system reads `action_policy` and decides:
+- proceed
+- reduce
+- or stop
 
-Today, programmable capital systems move from intent to execution without a standardized checkpoint. That's where uncoordinated risk enters the system.
+---
 
-Nova inserts directly into that flow. Before capital moves, systems call Nova to establish regime, constraints, and decision context.
+## Why This Matters (Real Output)
 
-We're not a data API or prediction engine. We shape behavior before execution.
+Without Nova:
+- 4/4 scenarios executed at full size
+- Total executed: 80,500
 
-That's the control point in capital systems.
+With Nova:
+- 4/4 scenarios constrained
+- Total executed: 40,250
 
-**Not a data API. Not a prediction engine.** Nova is decision infrastructure.
+Same strategies.
+Same signals.
+
+Different execution.
+
+---
+
+## The One Line That Matters
+
+Most systems increase size into volatility. Nova prevents that.
+
+---
+
+## What This Is
+
+Nova is not a signal.
+Nova is not a model.
+
+Nova determines whether execution is permitted under current conditions.
+
+---
+
+## What This Means
+
+If your system executes without checking Nova:
+
+it is executing unconditionally
+
+---
+
+## Next Step
+
+Run the comparison:
+
+```bash
+python examples/nova_comparison_agent.py
+```
+
+If the output changes what your system would have done:
+
+You have a control gap.
+
+Close it.
 
 ---
 
