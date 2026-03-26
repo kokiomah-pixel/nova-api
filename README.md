@@ -85,6 +85,22 @@ Same signals.
 
 Different execution.
 
+### Example (Live Behavior)
+
+WITHOUT NOVA
+- Executed size: 80,500
+
+WITH NOVA (Elevated Fragility)
+- Decision: CONSTRAIN
+- Executed size: 40,250
+- Reason: position increase blocked
+
+Nova reduced deployed risk by **50%** under the same conditions.
+
+If your system would have executed 80,500 instead of 40,250:
+
+It is increasing size into volatility.
+
 ---
 
 ## The One Line That Matters
