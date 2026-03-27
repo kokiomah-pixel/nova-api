@@ -118,6 +118,24 @@ Nova determines whether execution is permitted under current conditions.
 
 ---
 
+## Why This Should Not Live Inside Strategy
+
+You can build constraint logic internally.
+
+But once it lives inside your strategy stack, it begins to adapt to that strategy.
+
+Thresholds change.
+Overrides appear.
+Constraints bend under performance pressure.
+
+Nova stays outside strategy logic.
+
+That is the point.
+
+It acts as a consistent execution check that does not adapt to your own bias.
+
+---
+
 ## What This Means
 
 If your system executes without checking Nova:

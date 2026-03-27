@@ -52,6 +52,7 @@ def get_nova_context(
     }
 
 
+# External execution check — remains independent of strategy logic
 def get_nova_decision(
     intent: str,
     asset: str,
@@ -92,7 +93,7 @@ def get_nova_decision(
     }
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # Minimal pre-execution gate
     decision = get_nova_decision(intent="trade", asset="ETH", size=10000)
     print(f"timestamp: {decision['timestamp_utc']}")
     print(f"regime: {decision['regime']}")
