@@ -7,6 +7,8 @@ Nova exposes a system state composed of:
 - regime (system condition)
 - action_policy (execution constraints)
 
+The Nova State Model defines how decision context is structured, not how trades are executed.
+
 ---
 
 ## Epoch

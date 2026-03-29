@@ -8,7 +8,8 @@
 
 ## Executive Summary
 
-Sharpe Nova OS is a decision-context infrastructure API that provisions pre-execution context to autonomous capital systems. The system is **operationally live**, implements **Policy B monetization**, and enforces **strict separation between billable decision logic and non-billable operational endpoints**.
+Sharpe Nova OS is a decision-context infrastructure API that provisions pre-execution context to autonomous capital systems. The system is **operationally live**, implements **Policy B usage metering and quota enforcement**, and enforces **strict separation between billable decision logic and non-billable operational endpoints**.
+This report documents the implementation of a decision discipline layer designed to improve the coherence and defensibility of capital decisions prior to execution.
 
 ---
 
@@ -21,13 +22,14 @@ Nova meters **decision value**, not introspection or system management. This mea
 - **Billable endpoints** (decision logic) count toward usage and consume quota
 - **Non-billable endpoints** (support operations) do not meter or consume quota
 - **Admin-only endpoints** are restricted to administrative tier and do not consume quota
+- Payment rails, wallet integration, and settlement are not implemented in this repository.
 
 ### Billable Endpoints (Metered)
 
 These endpoints increment usage counters and consume monthly quota:
 
-- `GET /v1/context` – guardrails, memory context, and regime transitions for a deployment
-- `GET /v1/regime` – current regime and epoch
+- `GET /v1/context` – guardrails, memory context, and configured decision regime transitions for a deployment
+- `GET /v1/regime` – current configured decision regime and epoch
 - `GET /v1/epoch` – epoch hash and constitution snapshot
 
 ### Non-Billable Endpoints (Not Metered)
@@ -212,11 +214,11 @@ Nova API is deployed and operational.
 
 ---
 
-## Current GTM State
+## Current GTM Position
 
 Sharpe Nova OS is:
 - **Technically operational** — API is live with authentication, usage tracking, and quota enforcement
-- **Monetization-enabled** — Policy B billing model implemented and tested
+- **Usage-metering enabled** — Policy B endpoint metering and quota enforcement implemented and tested
 - **Ready for initial external onboarding** — documentation complete, test coverage comprehensive
 
 ---
@@ -234,7 +236,22 @@ All required test cases have been implemented and pass:
 - ✅ Inactive key behavior works (explicit test)
 - ✅ Admin-only branch is directly validated (non-admin key with reset access)
 
-Total: 8 tests passing
+Total: 9 tests passing
+---
+
+## Verifiability
+
+Nova outputs are designed to be cryptographically attestable.
+
+Each decision can be anchored to a verifiable record, ensuring that:
+- inputs were consistent
+- constraints were applied
+- outputs were not modified post-generation
+
+This repository focuses on the decision layer.
+Attestation infrastructure is introduced separately.
+If used, Base serves as an anchoring/settlement layer and does not replace application-level entitlement or billing logic.
+
 ---
 
 ## Configuration Environment Variables
@@ -247,7 +264,7 @@ Total: 8 tests passing
 | `NOVA_CONSTITUTION_VERSION` | Constitution version in responses | `v1.0` |
 | `NOVA_EPOCH` | Default epoch number | `2461` |
 | `NOVA_TIMESTAMP_UTC` | Default timestamp | `2026-03-20T16:00:00Z` |
-| `NOVA_REGIME` | Default regime | `Elevated Fragility` |
+| `NOVA_REGIME` | Default configured decision regime | `Elevated Fragility` |
 | `NOVA_USAGE_FILE` | Path to usage JSON file | `.usage.json` |
 | `NOVA_REDIS_URL` | Redis connection URL (optional) | `redis://localhost:6379` |
 

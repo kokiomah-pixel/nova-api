@@ -1,6 +1,6 @@
 # Your Trading Agent Has No Risk Brake. Nova OS Adds One.
 
-If your system can move capital without checking whether it is *allowed* under the current regime, it is executing unconditionally.
+If your system can move capital without checking whether it is *allowed* under the current decision constraint context, it is executing unconditionally.
 
 Run this:
 
@@ -19,7 +19,7 @@ Decision: EXECUTE
 Result: trade executes at full size (10000)
 
 WITH NOVA
-Regime: Elevated Fragility
+Configured Decision Regime: Elevated Fragility
 Action Policy: {
   "allow_new_risk": true,
   "allow_position_decrease": true,
@@ -47,13 +47,13 @@ Nova changed execution behavior in 4/4 scenarios.
 
 ## What This Means
 
-Your agent, running without a control layer, would have deployed **80,500 units** of risk across four standard scenarios under current market conditions.
+Your agent, running without a control layer, would have deployed **80,500 units** of exposure across four standard scenarios under captured decision-relevant conditions.
 
-With Nova, it deployed **40,250** — because the live regime (`Elevated Fragility`) prohibits increasing position size.
+With Nova, it deployed **40,250** — because the configured decision regime (`Elevated Fragility`) prohibits increasing position size.
 
 That is not a strategy difference. That is a **control gap**.
 
-Your system did not know the regime. It had no policy to read. It executed at full size because nothing told it not to.
+Your system did not know the configured decision regime. It had no policy to read. It executed at full size because nothing told it not to.
 
 ---
 
@@ -73,7 +73,7 @@ intent → size → [CHECK: is this allowed right now?] → execute or halt
 
 Nova is that check. It is a single API call that returns:
 
-- the current market regime
+- the current decision constraint context (including configured decision regime)
 - whether new risk is allowed
 - whether position increases are allowed
 - whether risk reduction is required
@@ -97,7 +97,7 @@ def nova_gate(intent, asset, size, api_key):
     policy = res["guardrail"]["action_policy"]
 
     if not policy["allow_new_risk"]:
-        raise RuntimeError("Nova VETO: new risk not permitted in current regime")
+        raise RuntimeError("Nova VETO: new risk not permitted in current configured decision regime")
 
     if not policy["allow_position_increase"]:
         raise RuntimeError("Nova CONSTRAIN: position increase blocked")
@@ -109,7 +109,7 @@ Drop this before any capital action. If Nova says no, your system stops.
 
 ---
 
-## Live State Right Now
+## Example Decision Constraint Context Snapshot (Captured 2026-03-16 UTC)
 
 ```json
 {
@@ -125,7 +125,7 @@ Drop this before any capital action. If Nova says no, your system stops.
 }
 ```
 
-This is a machine-readable signal. Your system can poll it before every execution.
+This is a machine-readable snapshot example. Your system can poll `/v1/context` before every execution for current decision constraint context.
 
 ---
 
@@ -150,7 +150,7 @@ If your agent cannot determine whether it is *allowed* to increase risk before a
 Before integrating anything, answer this:
 
 - Does your system know when it should NOT increase risk?
-- Does it change execution size based on regime?
+- Does it change execution size based on configured decision regime?
 - Would it behave differently in Stress vs Stable?
 
 If the answer to any of these is “no”:

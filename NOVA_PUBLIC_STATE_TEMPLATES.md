@@ -1,30 +1,30 @@
-# Nova Public State Templates
+# Nova Public Decision Constraint Templates
 
 ## Daily Anchor Template
 
-Nova State: [REGIME]
+Nova Decision Constraint Context: [REGIME]
 Timestamp: [UTC_TIMESTAMP]
 
-New Risk: [Allowed / Not Allowed]
+New Risk Constraint: [Allowed / Not Allowed]
 Position Increase: [Allowed / Not Allowed]
-Risk Reduction: [Allowed / Not Allowed]
+Risk Reduction Constraint: [Allowed / Not Allowed]
 Position Decrease: [Allowed / Not Allowed]
 
 ---
 
 ## Transition Event Template
 
-Nova Transition:
+Decision Constraint Transition:
 
-[OLD_REGIME] → [NEW_REGIME]
+[OLD_CONFIGURED_DECISION_REGIME] → [NEW_CONFIGURED_DECISION_REGIME]
 Timestamp: [UTC_TIMESTAMP]
 
-New Risk: [Allowed / Not Allowed]
+New Risk Constraint: [Allowed / Not Allowed]
 
 ---
 
 ## Light Interpretation Template
 
-Under current Nova State ([REGIME]), [ACTION_SUMMARY].
+Under the current Nova decision constraint context ([REGIME]), [ACTION_SUMMARY].
 
-Systems [BEHAVIOR_STATEMENT] are operating outside Nova constraints.
+Systems [BEHAVIOR_STATEMENT] are operating outside Nova decision constraints.

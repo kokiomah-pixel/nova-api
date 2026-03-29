@@ -11,7 +11,7 @@ import httpx
 
 
 NOVA_API_URL = os.getenv("NOVA_API_URL", "https://nova-api-ipz6.onrender.com")
-NOVA_API_KEY = os.getenv("NOVA_API_KEY", "nova_live_key_001")
+NOVA_API_KEY = os.getenv("NOVA_API_KEY", "your_api_key_here")
 
 
 @dataclass(frozen=True)
