@@ -11,6 +11,12 @@ import fakeredis
 from fastapi import FastAPI, Header, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
+from key_manager import generate_api_key, store_key, load_keys
+
+try:
+    import stripe
+except Exception:  # pragma: no cover - runtime fallback when stripe isn't installed
+    stripe = None
 
 load_dotenv()
 
@@ -63,6 +69,16 @@ REDIS_CLIENT: Optional[redis.Redis] = None
 # Keys in the registry may include a `rate_limit` object:
 # {"window_seconds": 60, "max_calls": 30}
 RATE_LIMIT_STATE: Dict[str, Dict[str, Any]] = {}
+PROCESSED_EVENTS = set()
+
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+PRICE_EMERGING_ID = os.getenv("STRIPE_PRICE_EMERGING_ID", "price_emerging_id")
+PRICE_CORE_ID = os.getenv("STRIPE_PRICE_CORE_ID", "price_core_id")
+PRICE_ENTERPRISE_ID = os.getenv("STRIPE_PRICE_ENTERPRISE_ID", "price_enterprise_id")
+
+if stripe and STRIPE_SECRET_KEY:
+    stripe.api_key = STRIPE_SECRET_KEY
 
 
 def _get_redis_client() -> Optional[redis.Redis]:
@@ -184,23 +200,46 @@ def track_usage(api_key: str, endpoint: str) -> None:
 
 
 def load_key_registry() -> Dict[str, Dict[str, Any]]:
+    registry: Dict[str, Dict[str, Any]] = {}
+
     if NOVA_KEYS_JSON.strip():
         try:
             parsed = json.loads(NOVA_KEYS_JSON)
             if isinstance(parsed, dict):
-                return parsed
+                registry.update(parsed)
         except json.JSONDecodeError:
             raise RuntimeError("Invalid NOVA_KEYS_JSON format")
 
+    # Merge Stripe/manual keys from keys.json
+    external_keys = load_keys()
+    for api_key, record in external_keys.items():
+        if not isinstance(record, dict):
+            continue
+        merged = dict(record)
+        merged.setdefault("owner", "external")
+        merged.setdefault("tier", "free")
+        merged.setdefault("status", "active")
+        if "monthly_quota" not in merged and "quota" in merged:
+            merged["monthly_quota"] = merged.get("quota")
+        merged.setdefault("monthly_quota", 1000)
+        merged.setdefault("allowed_endpoints", [
+            "/v1/regime",
+            "/v1/epoch",
+            "/v1/context",
+            "/v1/key-info",
+            "/v1/usage",
+            "/health",
+        ])
+        registry[api_key] = merged
+
     # fallback so your current live key keeps working
     if LEGACY_API_KEY:
-        return {
-            LEGACY_API_KEY: {
-                "owner": "legacy",
-                "tier": "admin",
-                "status": "active",
-                "monthly_quota": 1000000,
-                "allowed_endpoints": [
+        registry.setdefault(LEGACY_API_KEY, {
+            "owner": "legacy",
+            "tier": "admin",
+            "status": "active",
+            "monthly_quota": 1000000,
+            "allowed_endpoints": [
             "/v1/regime",
             "/v1/epoch",
             "/v1/context",
@@ -209,16 +248,17 @@ def load_key_registry() -> Dict[str, Dict[str, Any]]:
             "/v1/usage/reset",
             "/health",
         ]
-            }
-        }
+        })
 
-    return {}
+    return registry
 
 
-def get_api_key_from_header(authorization: Optional[str]) -> str:
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing bearer token")
-    return authorization.replace("Bearer ", "", 1).strip()
+def get_api_key_from_headers(authorization: Optional[str], x_api_key: Optional[str]) -> str:
+    if x_api_key:
+        return x_api_key.strip()
+    if authorization and authorization.startswith("Bearer "):
+        return authorization.replace("Bearer ", "", 1).strip()
+    raise HTTPException(status_code=401, detail="Missing API key")
 
 
 def get_key_record(api_key: str) -> Dict[str, Any]:
@@ -237,9 +277,10 @@ def get_key_record(api_key: str) -> Dict[str, Any]:
 
 def require_entitlement(
     request: Request,
-    authorization: Optional[str]
+    authorization: Optional[str],
+    x_api_key: Optional[str],
 ) -> Dict[str, Any]:
-    api_key = get_api_key_from_header(authorization)
+    api_key = get_api_key_from_headers(authorization, x_api_key)
     record = get_key_record(api_key)
 
     path = request.url.path
@@ -411,6 +452,82 @@ def build_memory_context() -> dict:
     }
 
 
+def map_price_to_tier(price_id: str) -> str:
+    price_map = {
+        PRICE_EMERGING_ID: "emerging",
+        PRICE_CORE_ID: "core",
+        PRICE_ENTERPRISE_ID: "enterprise",
+    }
+    return price_map.get(price_id, "free")
+
+
+@app.post("/webhook/stripe")
+async def stripe_webhook(request: Request) -> JSONResponse:
+    if stripe is None:
+        raise HTTPException(status_code=503, detail="Stripe SDK not installed")
+    if not STRIPE_WEBHOOK_SECRET:
+        raise HTTPException(status_code=500, detail="Missing STRIPE_WEBHOOK_SECRET")
+
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature")
+    if not sig_header:
+        raise HTTPException(status_code=400, detail="Missing stripe-signature")
+
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Invalid webhook: {exc}")
+
+    event_id = event.get("id")
+    if event_id in PROCESSED_EVENTS:
+        print(f"[DUPLICATE EVENT] {event_id}")
+        return JSONResponse({"status": "duplicate", "event_id": event_id})
+    if event_id:
+        PROCESSED_EVENTS.add(event_id)
+
+    event_type = event.get("type")
+    created_key: Optional[str] = None
+    created_tier: Optional[str] = None
+    customer_email: Optional[str] = None
+
+    if event_type in {"checkout.session.completed", "invoice.payment_succeeded"}:
+        obj = event.get("data", {}).get("object", {})
+        customer_email = (
+            obj.get("customer_details", {}).get("email")
+            or obj.get("customer_email")
+            or "stripe_customer"
+        )
+        customer_email = customer_email.strip().lower()
+
+        price_id = ""
+        try:
+            if event_type == "checkout.session.completed":
+                session_id = obj.get("id")
+                line_items = stripe.checkout.Session.list_line_items(session_id, limit=1)
+                if not line_items or not line_items.data:
+                    print("[ERROR] No line items found")
+                    return JSONResponse({"status": "error", "reason": "no_line_items"})
+                price_id = (line_items.data[0].get("price") or {}).get("id", "")
+            else:
+                lines = obj.get("lines", {}).get("data", [])
+                if lines:
+                    price_id = (lines[0].get("price") or {}).get("id", "")
+        except Exception:
+            price_id = ""
+
+        created_tier = map_price_to_tier(price_id)
+        created_key = generate_api_key()
+        store_key(created_key, created_tier, owner=customer_email)
+        print(f"[STRIPE] {customer_email} -> {created_key} ({created_tier})")
+
+    return JSONResponse({
+        "status": "success",
+        "event_type": event_type,
+        "api_key_created": bool(created_key),
+        "tier": created_tier,
+    })
+
+
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok"}
@@ -419,9 +536,10 @@ def health() -> dict:
 @app.get("/v1/regime")
 def get_regime(
     request: Request,
-    authorization: Optional[str] = Header(default=None)
+    authorization: Optional[str] = Header(default=None),
+    x_api_key: Optional[str] = Header(default=None, alias="x-api-key"),
 ) -> JSONResponse:
-    entitlement = require_entitlement(request, authorization)
+    entitlement = require_entitlement(request, authorization, x_api_key)
     epoch = get_current_epoch()
     timestamp = get_current_timestamp()
 
@@ -439,9 +557,10 @@ def get_regime(
 @app.get("/v1/epoch")
 def get_epoch(
     request: Request,
-    authorization: Optional[str] = Header(default=None)
+    authorization: Optional[str] = Header(default=None),
+    x_api_key: Optional[str] = Header(default=None, alias="x-api-key"),
 ) -> JSONResponse:
-    entitlement = require_entitlement(request, authorization)
+    entitlement = require_entitlement(request, authorization, x_api_key)
     epoch = get_current_epoch()
     timestamp = get_current_timestamp()
 
@@ -465,13 +584,14 @@ def get_epoch(
 def get_context(
     request: Request,
     authorization: Optional[str] = Header(default=None),
+    x_api_key: Optional[str] = Header(default=None, alias="x-api-key"),
     intent: Optional[str] = Query(default=None),
     asset: Optional[str] = Query(default=None),
     size: Optional[float] = Query(default=None),
     venue: Optional[str] = Query(default=None),
     strategy: Optional[str] = Query(default=None),
 ) -> JSONResponse:
-    entitlement = require_entitlement(request, authorization)
+    entitlement = require_entitlement(request, authorization, x_api_key)
     epoch = get_current_epoch()
     timestamp = get_current_timestamp()
 
@@ -504,9 +624,10 @@ def get_context(
 @app.get("/v1/key-info")
 def key_info(
     request: Request,
-    authorization: Optional[str] = Header(default=None)
+    authorization: Optional[str] = Header(default=None),
+    x_api_key: Optional[str] = Header(default=None, alias="x-api-key"),
 ) -> JSONResponse:
-    entitlement = require_entitlement(request, authorization)
+    entitlement = require_entitlement(request, authorization, x_api_key)
 
     payload = {
         "owner": entitlement["owner"],
@@ -521,9 +642,10 @@ def key_info(
 @app.get("/v1/usage")
 def get_usage(
     request: Request,
-    authorization: Optional[str] = Header(default=None)
+    authorization: Optional[str] = Header(default=None),
+    x_api_key: Optional[str] = Header(default=None, alias="x-api-key"),
 ) -> JSONResponse:
-    entitlement = require_entitlement(request, authorization)
+    entitlement = require_entitlement(request, authorization, x_api_key)
 
     api_key = entitlement["api_key"]
     usage = _get_redis_usage(api_key) if _get_redis_client() else USAGE_TRACKING.get(api_key, {
@@ -544,9 +666,10 @@ def get_usage(
 @app.post("/v1/usage/reset")
 def reset_usage(
     request: Request,
-    authorization: Optional[str] = Header(default=None)
+    authorization: Optional[str] = Header(default=None),
+    x_api_key: Optional[str] = Header(default=None, alias="x-api-key"),
 ) -> JSONResponse:
-    entitlement = require_entitlement(request, authorization)
+    entitlement = require_entitlement(request, authorization, x_api_key)
 
     api_key = entitlement["api_key"]
 

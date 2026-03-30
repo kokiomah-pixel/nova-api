@@ -201,6 +201,7 @@ cython_debug/
 
 # Local runtime state
 .usage.json
+keys.json
 .cursorignore
 .cursorindexingignore
 
