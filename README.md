@@ -30,6 +30,14 @@ Decision coherence is.
 
 Nova operates at this layer and conditions decisions before execution.
 
+## Reference
+
+- Example output: see Output Structure below
+- Integration: `examples/nova_client.py`
+- Behavior demo: `examples/nova_comparison_agent.py`
+- Tests: `tests/test_app.py`
+- State model: `docs/NOVA_STATE_MODEL.md`
+
 ## System Position
 
 ```text
@@ -55,6 +63,13 @@ This structure is invariant across all Nova responses.
 
 All outputs follow a fixed structure, are neutral in tone, and are designed for institutional decision workflows.
 It is designed to be readable in real time and defensible in governance settings.
+
+### API Contract (Simplified)
+
+Input: decision context
+Output: structured decision response
+
+The response format is fixed and invariant.
 
 ## Verifiability
 
@@ -144,49 +159,19 @@ Access and usage are designed to integrate into external systems rather than def
 
 ## Integration Reference
 
-Use the wrapper in `examples/nova_client.py` for the fastest integration path.
-
-```python
-from examples.nova_client import get_nova_decision
-
-decision = get_nova_decision("trade", "ETH", 10000)
-
-if decision["decision"] in {"VETO", "CONSTRAIN"}:
-    pass  # halt or reduce before execution
-else:
-    pass  # proceed under local controls
-```
-
-Direct API call:
-
-```bash
-curl -H "Authorization: Bearer YOUR_API_KEY" \
-  "https://YOUR_API_DOMAIN/v1/context?intent=trade&asset=ETH&size=10000"
-```
-
-Behavior comparison demo:
-
-```bash
-python examples/nova_comparison_agent.py
-```
+- Wrapper path: `examples/nova_client.py`
+- Direct call: `GET /v1/context`
+- Behavior demo: `python examples/nova_comparison_agent.py`
 
 ---
 
 ## Live vs Fixed Mode
 
-Nova operates in two modes depending on environment configuration.
-
-### Live Mode (default)
-
+Live mode is default:
 - `timestamp_utc` updates on every request
 - `epoch` updates automatically (hourly bucket)
-- returns current API-configured decision context in real time
 
-This is the default production behavior.
-
-### Fixed Mode (for testing and evidence)
-
-You can override time using environment variables:
+Fixed mode is available for evidence capture:
 
 ```bash
 export NOVA_TIMESTAMP_UTC="2026-03-16T16:00:00Z"
@@ -212,42 +197,22 @@ Evidence was captured under controlled conditions with locked epoch, configured 
 ## Notes
 
 - Payload signatures are HMAC-SHA256 using `NOVA_SIGNING_SECRET` (default: `replace_me`).
-- Usage is persisted between restarts in a JSON file (default `.usage.json`). You can override via `NOVA_USAGE_FILE`.
-- For scalable shared deployment, you can use Redis (set `NOVA_REDIS_URL`) instead of file persistence; this makes usage/quota/rate-limit state shared across instances.
-- The service enforces a per-key `monthly_quota` (from the key metadata). If usage exceeds the quota, protected endpoints return `429`.
-- Optionally, a key can set a `rate_limit` object in its metadata to enforce short-term rate limits (e.g. `{"window_seconds": 60, "max_calls": 30}`).
-- Default configured decision regime/epoch values are set via:
-  - `NOVA_EPOCH`
-  - `NOVA_TIMESTAMP_UTC`
-  - `NOVA_CONSTITUTION_VERSION`
-  - `NOVA_REGIME`
+- Usage state defaults to `.usage.json` and can be overridden via `NOVA_USAGE_FILE`.
+- For shared deployments, set `NOVA_REDIS_URL` for centralized usage/quota/rate-limit state.
+- Default configured decision regime and time controls: `NOVA_REGIME`, `NOVA_EPOCH`, `NOVA_TIMESTAMP_UTC`, `NOVA_CONSTITUTION_VERSION`.
 
 ---
 
 ## Verification / Tests
 
-### Health check (no auth required)
+Run the following from repo root:
+
 ```bash
 curl -i http://127.0.0.1:8000/health
-```
-
-### Live decision call
-```bash
-curl -H "Authorization: Bearer YOUR_API_KEY" \
-  "https://YOUR_API_DOMAIN/v1/context?intent=trade&asset=ETH&size=10000"
-```
-
-### Usage and reset
-```bash
+curl -H "Authorization: Bearer YOUR_API_KEY" "https://YOUR_API_DOMAIN/v1/context?intent=trade&asset=ETH&size=10000"
 export NOVA_API_KEY="mytestkey"
 curl -i -H "Authorization: Bearer mytestkey" http://127.0.0.1:8000/v1/regime
-
 curl -i -H "Authorization: Bearer mytestkey" http://127.0.0.1:8000/v1/usage
-
 curl -i -X POST -H "Authorization: Bearer mytestkey" http://127.0.0.1:8000/v1/usage/reset
-```
-
-### Run tests
-```bash
 ./.venv/bin/pytest -q
 ```
