@@ -24,7 +24,7 @@ epoch = int(timestamp / 3600)
 
 ## Timestamp
 
-- Generated per request in live mode
+- Generated on each live API call
 - Used for:
   - freshness
   - signature generation

@@ -61,17 +61,17 @@ def run_with_nova(scenario: Scenario) -> Dict[str, Any]:
         decision = "VETO"
         executed_size = 0.0
         reason = "new risk not allowed"
-        recommendation = "Do not initiate new risk. Reduce or exit existing exposure."
+        adjustment = "Do not initiate new risk. Reduce or exit existing exposure."
     elif not allow_position_increase and is_risk_increasing_intent(scenario.intent):
         executed_size = max(scenario.size * 0.5, 1)
         decision = "CONSTRAIN"
         reason = "position increase blocked"
-        recommendation = "Constrain exposure size and avoid position increases."
+        adjustment = "Constrain exposure size and avoid position increases."
     else:
         executed_size = scenario.size
         decision = "ALLOW"
         reason = "execution validated"
-        recommendation = "Proceed under local controls."
+        adjustment = "Proceed under local controls."
 
     decision_context = {
         "intent": scenario.intent,
@@ -94,7 +94,7 @@ def run_with_nova(scenario: Scenario) -> Dict[str, Any]:
         "constraint_analysis": constraint_analysis,
         "historical_reference": memory_context,
         "impact_on_outcomes": impact_on_outcomes,
-        "recommendation": recommendation,
+        "adjustment": adjustment,
         "decision_status": decision,
         "executed_size": executed_size,
         "reason": reason,
@@ -124,7 +124,7 @@ def print_scenario_comparison(scenario: Scenario) -> Dict[str, Any]:
         print(f"Constraint Analysis: {json.dumps(with_nova['constraint_analysis'], sort_keys=True)}")
         print(f"Historical Reference: {json.dumps(with_nova['historical_reference'], sort_keys=True)}")
         print(f"Impact on Outcomes: {json.dumps(with_nova['impact_on_outcomes'], sort_keys=True)}")
-        print(f"Recommendation: {with_nova['recommendation']}")
+        print(f"Adjustment: {with_nova['adjustment']}")
         print(f"Decision Status: {with_nova['decision_status']}")
     except Exception as exc:
         # Fail-safe behavior is explicit so demo output stays understandable.
@@ -136,13 +136,13 @@ def print_scenario_comparison(scenario: Scenario) -> Dict[str, Any]:
             "constraint_analysis": {"status": "unavailable"},
             "historical_reference": {"status": "unavailable"},
             "impact_on_outcomes": {"requested_size": scenario.size, "executed_size": 0.0},
-            "recommendation": f"Failed to fetch Nova context ({exc})",
+            "adjustment": f"Failed to fetch Nova context ({exc})",
         }
         print(f"Decision Context: {json.dumps(with_nova['decision_context'], sort_keys=True)}")
         print(f"Constraint Analysis: {json.dumps(with_nova['constraint_analysis'], sort_keys=True)}")
         print(f"Historical Reference: {json.dumps(with_nova['historical_reference'], sort_keys=True)}")
         print(f"Impact on Outcomes: {json.dumps(with_nova['impact_on_outcomes'], sort_keys=True)}")
-        print(f"Recommendation: {with_nova['recommendation']}")
+        print(f"Adjustment: {with_nova['adjustment']}")
         print(f"Decision Status: {with_nova['decision_status']}")
 
     print()

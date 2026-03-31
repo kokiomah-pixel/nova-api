@@ -54,7 +54,7 @@ Nova operates at this layer.
 - Constraint Analysis
 - Historical Reference
 - Impact on Outcomes
-- Recommendation
+- Adjustment
 - Decision Status
 
 This structure is invariant across all Nova responses.
