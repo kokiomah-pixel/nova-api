@@ -5,7 +5,7 @@ If your system can move capital without checking whether it is *allowed* under t
 Run this:
 
 ```bash
-python examples/nova_comparison_agent.py
+python3 examples/nova_comparison_agent.py
 ```
 
 Here is what you will see:

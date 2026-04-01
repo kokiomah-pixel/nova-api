@@ -348,8 +348,13 @@ def get_key_record(api_key: str) -> Dict[str, Any]:
 
     record = registry[api_key]
 
-    if (record.get("status") or "").lower() != "active":
-        raise HTTPException(status_code=403, detail="Inactive API key")
+    status = (record.get("status") or "").lower()
+    if status != "active":
+        if status == "suspended":
+            raise HTTPException(status_code=403, detail="Suspended API key")
+        if status == "inactive":
+            raise HTTPException(status_code=403, detail="Inactive API key")
+        raise HTTPException(status_code=403, detail="API key is not active")
 
     return record
 
@@ -458,6 +463,15 @@ def build_guardrail(intent: Optional[str], asset: Optional[str], size: Optional[
     # -----------------------------
     # STRESS REGIME (HARD VETO)
     # -----------------------------
+    normalized_intent = (intent or "").strip().lower()
+    requested_size = float(size) if size is not None else 0.0
+    is_risk_increasing = normalized_intent in {
+        "trade",
+        "deploy_liquidity",
+        "open_position",
+        "increase_position",
+    }
+
     if DEFAULT_REGIME == "Stress":
         return {
             "severity": "high",
@@ -474,7 +488,19 @@ def build_guardrail(intent: Optional[str], asset: Optional[str], size: Optional[
     # ELEVATED FRAGILITY (CONSTRAIN)
     # -----------------------------
     if DEFAULT_REGIME == "Elevated Fragility":
-        if intent == "deploy_liquidity":
+        if is_risk_increasing and requested_size >= 250000:
+            return {
+                "severity": "high",
+                "advisory": "Block large risk expansion until fragility conditions improve.",
+                "action_policy": {
+                    "allow_new_risk": False,
+                    "allow_risk_reduction": True,
+                    "allow_position_increase": False,
+                    "allow_position_decrease": True
+                }
+            }
+
+        if normalized_intent == "deploy_liquidity":
             return {
                 "severity": "medium",
                 "advisory": "Reduce size and avoid low-liquidity venues.",
@@ -509,6 +535,96 @@ def build_guardrail(intent: Optional[str], asset: Optional[str], size: Optional[
             "allow_position_increase": True,
             "allow_position_decrease": True
         }
+    }
+
+
+def derive_decision_status(intent: Optional[str], size: Optional[float], guardrail: Dict[str, Any]) -> str:
+    normalized_intent = (intent or "").strip().lower()
+    requested_size = float(size) if size is not None else None
+    is_risk_increasing = normalized_intent in {
+        "trade",
+        "deploy_liquidity",
+        "open_position",
+        "increase_position",
+    }
+    policy = guardrail.get("action_policy", {})
+
+    if is_risk_increasing and not policy.get("allow_new_risk", False):
+        return "VETO"
+    if is_risk_increasing and not policy.get("allow_position_increase", False):
+        if requested_size is None or requested_size > 0:
+            return "CONSTRAIN"
+    return "ALLOW"
+
+
+def build_adjustment(decision_status: str, size: Optional[float], guardrail: Dict[str, Any]) -> str:
+    requested_size = float(size) if size is not None else None
+    if decision_status == "VETO":
+        return guardrail.get("advisory") or "Do not initiate new risk."
+    if decision_status == "CONSTRAIN":
+        if requested_size is not None and requested_size > 0:
+            adjusted_size = max(round(requested_size * 0.5, 2), 1.0)
+            return f"Reduce requested size from {requested_size:g} to {adjusted_size:g} and tighten execution controls."
+        return "Reduce requested exposure and tighten execution controls."
+    return guardrail.get("advisory") or "Proceed under normal risk controls."
+
+
+def build_impact_on_outcomes(decision_status: str, size: Optional[float]) -> Dict[str, Any]:
+    requested_size = float(size) if size is not None else None
+    adjusted_size: Optional[float]
+    explanation: str
+
+    if requested_size is None:
+        adjusted_size = None
+    elif decision_status == "VETO":
+        adjusted_size = 0.0
+    elif decision_status == "CONSTRAIN":
+        adjusted_size = max(round(requested_size * 0.5, 2), 1.0)
+    else:
+        adjusted_size = requested_size
+
+    if decision_status == "VETO":
+        explanation = "New risk is blocked under the current regime, so the requested action should not proceed."
+    elif decision_status == "CONSTRAIN":
+        explanation = "Risk can proceed only in reduced form, so downstream execution should be size-limited."
+    else:
+        explanation = "Current conditions validate the request under normal controls."
+
+    return {
+        "requested_size": requested_size,
+        "adjusted_size": adjusted_size,
+        "size_delta": None if requested_size is None or adjusted_size is None else round(adjusted_size - requested_size, 2),
+        "why_this_happened": explanation,
+    }
+
+
+def build_constraint_analysis(
+    *,
+    intent: Optional[str],
+    asset: Optional[str],
+    size: Optional[float],
+    guardrail: Dict[str, Any],
+    decision_status: str,
+) -> Dict[str, Any]:
+    requested_size = float(size) if size is not None else None
+    severity = guardrail.get("severity", "unknown")
+    advisory = guardrail.get("advisory", "")
+
+    if decision_status == "VETO":
+        why = "Constraint analysis escalated to a veto because the requested action would add new risk under a high-fragility regime."
+    elif decision_status == "CONSTRAIN":
+        why = "Constraint analysis limited the request because the regime allows participation but blocks unrestricted position growth."
+    else:
+        why = "Constraint analysis found no active restriction on this request beyond baseline controls."
+
+    return {
+        "intent": intent,
+        "asset": asset,
+        "requested_size": requested_size,
+        "severity": severity,
+        "policy": guardrail.get("action_policy", {}),
+        "advisory": advisory,
+        "why_this_happened": why,
     }
 
 
@@ -906,16 +1022,44 @@ def get_context(
     entitlement = require_entitlement(request, authorization, x_api_key)
     epoch = get_current_epoch()
     timestamp = get_current_timestamp()
+    guardrail = build_guardrail(intent=intent, asset=asset, size=size)
+    decision_status = derive_decision_status(intent=intent, size=size, guardrail=guardrail)
+    adjustment = build_adjustment(decision_status=decision_status, size=size, guardrail=guardrail)
+    impact_on_outcomes = build_impact_on_outcomes(decision_status=decision_status, size=size)
+    historical_reference = build_memory_context()
+    decision_context = {
+        "intent": intent,
+        "asset": asset,
+        "requested_size": size,
+        "regime": DEFAULT_REGIME,
+        "epoch": epoch,
+        "timestamp_utc": timestamp,
+        "constitution_version": CONSTITUTION_VERSION,
+        "tier": entitlement["tier"],
+    }
+    constraint_analysis = build_constraint_analysis(
+        intent=intent,
+        asset=asset,
+        size=size,
+        guardrail=guardrail,
+        decision_status=decision_status,
+    )
 
     payload = {
         "epoch": epoch,
         "timestamp_utc": timestamp,
         "regime": DEFAULT_REGIME,
-        "guardrail": build_guardrail(intent=intent, asset=asset, size=size),
-        "memory_context": build_memory_context(),
+        "guardrail": guardrail,
+        "memory_context": historical_reference,
         "transition_state": "stable_to_elevated_recent" if DEFAULT_REGIME == "Elevated Fragility" else "stable",
         "constitution_version": CONSTITUTION_VERSION,
         "tier": entitlement["tier"],
+        "decision_context": decision_context,
+        "constraint_analysis": constraint_analysis,
+        "historical_reference": historical_reference,
+        "impact_on_outcomes": impact_on_outcomes,
+        "adjustment": adjustment,
+        "decision_status": decision_status,
     }
 
     if asset:

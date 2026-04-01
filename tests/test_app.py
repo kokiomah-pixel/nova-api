@@ -58,6 +58,19 @@ TEST_KEYS = {
             "/v1/usage",
         ],
     },
+    "suspended-key": {
+        "owner": "suspended-user",
+        "tier": "pro",
+        "status": "suspended",
+        "monthly_quota": 10,
+        "allowed_endpoints": [
+            "/v1/regime",
+            "/v1/epoch",
+            "/v1/context",
+            "/v1/key-info",
+            "/v1/usage",
+        ],
+    },
     "pro-reset-key": {
         "owner": "pro-reset-user",
         "tier": "pro",
@@ -121,6 +134,11 @@ def test_context_includes_guardrail_action_policy(client):
     assert "allow_risk_reduction" in action_policy
     assert "allow_position_increase" in action_policy
     assert "allow_position_decrease" in action_policy
+    assert payload["decision_context"]["intent"] == "trade"
+    assert "why_this_happened" in payload["constraint_analysis"]
+    assert "why_this_happened" in payload["impact_on_outcomes"]
+    assert payload["adjustment"]
+    assert payload["decision_status"] in {"ALLOW", "CONSTRAIN", "VETO"}
 
 
 # Test B: Billable endpoints increment usage
@@ -248,3 +266,34 @@ def test_usage_reset_requires_admin_tier_even_if_endpoint_allowed(client):
     response = client.post("/v1/usage/reset", headers={"Authorization": "Bearer pro-reset-key"})
     assert response.status_code == 403
     assert response.json()["detail"] == "Admin tier required for this endpoint"
+
+
+def test_suspended_key_rejected_with_specific_message(client):
+    response = client.get("/v1/context", headers={"Authorization": "Bearer suspended-key"})
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Suspended API key"
+
+
+def test_context_changes_with_large_size(client):
+    headers = {"Authorization": "Bearer admin-key"}
+    baseline = client.get(
+        "/v1/context",
+        headers=headers,
+        params={"intent": "trade", "asset": "ETH", "size": 10000},
+    )
+    oversized = client.get(
+        "/v1/context",
+        headers=headers,
+        params={"intent": "trade", "asset": "ETH", "size": 500000},
+    )
+
+    assert baseline.status_code == 200
+    assert oversized.status_code == 200
+
+    baseline_payload = baseline.json()
+    oversized_payload = oversized.json()
+
+    assert baseline_payload["decision_status"] == "CONSTRAIN"
+    assert oversized_payload["decision_status"] == "VETO"
+    assert baseline_payload["impact_on_outcomes"]["adjusted_size"] == 5000.0
+    assert oversized_payload["impact_on_outcomes"]["adjusted_size"] == 0.0

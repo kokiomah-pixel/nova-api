@@ -13,7 +13,7 @@ They do not represent trading signals or execution instructions.
 From the repository root:
 
 ```bash
-python examples/nova_comparison_agent.py
+python3 examples/nova_comparison_agent.py
 ```
 
 Optional environment overrides:
@@ -21,5 +21,5 @@ Optional environment overrides:
 ```bash
 export NOVA_API_URL="https://nova-api-ipz6.onrender.com"
 export NOVA_API_KEY="your_api_key_here"
-python examples/nova_comparison_agent.py
+python3 examples/nova_comparison_agent.py
 ```

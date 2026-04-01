@@ -57,7 +57,15 @@ Nova operates at this layer.
 - Adjustment
 - Decision Status
 
-This structure is invariant across all Nova responses.
+This structure is invariant across all Nova decision responses.
+
+In the JSON payload, these sections are exposed as:
+- `decision_context`
+- `constraint_analysis`
+- `historical_reference`
+- `impact_on_outcomes`
+- `adjustment`
+- `decision_status`
 
 All outputs follow a fixed structure, are neutral in tone, and are designed for institutional decision workflows.
 They are readable in real time and defensible in governance settings.
@@ -131,6 +139,13 @@ Run the server:
 ./.venv/bin/uvicorn app:app --host 127.0.0.1 --port 8000
 ```
 
+For local example scripts:
+
+```bash
+export NOVA_API_URL=http://127.0.0.1:8000
+export NOVA_API_KEY=mytestkey
+```
+
 ### Run via Docker
 
 ```bash
@@ -161,7 +176,7 @@ Access and usage are designed to integrate into external systems rather than def
 
 - Wrapper path: `examples/nova_client.py`
 - Direct call: `GET /v1/context`
-- Behavior demo: `python examples/nova_comparison_agent.py`
+- Behavior demo: `python3 examples/nova_comparison_agent.py`
 
 ---
 
@@ -214,5 +229,7 @@ export NOVA_API_KEY="mytestkey"
 curl -i -H "Authorization: Bearer mytestkey" http://127.0.0.1:8000/v1/regime
 curl -i -H "Authorization: Bearer mytestkey" http://127.0.0.1:8000/v1/usage
 curl -i -X POST -H "Authorization: Bearer mytestkey" http://127.0.0.1:8000/v1/usage/reset
-./.venv/bin/pytest -q
+PYTHONPATH=. ./.venv/bin/pytest -q
+python3 examples/nova_client.py
+python3 examples/nova_comparison_agent.py
 ```
