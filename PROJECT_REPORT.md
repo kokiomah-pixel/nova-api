@@ -28,7 +28,7 @@ Nova meters **decision value**, not introspection or system management. This mea
 
 These endpoints increment usage counters and consume monthly quota:
 
-- `GET /v1/context` – guardrails, memory context, and configured decision regime transitions for a deployment
+- `GET /v1/context` – guardrails, reflex memory, and configured decision regime transitions for a deployment
 - `GET /v1/regime` – current configured decision regime and epoch
 - `GET /v1/epoch` – epoch hash and constitution snapshot
 
@@ -236,7 +236,7 @@ All required test cases have been implemented and pass:
 - ✅ Inactive key behavior works (explicit test)
 - ✅ Admin-only branch is directly validated (non-admin key with reset access)
 
-Total: 9 tests passing
+Total: 15 tests passing, including Reflex Memory state, proof, and backward-compatibility coverage
 ---
 
 ## Verifiability

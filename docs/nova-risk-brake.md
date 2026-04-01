@@ -5,7 +5,7 @@ If your system can move capital without checking whether it is *allowed* under t
 Run this:
 
 ```bash
-python3 examples/nova_comparison_agent.py
+./.venv/bin/python examples/nova_comparison_agent.py
 ```
 
 Here is what you will see:
@@ -27,7 +27,7 @@ Action Policy: {
   "allow_risk_reduction": true
 }
 Decision: CONSTRAIN
-Result: trade executes at reduced size (5000 vs 10000)
+Result: trade executes at retained-discipline size (4000 vs 10000)
 ============================================================
 
 SUMMARY
@@ -38,7 +38,7 @@ Without Nova:
 
 With Nova:
 - 4 CONSTRAIN
-- Total executed size: 40250
+- Total executed size: 32200
 
 Nova changed execution behavior in 4/4 scenarios.
 ```
@@ -49,7 +49,7 @@ Nova changed execution behavior in 4/4 scenarios.
 
 Your agent, running without a control layer, would have deployed **80,500 units** of exposure across four standard scenarios under captured decision-relevant conditions.
 
-With Nova, it deployed **40,250** — because the configured decision regime (`Elevated Fragility`) prohibits increasing position size.
+With Nova, it deployed **32,200** — because the configured decision regime (`Elevated Fragility`) and retained discipline together tighten exposure before execution.
 
 That is not a strategy difference. That is a **control gap**.
 
@@ -94,13 +94,12 @@ def nova_gate(intent, asset, size, api_key):
         params={"intent": intent, "asset": asset, "size": size}
     ).json()
 
-    policy = res["guardrail"]["action_policy"]
-
-    if not policy["allow_new_risk"]:
+    if res["decision_status"] == "VETO":
         raise RuntimeError("Nova VETO: new risk not permitted in current configured decision regime")
 
-    if not policy["allow_position_increase"]:
-        raise RuntimeError("Nova CONSTRAIN: position increase blocked")
+    if res["decision_status"] == "CONSTRAIN":
+        adjusted = res["impact_on_outcomes"]["adjusted_size"]
+        raise RuntimeError(f"Nova CONSTRAIN: reduce size to {adjusted} before execution")
 
     return True
 ```

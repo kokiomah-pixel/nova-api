@@ -115,8 +115,8 @@ This is a captured example for demonstration purposes, not a live output.
 
 **WITH NOVA (Configured Decision Regime: Elevated Fragility)**
 - Decision: CONSTRAIN
-- Executed size: 40,250
-- Reason: position increase blocked
+- Executed size: 32,200
+- Reason: retained discipline tightened exposure before execution
 
 ---
 
@@ -181,7 +181,14 @@ Access and usage are designed to integrate into external systems rather than def
 
 - Wrapper path: `examples/nova_client.py`
 - Direct call: `GET /v1/context`
-- Behavior demo: `python3 examples/nova_comparison_agent.py`
+- Behavior demo: `./.venv/bin/python examples/nova_comparison_agent.py`
+
+---
+
+## Monetization
+
+- Text version: `docs/NOVA_MONETIZATION.md`
+- Manuscript (design export): coming shortly
 
 ---
 
@@ -235,6 +242,6 @@ curl -i -H "Authorization: Bearer mytestkey" http://127.0.0.1:8000/v1/regime
 curl -i -H "Authorization: Bearer mytestkey" http://127.0.0.1:8000/v1/usage
 curl -i -X POST -H "Authorization: Bearer mytestkey" http://127.0.0.1:8000/v1/usage/reset
 PYTHONPATH=. ./.venv/bin/pytest -q
-python3 examples/nova_client.py
-python3 examples/nova_comparison_agent.py
+./.venv/bin/python examples/nova_client.py
+./.venv/bin/python examples/nova_comparison_agent.py
 ```

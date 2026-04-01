@@ -52,26 +52,13 @@ def run_with_nova(scenario: Scenario) -> Dict[str, Any]:
 
     regime = context.get("regime", "Unknown")
     action_policy = context.get("guardrail", {}).get("action_policy", {})
-    memory_context = context.get("memory_context", {})
-
-    allow_new_risk = bool(action_policy.get("allow_new_risk", False))
-    allow_position_increase = bool(action_policy.get("allow_position_increase", False))
-
-    if not allow_new_risk and is_risk_increasing_intent(scenario.intent):
-        decision = "VETO"
-        executed_size = 0.0
-        reason = "new risk not allowed"
-        adjustment = "Do not initiate new risk. Reduce or exit existing exposure."
-    elif not allow_position_increase and is_risk_increasing_intent(scenario.intent):
-        executed_size = max(scenario.size * 0.5, 1)
-        decision = "CONSTRAIN"
-        reason = "position increase blocked"
-        adjustment = "Constrain exposure size and avoid position increases."
-    else:
-        executed_size = scenario.size
-        decision = "ALLOW"
-        reason = "execution validated"
-        adjustment = "Proceed under local controls."
+    memory_context = context.get("historical_reference") or context.get("memory_context", {})
+    reflex_memory = context.get("reflex_memory")
+    decision = context.get("decision_status", "ALLOW")
+    impact_on_outcomes = context.get("impact_on_outcomes", {})
+    executed_size = impact_on_outcomes.get("adjusted_size", scenario.size)
+    reason = context.get("constraint_analysis", {}).get("why_this_happened", "execution validated")
+    adjustment = context.get("adjustment", "Proceed under local controls.")
 
     decision_context = {
         "intent": scenario.intent,
@@ -79,6 +66,7 @@ def run_with_nova(scenario: Scenario) -> Dict[str, Any]:
         "requested_size": scenario.size,
         "configured_decision_regime": regime,
         "timestamp_utc": context.get("timestamp_utc"),
+        "reflex_influence_applied": context.get("decision_context", {}).get("reflex_influence_applied"),
     }
     constraint_analysis = {
         "action_policy": action_policy,
@@ -93,6 +81,7 @@ def run_with_nova(scenario: Scenario) -> Dict[str, Any]:
         "decision_context": decision_context,
         "constraint_analysis": constraint_analysis,
         "historical_reference": memory_context,
+        "reflex_memory": reflex_memory,
         "impact_on_outcomes": impact_on_outcomes,
         "adjustment": adjustment,
         "decision_status": decision,
@@ -123,24 +112,27 @@ def print_scenario_comparison(scenario: Scenario) -> Dict[str, Any]:
         print(f"Decision Context: {json.dumps(with_nova['decision_context'], sort_keys=True)}")
         print(f"Constraint Analysis: {json.dumps(with_nova['constraint_analysis'], sort_keys=True)}")
         print(f"Historical Reference: {json.dumps(with_nova['historical_reference'], sort_keys=True)}")
+        print(f"Reflex Memory: {json.dumps(with_nova['reflex_memory'], sort_keys=True)}")
         print(f"Impact on Outcomes: {json.dumps(with_nova['impact_on_outcomes'], sort_keys=True)}")
         print(f"Adjustment: {with_nova['adjustment']}")
         print(f"Decision Status: {with_nova['decision_status']}")
     except Exception as exc:
-        # Fail-safe behavior is explicit so demo output stays understandable.
+        # Surface transport failures honestly rather than implying Nova constrained the action.
         with_nova = {
-            "decision_status": "VETO",
-            "executed_size": 0.0,
+            "decision_status": "UNAVAILABLE",
+            "executed_size": scenario.size,
             "reason": f"Nova context unavailable ({exc})",
             "decision_context": {"status": "unavailable"},
             "constraint_analysis": {"status": "unavailable"},
             "historical_reference": {"status": "unavailable"},
-            "impact_on_outcomes": {"requested_size": scenario.size, "executed_size": 0.0},
+            "reflex_memory": {"status": "unavailable"},
+            "impact_on_outcomes": {"requested_size": scenario.size, "executed_size": scenario.size},
             "adjustment": f"Failed to fetch Nova context ({exc})",
         }
         print(f"Decision Context: {json.dumps(with_nova['decision_context'], sort_keys=True)}")
         print(f"Constraint Analysis: {json.dumps(with_nova['constraint_analysis'], sort_keys=True)}")
         print(f"Historical Reference: {json.dumps(with_nova['historical_reference'], sort_keys=True)}")
+        print(f"Reflex Memory: {json.dumps(with_nova['reflex_memory'], sort_keys=True)}")
         print(f"Impact on Outcomes: {json.dumps(with_nova['impact_on_outcomes'], sort_keys=True)}")
         print(f"Adjustment: {with_nova['adjustment']}")
         print(f"Decision Status: {with_nova['decision_status']}")
@@ -149,11 +141,17 @@ def print_scenario_comparison(scenario: Scenario) -> Dict[str, Any]:
     print("---")
     print("Comparison:")
     print("Without Nova -> decision evaluated in isolation")
-    print("With Nova -> decision evaluated under consistent constraints")
+    if with_nova["decision_status"] == "UNAVAILABLE":
+        print("With Nova -> decision context unavailable, so no constraint claim can be made")
+    else:
+        print("With Nova -> decision evaluated under consistent constraints")
     print()
     print("Implication:")
     print("Without Nova -> decision quality is inconsistent")
-    print("With Nova -> decision quality is standardized")
+    if with_nova["decision_status"] == "UNAVAILABLE":
+        print("With Nova -> integration path is unavailable and should be fixed before use")
+    else:
+        print("With Nova -> decision quality is standardized")
     print()
     print("Nova does not change the decision.")
     print("It changes how the decision is made.")

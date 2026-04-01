@@ -48,6 +48,10 @@ def get_nova_context(
         "regime": regime,
         "action_policy": action_policy,
         "timestamp_utc": payload.get("timestamp_utc"),
+        "decision_status": payload.get("decision_status"),
+        "adjustment": payload.get("adjustment"),
+        "impact_on_outcomes": payload.get("impact_on_outcomes", {}),
+        "reflex_memory": payload.get("reflex_memory"),
         "raw": payload,
     }
 
@@ -70,18 +74,12 @@ def get_nova_decision(
     )
 
     action_policy = context["action_policy"]
-    allow_new_risk = bool(action_policy.get("allow_new_risk", False))
-    allow_position_increase = bool(action_policy.get("allow_position_increase", False))
-    is_risk_increasing = intent in RISK_INCREASING_INTENTS
-
-    if not allow_new_risk:
-        decision = "VETO"
+    decision = context.get("decision_status") or "ALLOW"
+    if decision == "VETO":
         reason = "new risk not allowed"
-    elif not allow_position_increase and is_risk_increasing:
-        decision = "CONSTRAIN"
-        reason = "position increase blocked"
+    elif decision == "CONSTRAIN":
+        reason = "retained discipline tightened exposure before execution"
     else:
-        decision = "ALLOW"
         reason = "execution validated"
 
     return {
@@ -89,6 +87,9 @@ def get_nova_decision(
         "regime": context["regime"],
         "action_policy": action_policy,
         "timestamp_utc": context.get("timestamp_utc"),
+        "adjustment": context.get("adjustment"),
+        "impact_on_outcomes": context.get("impact_on_outcomes", {}),
+        "reflex_memory": context.get("reflex_memory"),
         "reason": reason,
     }
 
@@ -99,3 +100,4 @@ if __name__ == "__main__":  # Minimal pre-execution gate
     print(f"regime: {decision['regime']}")
     print(f"decision: {decision['decision']}")
     print(f"reason: {decision['reason']}")
+    print(f"adjustment: {decision['adjustment']}")
