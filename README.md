@@ -77,8 +77,8 @@ They are readable in real time and defensible in governance settings.
 
 ### API Contract (Simplified)
 
-Input: decision context
-Output: structured decision response
+- Input: decision context
+- Output: structured decision response
 
 The response format is fixed and invariant.
 
@@ -120,8 +120,8 @@ This is a captured example for demonstration purposes, not a live output.
 
 ---
 
-Without Nova -> decisions are evaluated in isolation
-With Nova -> decisions are evaluated under consistent constraints
+- **Without Nova:** decisions are evaluated in isolation
+- **With Nova:** decisions are evaluated under consistent constraints
 
 ## Run This First
 
@@ -188,7 +188,7 @@ Access and usage are designed to integrate into external systems rather than def
 ## Monetization
 
 - Text version: `docs/NOVA_MONETIZATION.md`
-- Manuscript (design export): coming shortly
+- Manuscript PDF: design export to be added
 
 ---
 
