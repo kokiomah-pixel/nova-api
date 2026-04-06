@@ -14,6 +14,69 @@ This repository is safe for local testing.
 
 All examples run against a locally scoped environment and do not interact with live capital or production systems. Nova validates decisions before execution, and this repo is designed to make that behavior observable without exposing any sensitive infrastructure.
 
+## Run Nova in 30 Seconds
+
+The fastest way to understand Nova is to run a decision through it once and watch what changes.
+
+Start the local server:
+
+```bash
+NOVA_API_KEY=mytestkey uvicorn app:app --host 127.0.0.1 --port 8000
+```
+
+Then run:
+
+```bash
+curl -s -H "Authorization: Bearer mytestkey" \
+"http://127.0.0.1:8000/v1/context?intent=trade&asset=ETH&size=10000"
+```
+
+You will receive a validated decision response showing:
+
+- whether the decision should proceed
+- how exposure is adjusted
+- why constraints are applied
+
+Nova does not execute trades.
+
+It applies pre-execution discipline through decision validation before capital moves.
+
+### Example Output (Simplified)
+
+```json
+{
+  "decision_status": "CONSTRAIN",
+  "adjustment": "Reduce requested size from 10000 to 4000 and tighten execution controls.",
+  "constraint_analysis": {
+    "why_this_happened": "Constraint analysis limited the request because the regime allows participation but blocks unrestricted position growth."
+  },
+  "impact_on_outcomes": {
+    "adjusted_size": 4000.0,
+    "why_this_happened": "Risk can proceed only in reduced form, so downstream execution should be size-limited."
+  }
+}
+```
+
+The key is not the output itself.
+
+It is seeing that the system intervenes before execution.
+
+### Important
+
+This example is simplified to foreground the constrained decision, the exposure adjustment, and the visible reason while matching the current response shape.
+
+This is the moment Nova introduces discipline into a decision before capital moves.
+
+### Try Your Own Decision
+
+Change the parameters and run the request again:
+
+- asset
+- size
+- intent
+
+Observe how Nova responds under different conditions.
+
 ## The Missing Layer
 
 Most systems are designed to act.
