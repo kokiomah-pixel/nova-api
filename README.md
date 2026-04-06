@@ -67,6 +67,20 @@ This example is simplified to foreground the constrained decision, the exposure 
 
 This is the moment Nova introduces discipline into a decision before capital moves.
 
+### What Just Happened
+
+Nova evaluated your decision before execution and determined that full exposure should not be allowed under current conditions.
+
+Instead of allowing the original request, it:
+
+- constrained the size of the decision
+- explained why the constraint was applied
+- showed how this reduces exposure to known failure patterns
+
+This is the core behavior of Nova:
+
+decisions are validated before capital moves, not corrected after.
+
 ### Try Your Own Decision
 
 Change the parameters and run the request again:
