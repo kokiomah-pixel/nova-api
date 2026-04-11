@@ -247,6 +247,14 @@ It is where decisions are validated before capital moves.
 - State model: `docs/NOVA_STATE_MODEL.md`
 - GitHub access policy: `docs/GITHUB_ACCESS_POLICY.md`
 
+## Infrastructure
+
+All system access and automation must comply with Nova's institutional access policy:
+[GitHub Access Policy](./docs/GITHUB_ACCESS_POLICY.md)
+Any system, agent, or automation that interacts with Nova repositories must comply with this policy.
+
+Violations of this policy are considered infrastructure integrity failures.
+
 ## Quick Start
 
 ```bash

@@ -1,8 +1,14 @@
+# Status: REQUIRED — Institutional Infrastructure Enforcement
+
+This document is not guidance.
+
+This document defines mandatory access control standards for Sharpe Nova OS.
+
 # Sharpe Nova OS — GitHub Access Policy & Implementation Plan
 
 ## Institutional Infrastructure Upgrade
 
-Version: `v1.0`
+## Version: v1.1
 
 ## Purpose
 
@@ -31,50 +37,6 @@ System automation must use:
 - GitHub App
 - scoped permissions
 - short-lived installation tokens
-
-## Target State
-
-### Human Access
-
-Used by:
-
-- Architect
-- developers
-- authorized operators
-
-Allowed methods:
-
-- SSH keys
-- fine-grained personal access tokens only if needed
-
-Not allowed as system infrastructure:
-
-- classic PAT as primary automation credential
-
-### System Access
-
-Used by:
-
-- treasury agent
-- automation
-- CI/CD
-- repo-integrated services
-- machine-to-repo workflows
-
-Required method:
-
-- GitHub App
-
-### Governance State
-
-GitHub access must support:
-
-- attribution
-- rotation
-- revocation
-- audit trail
-- least-privilege scoping
-- separation between operator access and system access
 
 ## Policy Rules
 
@@ -106,274 +68,33 @@ Any retained personal credential must be marked as:
 
 All current credential usage must be mapped before migration is considered complete.
 
-## Immediate Implementation Plan
+## Enforcement
 
-### Phase 1 — Stabilize Current State
+### Non-Compliance Definition
 
-Objectives:
+The following are considered violations of Nova infrastructure standards:
 
-- preserve continuity
-- reduce hidden credential dependence
-- identify all token exposure points
+- use of personal access tokens for system automation
+- undocumented or untracked credentials
+- credentials with excessive or undefined scope
+- automation dependent on operator-specific access
+- bypassing GitHub App-based system access
 
-Actions:
+### Consequence
 
-- label regenerated PAT as `BREAK_GLASS_TEMP_ONLY`
-- record where it is currently used:
-  - local git
-  - VS Code Git integration
-  - terminal credential helper
-  - scripts
-  - GitHub Actions secrets
-  - deployment hooks
-  - automation tools
-- remove any duplicate or unknown copies
-- verify which workflows actually require write access
+Any system or workflow found in violation:
 
-Deliverable:
+- is considered non-compliant with Nova infrastructure
+- must be corrected before continued use
+- may be halted if integrity risk is present
 
-- a complete access inventory
+### Principle
 
-### Phase 2 — Create Nova GitHub App
+Nova enforces discipline on capital.
 
-App name recommendation:
+Nova must also enforce discipline on its own infrastructure.
 
-- `nova-infra`
-- `nova-treasury-agent`
-
-App purpose:
-
-This GitHub App will act as Nova’s institutional system identity for repository automation.
-
-Minimum use cases:
-
-- treasury agent repo read/write
-- branch creation
-- PR creation
-- issue/comment automation if needed
-- workflow interaction if required
-
-### Phase 3 — Scope Permissions
-
-Repository scope:
-
-Only install the GitHub App on repositories it actually needs.
-
-Recommended permissions:
-
-Adjust as needed, but begin minimally.
-
-Repository permissions:
-
-- Contents: Read and Write
-- Pull Requests: Read and Write
-- Metadata: Read
-- Issues: Read and Write only if needed
-- Actions: Read or Write only if required
-- Commit statuses: Read and Write only if required
-
-Organization permissions:
-
-- none unless clearly needed
-
-Rule:
-
-Do not grant permissions because they "might be useful later."
-
-### Phase 4 — Install and Test
-
-Test scenarios:
-
-- repo read
-- repo clone/fetch
-- branch creation
-- commit/push
-- PR creation
-- workflow trigger compatibility
-- failure logging
-- revocation behavior
-
-Acceptance standard:
-
-The treasury agent and related automations must function without the personal PAT.
-
-### Phase 5 — Cutover
-
-Actions:
-
-- migrate automation to GitHub App credentials
-- update secrets/configuration
-- remove personal token from automation paths
-- retain personal token only as emergency admin fallback
-
-Deliverable:
-
-- system workflows no longer depend on personal credentials
-
-### Phase 6 — Lockdown
-
-Actions:
-
-- phase out classic PAT usage where possible
-- enforce fine-grained PAT only for humans if PAT use remains necessary
-- treat personal credentials as operator access only
-- document approval rules for future credential creation
-
-Desired end state:
-
-Nova source-control access becomes institutional, not personal.
-
-## VS Code Implementation Notes
-
-### Local Developer Setup
-
-Recommended for human developers:
-
-- use SSH for git operations in VS Code
-- avoid storing classic PATs as long-lived editor credentials
-- keep system automation outside personal editor auth state
-
-Practical rule:
-
-VS Code should be used for:
-
-- human authoring
-- review
-- local development
-
-VS Code should not become the hidden runtime credential source for Nova automation.
-
-## Credential Classification
-
-### Class A — Human Developer Access
-
-Owner: named individual
-
-Allowed methods:
-
-- SSH
-- fine-grained PAT
-
-Use case:
-
-- interactive development
-
-### Class B — System Automation Access
-
-Owner: Nova system role
-
-Allowed method:
-
-- GitHub App
-
-Use case:
-
-- agent and workflow operations
-
-### Class C — Break-Glass Access
-
-Owner: authorized admin only
-
-Allowed method:
-
-- tightly controlled personal credential
-
-Use case:
-
-- emergency continuity only
-
-## Required Access Inventory Template
-
-### Credential Inventory Table
-
-| Credential Name | Type | Owner | Scope | Used By | Repo Access | Write Access | Rotation Status | Notes |
-|---|---|---|---|---|---|---|---|---|
-| MacBook git push | Classic PAT | Architect | Broad repo | Local git | TBD | Yes | Temporary | Break-glass only after migration |
-
-## GitHub App Implementation Checklist
-
-### Creation
-
-- [ ] Create GitHub App
-- [ ] Name app
-- [ ] Add description
-- [ ] Set homepage URL
-- [ ] Disable unnecessary webhooks unless required
-- [ ] Configure permissions minimally
-
-### Installation
-
-- [ ] Install app only on required repos
-- [ ] Verify repo scope
-- [ ] Store credentials securely
-- [ ] Document app owner and admin authority
-
-### Testing
-
-- [ ] Read access test
-- [ ] Write access test
-- [ ] Branch creation test
-- [ ] PR creation test
-- [ ] Automation test
-- [ ] Revocation test
-- [ ] Failure-path test
-
-### Cutover
-
-- [ ] Remove personal PAT from automation
-- [ ] Update config and secrets
-- [ ] Confirm treasury agent path works
-- [ ] Reclassify personal PAT as break-glass only
-
-### Lockdown
-
-- [ ] Review remaining personal token usage
-- [ ] Remove non-essential legacy credentials
-- [ ] Document final approved access paths
-
-## Governance Roles
-
-### Doctrine Owner
-
-Ensures GitHub access model matches Nova’s institutional standards.
-
-### API Boundary Steward
-
-Ensures source-control credentials do not collapse system boundaries.
-
-### Logging & Registry Owner
-
-Maintains access inventory, migration records, and credential state.
-
-### Treasury Agent Operator
-
-Uses only approved system paths.
-
-### Halt Authority
-
-Can suspend deployment or automation if credential integrity weakens.
-
-## Failure Conditions
-
-The migration is incomplete if any of the following remain true:
-
-- treasury agent depends on a personal credential
-- a classic PAT is still the main automation credential
-- repo write access cannot be traced to a role
-- permissions are broader than necessary
-- no break-glass distinction exists
-- credential usage inventory is incomplete
-
-## Success Conditions
-
-The upgrade is successful when:
-
-- system automation uses a GitHub App
-- human access and system access are separated
-- all credentials are inventoried
-- all permissions are least-privilege
-- personal PAT is no longer part of normal operations
-- access can be rotated or revoked without operational confusion
+No exceptions.
 
 ## Implementation Summary
 
@@ -383,7 +104,7 @@ Upgrade GitHub access to institutional infrastructure quality.
 
 ### Constraint
 
-Operator-dependent classic PATs are not acceptable as long-term system credentials.
+Operator-dependent credentials are not acceptable as system infrastructure.
 
 ### Outcome
 
@@ -391,7 +112,7 @@ Nova gains auditable, role-based, least-privilege repository access.
 
 ### Adjustment
 
-Migrate treasury agent and automation access to a GitHub App, while retaining personal access only for human development or emergency recovery.
+Migrate automation and treasury agent access to GitHub App-based credentials.
 
 ### Status
 
