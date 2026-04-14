@@ -2590,6 +2590,16 @@ def _telemetry_response(
         reason=constraint_reason,
         snapshot=snapshot,
     )
+    if telemetry_action in {"DENY", "HALT"}:
+        _record_loop_denial(
+            api_key=api_key,
+            intent=intent,
+            asset=asset,
+            size_raw=size_raw,
+            venue=venue,
+            strategy=strategy,
+            constraint_category="telemetry_integrity",
+        )
     response_overrides = None
     if telemetry_action == "HALT":
         response_overrides = {

@@ -836,7 +836,7 @@ def test_temporal_request_rate_limit_sets_deny_cooldown(client, monkeypatch):
     headers = {"Authorization": "Bearer temporal-key"}
 
     first = client.get("/v1/context", headers=headers, params={"intent": "trade", "asset": "ETH", "size": 10000})
-    current_time = datetime(2026, 1, 1, 12, 0, 31, tzinfo=timezone.utc)
+    current_time = datetime(2026, 1, 1, 12, 0, 46, tzinfo=timezone.utc)
     second = client.get("/v1/context", headers=headers, params={"intent": "trade", "asset": "BTC", "size": 10000})
     current_time = datetime(2026, 1, 1, 12, 0, 59, tzinfo=timezone.utc)
     third = client.get("/v1/context", headers=headers, params={"intent": "trade", "asset": "SOL", "size": 10000})
@@ -860,7 +860,7 @@ def test_temporal_cooldown_expiry_resets_behavior(client, monkeypatch):
     headers = {"Authorization": "Bearer temporal-key"}
 
     client.get("/v1/context", headers=headers, params={"intent": "trade", "asset": "ETH", "size": 10000})
-    current_time = datetime(2026, 1, 1, 12, 0, 31, tzinfo=timezone.utc)
+    current_time = datetime(2026, 1, 1, 12, 0, 46, tzinfo=timezone.utc)
     client.get("/v1/context", headers=headers, params={"intent": "trade", "asset": "BTC", "size": 10000})
     current_time = datetime(2026, 1, 1, 12, 0, 59, tzinfo=timezone.utc)
     denied = client.get("/v1/context", headers=headers, params={"intent": "trade", "asset": "SOL", "size": 10000})
@@ -913,3 +913,123 @@ def test_temporal_halt_quarantine_blocks_further_admission(client, monkeypatch):
     assert quarantined.status_code == 409
     assert quarantined.json()["decision_status"] == "HALT"
     assert quarantined.json()["cooldown_state"]["reason"] == "halt_quarantine_active"
+
+
+def test_telemetry_deny_seeds_loop_history_for_same_family(client):
+    headers = {"Authorization": "Bearer full-governance-key"}
+
+    response = client.get(
+        "/v1/context",
+        headers=headers,
+        params={
+            "intent": "trade",
+            "asset": "ETH",
+            "size": 10000,
+            "strategy": "telemetry_deny_seed",
+            "telemetry_reliability": 0.4,
+            "telemetry_age_seconds": 10,
+            "telemetry_source_scores": "book:0.42,oi:0.38",
+        },
+    )
+
+    assert response.status_code == 429
+    assert response.json()["decision_status"] == "DENY"
+
+    from app import LOOP_INTEGRITY_STATE
+
+    family_denials = LOOP_INTEGRITY_STATE["full-governance-key"]["family_denials"]["trade:eth"]
+    assert family_denials
+    assert family_denials[-1]["constraint_category"] == "telemetry_integrity"
+
+
+def test_telemetry_halt_seeds_loop_history_for_same_family(client):
+    headers = {"Authorization": "Bearer full-governance-key"}
+
+    response = client.get(
+        "/v1/context",
+        headers=headers,
+        params={
+            "intent": "trade",
+            "asset": "ARB",
+            "size": 10000,
+            "strategy": "telemetry_halt_seed",
+            "telemetry_age_seconds": 10,
+            "telemetry_source_scores": "book:0.99,oi:0.20",
+        },
+    )
+
+    assert response.status_code == 409
+    assert response.json()["decision_status"] == "HALT"
+
+    from app import LOOP_INTEGRITY_STATE
+
+    family_denials = LOOP_INTEGRITY_STATE["full-governance-key"]["family_denials"]["trade:arb"]
+    assert family_denials
+    assert family_denials[-1]["constraint_category"] == "telemetry_integrity"
+
+
+def test_telemetry_delay_does_not_seed_loop_history(client):
+    headers = {"Authorization": "Bearer full-governance-key"}
+
+    response = client.get(
+        "/v1/context",
+        headers=headers,
+        params={
+            "intent": "trade",
+            "asset": "BTC",
+            "size": 10000,
+            "strategy": "telemetry_delay_seed",
+            "telemetry_reliability": 0.95,
+            "telemetry_age_seconds": 600,
+            "telemetry_source_scores": "book:0.96,oi:0.94",
+        },
+    )
+
+    assert response.status_code == 429
+    assert response.json()["decision_status"] == "DELAY"
+
+    from app import LOOP_INTEGRITY_STATE
+
+    assert LOOP_INTEGRITY_STATE["full-governance-key"]["family_denials"].get("trade:btc") is None
+
+
+def test_same_family_retry_after_telemetry_deny_surfaces_loop_fields(client, monkeypatch):
+    app_module = importlib.import_module("app")
+    current_time = datetime(2026, 1, 1, 12, 0, tzinfo=timezone.utc)
+    monkeypatch.setattr(app_module, "get_current_datetime", lambda: current_time)
+
+    headers = {"Authorization": "Bearer full-governance-key"}
+    seed_params = {
+        "intent": "trade",
+        "asset": "ETH",
+        "size": 10000,
+        "strategy": "telemetry_retry_seed",
+        "telemetry_reliability": 0.4,
+        "telemetry_age_seconds": 10,
+        "telemetry_source_scores": "book:0.42,oi:0.38",
+    }
+    retry_params = {
+        "intent": "trade",
+        "asset": "ETH",
+        "size": 10000,
+        "strategy": "telemetry_retry_seed",
+        "telemetry_reliability": 0.95,
+        "telemetry_age_seconds": 10,
+        "telemetry_source_scores": "book:0.96,oi:0.94",
+    }
+
+    seed = client.get("/v1/context", headers=headers, params=seed_params)
+    current_time = datetime(2026, 1, 1, 12, 0, 46, tzinfo=timezone.utc)
+    retry = client.get("/v1/context", headers=headers, params=retry_params)
+
+    assert seed.status_code == 429
+    assert seed.json()["decision_status"] == "DENY"
+    assert retry.status_code == 429
+    payload = retry.json()
+    assert payload["decision_status"] == "RETRY_DELAYED"
+    assert payload["retry_count_by_family"] == 1
+    assert payload["semantic_similarity_to_prior_denial"] > 0
+    assert payload["loop_classification"] == "pressure_retry"
+    assert payload["pressure_score"] > 0
+    assert payload["loop_integrity_state"] == "retry_delayed"
+    assert payload["telemetry_integrity_state"] == "not_evaluated"
