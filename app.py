@@ -1193,6 +1193,19 @@ def _proof_memory_influence(payload: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def _failure_class_for_proof(payload: Dict[str, Any], decision_status: str) -> str:
+    constraint_analysis = payload.get("constraint_analysis", {})
+    if not isinstance(constraint_analysis, dict):
+        constraint_analysis = {}
+
+    category = str(constraint_analysis.get("constraint_category") or "").strip()
+    if category:
+        return category
+    if decision_status == "ALLOW":
+        return "none"
+    return "decision_admission_failure"
+
+
 def _normalized_proof_hash_material(
     *,
     decision_context: Dict[str, Any],
@@ -1234,6 +1247,8 @@ def _build_proof_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
     constraint_effect = _constraint_effect_for_proof(payload, decision_status)
     classification = _classify_proof(payload)
     intervention_type = _intervention_type_for_proof(decision_status, constraint_effect["effect_type"])
+    failure_class = _failure_class_for_proof(payload, decision_status)
+    memory_influence = _proof_memory_influence(payload)
     hash_material = _normalized_proof_hash_material(
         decision_context=decision_context,
         decision_status=decision_status,
@@ -1247,6 +1262,13 @@ def _build_proof_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
         json.dumps(hash_material, sort_keys=True, separators=(",", ":")).encode("utf-8")
     ).hexdigest()
     return {
+        "decision_status": decision_status,
+        "constraint_effect": constraint_effect,
+        "failure_class": failure_class,
+        "intervention_type": intervention_type,
+        "memory_influence": memory_influence,
+        "system_state": system_state,
+        "reproducibility_hash": reproducibility_hash,
         "decision_context": decision_context,
         "nova_evaluation": {
             "decision_status": decision_status,
@@ -1257,7 +1279,7 @@ def _build_proof_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
             "prevented_action": _prevented_action_for_proof(payload, decision_status),
             "classification": classification,
             "intervention_type": intervention_type,
-            "memory_influence": _proof_memory_influence(payload),
+            "memory_influence": memory_influence,
         },
         "validation": {
             "environment": _proof_environment_tag(),
