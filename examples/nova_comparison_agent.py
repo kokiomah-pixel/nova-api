@@ -1,4 +1,4 @@
-"""Minimal side-by-side demo: agent without Nova vs with Nova guardrails."""
+"""Minimal side-by-side demo: decision flow without Nova vs with governed admission."""
 
 from __future__ import annotations
 
@@ -43,22 +43,32 @@ def fetch_nova_context(scenario: Scenario) -> Dict[str, Any]:
         return response.json()
 
 
+def fetch_nova_proof(decision_id: str) -> Dict[str, Any]:
+    endpoint = f"{NOVA_API_URL.rstrip('/')}/v1/proof/{decision_id}"
+    headers = {"Authorization": f"Bearer {NOVA_API_KEY}"}
+
+    with httpx.Client(timeout=20.0) as client:
+        response = client.get(endpoint, headers=headers)
+        response.raise_for_status()
+        return response.json()
+
+
 def is_risk_increasing_intent(intent: str) -> bool:
     return intent in {"trade", "deploy_liquidity", "open_position", "increase_position"}
 
 
 def run_with_nova(scenario: Scenario) -> Dict[str, Any]:
     context = fetch_nova_context(scenario)
+    proof = fetch_nova_proof(context["decision_id"])
 
     regime = context.get("regime", "Unknown")
     action_policy = context.get("guardrail", {}).get("action_policy", {})
-    memory_context = context.get("historical_reference") or context.get("memory_context", {})
-    reflex_memory = context.get("reflex_memory")
     decision = context.get("decision_status", "ALLOW")
     impact_on_outcomes = context.get("impact_on_outcomes", {})
     executed_size = impact_on_outcomes.get("adjusted_size", scenario.size)
-    reason = context.get("constraint_analysis", {}).get("why_this_happened", "execution validated")
-    adjustment = context.get("adjustment", "Proceed under local controls.")
+    constraint_effect = proof.get("constraint_effect", {})
+    intervention_type = proof.get("intervention_type")
+    failure_class = proof.get("failure_class")
 
     decision_context = {
         "intent": scenario.intent,
@@ -66,27 +76,23 @@ def run_with_nova(scenario: Scenario) -> Dict[str, Any]:
         "requested_size": scenario.size,
         "configured_decision_regime": regime,
         "timestamp_utc": context.get("timestamp_utc"),
-        "reflex_influence_applied": context.get("decision_context", {}).get("reflex_influence_applied"),
+        "decision_id": context.get("decision_id"),
+        "system_state": context.get("system_state"),
     }
-    constraint_analysis = {
-        "action_policy": action_policy,
-        "reason": reason,
-    }
-    impact_on_outcomes = {
+    validated_exposure = {
         "requested_size": scenario.size,
-        "executed_size": executed_size,
+        "validated_size": executed_size,
     }
 
     return {
         "decision_context": decision_context,
-        "constraint_analysis": constraint_analysis,
-        "historical_reference": memory_context,
-        "reflex_memory": reflex_memory,
-        "impact_on_outcomes": impact_on_outcomes,
-        "adjustment": adjustment,
+        "action_policy": action_policy,
+        "validated_exposure": validated_exposure,
         "decision_status": decision,
         "executed_size": executed_size,
-        "reason": reason,
+        "constraint_effect": constraint_effect,
+        "intervention_type": intervention_type,
+        "failure_class": failure_class,
         "raw_action_policy": json.dumps(action_policy, indent=2, sort_keys=True),
     }
 
@@ -110,32 +116,31 @@ def print_scenario_comparison(scenario: Scenario) -> Dict[str, Any]:
     try:
         with_nova = run_with_nova(scenario)
         print(f"Decision Context: {json.dumps(with_nova['decision_context'], sort_keys=True)}")
-        print(f"Constraint Analysis: {json.dumps(with_nova['constraint_analysis'], sort_keys=True)}")
-        print(f"Historical Reference: {json.dumps(with_nova['historical_reference'], sort_keys=True)}")
-        print(f"Reflex Memory: {json.dumps(with_nova['reflex_memory'], sort_keys=True)}")
-        print(f"Impact on Outcomes: {json.dumps(with_nova['impact_on_outcomes'], sort_keys=True)}")
-        print(f"Adjustment: {with_nova['adjustment']}")
+        print(f"Action Policy: {json.dumps(with_nova['action_policy'], sort_keys=True)}")
+        print(f"Validated Exposure: {json.dumps(with_nova['validated_exposure'], sort_keys=True)}")
         print(f"Decision Status: {with_nova['decision_status']}")
+        print(f"Constraint Effect: {json.dumps(with_nova['constraint_effect'], sort_keys=True)}")
+        print(f"Intervention Type: {with_nova['intervention_type']}")
+        print(f"Failure Class: {with_nova['failure_class']}")
     except Exception as exc:
         # Surface transport failures honestly rather than implying Nova constrained the action.
         with_nova = {
             "decision_status": "UNAVAILABLE",
             "executed_size": scenario.size,
-            "reason": f"Nova context unavailable ({exc})",
             "decision_context": {"status": "unavailable"},
-            "constraint_analysis": {"status": "unavailable"},
-            "historical_reference": {"status": "unavailable"},
-            "reflex_memory": {"status": "unavailable"},
-            "impact_on_outcomes": {"requested_size": scenario.size, "executed_size": scenario.size},
-            "adjustment": f"Failed to fetch Nova context ({exc})",
+            "action_policy": {"status": "unavailable"},
+            "validated_exposure": {"requested_size": scenario.size, "validated_size": scenario.size},
+            "constraint_effect": {"status": "unavailable"},
+            "intervention_type": f"Failed to fetch Nova proof ({exc})",
+            "failure_class": "unavailable",
         }
         print(f"Decision Context: {json.dumps(with_nova['decision_context'], sort_keys=True)}")
-        print(f"Constraint Analysis: {json.dumps(with_nova['constraint_analysis'], sort_keys=True)}")
-        print(f"Historical Reference: {json.dumps(with_nova['historical_reference'], sort_keys=True)}")
-        print(f"Reflex Memory: {json.dumps(with_nova['reflex_memory'], sort_keys=True)}")
-        print(f"Impact on Outcomes: {json.dumps(with_nova['impact_on_outcomes'], sort_keys=True)}")
-        print(f"Adjustment: {with_nova['adjustment']}")
+        print(f"Action Policy: {json.dumps(with_nova['action_policy'], sort_keys=True)}")
+        print(f"Validated Exposure: {json.dumps(with_nova['validated_exposure'], sort_keys=True)}")
         print(f"Decision Status: {with_nova['decision_status']}")
+        print(f"Constraint Effect: {json.dumps(with_nova['constraint_effect'], sort_keys=True)}")
+        print(f"Intervention Type: {with_nova['intervention_type']}")
+        print(f"Failure Class: {with_nova['failure_class']}")
 
     print()
     print("---")
@@ -153,8 +158,7 @@ def print_scenario_comparison(scenario: Scenario) -> Dict[str, Any]:
     else:
         print("With Nova -> decision quality is standardized")
     print()
-    print("Nova does not change the decision.")
-    print("It changes how the decision is made.")
+    print("Nova conditions whether capital is allowed to move before execution.")
 
     print("=" * 60)
     return {

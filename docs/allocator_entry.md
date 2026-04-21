@@ -10,6 +10,8 @@ Allocators use Nova to determine whether a proposed capital action is admissible
 
 - submit the decision through the API
 - read `decision_status`
+- retain `decision_id`
+- retrieve `/v1/proof/{decision_id}` when audit evidence is required
 - bind downstream behavior to the returned state
 
 ## Do Not Treat Nova As

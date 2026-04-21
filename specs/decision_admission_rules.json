@@ -15,6 +15,10 @@
       "requirement": "downstream integrations must enforce refusal and constraint states"
     },
     {
+      "id": "proof_retrieval",
+      "requirement": "audit-facing integrations must retrieve /v1/proof/{decision_id} rather than infer proof fields from internal traces"
+    },
+    {
       "id": "no_execution_bypass",
       "requirement": "examples and adapters must not bypass governance to execute capital movement"
     }

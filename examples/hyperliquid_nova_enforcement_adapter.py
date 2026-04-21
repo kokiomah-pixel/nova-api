@@ -53,13 +53,37 @@ def fetch_nova_response(
         return response.json()
 
 
+def fetch_nova_proof(
+    *,
+    decision_id: str,
+    api_url: Optional[str] = None,
+    api_key: Optional[str] = None,
+) -> Dict[str, Any]:
+    resolved_url = (api_url or DEFAULT_API_URL).rstrip("/")
+    resolved_key = api_key if api_key is not None else DEFAULT_API_KEY
+    if not resolved_key:
+        raise ValueError("Missing API key. Set NOVA_API_KEY or pass api_key.")
+
+    endpoint = f"{resolved_url}/v1/proof/{decision_id}"
+    headers = {"Authorization": f"Bearer {resolved_key}"}
+
+    with httpx.Client(timeout=20.0) as client:
+        response = client.get(endpoint, headers=headers)
+        response.raise_for_status()
+        return response.json()
+
+
 def _effective_constraints(nova_response: Dict[str, Any]) -> Dict[str, Any]:
+    proof = nova_response.get("proof_surface") or {}
     impact = nova_response.get("impact_on_outcomes") or {}
     return {
+        "decision_id": nova_response.get("decision_id"),
         "requested_size": (nova_response.get("decision_context") or {}).get("requested_size"),
         "effective_size": impact.get("adjusted_size"),
-        "adjustment": nova_response.get("adjustment"),
         "system_state": nova_response.get("system_state"),
+        "constraint_effect": proof.get("constraint_effect"),
+        "intervention_type": proof.get("intervention_type"),
+        "failure_class": proof.get("failure_class"),
         "cooldown_state": nova_response.get("cooldown_state"),
         "retry_cooldown_expiry": nova_response.get("retry_cooldown_expiry"),
         "post_halt_quarantine_expiry": nova_response.get("post_halt_quarantine_expiry"),
@@ -122,6 +146,13 @@ def evaluate_hyperliquid_decision_candidate(
         api_url=api_url,
         api_key=api_key,
     )
+    decision_id = nova_response.get("decision_id")
+    if decision_id:
+        nova_response["proof_surface"] = fetch_nova_proof(
+            decision_id=decision_id,
+            api_url=api_url,
+            api_key=api_key,
+        )
     return enforce_nova_response(nova_response)
 
 

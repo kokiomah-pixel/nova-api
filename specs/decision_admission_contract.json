@@ -3,12 +3,27 @@
   "version": "1.0",
   "interface_type": "response_contract",
   "authoritative_endpoint": "/v1/context",
+  "proof_endpoint": "/v1/proof/{decision_id}",
   "required_fields": [
     "decision_status",
     "decision_context",
-    "constraint_analysis",
+    "decision_id",
+    "system_state",
+    "signature"
+  ],
+  "supporting_context_fields": [
     "impact_on_outcomes",
-    "adjustment",
+    "constraint_analysis",
+    "adjustment"
+  ],
+  "proof_fields": [
+    "decision_status",
+    "constraint_effect",
+    "failure_class",
+    "intervention_type",
+    "memory_influence",
+    "system_state",
+    "reproducibility_hash",
     "signature"
   ],
   "decision_status_values": [
@@ -23,5 +38,5 @@
     "PRESSURE_ESCALATED",
     "REDUCE"
   ],
-  "integration_rule": "downstream systems must bind behavior to decision_status and returned constraints"
+  "integration_rule": "downstream systems must bind behavior to decision_status from /v1/context and retrieve /v1/proof/{decision_id} when authoritative audit fields are required"
 }

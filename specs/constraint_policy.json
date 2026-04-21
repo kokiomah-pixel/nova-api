@@ -11,6 +11,7 @@
   "downstream_requirements": [
     "submit decisions through the API",
     "bind to decision_status",
+    "retrieve proof through /v1/proof/{decision_id} when auditable outcome fields are required",
     "enforce refusal states"
   ]
 }

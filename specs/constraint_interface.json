@@ -3,15 +3,26 @@
   "version": "1.0",
   "interface_type": "control_surface",
   "core_domains": [
-    "telemetry",
+    "telemetry_integrity",
     "reflex_memory",
-    "constraint_logic"
+    "constraint_interface"
   ],
-  "constraint_fields": [
-    "constraint_analysis",
-    "constraint_trace",
+  "primary_context_fields": [
+    "decision_status",
+    "decision_id",
+    "system_state"
+  ],
+  "proof_fields": [
+    "constraint_effect",
+    "failure_class",
+    "intervention_type",
+    "memory_influence",
+    "reproducibility_hash"
+  ],
+  "supporting_context_fields": [
     "impact_on_outcomes",
+    "constraint_analysis",
     "adjustment"
   ],
-  "interpretation_rule": "constraints describe how capital must be conditioned before execution"
+  "interpretation_rule": "the constraint interface conditions and verifies whether capital is allowed to move before execution; proof surfaces expose only authoritative outcome fields"
 }

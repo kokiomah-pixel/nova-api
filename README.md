@@ -4,9 +4,9 @@ Sharpe Nova OS is a pre-execution decision discipline layer that conditions and 
 
 ## What This Is
 
-- A decision-layer interface
-- A capital conditioning system
-- A constraint and governance surface
+- A pre-execution decision discipline layer
+- A decision admission infrastructure surface
+- A constraint interface with verifiable proof
 
 ## What This Is Not
 
@@ -91,20 +91,27 @@ curl -s -H "Authorization: Bearer mytestkey" \
   "http://127.0.0.1:8000/v1/context?intent=trade&asset=ETH&size=10000"
 ```
 
-Evaluate the response through contract fields:
+Read the governed response through:
 
 - `decision_status`
-- `constraint_effect`
-- `intervention_type`
-- `failure_class`
+- `decision_id`
 - `system_state`
 
-Retrieve proof:
+Retrieve proof for the auditable outcome:
 
 ```bash
 curl -s -H "Authorization: Bearer mytestkey" \
   "http://127.0.0.1:8000/v1/proof/{decision_id}"
 ```
+
+Evaluate proof through:
+
+- `decision_status`
+- `constraint_effect`
+- `intervention_type`
+- `failure_class`
+- `memory_influence`
+- `reproducibility_hash`
 
 ## Interpretation Discipline
 

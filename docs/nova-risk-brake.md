@@ -78,11 +78,13 @@ Nova is that check. It is a single API call that returns:
 - whether position increases are allowed
 - whether risk reduction is required
 
+That admission response also returns `decision_id`, which binds the decision to a retrievable proof object.
+
 Your system reads it. Your system applies constraint enforcement. Capital is then exposed only under a validated decision state.
 
 ---
 
-## Integration (2 Lines)
+## Integration Pattern
 
 ```python
 import requests
@@ -98,8 +100,13 @@ def nova_gate(intent, asset, size, api_key):
         raise RuntimeError("Nova VETO: new risk not permitted in current configured decision regime")
 
     if res["decision_status"] == "CONSTRAIN":
-        adjusted = res["impact_on_outcomes"]["adjusted_size"]
-        raise RuntimeError(f"Nova CONSTRAIN: reduce size to {adjusted} before capital deployment")
+        proof = requests.get(
+            f"https://nova-api-ipz6.onrender.com/v1/proof/{res['decision_id']}",
+            headers={"Authorization": f"Bearer {api_key}"}
+        ).json()
+        raise RuntimeError(
+            f"Nova CONSTRAIN: {proof['constraint_effect']['effect_type']} before capital deployment"
+        )
 
     return True
 ```
@@ -172,8 +179,8 @@ curl -s -H "Authorization: Bearer YOUR_API_KEY" \
 Read the response:
 
 - `decision_status` -> whether the decision is admissible
-- `constraint_effect` -> how exposure must change
-- `intervention_type` -> what action is enforced
+- `decision_id` -> the binding identifier for proof retrieval
+- `system_state` -> the current operating state applied to the decision
 
 Retrieve proof:
 
@@ -182,7 +189,13 @@ curl -s -H "Authorization: Bearer YOUR_API_KEY" \
   "https://nova-api-ipz6.onrender.com/v1/proof/{decision_id}"
 ```
 
-If Nova changes the decision - if size is reduced, blocked, or delayed -
+Read the proof:
+
+- `constraint_effect` -> how exposure must change
+- `intervention_type` -> what action is enforced
+- `failure_class` -> the failure mode Nova identified
+
+If the proof shows the decision was constrained, blocked, or delayed -
 
 you are seeing a live constraint that your system does not enforce.
 

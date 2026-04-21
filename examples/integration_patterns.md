@@ -6,8 +6,10 @@ Examples in this repository are controlled integration patterns for Sharpe Nova 
 
 - submit decisions to the Nova API
 - read `decision_status`
+- retain `decision_id`
+- retrieve `/v1/proof/{decision_id}` when audit evidence is required
 - enforce refusal states
-- preserve the returned constraint surface
+- preserve the authoritative outcome surface
 
 ## Prohibited Example Behavior
 

@@ -5,8 +5,9 @@ Sharpe Nova OS integrates through a machine-readable API contract.
 ## Integration Pattern
 
 1. Submit a decision candidate to `/v1/context`.
-2. Parse `decision_status` and the returned constraint fields.
-3. Enforce refusal or constraint states before any downstream execution step.
+2. Parse `decision_status`, `decision_id`, and `system_state`.
+3. Retrieve `/v1/proof/{decision_id}` when you need the authoritative audit surface.
+4. Enforce refusal or constraint states before any downstream execution step.
 
 ## Required Binding
 
@@ -20,4 +21,4 @@ Sharpe Nova OS integrates through a machine-readable API contract.
 
 No integration should reinterpret Nova output as optional guidance.
 
-The response contract is authoritative.
+The response contract is authoritative, and proof fields should be read from the proof endpoint rather than inferred from internal traces.

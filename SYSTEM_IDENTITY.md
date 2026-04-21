@@ -23,9 +23,9 @@ Sharpe Nova OS is not:
 
 ## Core Components
 
-- telemetry
+- telemetry integrity
 - reflex memory
-- constraint logic
+- constraint interface
 
 ## Interpretation Rule
 

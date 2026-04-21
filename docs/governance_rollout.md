@@ -26,3 +26,9 @@ These layers should be understood as control surfaces, not as trading features.
 ## Operational Reading
 
 Use governance rollout to understand which control surfaces are active for a key or environment, not to infer a broader system identity.
+
+Governance still resolves into the same authoritative interaction:
+
+- submit the decision to `/v1/context`
+- bind behavior to `decision_status`
+- retrieve `/v1/proof/{decision_id}` for the auditable outcome
