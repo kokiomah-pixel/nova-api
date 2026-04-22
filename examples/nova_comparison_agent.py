@@ -1,4 +1,8 @@
-"""Minimal side-by-side demo: decision flow without Nova vs with governed admission."""
+"""Minimal side-by-side demo: decision flow without Nova vs with governed admission.
+
+Defaults to a local Nova API for development safety.
+Override with NOVA_API_URL and NOVA_API_KEY when targeting another environment.
+"""
 
 from __future__ import annotations
 
@@ -10,7 +14,7 @@ from typing import Any, Dict, List
 import httpx
 
 
-NOVA_API_URL = os.getenv("NOVA_API_URL", "https://nova-api-ipz6.onrender.com")
+NOVA_API_URL = os.getenv("NOVA_API_URL", "http://127.0.0.1:8000")
 NOVA_API_KEY = os.getenv("NOVA_API_KEY", "your_api_key_here")
 
 
@@ -39,7 +43,20 @@ def fetch_nova_context(scenario: Scenario) -> Dict[str, Any]:
 
     with httpx.Client(timeout=20.0) as client:
         response = client.get(endpoint, params=params, headers=headers)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == 403:
+                raise RuntimeError(
+                    "Nova returned 403 Forbidden.\n"
+                    "Check credentials/target environment:\n"
+                    "1) If running locally, start API and export:\n"
+                    "   NOVA_API_URL=http://127.0.0.1:8000\n"
+                    "   NOVA_API_KEY=mytestkey\n"
+                    "2) If using remote, set a valid remote key in NOVA_API_KEY.\n"
+                    f"Current target: {NOVA_API_URL}"
+                ) from exc
+            raise
         return response.json()
 
 
@@ -173,6 +190,11 @@ def print_scenario_comparison(scenario: Scenario) -> Dict[str, Any]:
 
 
 def main() -> None:
+    if NOVA_API_URL.rstrip("/") == "http://127.0.0.1:8000":
+        print("Using local Nova API default: http://127.0.0.1:8000")
+        print("Set NOVA_API_URL to override this target.")
+        print()
+
     scenarios: List[Scenario] = [
         Scenario("trade", "ETH", 10000),
         Scenario("trade", "BTC", 50000),
