@@ -1,0 +1,580 @@
+{
+  "escalation::classification_compression:market_system_risk:30": {
+    "created_at": "2026-04-22T10:59:41.930123+00:00",
+    "domain": "classification",
+    "escalation_id": "escalation::classification_compression:market_system_risk:30",
+    "flag": "classification_compression",
+    "last_seen": "2026-04-22T10:59:42.093522+00:00",
+    "pattern": {
+      "affects_outcomes": true,
+      "domain": "classification",
+      "evidence": {
+        "classification": "market_system_risk",
+        "share": 0.8333
+      },
+      "first_seen": "2026-04-22T10:59:41.848848+00:00",
+      "flag": "classification_compression",
+      "last_seen": "2026-04-22T10:59:42.081940+00:00",
+      "occurrences": 5,
+      "pattern_key": "classification_compression:market_system_risk:30",
+      "scope": "market_system_risk",
+      "window_days": 30
+    },
+    "pattern_key": "classification_compression:market_system_risk:30",
+    "recommended_posture": "VALIDATE",
+    "resolution": null,
+    "scope": "market_system_risk",
+    "signal_status": "escalate",
+    "state": "pending_resolution",
+    "watch": null,
+    "window_days": 30
+  },
+  "escalation::classification_compression:market_system_risk:7": {
+    "created_at": "2026-04-22T10:59:41.930123+00:00",
+    "domain": "classification",
+    "escalation_id": "escalation::classification_compression:market_system_risk:7",
+    "flag": "classification_compression",
+    "last_seen": "2026-04-22T10:59:42.093522+00:00",
+    "pattern": {
+      "affects_outcomes": true,
+      "domain": "classification",
+      "evidence": {
+        "classification": "market_system_risk",
+        "share": 0.8333
+      },
+      "first_seen": "2026-04-22T10:59:41.848848+00:00",
+      "flag": "classification_compression",
+      "last_seen": "2026-04-22T10:59:42.081940+00:00",
+      "occurrences": 5,
+      "pattern_key": "classification_compression:market_system_risk:7",
+      "scope": "market_system_risk",
+      "window_days": 7
+    },
+    "pattern_key": "classification_compression:market_system_risk:7",
+    "recommended_posture": "VALIDATE",
+    "resolution": null,
+    "scope": "market_system_risk",
+    "signal_status": "escalate",
+    "state": "pending_resolution",
+    "watch": null,
+    "window_days": 7
+  },
+  "escalation::classification_inconsistency:{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}:30": {
+    "created_at": "2026-04-22T10:59:42.010273+00:00",
+    "domain": "classification",
+    "escalation_id": "escalation::classification_inconsistency:{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}:30",
+    "flag": "classification_inconsistency",
+    "last_seen": "2026-04-22T11:00:09.018719+00:00",
+    "pattern": {
+      "affects_outcomes": true,
+      "domain": "classification",
+      "evidence": {
+        "classification_variants": [
+          [],
+          [
+            "market_system_risk"
+          ],
+          [
+            "process_integrity"
+          ],
+          [
+            "telemetry_integrity"
+          ]
+        ],
+        "normalized_signature": "{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}"
+      },
+      "first_seen": "2026-04-22T10:59:41.848848+00:00",
+      "flag": "classification_inconsistency",
+      "last_seen": "2026-04-22T11:00:09.018719+00:00",
+      "occurrences": 30,
+      "pattern_key": "classification_inconsistency:{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}:30",
+      "scope": "{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}",
+      "window_days": 30
+    },
+    "pattern_key": "classification_inconsistency:{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}:30",
+    "recommended_posture": "VALIDATE",
+    "resolution": null,
+    "scope": "{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}",
+    "signal_status": "escalate",
+    "state": "pending_resolution",
+    "watch": null,
+    "window_days": 30
+  },
+  "escalation::classification_inconsistency:{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}:7": {
+    "created_at": "2026-04-22T10:59:42.010273+00:00",
+    "domain": "classification",
+    "escalation_id": "escalation::classification_inconsistency:{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}:7",
+    "flag": "classification_inconsistency",
+    "last_seen": "2026-04-22T11:00:09.018719+00:00",
+    "pattern": {
+      "affects_outcomes": true,
+      "domain": "classification",
+      "evidence": {
+        "classification_variants": [
+          [],
+          [
+            "market_system_risk"
+          ],
+          [
+            "process_integrity"
+          ],
+          [
+            "telemetry_integrity"
+          ]
+        ],
+        "normalized_signature": "{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}"
+      },
+      "first_seen": "2026-04-22T10:59:41.848848+00:00",
+      "flag": "classification_inconsistency",
+      "last_seen": "2026-04-22T11:00:09.018719+00:00",
+      "occurrences": 30,
+      "pattern_key": "classification_inconsistency:{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}:7",
+      "scope": "{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}",
+      "window_days": 7
+    },
+    "pattern_key": "classification_inconsistency:{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}:7",
+    "recommended_posture": "VALIDATE",
+    "resolution": null,
+    "scope": "{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}",
+    "signal_status": "escalate",
+    "state": "pending_resolution",
+    "watch": null,
+    "window_days": 7
+  },
+  "escalation::determinism_violation:{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}:30": {
+    "created_at": "2026-04-22T10:59:42.010273+00:00",
+    "domain": "proof",
+    "escalation_id": "escalation::determinism_violation:{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}:30",
+    "flag": "determinism_violation",
+    "last_seen": "2026-04-22T11:00:09.018719+00:00",
+    "pattern": {
+      "affects_outcomes": true,
+      "domain": "proof",
+      "evidence": {
+        "decision_statuses": [
+          "ALLOW",
+          "CONSTRAIN",
+          "DELAY",
+          "DENY",
+          "HALT"
+        ],
+        "intervention_types": [
+          "blocked",
+          "delayed",
+          "halted",
+          "none",
+          "reduced"
+        ]
+      },
+      "first_seen": "2026-04-22T10:59:41.848848+00:00",
+      "flag": "determinism_violation",
+      "last_seen": "2026-04-22T11:00:09.018719+00:00",
+      "occurrences": 30,
+      "pattern_key": "determinism_violation:{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}:30",
+      "scope": "{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}",
+      "window_days": 30
+    },
+    "pattern_key": "determinism_violation:{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}:30",
+    "recommended_posture": "HOLD",
+    "resolution": null,
+    "scope": "{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}",
+    "signal_status": "escalate",
+    "state": "pending_resolution",
+    "watch": null,
+    "window_days": 30
+  },
+  "escalation::determinism_violation:{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}:7": {
+    "created_at": "2026-04-22T10:59:42.010273+00:00",
+    "domain": "proof",
+    "escalation_id": "escalation::determinism_violation:{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}:7",
+    "flag": "determinism_violation",
+    "last_seen": "2026-04-22T11:00:09.018719+00:00",
+    "pattern": {
+      "affects_outcomes": true,
+      "domain": "proof",
+      "evidence": {
+        "decision_statuses": [
+          "ALLOW",
+          "CONSTRAIN",
+          "DELAY",
+          "DENY",
+          "HALT"
+        ],
+        "intervention_types": [
+          "blocked",
+          "delayed",
+          "halted",
+          "none",
+          "reduced"
+        ]
+      },
+      "first_seen": "2026-04-22T10:59:41.848848+00:00",
+      "flag": "determinism_violation",
+      "last_seen": "2026-04-22T11:00:09.018719+00:00",
+      "occurrences": 30,
+      "pattern_key": "determinism_violation:{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}:7",
+      "scope": "{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}",
+      "window_days": 7
+    },
+    "pattern_key": "determinism_violation:{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}:7",
+    "recommended_posture": "HOLD",
+    "resolution": null,
+    "scope": "{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}",
+    "signal_status": "escalate",
+    "state": "pending_resolution",
+    "watch": null,
+    "window_days": 7
+  },
+  "escalation::ineffective_reflex:global:30": {
+    "created_at": "2026-04-20T10:00:00+00:00",
+    "domain": "reflex",
+    "escalation_id": "escalation::ineffective_reflex:global:30",
+    "flag": "ineffective_reflex",
+    "last_seen": "2026-04-22T11:00:09.018719+00:00",
+    "pattern": {
+      "affects_outcomes": false,
+      "domain": "reflex",
+      "evidence": {
+        "count": 10
+      },
+      "first_seen": "2026-04-20T10:00:00+00:00",
+      "flag": "ineffective_reflex",
+      "last_seen": "2026-04-22T11:00:08.911199+00:00",
+      "occurrences": 10,
+      "pattern_key": "ineffective_reflex:global:30",
+      "scope": "global",
+      "window_days": 30
+    },
+    "pattern_key": "ineffective_reflex:global:30",
+    "recommended_posture": "HOLD",
+    "resolution": null,
+    "scope": "global",
+    "signal_status": "escalate",
+    "state": "pending_resolution",
+    "watch": null,
+    "window_days": 30
+  },
+  "escalation::ineffective_reflex:global:7": {
+    "created_at": "2026-04-20T10:00:00+00:00",
+    "domain": "reflex",
+    "escalation_id": "escalation::ineffective_reflex:global:7",
+    "flag": "ineffective_reflex",
+    "last_seen": "2026-04-22T11:00:09.018719+00:00",
+    "pattern": {
+      "affects_outcomes": false,
+      "domain": "reflex",
+      "evidence": {
+        "count": 10
+      },
+      "first_seen": "2026-04-20T10:00:00+00:00",
+      "flag": "ineffective_reflex",
+      "last_seen": "2026-04-22T11:00:08.911199+00:00",
+      "occurrences": 10,
+      "pattern_key": "ineffective_reflex:global:7",
+      "scope": "global",
+      "window_days": 7
+    },
+    "pattern_key": "ineffective_reflex:global:7",
+    "recommended_posture": "HOLD",
+    "resolution": null,
+    "scope": "global",
+    "signal_status": "escalate",
+    "state": "pending_resolution",
+    "watch": null,
+    "window_days": 7
+  },
+  "escalation::overactive_reflex:None:30": {
+    "created_at": "2026-04-20T10:00:00+00:00",
+    "domain": "reflex",
+    "escalation_id": "escalation::overactive_reflex:None:30",
+    "flag": "overactive_reflex",
+    "last_seen": "2026-04-22T11:00:09.018719+00:00",
+    "pattern": {
+      "affects_outcomes": true,
+      "domain": "reflex",
+      "evidence": {
+        "activation_count": 24,
+        "reflex_id": "None"
+      },
+      "first_seen": "2026-04-20T10:00:00+00:00",
+      "flag": "overactive_reflex",
+      "last_seen": "2026-04-22T11:00:09.018719+00:00",
+      "occurrences": 24,
+      "pattern_key": "overactive_reflex:None:30",
+      "scope": "None",
+      "window_days": 30
+    },
+    "pattern_key": "overactive_reflex:None:30",
+    "recommended_posture": "HOLD",
+    "resolution": null,
+    "scope": "None",
+    "signal_status": "escalate",
+    "state": "pending_resolution",
+    "watch": null,
+    "window_days": 30
+  },
+  "escalation::overactive_reflex:None:7": {
+    "created_at": "2026-04-20T10:00:00+00:00",
+    "domain": "reflex",
+    "escalation_id": "escalation::overactive_reflex:None:7",
+    "flag": "overactive_reflex",
+    "last_seen": "2026-04-22T11:00:09.018719+00:00",
+    "pattern": {
+      "affects_outcomes": true,
+      "domain": "reflex",
+      "evidence": {
+        "activation_count": 24,
+        "reflex_id": "None"
+      },
+      "first_seen": "2026-04-20T10:00:00+00:00",
+      "flag": "overactive_reflex",
+      "last_seen": "2026-04-22T11:00:09.018719+00:00",
+      "occurrences": 24,
+      "pattern_key": "overactive_reflex:None:7",
+      "scope": "None",
+      "window_days": 7
+    },
+    "pattern_key": "overactive_reflex:None:7",
+    "recommended_posture": "HOLD",
+    "resolution": null,
+    "scope": "None",
+    "signal_status": "escalate",
+    "state": "pending_resolution",
+    "watch": null,
+    "window_days": 7
+  },
+  "escalation::overactive_reflex:elevated_fragility_size_brake:30": {
+    "created_at": "2026-04-22T10:59:41.930123+00:00",
+    "domain": "reflex",
+    "escalation_id": "escalation::overactive_reflex:elevated_fragility_size_brake:30",
+    "flag": "overactive_reflex",
+    "last_seen": "2026-04-22T11:00:09.018719+00:00",
+    "pattern": {
+      "affects_outcomes": true,
+      "domain": "reflex",
+      "evidence": {
+        "activation_count": 14,
+        "reflex_id": "elevated_fragility_size_brake"
+      },
+      "first_seen": "2026-04-22T10:59:41.848848+00:00",
+      "flag": "overactive_reflex",
+      "last_seen": "2026-04-22T11:00:09.002962+00:00",
+      "occurrences": 14,
+      "pattern_key": "overactive_reflex:elevated_fragility_size_brake:30",
+      "scope": "elevated_fragility_size_brake",
+      "window_days": 30
+    },
+    "pattern_key": "overactive_reflex:elevated_fragility_size_brake:30",
+    "recommended_posture": "HOLD",
+    "resolution": null,
+    "scope": "elevated_fragility_size_brake",
+    "signal_status": "escalate",
+    "state": "pending_resolution",
+    "watch": null,
+    "window_days": 30
+  },
+  "escalation::overactive_reflex:elevated_fragility_size_brake:7": {
+    "created_at": "2026-04-22T10:59:41.930123+00:00",
+    "domain": "reflex",
+    "escalation_id": "escalation::overactive_reflex:elevated_fragility_size_brake:7",
+    "flag": "overactive_reflex",
+    "last_seen": "2026-04-22T11:00:09.018719+00:00",
+    "pattern": {
+      "affects_outcomes": true,
+      "domain": "reflex",
+      "evidence": {
+        "activation_count": 14,
+        "reflex_id": "elevated_fragility_size_brake"
+      },
+      "first_seen": "2026-04-22T10:59:41.848848+00:00",
+      "flag": "overactive_reflex",
+      "last_seen": "2026-04-22T11:00:09.002962+00:00",
+      "occurrences": 14,
+      "pattern_key": "overactive_reflex:elevated_fragility_size_brake:7",
+      "scope": "elevated_fragility_size_brake",
+      "window_days": 7
+    },
+    "pattern_key": "overactive_reflex:elevated_fragility_size_brake:7",
+    "recommended_posture": "HOLD",
+    "resolution": null,
+    "scope": "elevated_fragility_size_brake",
+    "signal_status": "escalate",
+    "state": "pending_resolution",
+    "watch": null,
+    "window_days": 7
+  },
+  "escalation::proof_mismatch:global:30": {
+    "created_at": "2026-04-22T10:59:42.171887+00:00",
+    "domain": "proof",
+    "escalation_id": "escalation::proof_mismatch:global:30",
+    "flag": "proof_mismatch",
+    "last_seen": "2026-04-22T11:00:09.018719+00:00",
+    "pattern": {
+      "affects_outcomes": true,
+      "domain": "proof",
+      "evidence": {
+        "count": 6
+      },
+      "first_seen": "2026-04-22T10:59:42.154782+00:00",
+      "flag": "proof_mismatch",
+      "last_seen": "2026-04-22T11:00:09.018719+00:00",
+      "occurrences": 6,
+      "pattern_key": "proof_mismatch:global:30",
+      "scope": "global",
+      "window_days": 30
+    },
+    "pattern_key": "proof_mismatch:global:30",
+    "recommended_posture": "HOLD",
+    "resolution": null,
+    "scope": "global",
+    "signal_status": "escalate",
+    "state": "pending_resolution",
+    "watch": null,
+    "window_days": 30
+  },
+  "escalation::proof_mismatch:global:7": {
+    "created_at": "2026-04-22T10:59:42.171887+00:00",
+    "domain": "proof",
+    "escalation_id": "escalation::proof_mismatch:global:7",
+    "flag": "proof_mismatch",
+    "last_seen": "2026-04-22T11:00:09.018719+00:00",
+    "pattern": {
+      "affects_outcomes": true,
+      "domain": "proof",
+      "evidence": {
+        "count": 6
+      },
+      "first_seen": "2026-04-22T10:59:42.154782+00:00",
+      "flag": "proof_mismatch",
+      "last_seen": "2026-04-22T11:00:09.018719+00:00",
+      "occurrences": 6,
+      "pattern_key": "proof_mismatch:global:7",
+      "scope": "global",
+      "window_days": 7
+    },
+    "pattern_key": "proof_mismatch:global:7",
+    "recommended_posture": "HOLD",
+    "resolution": null,
+    "scope": "global",
+    "signal_status": "escalate",
+    "state": "pending_resolution",
+    "watch": null,
+    "window_days": 7
+  },
+  "escalation::reproducibility_failure:{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}:30": {
+    "created_at": "2026-04-22T10:59:42.010273+00:00",
+    "domain": "proof",
+    "escalation_id": "escalation::reproducibility_failure:{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}:30",
+    "flag": "reproducibility_failure",
+    "last_seen": "2026-04-22T11:00:09.018719+00:00",
+    "pattern": {
+      "affects_outcomes": true,
+      "domain": "proof",
+      "evidence": {
+        "hash_count": 8
+      },
+      "first_seen": "2026-04-22T10:59:41.848848+00:00",
+      "flag": "reproducibility_failure",
+      "last_seen": "2026-04-22T11:00:09.018719+00:00",
+      "occurrences": 30,
+      "pattern_key": "reproducibility_failure:{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}:30",
+      "scope": "{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}",
+      "window_days": 30
+    },
+    "pattern_key": "reproducibility_failure:{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}:30",
+    "recommended_posture": "HOLD",
+    "resolution": null,
+    "scope": "{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}",
+    "signal_status": "escalate",
+    "state": "pending_resolution",
+    "watch": null,
+    "window_days": 30
+  },
+  "escalation::reproducibility_failure:{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}:7": {
+    "created_at": "2026-04-22T10:59:42.010273+00:00",
+    "domain": "proof",
+    "escalation_id": "escalation::reproducibility_failure:{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}:7",
+    "flag": "reproducibility_failure",
+    "last_seen": "2026-04-22T11:00:09.018719+00:00",
+    "pattern": {
+      "affects_outcomes": true,
+      "domain": "proof",
+      "evidence": {
+        "hash_count": 8
+      },
+      "first_seen": "2026-04-22T10:59:41.848848+00:00",
+      "flag": "reproducibility_failure",
+      "last_seen": "2026-04-22T11:00:09.018719+00:00",
+      "occurrences": 30,
+      "pattern_key": "reproducibility_failure:{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}:7",
+      "scope": "{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}",
+      "window_days": 7
+    },
+    "pattern_key": "reproducibility_failure:{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}:7",
+    "recommended_posture": "HOLD",
+    "resolution": null,
+    "scope": "{\"asset\":\"ETH\",\"intent\":\"risk_increasing\",\"requested_action\":\"trade\"}",
+    "signal_status": "escalate",
+    "state": "pending_resolution",
+    "watch": null,
+    "window_days": 7
+  },
+  "escalation::unclassified_decisions:global:30": {
+    "created_at": "2026-04-20T10:00:00+00:00",
+    "domain": "classification",
+    "escalation_id": "escalation::unclassified_decisions:global:30",
+    "flag": "unclassified_decisions",
+    "last_seen": "2026-04-22T11:00:09.018719+00:00",
+    "pattern": {
+      "affects_outcomes": false,
+      "domain": "classification",
+      "evidence": {
+        "count": 10
+      },
+      "first_seen": "2026-04-20T10:00:00+00:00",
+      "flag": "unclassified_decisions",
+      "last_seen": "2026-04-22T11:00:08.911199+00:00",
+      "occurrences": 10,
+      "pattern_key": "unclassified_decisions:global:30",
+      "scope": "global",
+      "window_days": 30
+    },
+    "pattern_key": "unclassified_decisions:global:30",
+    "recommended_posture": "VALIDATE",
+    "resolution": null,
+    "scope": "global",
+    "signal_status": "escalate",
+    "state": "pending_resolution",
+    "watch": null,
+    "window_days": 30
+  },
+  "escalation::unclassified_decisions:global:7": {
+    "created_at": "2026-04-20T10:00:00+00:00",
+    "domain": "classification",
+    "escalation_id": "escalation::unclassified_decisions:global:7",
+    "flag": "unclassified_decisions",
+    "last_seen": "2026-04-22T11:00:09.018719+00:00",
+    "pattern": {
+      "affects_outcomes": false,
+      "domain": "classification",
+      "evidence": {
+        "count": 10
+      },
+      "first_seen": "2026-04-20T10:00:00+00:00",
+      "flag": "unclassified_decisions",
+      "last_seen": "2026-04-22T11:00:08.911199+00:00",
+      "occurrences": 10,
+      "pattern_key": "unclassified_decisions:global:7",
+      "scope": "global",
+      "window_days": 7
+    },
+    "pattern_key": "unclassified_decisions:global:7",
+    "recommended_posture": "VALIDATE",
+    "resolution": null,
+    "scope": "global",
+    "signal_status": "escalate",
+    "state": "pending_resolution",
+    "watch": null,
+    "window_days": 7
+  }
+}
