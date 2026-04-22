@@ -2,3 +2,11 @@
 {"api_key": "billing-key", "decision_id": "1552d02d-b5ee-4414-9b3e-63df2ce0d084", "owner": "billing-user", "result": "success", "timestamp_utc": "2026-04-20T18:45:58.463493+00:00"}
 {"api_key": "billing-key", "decision_id": "ee637fdf-1bfd-4105-afda-c7d7bb760e33", "owner": "billing-user", "result": "success", "timestamp_utc": "2026-04-20T18:46:40.612907+00:00"}
 {"api_key": "billing-key", "decision_id": "1f92a3e5-dede-4be7-b2ad-352d07e03e9a", "owner": "billing-user", "result": "success", "timestamp_utc": "2026-04-20T18:47:15.339793+00:00"}
+{"api_key": "billing-key", "decision_id": "cec8c27e-2763-487d-85bd-24c78fa9eaeb", "owner": "billing-user", "result": "success", "timestamp_utc": "2026-04-22T16:17:39.797772+00:00"}
+{"api_key": "mytestkey", "decision_id": "219ce9a3-7832-43e3-bf95-508c3561fd14", "owner": "legacy", "result": "success", "timestamp_utc": "2026-04-22T16:19:11.571328+00:00"}
+{"api_key": "mytestkey", "decision_id": "71af9167-c878-463c-a6b7-9ca92a6cde6f", "owner": "legacy", "result": "success", "timestamp_utc": "2026-04-22T16:19:59.352481+00:00"}
+{"api_key": "mytestkey", "decision_id": "367f34a2-4b33-40ea-9f1b-035c00ebf0c7", "owner": "legacy", "result": "success", "timestamp_utc": "2026-04-22T16:19:59.416315+00:00"}
+{"api_key": "mytestkey", "decision_id": "e588c3cb-9068-49bd-805a-b4655e45939c", "owner": "legacy", "result": "success", "timestamp_utc": "2026-04-22T16:19:59.481754+00:00"}
+{"api_key": "mytestkey", "decision_id": "e1004ff6-1b30-43ff-938c-60dbe530bad8", "owner": "legacy", "result": "success", "timestamp_utc": "2026-04-22T16:19:59.545440+00:00"}
+{"api_key": "mytestkey", "decision_id": "ab2b5aeb-b49a-45c1-8105-f2602cde6b96", "owner": "legacy", "result": "success", "timestamp_utc": "2026-04-22T16:20:27.494246+00:00"}
+{"api_key": "mytestkey", "decision_id": "a036da24-8884-45a0-8939-b79313324431", "owner": "legacy", "result": "success", "timestamp_utc": "2026-04-22T16:20:27.587993+00:00"}
