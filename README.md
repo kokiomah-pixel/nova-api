@@ -23,33 +23,49 @@ Nova is authoritative and auditable. Downstream systems must bind execution beha
 
 Nova is not an execution engine or a strategy system. It does not move capital on its own. It determines whether a proposed capital action is admitted, constrained, delayed, denied, halted, or vetoed before execution can occur.
 
-## Run One Decision
+## Start Here (Required)
 
-From the repository root:
+Start the API from the repository root:
 
 ```bash
-./.venv/bin/uvicorn app:app --host 127.0.0.1 --port 8000
+NOVA_API_KEY=mytestkey ./.venv/bin/uvicorn app:app --host 127.0.0.1 --port 8000
 ```
 
-In another terminal:
+Before reading further, run one decision through Nova:
 
 ```bash
-curl -s "http://127.0.0.1:8000/v1/context?intent=trade&asset=ETH&size=10000" \
-  -H "x-api-key: mytestkey"
+curl -s -H "Authorization: Bearer mytestkey" \
+"http://127.0.0.1:8000/v1/context?intent=allocate&asset=ETH&size=10000"
+```
+
+Then retrieve proof using the returned `decision_id`:
+
+```bash
+curl -s -H "Authorization: Bearer mytestkey" \
+"http://127.0.0.1:8000/v1/proof/<decision_id>"
 ```
 
 Read `decision_status` first. If the response returns `CONSTRAIN`, apply the governed adjustment before any execution step. If the response returns `DENY`, `DELAY`, `HALT`, or `VETO`, do not execute.
 
-## Retrieve Proof
+### Why this is required
 
-After receiving a `decision_id` from `/v1/context`:
+If you do not run this:
 
-```bash
-curl -s "http://127.0.0.1:8000/v1/proof/<decision_id>" \
-  -H "x-api-key: mytestkey"
-```
+- you will not see `decision_status`
+- you will not observe constraint vs admission
+- you will not understand how proof verifies outcomes
 
-`/v1/proof/{decision_id}` verifies the governed decision. It does not replace `decision_status` as execution authority.
+Nova is not understood through description.
+
+Nova is understood when it:
+
+> **allows, constrains, or denies a real decision before execution.**
+
+### Instruction
+
+Run the command. Observe the result.
+
+Only then continue reading.
 
 ## End-to-End Decision Flow
 
