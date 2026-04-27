@@ -703,12 +703,13 @@ def test_governance_profile_endpoint_returns_enabled_layers_and_environment(clie
     assert payload["proving_ground"] is False
 
 
-def test_governance_profile_endpoint_marks_hyperliquid_proving_ground(client):
+def test_governance_profile_endpoint_marks_legacy_private_proving_ground(client):
     app_module = importlib.import_module("app")
     keys = json.loads(json.dumps(TEST_KEYS))
-    keys["hyperliquid-key"] = {
+    keys["private-proving-key"] = {
         **keys["full-governance-key"],
-        "owner": "hyperliquid-user",
+        "owner": "private-proving-user",
+        # Legacy compatibility label retained by the API contract.
         "proving_ground": "hyperliquid",
     }
 
@@ -716,7 +717,7 @@ def test_governance_profile_endpoint_marks_hyperliquid_proving_ground(client):
         sys.modules.pop("app", None)
         app_module = importlib.import_module("app")
         test_client = TestClient(app_module.app)
-        response = test_client.get("/v1/governance-profile", headers={"Authorization": "Bearer hyperliquid-key"})
+        response = test_client.get("/v1/governance-profile", headers={"Authorization": "Bearer private-proving-key"})
 
     assert response.status_code == 200
     payload = response.json()

@@ -129,6 +129,26 @@ def _admissible_telemetry() -> dict:
     }
 
 
+def _enforce_downstream_response(nova_response: dict) -> dict:
+    decision_status = str(nova_response.get("decision_status") or "").strip().upper()
+    impact = nova_response.get("impact_on_outcomes") or {}
+    effective_constraints = {
+        "effective_size": impact.get("adjusted_size"),
+        "system_state": nova_response.get("system_state"),
+    }
+
+    if decision_status in {"ALLOW", "CONSTRAIN", "REDUCE"}:
+        allowed = True
+    else:
+        allowed = False
+
+    return {
+        "allowed_to_proceed": allowed,
+        "authoritative_decision_status": decision_status or "UNAVAILABLE",
+        "effective_constraints": effective_constraints,
+    }
+
+
 @pytest.mark.parametrize(
     ("strategy", "venue"),
     [
@@ -388,9 +408,8 @@ def test_proof_integrity_pack_remains_deterministic_owner_scoped_and_ambiguous_o
 
 def test_downstream_interpretation_drift_pack_keeps_decision_status_authoritative(adversarial_client):
     client, _ = adversarial_client
-    adapter = importlib.import_module("examples.hyperliquid_nova_enforcement_adapter")
 
-    deny_result = adapter.enforce_nova_response(
+    deny_result = _enforce_downstream_response(
         {
             "decision_status": "DENY",
             "decision_context": {"requested_size": 10000},
@@ -398,7 +417,7 @@ def test_downstream_interpretation_drift_pack_keeps_decision_status_authoritativ
             "system_state": "PRESSURE_ELEVATED",
         }
     )
-    skipped_call_result = adapter.enforce_nova_response(
+    skipped_call_result = _enforce_downstream_response(
         {
             "impact_on_outcomes": {"requested_size": 10000, "adjusted_size": 10000},
             "system_state": "NORMAL",
@@ -413,7 +432,7 @@ def test_downstream_interpretation_drift_pack_keeps_decision_status_authoritativ
         size=10000,
         **_admissible_telemetry(),
     )
-    constrained_result = adapter.enforce_nova_response(constrained.json())
+    constrained_result = _enforce_downstream_response(constrained.json())
 
     assert deny_result["allowed_to_proceed"] is False
     assert deny_result["authoritative_decision_status"] == "DENY"

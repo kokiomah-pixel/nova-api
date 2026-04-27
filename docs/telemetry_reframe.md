@@ -20,11 +20,11 @@ Nova telemetry can be misread as:
 - logs
 - API responses
 - risk signals
-- advisory outputs
+- bypassable suggestions
 
 That interpretation leads to:
 
-- optional usage
+- bypassable invocation
 - inconsistent invocation
 - weak integration priority
 - compressed pricing perception
@@ -137,7 +137,7 @@ The shift moves Nova from:
 | State | Outcome |
 | --- | --- |
 | Informational | Low usage |
-| Advisory | Experimental usage |
+| Non-binding | Experimental usage |
 | Decision Authority | System dependency |
 
 ## Strategic Implication

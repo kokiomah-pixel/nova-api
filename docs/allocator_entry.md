@@ -19,7 +19,7 @@ Allocators use Nova to determine whether a proposed capital action is admissible
 - a source of signals
 - a ranking engine
 - an execution venue
-- an advisory output
+- a bypassable suggestion
 
 The correct question is not "what should I buy?"
 

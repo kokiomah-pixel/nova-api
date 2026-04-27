@@ -81,7 +81,7 @@ See a complete example of decision admission, decision-state binding, and proof:
 
 [examples/nova_end_to_end_decision_flow.md](examples/nova_end_to_end_decision_flow.md)
 
-For a repeatable controlled execution pilot, see [examples/README_controlled_execution_loop.md](examples/README_controlled_execution_loop.md).
+For a controlled enforcement example, see [examples/README_controlled_execution_loop.md](examples/README_controlled_execution_loop.md).
 
 ## Read Next
 

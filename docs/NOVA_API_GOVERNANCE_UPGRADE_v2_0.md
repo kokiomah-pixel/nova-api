@@ -20,7 +20,7 @@ This upgrade must not turn Nova into:
 - an orchestration framework
 - a workflow engine
 - an execution system
-- a venue-specific trading application
+- a venue-bound trading application
 
 ---
 
@@ -85,7 +85,7 @@ Outcome is always downstream.
 ## 2.3 Boundary Protection
 This governance upgrade must remain canonical and venue-agnostic.
 
-No venue-specific behavior may be written into Nova core.
+No venue-bound behavior may be written into Nova core.
 
 Any environment-specific handling must remain outside the API in an adapter layer.
 
@@ -365,13 +365,13 @@ All proof must still preserve:
 
 ## Must Do
 - preserve venue-agnostic API behavior
-- keep Hyperliquid-specific logic outside Nova core
+- keep venue-bound logic outside Nova core
 - treat this as governance expansion, not capability sprawl
 - keep outputs machine-legible and auditable
 
 ## Must Not Do
 - add execution routing into Nova core
-- add venue-specific perps logic into canonical API
+- add venue execution logic into canonical API
 - let retry handling become negotiation
 - let “human review” override structure without explicit classification
 - turn Nova into orchestration middleware
@@ -408,7 +408,7 @@ This upgrade is complete only when:
 - memory influence is governed
 - halt release is auditable
 - human intervention is classified
-- no venue-specific contamination enters Nova core
+- no venue-bound contamination enters Nova core
 
 ---
 
