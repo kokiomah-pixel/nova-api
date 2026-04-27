@@ -1,6 +1,6 @@
 # Your Decision Stack Has No Risk Brake. Nova OS Adds One.
 
-If your system can expose capital without checking whether it is *allowed* under the current decision constraint context, it is operating without constraint enforcement.
+If your system can expose capital without checking whether the proposed decision is admissible under the current decision constraint context, it is operating without decision authority.
 
 Run this:
 
@@ -80,7 +80,7 @@ Nova is that check. It is a single API call that returns:
 
 That admission response also returns `decision_id`, which binds the decision to a retrievable proof object.
 
-Your system reads it. Your system applies constraint enforcement. Capital is then exposed only under a validated decision state.
+Your system reads `decision_status`. Your system binds execution behavior to that authoritative state. Capital is then exposed only under an admitted decision state.
 
 ---
 
@@ -111,7 +111,7 @@ def nova_gate(intent, asset, size, api_key):
     return True
 ```
 
-Drop this before any capital action. If Nova says no, your system does not proceed to capital deployment.
+Drop this before any capital action. If Nova returns a non-admissible state, your system does not proceed to capital deployment.
 
 ---
 
@@ -178,7 +178,7 @@ curl -s -H "Authorization: Bearer YOUR_API_KEY" \
 
 Read the response:
 
-- `decision_status` -> whether the decision is admissible
+- `decision_status` -> authoritative decision state
 - `decision_id` -> the binding identifier for proof retrieval
 - `system_state` -> the current operating state applied to the decision
 
@@ -191,13 +191,13 @@ curl -s -H "Authorization: Bearer YOUR_API_KEY" \
 
 Read the proof:
 
-- `constraint_effect` -> how exposure must change
-- `intervention_type` -> what action is enforced
+- `constraint_effect` -> how exposure must change when the decision is constrained
+- `intervention_type` -> how Nova classified the governed state
 - `failure_class` -> the failure mode Nova identified
 
 If the proof shows the decision was constrained, blocked, or delayed -
 
-you are seeing a live constraint that your system does not enforce.
+you are seeing a verified decision state your system must obey.
 
 That is the gap.
 

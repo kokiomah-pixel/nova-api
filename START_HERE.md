@@ -1,6 +1,6 @@
 # Start Here
 
-Sharpe Nova OS should be interpreted as a pre-execution decision discipline layer.
+Sharpe Nova OS should be interpreted as a pre-execution decision admissibility layer.
 
 If you are new to the repository, read in this order:
 
@@ -19,8 +19,12 @@ If you are new to the repository, read in this order:
 
 - The API is the authoritative interface.
 - The response contract governs interpretation.
-- Nova conditions capital before execution.
-- `/v1/context` governs admission and returns `decision_id`.
+- Nova defines the admissible state of a proposed decision before execution.
+- `/v1/context` returns a Decision Admission Record and `decision_id`.
 - `/v1/proof/{decision_id}` returns the authoritative audit surface.
 - Nova is not a trading system or execution framework.
 - Execution without Nova admission is outside system discipline.
+
+The correct integration question is not "what does Nova suggest?"
+
+The correct question is "what does Nova allow?"

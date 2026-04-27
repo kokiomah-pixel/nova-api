@@ -1,6 +1,6 @@
 # Sharpe Nova OS — End-to-End Decision Admission Flow
 
-This example demonstrates how Sharpe Nova OS conditions a decision before execution and produces verifiable proof.
+This example demonstrates how Sharpe Nova OS defines the admissible state of a decision before execution and produces verifiable proof.
 
 ---
 
@@ -76,7 +76,7 @@ curl -s -H "Authorization: Bearer mytestkey" \
 
 ---
 
-## Step 3 — Enforcement Rule (Always Applies)
+## Step 3 — Decision State Rule (Always Applies)
 
 ```text
 ALLOW → proceed
@@ -97,7 +97,7 @@ curl -s -H "Authorization: Bearer mytestkey" \
 
 ---
 
-## Step 5 — Proof Confirms Outcome
+## Step 5 — Proof Verifies Decision State
 
 Proof will include:
 
@@ -115,7 +115,7 @@ Nova does not always constrain.
 
 Nova:
 
-> **enforces discipline only when conditions require it**
+> **defines the admissible state of each proposed decision before execution**
 
 ---
 
@@ -130,7 +130,7 @@ Decision → Execution (always full size)
 With Nova:
 
 ```text
-Decision → Nova → Conditional Outcome → Execution only if admitted
+Decision -> Nova -> Decision Admitted -> Execution
 ```
 
 ---
@@ -138,12 +138,12 @@ Decision → Nova → Conditional Outcome → Execution only if admitted
 ## Authority Model
 
 * `/v1/context` → determines decision admission
-* `decision_status` → governs execution
-* `/v1/proof/{decision_id}` → verifies outcome
+* `decision_status` → authoritative decision state
+* `/v1/proof/{decision_id}` → verifies the governed decision state
 
 Proof does not grant permission.
 
-Proof confirms what was enforced.
+Proof confirms the state Nova returned.
 
 ---
 
@@ -153,4 +153,4 @@ Sharpe Nova OS does not force constraint.
 
 It determines:
 
-> whether constraint is required before capital moves.
+> whether a proposed decision is admissible before capital moves.

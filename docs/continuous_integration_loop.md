@@ -4,7 +4,7 @@ Sharpe Nova OS sits between decision formation and execution.
 
 Canonical placement:
 
-signal → sizing → Nova → execution
+decision proposed -> Nova -> decision admitted -> execution
 
 ## Why Nova Must Sit Here
 
@@ -47,7 +47,7 @@ This is the canonical loop:
 
 1. form a decision
 2. send it to Nova before execution
-3. obey the governed outcome
+3. obey the governed decision state
 
 ## Outcome Handling
 
@@ -61,7 +61,8 @@ This is the canonical loop:
 Primary authority comes from:
 
 - `decision_status`
-- proof-layer outcomes when audit is needed
+
+Proof verifies the governed state when audit is needed.
 
 Supporting fields such as `impact_on_outcomes` are explanatory, not authoritative.
 
@@ -71,7 +72,7 @@ When auditability is required:
 
 1. retain `decision_id` from `/v1/context`
 2. retrieve `/v1/proof/{decision_id}`
-3. use proof to verify the governed outcome
+3. use proof to verify the governed decision state
 
 Proof is for verification.
 It does not replace `decision_status` as execution authority.
@@ -90,6 +91,6 @@ Bypassing Nova due to convenience is outside governed decision discipline.
 
 Sharpe Nova OS is a decision discipline layer.
 
-If a system ignores or bypasses governed output, it is no longer operating under Nova's decision discipline.
+If a system ignores or bypasses governed decision state, it is no longer operating under Nova's decision discipline.
 
-Nova is only integrated when its output is binding.
+Nova is only integrated when `decision_status` is binding.

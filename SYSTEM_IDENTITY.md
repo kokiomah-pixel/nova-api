@@ -1,14 +1,14 @@
 # System Identity
 
-Sharpe Nova OS is a pre-execution decision layer.
+Sharpe Nova OS is a pre-execution decision admissibility layer.
 
-Its primary function is to condition capital before execution by evaluating whether a proposed decision should be allowed, constrained, delayed, denied, or halted.
+Its primary function is to define the admissible state of a proposed capital decision before execution.
 
 ## Canonical Classification
 
 - System name: `Sharpe Nova OS`
-- System type: `pre_execution_decision_layer`
-- Primary function: `condition capital before execution`
+- System type: `pre_execution_decision_admissibility_layer`
+- Primary function: `define decision admissibility before execution`
 - Interface: `machine_readable_api`
 - Control model: `denial_first`
 
@@ -18,6 +18,7 @@ Sharpe Nova OS is not:
 
 - a trading system
 - an execution engine
+- a signal engine
 - a generic agent toolkit
 
 ## Core Components
@@ -30,8 +31,9 @@ Sharpe Nova OS is not:
 
 The repository should be read as an interpretation boundary plus integration surface. Any downstream system should bind to the Nova API contract rather than infer a broader role.
 
-Primary decision authority belongs to `decision_status`, `constraint_effect`, `intervention_type`, `failure_class`, and proof-layer outcome fields.
-Supporting fields such as `impact_on_outcomes`, `adjustment`, and deeper constraint calculations remain explanatory only.
+Primary decision authority belongs to `decision_status`.
+Supporting fields such as `constraint_effect`, `intervention_type`, `failure_class`, `impact_on_outcomes`, `adjustment`, and deeper constraint calculations remain explanatory only.
+Proof verifies the governed decision state; it does not override `decision_status`.
 
 ## Governance Doctrine
 

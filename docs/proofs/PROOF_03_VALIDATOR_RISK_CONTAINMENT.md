@@ -2,9 +2,9 @@
 
 Sharpe Nova OS — Institutional Proof Surface
 
-Sharpe Nova OS is a pre-execution decision discipline layer that conditions capital through telemetry, reflex memory, and constraint logic before execution.
+Sharpe Nova OS is a pre-execution decision admissibility layer that resolves proposed capital actions into governed decision states before execution.
 
-This proof documents a validator fragility failure class, the unconstrained path that would have remained execution-permitted without Nova, the intervention path Nova applied before execution, and the prevented outcomes attributable to pre-execution discipline.
+This proof documents a validator fragility failure class, the unconstrained path that would have remained execution-permitted without Nova, the governed decision state Nova returned before execution, and the prevented outcomes attributable to pre-execution discipline.
 
 ## 1. Failure Class
 
@@ -33,7 +33,7 @@ Without Nova, exposure to the degrading validator continues.
 
 Capital remains exposed to validator fragility, delayed recognition of risk, and potential slashing or liquidity delay.
 
-Without pre-execution discipline, the proposed allocation continues with no constraint enforcement applied before capital deployment.
+Without pre-execution discipline, the proposed allocation continues with no authoritative decision state bound before capital deployment.
 
 The unconstrained outcome is explicit:
 
@@ -44,19 +44,19 @@ The unconstrained outcome is explicit:
 
 Without Nova, capital remains exposed.
 
-## 4. Nova Intervention
+## 4. Nova Decision State
 
 Nova intervenes before execution through a governed pre-execution discipline chain.
 
-The intervention path is explicit:
+The decision-state path is explicit:
 
 1. telemetry-driven classification detects validator degradation and mobility stress
 2. the environment is classified as a fragility state associated with validator concentration and slashing risk
-3. constraint logic is applied before execution
+3. Nova returns a constrained decision state before execution
 4. exposure is constrained or reallocated away from the degrading validator
 5. the decision is converted from an execution-permitted state to a constrained state
 
-This is a governed intervention applied before capital moves, not a post-event response.
+This is a governed decision state returned before capital moves, not a post-event response.
 
 With Nova, exposure is reduced or redirected before execution.
 
@@ -75,7 +75,7 @@ This proof records a disciplined change in allowed execution state. Quantitative
 
 ## 6. Prevented Outcomes
 
-Because Nova intervened before execution, the following outcomes were prevented from propagating further:
+Because Nova returned a governed decision state before execution, the following outcomes were prevented from propagating further:
 
 - slashing exposure was avoided or materially reduced
 - validator concentration risk was reduced
@@ -91,6 +91,6 @@ It proves that Nova constrained the failure path before execution and prevented 
 
 This proof documents validator risk containment as a pre-execution discipline outcome.
 
-The addressed failure class is validator degradation with associated slashing risk, uptime fragility, and withdrawal queue stress. Nova intervened through telemetry-driven classification and constraint enforcement before execution, constraining or reallocating exposure before capital deployment.
+The addressed failure class is validator degradation with associated slashing risk, uptime fragility, and withdrawal queue stress. Nova resolved the proposed allocation into a constrained decision state through telemetry-driven classification before execution, constraining or reallocating exposure before capital deployment.
 
 For allocators, treasuries, and agentic capital systems, the significance is infrastructural. Nova did not repair the failure after the fact. It constrained a fragile, execution-permitted validator exposure state before capital moved, reducing concentration risk and preserving capital mobility through governed intervention.

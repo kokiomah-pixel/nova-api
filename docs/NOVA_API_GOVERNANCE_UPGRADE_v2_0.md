@@ -26,7 +26,7 @@ This upgrade must not turn Nova into:
 
 # 1. Purpose
 
-Nova’s admission layer is now enforcement-complete.
+Nova’s admission layer now returns authoritative decision states.
 
 The next requirement is governance across:
 
@@ -185,7 +185,7 @@ Govern whether telemetry itself is admissible.
 
 ### Rule
 Nova must not only ask what telemetry says.
-Nova must ask whether telemetry is trustworthy enough to influence permission at all.
+Nova must ask whether telemetry is trustworthy enough to produce a Decision Admission Record at all.
 
 ---
 

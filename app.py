@@ -75,7 +75,7 @@ def get_current_epoch() -> int:
 app = FastAPI(
     title="Sharpe Nova OS API",
     version="1.1.0",
-    description="Decision-context infrastructure for autonomous capital systems."
+    description="Pre-execution decision admissibility infrastructure for autonomous capital systems."
 )
 
 SIGNING_SECRET = os.getenv("NOVA_SIGNING_SECRET", "replace_me")

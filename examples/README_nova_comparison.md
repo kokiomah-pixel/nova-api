@@ -3,10 +3,10 @@
 This demo compares two agent behaviors on the same scenarios:
 
 - WITHOUT Nova: always executes requested action.
-- WITH Nova: calls `/v1/context`, binds to `decision_status`, and applies `constraint_effect` before any execution step.
+- WITH Nova: calls `/v1/context`, binds to authoritative `decision_status`, and applies returned constraints before any execution step.
 
-These examples demonstrate how Nova conditions decision context.
-They do not represent trading signals or execution instructions.
+These examples demonstrate how Nova defines the admissible state of a proposed decision.
+They do not represent trading signals, advisory outputs, or execution instructions.
 
 ## Run
 

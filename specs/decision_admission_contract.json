@@ -2,6 +2,7 @@
   "name": "decision_admission_contract",
   "version": "1.0",
   "interface_type": "response_contract",
+  "record_type": "decision_admission_record",
   "authoritative_endpoint": "/v1/context",
   "proof_endpoint": "/v1/proof/{decision_id}",
   "required_fields": [
@@ -15,6 +16,9 @@
     "impact_on_outcomes",
     "constraint_analysis",
     "adjustment"
+  ],
+  "authoritative_fields": [
+    "decision_status"
   ],
   "proof_fields": [
     "decision_status",
@@ -38,5 +42,16 @@
     "PRESSURE_ESCALATED",
     "REDUCE"
   ],
-  "integration_rule": "downstream systems must bind behavior to decision_status from /v1/context and retrieve /v1/proof/{decision_id} when authoritative audit fields are required"
+  "authority_model": {
+    "decision_status": "authoritative",
+    "supporting_fields": "explanatory",
+    "proof": "verifies governed decision state",
+    "derived_fields": "must not override decision_status"
+  },
+  "integration_rule": "downstream systems must bind behavior to decision_status from /v1/context before execution and retrieve /v1/proof/{decision_id} when audit verification is required",
+  "forbidden_simplifications": [
+    "treating decision_status as advisory",
+    "deriving alternate permission from supporting fields",
+    "collapsing decision_status into a boolean execution gate"
+  ]
 }

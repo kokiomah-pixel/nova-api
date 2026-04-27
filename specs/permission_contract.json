@@ -1,7 +1,7 @@
 {
   "name": "permission_contract",
   "version": "1.0",
-  "contract_scope": "pre_execution_permissioning",
+  "contract_scope": "pre_execution_decision_admissibility",
   "admission_outcomes": {
     "allow": "decision may proceed",
     "constrain": "decision may proceed only under returned limits",
@@ -9,6 +9,7 @@
     "deny": "decision must not proceed",
     "halt": "decision flow must pause pending restored integrity"
   },
-  "control_obligation": "integrators must treat refusal states as binding and non-advisory",
+  "authority_field": "decision_status",
+  "control_obligation": "integrators must treat non-admissible decision states as binding and non-advisory",
   "proof_obligation": "when auditability is required, integrators must bind the decision to its decision_id and retrieve /v1/proof/{decision_id}"
 }
