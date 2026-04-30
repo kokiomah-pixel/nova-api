@@ -224,6 +224,12 @@ def test_billing_summary_returns_canonical_payment_destination(billing_client):
         response = _context(client)
         assert response.status_code == 200
 
+    proof = client.get(
+        f"/v1/proof/{response.json()['decision_id']}",
+        headers=_headers(),
+    )
+    assert proof.status_code == 200
+
     summary = client.get("/v1/billing/summary", headers=_headers())
     assert summary.status_code == 200
 
@@ -231,6 +237,7 @@ def test_billing_summary_returns_canonical_payment_destination(billing_client):
     assert payload["actor_id"] == actor_id_from_api_key("billing-key")
     assert payload["billing_mode"] == "pilot"
     assert payload["context_calls"] == FREE_CONTEXT_CALL_LIMIT + 2
+    assert payload["proof_calls"] == 1
     assert payload["free_context_call_limit"] == FREE_CONTEXT_CALL_LIMIT
     assert payload["billable_context_calls"] == 2
     assert payload["price_per_decision_usd"] == DEFAULT_PRICE_PER_DECISION_USD

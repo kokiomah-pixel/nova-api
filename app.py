@@ -1039,6 +1039,7 @@ def _meter_proof_retrieval(entitlement: Dict[str, Any]) -> None:
 def _settlement_summary_payload(actor_id: str) -> Dict[str, Any]:
     usage_record = decision_usage_meter.get_usage_record(actor_id)
     context_calls = int(usage_record.get("context_calls", 0) or 0)
+    proof_calls = int(usage_record.get("proof_calls", 0) or 0)
     billable_context_calls = max(context_calls - FREE_CONTEXT_CALL_LIMIT, 0)
     synced_billing = usdc_billing_state.sync_context_usage(actor_id, context_calls)
     billing_record = synced_billing or usdc_billing_state.get_billing_record(actor_id)
@@ -1047,6 +1048,7 @@ def _settlement_summary_payload(actor_id: str) -> Dict[str, Any]:
         "actor_id": actor_id,
         "billing_mode": billing_record.get("billing_mode", "evaluation"),
         "context_calls": context_calls,
+        "proof_calls": proof_calls,
         "free_context_call_limit": FREE_CONTEXT_CALL_LIMIT,
         "billable_context_calls": billable_context_calls,
         "price_per_decision_usd": DEFAULT_PRICE_PER_DECISION_USD,
