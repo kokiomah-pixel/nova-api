@@ -24,6 +24,14 @@ from core.reflex_memory.proof import build_reflex_proof
 from core.reflex_governance_runtime.alert_engine import ReflexGovernanceAlertEngine
 from core.reflex_governance_runtime.collector import collect_governance_record
 from core.reflex_governance_runtime.pattern_engine import detect_structural_patterns
+from core import billing_state as usdc_billing_state
+from core import usage_meter as decision_usage_meter
+from core.billing_config import (
+    DEFAULT_PRICE_PER_DECISION_USD,
+    FREE_CONTEXT_CALL_LIMIT,
+    USDC_PAYMENT_WALLET,
+)
+from core.identity import actor_id_from_api_key
 from key_manager import (
     activate_or_renew_key,
     deactivate_key_by_stripe_customer_id,
@@ -107,6 +115,8 @@ NON_BILLABLE_ENDPOINTS = {
     "/v1/proof/{decision_id}",
     "/v1/usage",
     "/v1/billing",
+    "/v1/billing/bind_wallet",
+    "/v1/billing/summary",
     "/v1/balance",
     "/v1/funding-instructions",
 }
@@ -788,6 +798,8 @@ def load_key_registry() -> Dict[str, Dict[str, Any]]:
             "/v1/proof/{decision_id}",
             "/v1/usage",
             "/v1/billing",
+            "/v1/billing/bind_wallet",
+            "/v1/billing/summary",
             "/v1/balance",
             "/v1/funding-instructions",
             "/health",
@@ -810,6 +822,8 @@ def load_key_registry() -> Dict[str, Dict[str, Any]]:
             "/v1/proof/{decision_id}",
             "/v1/usage",
             "/v1/billing",
+            "/v1/billing/bind_wallet",
+            "/v1/billing/summary",
             "/v1/balance",
             "/v1/funding-instructions",
             "/v1/usage/reset",
@@ -995,6 +1009,49 @@ def require_entitlement(
         "monthly_quota": monthly_quota,
         "allowed_endpoints": allowed,
         "key_record": record,
+    }
+
+
+def _actor_id_from_entitlement(entitlement: Dict[str, Any]) -> str:
+    return actor_id_from_api_key(entitlement.get("api_key"))
+
+
+def _meter_context_admission(entitlement: Dict[str, Any]) -> None:
+    try:
+        actor_id = _actor_id_from_entitlement(entitlement)
+        usage_record = decision_usage_meter.increment_context_call(actor_id)
+        if usage_record:
+            usdc_billing_state.sync_context_usage(
+                actor_id,
+                int(usage_record.get("context_calls", 0) or 0),
+            )
+    except Exception:
+        pass
+
+
+def _meter_proof_retrieval(entitlement: Dict[str, Any]) -> None:
+    try:
+        decision_usage_meter.increment_proof_call(_actor_id_from_entitlement(entitlement))
+    except Exception:
+        pass
+
+
+def _settlement_summary_payload(actor_id: str) -> Dict[str, Any]:
+    usage_record = decision_usage_meter.get_usage_record(actor_id)
+    context_calls = int(usage_record.get("context_calls", 0) or 0)
+    billable_context_calls = max(context_calls - FREE_CONTEXT_CALL_LIMIT, 0)
+    synced_billing = usdc_billing_state.sync_context_usage(actor_id, context_calls)
+    billing_record = synced_billing or usdc_billing_state.get_billing_record(actor_id)
+
+    return {
+        "actor_id": actor_id,
+        "billing_mode": billing_record.get("billing_mode", "evaluation"),
+        "context_calls": context_calls,
+        "free_context_call_limit": FREE_CONTEXT_CALL_LIMIT,
+        "billable_context_calls": billable_context_calls,
+        "price_per_decision_usd": DEFAULT_PRICE_PER_DECISION_USD,
+        "amount_due_usd": round(billable_context_calls * DEFAULT_PRICE_PER_DECISION_USD, 2),
+        "payment_destination": USDC_PAYMENT_WALLET,
     }
 
 
@@ -4590,6 +4647,7 @@ def get_context(
     halt_release_evidence_input: Optional[str] = Query(default=None),
 ) -> JSONResponse:
     entitlement = require_entitlement(request, authorization, x_api_key)
+    _meter_context_admission(entitlement)
     temporal_fields = _default_temporal_fields()
     loop_fields = _default_loop_fields()
     telemetry_fields = _default_telemetry_fields()
@@ -5059,6 +5117,7 @@ def get_proof(
     x_api_key: Optional[str] = Header(default=None, alias="x-api-key"),
 ) -> JSONResponse:
     entitlement = require_entitlement(request, authorization, x_api_key)
+    _meter_proof_retrieval(entitlement)
     record = _proof_record_for_owner(decision_id, entitlement["owner"])
     if record is None:
         _audit_proof_retrieval(
@@ -5119,6 +5178,41 @@ def get_usage(
 
     payload["signature"] = sign_payload(payload)
     return JSONResponse(payload)
+
+
+@app.post("/v1/billing/bind_wallet")
+def bind_billing_wallet(
+    request: Request,
+    payload: Dict[str, Any],
+    authorization: Optional[str] = Header(default=None),
+    x_api_key: Optional[str] = Header(default=None, alias="x-api-key"),
+) -> JSONResponse:
+    entitlement = require_entitlement(request, authorization, x_api_key)
+    payer_wallet = str(payload.get("payer_wallet") or "").strip()
+
+    try:
+        billing_record = usdc_billing_state.bind_wallet(
+            _actor_id_from_entitlement(entitlement),
+            payer_wallet,
+        )
+    except ValueError:
+        raise HTTPException(status_code=422, detail="Invalid payer_wallet")
+
+    return JSONResponse({
+        "billing_mode": billing_record["billing_mode"],
+        "payer_wallet": billing_record["usdc_wallet"],
+        "payment_destination": USDC_PAYMENT_WALLET,
+    })
+
+
+@app.get("/v1/billing/summary")
+def get_settlement_summary(
+    request: Request,
+    authorization: Optional[str] = Header(default=None),
+    x_api_key: Optional[str] = Header(default=None, alias="x-api-key"),
+) -> JSONResponse:
+    entitlement = require_entitlement(request, authorization, x_api_key)
+    return JSONResponse(_settlement_summary_payload(_actor_id_from_entitlement(entitlement)))
 
 
 @app.get("/v1/billing")

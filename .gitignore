@@ -202,6 +202,8 @@ cython_debug/
 # Local runtime state
 .usage.json
 .usage.manual.json
+.usage_state.json
+.billing_state.json
 .proof_registry.json
 .reflex_governance_records.jsonl
 .reflex_governance_signals.json
