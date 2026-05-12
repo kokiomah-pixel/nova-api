@@ -46,6 +46,8 @@ class RequestSpec:
 
 @dataclass
 class TestResult:
+    __test__ = False
+
     id: str
     title: str
     wave: str
