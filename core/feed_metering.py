@@ -204,6 +204,38 @@ def build_feed_usage_summary(*, feed_consumer_id: str, feed_tier: str) -> Dict[s
     }
 
 
+def build_aggregate_feed_usage_summary() -> Dict[str, Any]:
+    now = _now_utc()
+    month = _month_key(now)
+    with _FEED_USAGE_LOCK:
+        _ensure_loaded_unlocked()
+        records = list(_FEED_USAGE_STATE.values())
+
+    current_month_records = [
+        record for record in records if record.get("current_month") == month
+    ]
+    return {
+        "constraint_pressure_calls": sum(
+            int(record.get("constraint_pressure_calls", 0) or 0)
+            for record in current_month_records
+        ),
+        "feed_calls": sum(
+            int(record.get("feed_calls", 0) or 0)
+            for record in current_month_records
+        ),
+        "monthly_feed_usage": sum(
+            int(record.get("monthly_feed_usage", 0) or 0)
+            for record in current_month_records
+        ),
+        "billable_feed_events": sum(
+            int(record.get("billable_feed_events", 0) or 0)
+            for record in current_month_records
+        ),
+        "current_month": month,
+        "source_layer": "aggregate_feed_metering",
+    }
+
+
 def reset_feed_usage_state_for_tests() -> None:
     with _FEED_USAGE_LOCK:
         _FEED_USAGE_STATE.clear()

@@ -1,0 +1,25 @@
+{
+  "manifest_version": "v1",
+  "discovery_role": "agentic_market_runtime_service_discovery",
+  "services": [
+    {
+      "name": "Nova Constraint Pressure",
+      "endpoint": "/v1/feeds/constraint_pressure",
+      "service_type": "environmental_conditioning",
+      "description": "Machine-readable environmental conditioning telemetry for autonomous execution systems.",
+      "category": "Infrastructure",
+      "pricing_model": "subscription_plus_volume",
+      "payment_asset": "USDC",
+      "network": "base",
+      "machine_consumable": true,
+      "mcp_compatible": true,
+      "x402_ready": true,
+      "agentic_market_ready": true,
+      "semantic_version": "v1",
+      "runtime_role": "execution_posture_conditioning",
+      "authority_layer": "non_admission_telemetry",
+      "supported_networks": ["base"],
+      "settlement_wallet": "0xb29b02130138a6fF8e0f6D7812bDa8D436001BE4"
+    }
+  ]
+}

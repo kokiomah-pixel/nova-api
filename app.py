@@ -24,11 +24,18 @@ from core.reflex_memory.proof import build_reflex_proof
 from core.reflex_governance_runtime.alert_engine import ReflexGovernanceAlertEngine
 from core.reflex_governance_runtime.collector import collect_governance_record
 from core.reflex_governance_runtime.pattern_engine import detect_structural_patterns
+from core.bazaar_metadata import build_services_manifest
 from core.environmental_state_engine import EnvironmentalStateEngine
 from core.feed_identity import build_feed_consumer_identity
-from core.feed_metering import build_feed_usage_summary, record_feed_request
+from core.feed_metering import (
+    build_aggregate_feed_usage_summary,
+    build_feed_usage_summary,
+    record_feed_request,
+)
 from core.feed_pricing import pricing_for_tier
 from core.telemetry_engine import InternalTelemetryEngine
+from core.x402_config import x402_payment_requirement
+from core.x402_middleware import authorize_x402_request
 from core import billing_state as usdc_billing_state
 from core import usage_meter as decision_usage_meter
 from core.billing_config import (
@@ -1088,8 +1095,11 @@ def _feed_usage_payload(entitlement: Dict[str, Any]) -> Dict[str, Any]:
         feed_consumer_id=identity["feed_consumer_id"],
         feed_tier=identity["feed_tier"],
     )
+    aggregate_usage = build_aggregate_feed_usage_summary()
     return {
         "feed_usage": feed_usage,
+        "aggregate_feed_usage": aggregate_usage,
+        "constraint_pressure_calls": aggregate_usage["constraint_pressure_calls"],
         "feed_identity": identity,
         "feed_authority": "non_admission_telemetry",
         "source_layer": "feed_metering",
@@ -4632,6 +4642,11 @@ def health() -> dict:
     return {"status": "ok"}
 
 
+@app.get("/services.json")
+def services_manifest() -> dict:
+    return build_services_manifest()
+
+
 @app.get("/v1/regime")
 def get_regime(
     request: Request,
@@ -4686,8 +4701,20 @@ def get_constraint_pressure_feed(
     authorization: Optional[str] = Header(default=None),
     x_api_key: Optional[str] = Header(default=None, alias="x-api-key"),
 ) -> JSONResponse:
-    entitlement = require_entitlement(request, authorization, x_api_key)
-    feed_identity = _feed_identity_for_entitlement(entitlement)
+    endpoint = request.url.path
+    x402_payment = None
+    x402_response_headers = {}
+    if authorization or x_api_key:
+        entitlement = require_entitlement(request, authorization, x_api_key)
+        feed_identity = _feed_identity_for_entitlement(entitlement)
+    else:
+        x402_access = authorize_x402_request(request, endpoint)
+        if not x402_access["authorized"]:
+            return x402_access["response"]
+        feed_identity = x402_access["feed_identity"]
+        x402_payment = x402_access["x402_payment"]
+        x402_response_headers = x402_access.get("response_headers", {})
+
     pricing = pricing_for_tier(feed_identity["feed_tier"])
     metering = record_feed_request(
         feed_consumer_id=feed_identity["feed_consumer_id"],
@@ -4710,6 +4737,11 @@ def get_constraint_pressure_feed(
         "cadence_seconds": pricing["cadence_seconds"],
         "cadence_description": pricing["cadence_description"],
         "marketplace_package": pricing["marketplace_package"],
+        "x402": x402_payment_requirement(endpoint=endpoint, feed_tier=feed_identity["feed_tier"]),
+        "x402_payment": {
+            "payment_verified": x402_payment is not None,
+            **(x402_payment or {}),
+        },
         "feed_metering": {
             "cadence_limited": metering["cadence_limited"],
             "cadence_state": metering["cadence_state"],
@@ -4720,7 +4752,7 @@ def get_constraint_pressure_feed(
         },
     })
     payload["signature"] = sign_payload(payload)
-    return JSONResponse(payload)
+    return JSONResponse(payload, headers=x402_response_headers)
 
 
 @app.get("/v1/feeds/usage")

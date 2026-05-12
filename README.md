@@ -89,6 +89,11 @@ Environmental telemetry is governed by the Nova Sovereignty Boundary:
 
 Environmental telemetry access and usage are governed separately from sovereign decision authority.
 
+Nova Environmental Telemetry supports:
+- x402-compatible settlement
+- machine-readable orchestration metadata
+- Agentic.Market-compatible discovery infrastructure
+
 ## Read Next
 
 1. [START_HERE.md](START_HERE.md)

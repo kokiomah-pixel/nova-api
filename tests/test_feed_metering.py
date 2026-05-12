@@ -65,9 +65,10 @@ def feed_metering_client():
             "NOVA_REFLEX_GOVERNANCE_ESCALATIONS_FILE": test_files[8],
         },
     ):
-        for module_name in ["app", "core.usage_meter", "core.billing_state"]:
+        for module_name in ["app", "core.usage_meter", "core.billing_state", "core.feed_metering"]:
             sys.modules.pop(module_name, None)
         app_module = importlib.import_module("app")
+        feed_metering = importlib.import_module("core.feed_metering")
         app_module.USAGE_TRACKING.clear()
         app_module.SYSTEM_STATE_REGISTRY.clear()
         app_module.DECISION_ADMISSION_STATE.clear()
@@ -76,7 +77,7 @@ def feed_metering_client():
         app_module.REFLEX_GOVERNANCE_RECORDS.clear()
         app_module.decision_usage_meter.reset_usage_state_for_tests()
         app_module.usdc_billing_state.reset_billing_state_for_tests()
-        reset_feed_usage_state_for_tests()
+        feed_metering.reset_feed_usage_state_for_tests()
         yield TestClient(app_module.app), app_module
         app_module.USAGE_TRACKING.clear()
         app_module.SYSTEM_STATE_REGISTRY.clear()
@@ -86,7 +87,7 @@ def feed_metering_client():
         app_module.REFLEX_GOVERNANCE_RECORDS.clear()
         app_module.decision_usage_meter.reset_usage_state_for_tests()
         app_module.usdc_billing_state.reset_billing_state_for_tests()
-        reset_feed_usage_state_for_tests()
+        feed_metering.reset_feed_usage_state_for_tests()
         for path in test_files:
             try:
                 os.remove(path)
