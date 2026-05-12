@@ -25,6 +25,9 @@ from core.reflex_governance_runtime.alert_engine import ReflexGovernanceAlertEng
 from core.reflex_governance_runtime.collector import collect_governance_record
 from core.reflex_governance_runtime.pattern_engine import detect_structural_patterns
 from core.environmental_state_engine import EnvironmentalStateEngine
+from core.feed_identity import build_feed_consumer_identity
+from core.feed_metering import build_feed_usage_summary, record_feed_request
+from core.feed_pricing import pricing_for_tier
 from core.telemetry_engine import InternalTelemetryEngine
 from core import billing_state as usdc_billing_state
 from core import usage_meter as decision_usage_meter
@@ -122,6 +125,7 @@ NON_BILLABLE_ENDPOINTS = {
     "/v1/balance",
     "/v1/funding-instructions",
     "/v1/feeds/constraint_pressure",
+    "/v1/feeds/usage",
 }
 ADMIN_ONLY_ENDPOINTS = {"/v1/usage/reset"}
 CONTEXT_BILLABLE_DECISION_STATUSES = {"ALLOW", "CONSTRAIN"}
@@ -808,6 +812,7 @@ def load_key_registry() -> Dict[str, Dict[str, Any]]:
             "/v1/balance",
             "/v1/funding-instructions",
             "/v1/feeds/constraint_pressure",
+            "/v1/feeds/usage",
             "/health",
         ])
         registry[api_key] = merged
@@ -834,6 +839,7 @@ def load_key_registry() -> Dict[str, Dict[str, Any]]:
             "/v1/funding-instructions",
             "/v1/usage/reset",
             "/v1/feeds/constraint_pressure",
+            "/v1/feeds/usage",
             "/health",
         ]
         })
@@ -1061,6 +1067,33 @@ def _settlement_summary_payload(actor_id: str) -> Dict[str, Any]:
         "price_per_decision_usd": DEFAULT_PRICE_PER_DECISION_USD,
         "amount_due_usd": round(billable_context_calls * DEFAULT_PRICE_PER_DECISION_USD, 2),
         "payment_destination": USDC_PAYMENT_WALLET,
+    }
+
+
+def _feed_identity_for_entitlement(entitlement: Dict[str, Any]) -> Dict[str, Any]:
+    return build_feed_consumer_identity(entitlement["api_key"], entitlement["key_record"])
+
+
+def _telemetry_settlement_payload(feed_usage: Dict[str, Any]) -> Dict[str, Any]:
+    return {
+        "telemetry_billing_mode": feed_usage.get("pricing_model", "subscription_plus_volume"),
+        "telemetry_amount_due_usd": feed_usage.get("estimated_monthly_cost_usd", 0),
+        "settlement_wallet": USDC_PAYMENT_WALLET,
+    }
+
+
+def _feed_usage_payload(entitlement: Dict[str, Any]) -> Dict[str, Any]:
+    identity = _feed_identity_for_entitlement(entitlement)
+    feed_usage = build_feed_usage_summary(
+        feed_consumer_id=identity["feed_consumer_id"],
+        feed_tier=identity["feed_tier"],
+    )
+    return {
+        "feed_usage": feed_usage,
+        "feed_identity": identity,
+        "feed_authority": "non_admission_telemetry",
+        "source_layer": "feed_metering",
+        "telemetry_billing": _telemetry_settlement_payload(feed_usage),
     }
 
 
@@ -4653,12 +4686,51 @@ def get_constraint_pressure_feed(
     authorization: Optional[str] = Header(default=None),
     x_api_key: Optional[str] = Header(default=None, alias="x-api-key"),
 ) -> JSONResponse:
-    require_entitlement(request, authorization, x_api_key)
+    entitlement = require_entitlement(request, authorization, x_api_key)
+    feed_identity = _feed_identity_for_entitlement(entitlement)
+    pricing = pricing_for_tier(feed_identity["feed_tier"])
+    metering = record_feed_request(
+        feed_consumer_id=feed_identity["feed_consumer_id"],
+        feed_name="constraint_pressure",
+        feed_tier=feed_identity["feed_tier"],
+        requested_at=get_current_datetime(),
+    )
     payload = ENVIRONMENTAL_STATE_ENGINE.build_constraint_pressure_feed(
         records=INTERNAL_TELEMETRY_ENGINE.snapshot(limit=100),
         timestamp_utc=get_current_timestamp(),
         environment_epoch=get_current_epoch(),
     )
+    payload.update({
+        "feed_identity": feed_identity,
+        "pricing_model": pricing["pricing_model"],
+        "base_subscription_usd": pricing["base_subscription_usd"],
+        "included_requests": pricing["included_requests"],
+        "overage_per_1000": pricing["overage_per_1000"],
+        "cadence_tier": pricing["cadence_tier"],
+        "cadence_seconds": pricing["cadence_seconds"],
+        "cadence_description": pricing["cadence_description"],
+        "marketplace_package": pricing["marketplace_package"],
+        "feed_metering": {
+            "cadence_limited": metering["cadence_limited"],
+            "cadence_state": metering["cadence_state"],
+            "rolling_window_requests": metering["rolling_window_requests"],
+            "monthly_feed_usage": metering["monthly_feed_usage"],
+            "billable_feed_events": metering["billable_feed_events"],
+            "last_request_timestamp": metering["last_request_timestamp"],
+        },
+    })
+    payload["signature"] = sign_payload(payload)
+    return JSONResponse(payload)
+
+
+@app.get("/v1/feeds/usage")
+def get_feed_usage(
+    request: Request,
+    authorization: Optional[str] = Header(default=None),
+    x_api_key: Optional[str] = Header(default=None, alias="x-api-key"),
+) -> JSONResponse:
+    entitlement = require_entitlement(request, authorization, x_api_key)
+    payload = _feed_usage_payload(entitlement)
     payload["signature"] = sign_payload(payload)
     return JSONResponse(payload)
 
@@ -5246,7 +5318,12 @@ def get_settlement_summary(
     x_api_key: Optional[str] = Header(default=None, alias="x-api-key"),
 ) -> JSONResponse:
     entitlement = require_entitlement(request, authorization, x_api_key)
-    return JSONResponse(_settlement_summary_payload(_actor_id_from_entitlement(entitlement)))
+    payload = _settlement_summary_payload(_actor_id_from_entitlement(entitlement))
+    feed_usage_payload = _feed_usage_payload(entitlement)
+    payload["telemetry_usage"] = feed_usage_payload["feed_usage"]
+    payload["telemetry_billing"] = feed_usage_payload["telemetry_billing"]
+    payload["telemetry_authority"] = feed_usage_payload["feed_authority"]
+    return JSONResponse(payload)
 
 
 @app.get("/v1/billing")

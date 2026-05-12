@@ -8,6 +8,7 @@ import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch
 
+from core.feed_metering import reset_feed_usage_state_for_tests
 from examples.controlled_execution_loop import simulate_execution
 
 
@@ -23,6 +24,7 @@ SOVEREIGNTY_TEST_KEYS = {
             "/v1/proof/{decision_id}",
             "/v1/billing/summary",
             "/v1/feeds/constraint_pressure",
+            "/v1/feeds/usage",
             "/v1/key-info",
             "/v1/usage",
         ],
@@ -76,6 +78,7 @@ def sovereignty_client():
         ".usage.environmental-sovereignty-test.json",
         ".usage_state.environmental-sovereignty-test.json",
         ".billing_state.environmental-sovereignty-test.json",
+        ".feed_usage.environmental-sovereignty-test.json",
         ".proof.environmental-sovereignty-test.json",
         "proof_retrieval_audit.environmental-sovereignty-test.jsonl",
         ".reflex_governance_records.environmental-sovereignty-test.jsonl",
@@ -89,11 +92,12 @@ def sovereignty_client():
             "NOVA_USAGE_FILE": test_files[0],
             "NOVA_USAGE_STATE_FILE": test_files[1],
             "NOVA_BILLING_STATE_FILE": test_files[2],
-            "NOVA_PROOF_FILE": test_files[3],
-            "NOVA_PROOF_RETRIEVAL_AUDIT_FILE": test_files[4],
-            "NOVA_REFLEX_GOVERNANCE_RECORDS_FILE": test_files[5],
-            "NOVA_REFLEX_GOVERNANCE_SIGNALS_FILE": test_files[6],
-            "NOVA_REFLEX_GOVERNANCE_ESCALATIONS_FILE": test_files[7],
+            "NOVA_FEED_USAGE_FILE": test_files[3],
+            "NOVA_PROOF_FILE": test_files[4],
+            "NOVA_PROOF_RETRIEVAL_AUDIT_FILE": test_files[5],
+            "NOVA_REFLEX_GOVERNANCE_RECORDS_FILE": test_files[6],
+            "NOVA_REFLEX_GOVERNANCE_SIGNALS_FILE": test_files[7],
+            "NOVA_REFLEX_GOVERNANCE_ESCALATIONS_FILE": test_files[8],
         },
     ):
         for module_name in ["app", "core.usage_meter", "core.billing_state"]:
@@ -107,6 +111,7 @@ def sovereignty_client():
         app_module.REFLEX_GOVERNANCE_RECORDS.clear()
         app_module.decision_usage_meter.reset_usage_state_for_tests()
         app_module.usdc_billing_state.reset_billing_state_for_tests()
+        reset_feed_usage_state_for_tests()
         yield TestClient(app_module.app), app_module
         app_module.USAGE_TRACKING.clear()
         app_module.SYSTEM_STATE_REGISTRY.clear()
@@ -116,6 +121,7 @@ def sovereignty_client():
         app_module.REFLEX_GOVERNANCE_RECORDS.clear()
         app_module.decision_usage_meter.reset_usage_state_for_tests()
         app_module.usdc_billing_state.reset_billing_state_for_tests()
+        reset_feed_usage_state_for_tests()
         for path in test_files:
             try:
                 os.remove(path)
@@ -185,6 +191,21 @@ def _public_feed_without_signature(feed: Dict[str, Any]) -> Dict[str, Any]:
     return {key: value for key, value in feed.items() if key != "signature"}
 
 
+def _sovereign_billing_fields(payload: Dict[str, Any]) -> Dict[str, Any]:
+    fields = {
+        "actor_id",
+        "billing_mode",
+        "context_calls",
+        "proof_calls",
+        "free_context_call_limit",
+        "billable_context_calls",
+        "price_per_decision_usd",
+        "amount_due_usd",
+        "payment_destination",
+    }
+    return {key: payload[key] for key in fields}
+
+
 def test_constraint_pressure_feed_preserves_sovereignty_boundary(sovereignty_client):
     client, _ = sovereignty_client
     denied_context = _context(client, intent="trade", asset="ETH", size=300000)
@@ -218,7 +239,10 @@ def test_feed_schema_keeps_marketplace_semantics_stable(sovereignty_client):
     assert feed["machine_consumable"] is True
     assert feed["mcp_compatible"] is True
     assert feed["x402_ready"] is True
+    assert feed["agentic_market_ready"] is True
     assert feed["non_substitution_rule"] == "telemetry_informs_posture_only"
+    assert feed["pricing_model"] == "subscription_plus_volume"
+    assert feed["cadence_tier"] == "developer"
     assert isinstance(feed["allow_rate"], float)
     assert isinstance(feed["constrain_rate"], float)
     assert isinstance(feed["deny_rate"], float)
@@ -262,7 +286,9 @@ def test_feed_does_not_mutate_context_proof_billing_or_controlled_loop_contracts
     proof_after = _proof(client, decision_id)
     repeated_context = _context(client, intent="trade", asset="ETH", size=10000)
 
-    assert billing_after == billing_before
+    assert _sovereign_billing_fields(billing_after) == _sovereign_billing_fields(billing_before)
+    assert billing_before["telemetry_usage"]["constraint_pressure_calls"] == 0
+    assert billing_after["telemetry_usage"]["constraint_pressure_calls"] == 5
     assert _public_feed_without_signature(proof_after) == _public_feed_without_signature(proof_before)
     assert repeated_context["decision_status"] == constrained_context["decision_status"]
     assert repeated_context["impact_on_outcomes"]["adjusted_size"] == constrained_context["impact_on_outcomes"]["adjusted_size"]

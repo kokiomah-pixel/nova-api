@@ -87,6 +87,8 @@ For a controlled enforcement example, see [examples/README_controlled_execution_
 Environmental telemetry is governed by the Nova Sovereignty Boundary:
 [docs/environmental_telemetry_doctrine.md](docs/environmental_telemetry_doctrine.md)
 
+Environmental telemetry access and usage are governed separately from sovereign decision authority.
+
 ## Read Next
 
 1. [START_HERE.md](START_HERE.md)

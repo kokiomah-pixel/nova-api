@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from unittest.mock import patch
 
 from core.environmental_state_engine import EnvironmentalStateEngine
+from core.feed_metering import reset_feed_usage_state_for_tests
 from core.telemetry_engine import InternalTelemetryEngine
 
 
@@ -35,6 +36,7 @@ def environmental_client():
         {
             "NOVA_KEYS_JSON": keys_json,
             "NOVA_USAGE_FILE": ".usage.environmental-test.json",
+            "NOVA_FEED_USAGE_FILE": ".feed_usage.environmental-test.json",
             "NOVA_PROOF_FILE": ".proof.environmental-test.json",
             "NOVA_REFLEX_GOVERNANCE_RECORDS_FILE": ".reflex_governance_records.environmental-test.jsonl",
             "NOVA_REFLEX_GOVERNANCE_SIGNALS_FILE": ".reflex_governance_signals.environmental-test.json",
@@ -47,13 +49,16 @@ def environmental_client():
         app_module.SYSTEM_STATE_REGISTRY.clear()
         app_module.DECISION_ADMISSION_STATE.clear()
         app_module.INTERNAL_TELEMETRY_ENGINE.clear()
+        reset_feed_usage_state_for_tests()
         yield TestClient(app_module.app), app_module
         app_module.USAGE_TRACKING.clear()
         app_module.SYSTEM_STATE_REGISTRY.clear()
         app_module.DECISION_ADMISSION_STATE.clear()
         app_module.INTERNAL_TELEMETRY_ENGINE.clear()
+        reset_feed_usage_state_for_tests()
         for path in [
             ".usage.environmental-test.json",
+            ".feed_usage.environmental-test.json",
             ".proof.environmental-test.json",
             ".reflex_governance_records.environmental-test.jsonl",
             ".reflex_governance_signals.environmental-test.json",

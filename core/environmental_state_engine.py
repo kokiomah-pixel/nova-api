@@ -274,6 +274,7 @@ class EnvironmentalStateEngine:
             "machine_consumable": True,
             "mcp_compatible": True,
             "x402_ready": True,
+            "agentic_market_ready": True,
             "semantic_version": "1.0",
             "timestamp_utc": timestamp_utc,
             "environment_epoch": environment_epoch,
