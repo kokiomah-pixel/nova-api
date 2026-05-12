@@ -24,6 +24,8 @@ from core.reflex_memory.proof import build_reflex_proof
 from core.reflex_governance_runtime.alert_engine import ReflexGovernanceAlertEngine
 from core.reflex_governance_runtime.collector import collect_governance_record
 from core.reflex_governance_runtime.pattern_engine import detect_structural_patterns
+from core.environmental_state_engine import EnvironmentalStateEngine
+from core.telemetry_engine import InternalTelemetryEngine
 from core import billing_state as usdc_billing_state
 from core import usage_meter as decision_usage_meter
 from core.billing_config import (
@@ -119,6 +121,7 @@ NON_BILLABLE_ENDPOINTS = {
     "/v1/billing/summary",
     "/v1/balance",
     "/v1/funding-instructions",
+    "/v1/feeds/constraint_pressure",
 }
 ADMIN_ONLY_ENDPOINTS = {"/v1/usage/reset"}
 CONTEXT_BILLABLE_DECISION_STATUSES = {"ALLOW", "CONSTRAIN"}
@@ -172,6 +175,8 @@ REFLEX_GOVERNANCE_SIGNALS_FILE = Path(
 REFLEX_GOVERNANCE_ESCALATIONS_FILE = Path(
     os.getenv("NOVA_REFLEX_GOVERNANCE_ESCALATIONS_FILE", ".reflex_governance_escalations.json")
 ).expanduser()
+INTERNAL_TELEMETRY_ENGINE = InternalTelemetryEngine()
+ENVIRONMENTAL_STATE_ENGINE = EnvironmentalStateEngine()
 
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
@@ -802,6 +807,7 @@ def load_key_registry() -> Dict[str, Dict[str, Any]]:
             "/v1/billing/summary",
             "/v1/balance",
             "/v1/funding-instructions",
+            "/v1/feeds/constraint_pressure",
             "/health",
         ])
         registry[api_key] = merged
@@ -827,6 +833,7 @@ def load_key_registry() -> Dict[str, Dict[str, Any]]:
             "/v1/balance",
             "/v1/funding-instructions",
             "/v1/usage/reset",
+            "/v1/feeds/constraint_pressure",
             "/health",
         ]
         })
@@ -1064,6 +1071,13 @@ def sign_payload(payload: dict) -> str:
         encoded,
         hashlib.sha256
     ).hexdigest()
+
+
+def _capture_internal_environmental_telemetry(payload: Dict[str, Any]) -> None:
+    try:
+        INTERNAL_TELEMETRY_ENGINE.capture_decision(payload)
+    except Exception as exc:
+        print(f"[ENVIRONMENTAL TELEMETRY CAPTURE FAILED] {exc}", file=sys.stderr)
 
 
 AMBIGUOUS_LANGUAGE_TERMS = {
@@ -3287,6 +3301,7 @@ def _build_structured_response(
     payload = _apply_human_intervention_taxonomy(payload)
     _apply_context_billing(payload, api_key, get_key_record(api_key), decision_status)
     payload = _attach_proof_to_payload(payload, owner=get_key_record(api_key).get("owner"))
+    _capture_internal_environmental_telemetry(payload)
     payload["signature"] = sign_payload(payload)
     return JSONResponse(payload, status_code=status_code)
 
@@ -4632,6 +4647,22 @@ def get_epoch(
     return JSONResponse(payload)
 
 
+@app.get("/v1/feeds/constraint_pressure")
+def get_constraint_pressure_feed(
+    request: Request,
+    authorization: Optional[str] = Header(default=None),
+    x_api_key: Optional[str] = Header(default=None, alias="x-api-key"),
+) -> JSONResponse:
+    require_entitlement(request, authorization, x_api_key)
+    payload = ENVIRONMENTAL_STATE_ENGINE.build_constraint_pressure_feed(
+        records=INTERNAL_TELEMETRY_ENGINE.snapshot(limit=100),
+        timestamp_utc=get_current_timestamp(),
+        environment_epoch=get_current_epoch(),
+    )
+    payload["signature"] = sign_payload(payload)
+    return JSONResponse(payload)
+
+
 @app.get("/v1/context")
 def get_context(
     request: Request,
@@ -5087,6 +5118,7 @@ def get_context(
             memory_fields=memory_fields,
         )
     payload = _attach_proof_to_payload(payload, owner=entitlement["owner"])
+    _capture_internal_environmental_telemetry(payload)
     payload["signature"] = sign_payload(payload)
     return JSONResponse(payload)
 

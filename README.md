@@ -84,6 +84,9 @@ See a complete example of decision admission, decision-state binding, and proof:
 
 For a controlled enforcement example, see [examples/README_controlled_execution_loop.md](examples/README_controlled_execution_loop.md).
 
+Environmental telemetry is governed by the Nova Sovereignty Boundary:
+[docs/environmental_telemetry_doctrine.md](docs/environmental_telemetry_doctrine.md)
+
 ## Read Next
 
 1. [START_HERE.md](START_HERE.md)

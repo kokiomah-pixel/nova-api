@@ -95,6 +95,7 @@ def store_key(
             "/v1/context",
             "/v1/key-info",
             "/v1/usage",
+            "/v1/feeds/constraint_pressure",
             "/health",
         ],
     }
