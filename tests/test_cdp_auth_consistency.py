@@ -22,6 +22,7 @@ def test_probe_live_script_and_middleware_share_cdp_auth_builder(monkeypatch):
 
     assert isinstance(gateway._auth_provider(), CDPFacilitatorAuthProvider)
     assert check_cdp_x402_auth.build_cdp_auth_provider_from_env is build_cdp_auth_provider_from_env
+    assert live_x402_payment.build_cdp_auth_provider_from_env is build_cdp_auth_provider_from_env
     assert live_x402_payment.load_cdp_credentials_from_env is load_cdp_credentials_from_env
 
 
@@ -72,3 +73,103 @@ def test_placeholder_cdp_env_fails_without_secret_leak(monkeypatch):
     message = str(exc.value)
     assert "CDP_API_KEY_SECRET" in message
     assert "PASTE_SECRET_LOCALLY_ONLY" not in message
+
+
+def test_live_auth_only_uses_verify_auth_without_signing_or_settling(monkeypatch, capsys):
+    monkeypatch.setenv("CDP_API_KEY_ID", "server-key-id")
+    monkeypatch.setenv("CDP_API_KEY_SECRET", "server-key-secret")
+    calls = []
+
+    class FakeHeaders:
+        verify = {"Authorization": "Bearer fake-verify-token"}
+
+    class FakeAuthProvider:
+        def get_auth_headers(self):
+            return FakeHeaders()
+
+    class FakeResponse:
+        status_code = 422
+        text = '{"error":"invalid payment payload"}'
+
+        def json(self):
+            return {"error": "invalid payment payload"}
+
+    class FakeClient:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def post(self, url, *, headers, json):
+            calls.append((url, headers, json))
+            return FakeResponse()
+
+        def get(self, *args, **kwargs):
+            raise AssertionError("auth-only must not perform feed discovery")
+
+    monkeypatch.setattr(
+        live_x402_payment,
+        "build_cdp_auth_provider_from_env",
+        lambda *, facilitator_url: FakeAuthProvider(),
+    )
+    monkeypatch.setattr(live_x402_payment.httpx, "Client", FakeClient)
+
+    assert live_x402_payment.main(["--auth-only"]) == 0
+
+    output = capsys.readouterr().out
+    assert "live_auth_only_attempted: yes" in output
+    assert "live_auth_path_accepted: yes" in output
+    assert "auth_failure_still_401: no" in output
+    assert calls == [
+        (
+            f"{FACILITATOR_URL}/verify",
+            {"Authorization": "Bearer fake-verify-token"},
+            {"paymentPayload": {}, "paymentRequirements": {}},
+        )
+    ]
+
+
+def test_live_auth_only_reports_401_as_rejected(monkeypatch, capsys):
+    class FakeHeaders:
+        verify = {"Authorization": "Bearer fake-verify-token"}
+
+    class FakeAuthProvider:
+        def get_auth_headers(self):
+            return FakeHeaders()
+
+    class FakeResponse:
+        status_code = 401
+        text = '{"error":"Unauthorized"}'
+
+        def json(self):
+            return {"error": "Unauthorized"}
+
+    class FakeClient:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def post(self, *args, **kwargs):
+            return FakeResponse()
+
+    monkeypatch.setattr(
+        live_x402_payment,
+        "build_cdp_auth_provider_from_env",
+        lambda *, facilitator_url: FakeAuthProvider(),
+    )
+    monkeypatch.setattr(live_x402_payment.httpx, "Client", FakeClient)
+
+    assert live_x402_payment.main(["--auth-only"]) == 1
+
+    output = capsys.readouterr().out
+    assert "live_auth_path_accepted: no" in output
+    assert "auth_failure_still_401: yes" in output

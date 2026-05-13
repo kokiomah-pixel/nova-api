@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import sys
@@ -19,7 +20,8 @@ from x402.mechanisms.evm.exact import ExactEvmScheme
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from core.cdp_auth import load_cdp_credentials_from_env
+from core.cdp_auth import build_cdp_auth_provider_from_env, load_cdp_credentials_from_env
+from core.x402_config import X402_FACILITATOR_URL
 
 
 TARGET_PATH = "/v1/feeds/constraint_pressure"
@@ -57,6 +59,55 @@ def _get_header(headers: httpx.Headers, name: str) -> str | None:
     return headers.get(name) or headers.get(name.lower())
 
 
+def _safe_json_error(response: httpx.Response) -> str:
+    if not response.text:
+        return "none"
+    try:
+        body = response.json()
+    except Exception:
+        return "non_json_response"
+
+    if isinstance(body, dict):
+        detail = body.get("detail") or body.get("error") or body.get("message")
+        return str(detail).strip() if detail else "none"
+    return "none"
+
+
+def _auth_response_accepted(status_code: int) -> bool:
+    return status_code in {400, 404, 405, 415, 422} or 200 <= status_code < 300
+
+
+def _run_auth_only_probe() -> int:
+    try:
+        auth_provider = build_cdp_auth_provider_from_env(
+            facilitator_url=X402_FACILITATOR_URL,
+        )
+        auth_headers = auth_provider.get_auth_headers()
+    except Exception as exc:
+        print("live_auth_only_attempted: no")
+        print("live_auth_path_accepted: no")
+        print("auth_failure_still_401: no")
+        print("verify_http_status: 0")
+        print(f"verify_error: {exc}")
+        return 2
+
+    with httpx.Client(timeout=30, follow_redirects=True) as client:
+        response = client.post(
+            f"{X402_FACILITATOR_URL.rstrip('/')}/verify",
+            headers=auth_headers.verify,
+            json={"paymentPayload": {}, "paymentRequirements": {}},
+        )
+
+    auth_401 = response.status_code == 401
+    accepted = not auth_401 and _auth_response_accepted(response.status_code)
+    print("live_auth_only_attempted: yes")
+    print(f"live_auth_path_accepted: {_bool_text(accepted)}")
+    print(f"auth_failure_still_401: {_bool_text(auth_401)}")
+    print(f"verify_http_status: {response.status_code}")
+    print(f"verify_error: {_safe_json_error(response)}")
+    return 0 if accepted else 1
+
+
 def _validate_requirements(payment_required: Any) -> None:
     if not payment_required.accepts:
         raise RuntimeError("payment requirements missing")
@@ -70,7 +121,19 @@ def _validate_requirements(payment_required: Any) -> None:
         raise RuntimeError("unexpected settlement wallet")
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Execute one Nova Constraint Pressure x402 payment.",
+    )
+    parser.add_argument(
+        "--auth-only",
+        action="store_true",
+        help="Probe CDP verify auth with an invalid payload; do not sign or settle.",
+    )
+    args = parser.parse_args(argv)
+    if args.auth_only:
+        return _run_auth_only_probe()
+
     settlement_succeeded = False
     paid_access_succeeded = False
     http_status = 0
