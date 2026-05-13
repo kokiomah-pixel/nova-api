@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
-from urllib.parse import urlparse
 
-from cdp.auth.utils.jwt import JwtOptions, generate_jwt
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from x402.http import FacilitatorConfig, HTTPFacilitatorClientSync
@@ -15,7 +12,6 @@ from x402.http.constants import (
     PAYMENT_SIGNATURE_HEADER,
     X_PAYMENT_HEADER,
 )
-from x402.http.facilitator_client_base import AuthHeaders, AuthProvider
 from x402.http.utils import (
     decode_payment_signature_header,
     encode_payment_required_header,
@@ -23,6 +19,10 @@ from x402.http.utils import (
 )
 from x402.schemas import PaymentPayload, PaymentPayloadV1, PaymentRequired, PaymentRequirements, ResourceInfo
 
+from core.cdp_auth import (
+    CDPFacilitatorAuthProvider,
+    build_cdp_auth_provider_from_env,
+)
 from core.feed_identity import build_feed_consumer_identity
 from core.feed_pricing import normalize_feed_tier
 from core.x402_config import (
@@ -42,40 +42,6 @@ from core.x402_config import (
     is_x402_protected_feed,
     x402_payment_requirement,
 )
-
-
-CDP_API_KEY_ID_ENV = "CDP_API_KEY_ID"
-CDP_API_KEY_SECRET_ENV = "CDP_API_KEY_SECRET"
-
-
-class CDPFacilitatorAuthProvider(AuthProvider):
-    def __init__(self, *, api_key_id: str, api_key_secret: str, facilitator_url: str) -> None:
-        parsed = urlparse(facilitator_url)
-        self._api_key_id = api_key_id
-        self._api_key_secret = api_key_secret
-        self._request_host = parsed.netloc
-        self._base_path = parsed.path.rstrip("/")
-
-    def _headers_for(self, *, method: str, suffix: str) -> Dict[str, str]:
-        request_path = f"{self._base_path}/{suffix.lstrip('/')}"
-        token = generate_jwt(
-            JwtOptions(
-                api_key_id=self._api_key_id,
-                api_key_secret=self._api_key_secret,
-                request_method=method,
-                request_host=self._request_host,
-                request_path=request_path,
-                expires_in=120,
-            )
-        )
-        return {"Authorization": f"Bearer {token}"}
-
-    def get_auth_headers(self) -> AuthHeaders:
-        return AuthHeaders(
-            verify=self._headers_for(method="POST", suffix="verify"),
-            settle=self._headers_for(method="POST", suffix="settle"),
-            supported=self._headers_for(method="GET", suffix="supported"),
-        )
 
 
 @dataclass(frozen=True)
@@ -136,15 +102,7 @@ class X402PaymentGateway:
         )
 
     def _auth_provider(self) -> CDPFacilitatorAuthProvider:
-        api_key_id = os.getenv(CDP_API_KEY_ID_ENV, "").strip()
-        api_key_secret = os.getenv(CDP_API_KEY_SECRET_ENV, "").strip()
-        if not api_key_id or not api_key_secret:
-            raise RuntimeError("cdp_facilitator_credentials_missing")
-        return CDPFacilitatorAuthProvider(
-            api_key_id=api_key_id,
-            api_key_secret=api_key_secret,
-            facilitator_url=self._facilitator_url,
-        )
+        return build_cdp_auth_provider_from_env(facilitator_url=self._facilitator_url)
 
     def _client(self) -> HTTPFacilitatorClientSync:
         if self._facilitator_client is not None:

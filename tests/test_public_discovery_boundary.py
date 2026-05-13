@@ -20,6 +20,7 @@ DISCOVERY_TEST_KEYS = {
             "/v1/context",
             "/v1/proof/{decision_id}",
             "/v1/billing/summary",
+            "/v1/internal/runtime_config_status",
             "/v1/feeds/constraint_pressure",
             "/v1/feeds/usage",
             "/v1/usage",
@@ -54,6 +55,10 @@ def discovery_client():
             "NOVA_REFLEX_GOVERNANCE_RECORDS_FILE": test_files[6],
             "NOVA_REFLEX_GOVERNANCE_SIGNALS_FILE": test_files[7],
             "NOVA_REFLEX_GOVERNANCE_ESCALATIONS_FILE": test_files[8],
+            "NOVA_API_URL": "https://nova-api-ipz6.onrender.com",
+            "CDP_API_KEY_ID": "server-secret-key-abcdef",
+            "CDP_API_KEY_SECRET": "server-secret-value",
+            "NOVA_TELEMETRY_ADMIN_KEY": "telemetry-admin-key",
         },
     ):
         for module_name in [
@@ -140,3 +145,43 @@ def test_proof_is_not_public_x402_discoverable(discovery_client):
     assert response.status_code == 401
     assert response.json()["detail"] == "Missing API key"
     assert PAYMENT_REQUIRED_HEADER not in response.headers
+
+
+def test_runtime_config_status_requires_api_key(discovery_client):
+    client, _, _ = discovery_client
+
+    response = client.get("/v1/internal/runtime_config_status")
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Missing API key"
+
+
+def test_runtime_config_status_returns_only_non_secret_fingerprints(discovery_client):
+    client, _, _ = discovery_client
+
+    response = client.get(
+        "/v1/internal/runtime_config_status",
+        headers={"Authorization": f"Bearer {DISCOVERY_TEST_KEY}"},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["cdp_key_id_present"] is True
+    assert payload["cdp_secret_present"] is True
+    assert payload["x402_settlement_wallet"] == "0xb29b02130138a6fF8e0f6D7812bDa8D436001BE4"
+    assert payload["nova_api_url"] == "https://nova-api-ipz6.onrender.com"
+    assert payload["cdp_key_id_suffix"] == "abcdef"
+    rendered = json.dumps(payload, sort_keys=True)
+    assert "server-secret-key-" not in rendered
+    assert "server-secret-value" not in rendered
+
+
+def test_telemetry_admin_key_can_read_feed_usage_and_billing(discovery_client):
+    client, _, _ = discovery_client
+    headers = {"Authorization": "Bearer telemetry-admin-key"}
+
+    usage_response = client.get("/v1/feeds/usage", headers=headers)
+    billing_response = client.get("/v1/billing/summary", headers=headers)
+
+    assert usage_response.status_code == 200
+    assert billing_response.status_code == 200

@@ -34,7 +34,8 @@ from core.feed_metering import (
 )
 from core.feed_pricing import pricing_for_tier
 from core.telemetry_engine import InternalTelemetryEngine
-from core.x402_config import x402_payment_requirement
+from core.cdp_auth import CDP_API_KEY_ID_ENV, CDP_API_KEY_SECRET_ENV
+from core.x402_config import X402_SETTLEMENT_WALLET, x402_payment_requirement
 from core.x402_middleware import authorize_x402_request
 from core import billing_state as usdc_billing_state
 from core import usage_meter as decision_usage_meter
@@ -104,6 +105,7 @@ DEFAULT_REGIME = os.getenv("NOVA_REGIME", "Elevated Fragility")
 
 # Backward compatibility for your current single-key setup
 LEGACY_API_KEY = os.getenv("NOVA_API_KEY", "")
+TELEMETRY_ADMIN_KEY = os.getenv("NOVA_TELEMETRY_ADMIN_KEY", "").strip()
 
 # New v1 key registry
 NOVA_KEYS_JSON = os.getenv("NOVA_KEYS_JSON", "")
@@ -131,6 +133,7 @@ NON_BILLABLE_ENDPOINTS = {
     "/v1/billing/summary",
     "/v1/balance",
     "/v1/funding-instructions",
+    "/v1/internal/runtime_config_status",
     "/v1/feeds/constraint_pressure",
     "/v1/feeds/usage",
 }
@@ -818,6 +821,7 @@ def load_key_registry() -> Dict[str, Dict[str, Any]]:
             "/v1/billing/summary",
             "/v1/balance",
             "/v1/funding-instructions",
+            "/v1/internal/runtime_config_status",
             "/v1/feeds/constraint_pressure",
             "/v1/feeds/usage",
             "/health",
@@ -845,11 +849,39 @@ def load_key_registry() -> Dict[str, Dict[str, Any]]:
             "/v1/balance",
             "/v1/funding-instructions",
             "/v1/usage/reset",
+            "/v1/internal/runtime_config_status",
             "/v1/feeds/constraint_pressure",
             "/v1/feeds/usage",
             "/health",
         ]
         })
+
+    if TELEMETRY_ADMIN_KEY:
+        telemetry_allowed = [
+            "/v1/feeds/usage",
+            "/v1/billing/summary",
+            "/v1/internal/runtime_config_status",
+            "/health",
+        ]
+        existing = registry.get(TELEMETRY_ADMIN_KEY)
+        if isinstance(existing, dict):
+            existing.setdefault("owner", "telemetry-admin")
+            existing.setdefault("tier", "admin")
+            existing.setdefault("status", "active")
+            existing.setdefault("monthly_quota", 1000000)
+            allowed = list(existing.get("allowed_endpoints") or [])
+            for endpoint in telemetry_allowed:
+                if endpoint not in allowed:
+                    allowed.append(endpoint)
+            existing["allowed_endpoints"] = allowed
+        else:
+            registry[TELEMETRY_ADMIN_KEY] = {
+                "owner": "telemetry-admin",
+                "tier": "admin",
+                "status": "active",
+                "monthly_quota": 1000000,
+                "allowed_endpoints": telemetry_allowed,
+            }
 
     return registry
 
@@ -4645,6 +4677,27 @@ def health() -> dict:
 @app.get("/services.json")
 def services_manifest() -> dict:
     return build_services_manifest()
+
+
+@app.get("/v1/internal/runtime_config_status")
+def runtime_config_status(
+    request: Request,
+    authorization: Optional[str] = Header(default=None),
+    x_api_key: Optional[str] = Header(default=None, alias="x-api-key"),
+) -> JSONResponse:
+    require_entitlement(request, authorization, x_api_key)
+
+    cdp_key_id = os.getenv(CDP_API_KEY_ID_ENV, "").strip()
+    cdp_secret = os.getenv(CDP_API_KEY_SECRET_ENV, "").strip()
+    payload = {
+        "cdp_key_id_present": bool(cdp_key_id),
+        "cdp_secret_present": bool(cdp_secret),
+        "x402_settlement_wallet": X402_SETTLEMENT_WALLET,
+        "nova_api_url": os.getenv("NOVA_API_URL", "").strip(),
+        "cdp_key_id_suffix": cdp_key_id[-6:] if cdp_key_id else None,
+        "runtime_timestamp_utc": get_current_timestamp(),
+    }
+    return JSONResponse(payload)
 
 
 @app.get("/v1/regime")

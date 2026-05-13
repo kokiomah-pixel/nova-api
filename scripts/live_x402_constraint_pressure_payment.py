@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+from pathlib import Path
 from typing import Any
 
 import httpx
@@ -16,19 +17,36 @@ from x402.http.utils import (
 )
 from x402.mechanisms.evm.exact import ExactEvmScheme
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from core.cdp_auth import load_cdp_credentials_from_env
+
 
 TARGET_PATH = "/v1/feeds/constraint_pressure"
 EXPECTED_NETWORK = "eip155:8453"
 EXPECTED_ASSET = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
 EXPECTED_SETTLEMENT_WALLET = "0xb29b02130138a6fF8e0f6D7812bDa8D436001BE4"
 PLACEHOLDER_PREFIX = "PASTE_"
+REQUIRED_ENV_NAMES = (
+    "NOVA_API_URL",
+    "EVM_PRIVATE_KEY",
+)
 
 
-def _env(name: str) -> str:
-    value = os.getenv(name, "").strip()
-    if not value or value.startswith(PLACEHOLDER_PREFIX):
-        raise RuntimeError(f"{name} missing")
-    return value
+def _load_required_env() -> dict[str, str]:
+    required = {name: os.getenv(name) for name in REQUIRED_ENV_NAMES}
+    missing = [
+        name
+        for name, value in required.items()
+        if not value or PLACEHOLDER_PREFIX in str(value)
+    ]
+    if missing:
+        raise RuntimeError(
+            f"Missing or placeholder env vars: {', '.join(missing)}"
+        )
+    load_cdp_credentials_from_env()
+
+    return {name: str(value).strip() for name, value in required.items()}
 
 
 def _bool_text(value: bool) -> str:
@@ -58,9 +76,11 @@ def main() -> int:
     http_status = 0
 
     try:
-        base_url = _env("NOVA_API_URL").rstrip("/")
-        private_key = _env("EVM_PRIVATE_KEY")
-    except Exception:
+        env = _load_required_env()
+        base_url = env["NOVA_API_URL"].rstrip("/")
+        private_key = env["EVM_PRIVATE_KEY"]
+    except Exception as exc:
+        print(f"settlement error: {exc}")
         print("settlement succeeded: no")
         print("HTTP status: 0")
         print("paid access succeeded: no")
