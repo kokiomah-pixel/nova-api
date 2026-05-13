@@ -10,6 +10,7 @@ from x402.http.constants import PAYMENT_REQUIRED_HEADER, PAYMENT_SIGNATURE_HEADE
 
 
 DISCOVERY_TEST_KEY = "discovery-boundary-key"
+TELEMETRY_ADMIN_TEST_KEY = "telemetry-admin-key"
 DISCOVERY_TEST_KEYS = {
     DISCOVERY_TEST_KEY: {
         "owner": "discovery-boundary-user",
@@ -25,7 +26,19 @@ DISCOVERY_TEST_KEYS = {
             "/v1/feeds/usage",
             "/v1/usage",
         ],
-    }
+    },
+    TELEMETRY_ADMIN_TEST_KEY: {
+        "owner": "misconfigured-telemetry-admin",
+        "tier": "admin",
+        "status": "active",
+        "monthly_quota": 1000,
+        "allowed_endpoints": [
+            "/v1/context",
+            "/v1/proof/{decision_id}",
+            "/v1/internal/runtime_config_status",
+            "/v1/feeds/usage",
+        ],
+    },
 }
 
 
@@ -58,7 +71,7 @@ def discovery_client():
             "NOVA_API_URL": "https://nova-api-ipz6.onrender.com",
             "CDP_API_KEY_ID": "server-secret-key-abcdef",
             "CDP_API_KEY_SECRET": "server-secret-value",
-            "NOVA_TELEMETRY_ADMIN_KEY": "telemetry-admin-key",
+            "NOVA_TELEMETRY_ADMIN_KEY": TELEMETRY_ADMIN_TEST_KEY,
         },
     ):
         for module_name in [
@@ -178,10 +191,29 @@ def test_runtime_config_status_returns_only_non_secret_fingerprints(discovery_cl
 
 def test_telemetry_admin_key_can_read_feed_usage_and_billing(discovery_client):
     client, _, _ = discovery_client
-    headers = {"Authorization": "Bearer telemetry-admin-key"}
+    headers = {"Authorization": f"Bearer {TELEMETRY_ADMIN_TEST_KEY}"}
 
     usage_response = client.get("/v1/feeds/usage", headers=headers)
     billing_response = client.get("/v1/billing/summary", headers=headers)
 
     assert usage_response.status_code == 200
     assert billing_response.status_code == 200
+
+
+def test_telemetry_admin_key_is_limited_to_inspection_routes(discovery_client):
+    client, _, _ = discovery_client
+    headers = {"Authorization": f"Bearer {TELEMETRY_ADMIN_TEST_KEY}"}
+
+    context_response = client.get(
+        "/v1/context?intent=allocate&asset=ETH&size=10000",
+        headers=headers,
+    )
+    proof_response = client.get("/v1/proof/test", headers=headers)
+    runtime_status_response = client.get("/v1/internal/runtime_config_status", headers=headers)
+
+    assert context_response.status_code == 403
+    assert context_response.json()["detail"] == "API key not allowed for this endpoint"
+    assert proof_response.status_code == 403
+    assert proof_response.json()["detail"] == "API key not allowed for this endpoint"
+    assert runtime_status_response.status_code == 403
+    assert runtime_status_response.json()["detail"] == "API key not allowed for this endpoint"

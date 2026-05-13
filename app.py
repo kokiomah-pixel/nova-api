@@ -860,20 +860,14 @@ def load_key_registry() -> Dict[str, Dict[str, Any]]:
         telemetry_allowed = [
             "/v1/feeds/usage",
             "/v1/billing/summary",
-            "/v1/internal/runtime_config_status",
-            "/health",
         ]
         existing = registry.get(TELEMETRY_ADMIN_KEY)
         if isinstance(existing, dict):
-            existing.setdefault("owner", "telemetry-admin")
-            existing.setdefault("tier", "admin")
-            existing.setdefault("status", "active")
-            existing.setdefault("monthly_quota", 1000000)
-            allowed = list(existing.get("allowed_endpoints") or [])
-            for endpoint in telemetry_allowed:
-                if endpoint not in allowed:
-                    allowed.append(endpoint)
-            existing["allowed_endpoints"] = allowed
+            existing["owner"] = existing.get("owner") or "telemetry-admin"
+            existing["tier"] = "admin"
+            existing["status"] = "active"
+            existing["monthly_quota"] = existing.get("monthly_quota", 1000000)
+            existing["allowed_endpoints"] = telemetry_allowed
         else:
             registry[TELEMETRY_ADMIN_KEY] = {
                 "owner": "telemetry-admin",
