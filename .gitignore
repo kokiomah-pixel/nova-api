@@ -137,6 +137,8 @@ celerybeat.pid
 # Environments
 .env
 .envrc
+.env*.local
+.env.x402.local
 .venv
 env/
 venv/
