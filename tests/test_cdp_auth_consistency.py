@@ -26,6 +26,12 @@ def test_probe_live_script_and_middleware_share_cdp_auth_builder(monkeypatch):
     assert live_x402_payment.load_cdp_credentials_from_env is load_cdp_credentials_from_env
 
 
+def test_live_payment_uses_official_http_helper_for_payment_headers():
+    assert live_x402_payment.x402HTTPClientSync.__name__ == "x402HTTPClientSync"
+    assert "encode_payment_signature_header" not in live_x402_payment.__dict__
+    assert "decode_payment_required_header" not in live_x402_payment.__dict__
+
+
 def test_cdp_auth_headers_use_expected_facilitator_paths(monkeypatch):
     monkeypatch.setenv("CDP_API_KEY_ID", "server-key-id")
     monkeypatch.setenv("CDP_API_KEY_SECRET", "server-key-secret")

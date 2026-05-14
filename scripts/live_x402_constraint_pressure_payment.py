@@ -10,11 +10,10 @@ from typing import Any
 import httpx
 from eth_account import Account
 from x402 import prefer_network, prefer_scheme, x402ClientSync
-from x402.http.constants import PAYMENT_REQUIRED_HEADER, PAYMENT_RESPONSE_HEADER, PAYMENT_SIGNATURE_HEADER
+from x402.http import x402HTTPClientSync
+from x402.http.constants import PAYMENT_REQUIRED_HEADER, PAYMENT_RESPONSE_HEADER
 from x402.http.utils import (
-    decode_payment_required_header,
     decode_payment_response_header,
-    encode_payment_signature_header,
 )
 from x402.mechanisms.evm.exact import ExactEvmScheme
 
@@ -57,6 +56,10 @@ def _bool_text(value: bool) -> str:
 
 def _get_header(headers: httpx.Headers, name: str) -> str | None:
     return headers.get(name) or headers.get(name.lower())
+
+
+def _resource_url(value: Any) -> str:
+    return str(getattr(value, "url", value or ""))
 
 
 def _safe_json_error(response: httpx.Response) -> str:
@@ -109,16 +112,25 @@ def _run_auth_only_probe() -> int:
 
 
 def _validate_requirements(payment_required: Any) -> None:
-    if not payment_required.accepts:
-        raise RuntimeError("payment requirements missing")
-
-    requirement = payment_required.accepts[0]
-    if requirement.network != EXPECTED_NETWORK:
+    if payment_required.network != EXPECTED_NETWORK:
         raise RuntimeError("unexpected payment network")
-    if str(requirement.asset).lower() != EXPECTED_ASSET.lower():
+    if str(payment_required.asset).lower() != EXPECTED_ASSET.lower():
         raise RuntimeError("unexpected payment asset")
-    if str(requirement.pay_to).lower() != EXPECTED_SETTLEMENT_WALLET.lower():
+    if str(payment_required.pay_to).lower() != EXPECTED_SETTLEMENT_WALLET.lower():
         raise RuntimeError("unexpected settlement wallet")
+    if str(payment_required.amount) != "10000":
+        raise RuntimeError("unexpected payment amount")
+
+
+def _print_payment_diagnostics(*, payer_address: str, payment_payload: Any) -> None:
+    payload_data = payment_payload.model_dump(by_alias=True, exclude_none=True)
+    accepted = payment_payload.accepted
+    print(f"payer_address: {payer_address}")
+    print(f"payment_payload_keys: {','.join(sorted(payload_data.keys()))}")
+    print(f"network: {accepted.network}")
+    print(f"asset: {accepted.asset}")
+    print(f"amount: {accepted.amount}")
+    print(f"resource: {_resource_url(payment_payload.resource)}")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -157,6 +169,7 @@ def main(argv: list[str] | None = None) -> int:
         x402_client.register(EXPECTED_NETWORK, ExactEvmScheme(signer=account))
         x402_client.register_policy(prefer_network(EXPECTED_NETWORK))
         x402_client.register_policy(prefer_scheme("exact"))
+        x402_http_client = x402HTTPClientSync(x402_client)
 
         with httpx.Client(timeout=30, follow_redirects=True) as client:
             discovery_response = client.get(target_url)
@@ -169,16 +182,20 @@ def main(argv: list[str] | None = None) -> int:
                 http_status = discovery_response.status_code
                 raise RuntimeError("payment required header missing")
 
-            payment_required = decode_payment_required_header(required_header)
-            _validate_requirements(payment_required)
-
-            payment_payload = x402_client.create_payment_payload(payment_required)
-            payment_header = encode_payment_signature_header(payment_payload)
+            payment_headers, payment_payload = x402_http_client.handle_402_response(
+                dict(discovery_response.headers),
+                discovery_response.content,
+            )
+            _validate_requirements(payment_payload.accepted)
+            _print_payment_diagnostics(
+                payer_address=account.address,
+                payment_payload=payment_payload,
+            )
 
             paid_response = client.get(
                 target_url,
                 headers={
-                    PAYMENT_SIGNATURE_HEADER: payment_header,
+                    **payment_headers,
                     "Access-Control-Expose-Headers": PAYMENT_RESPONSE_HEADER,
                 },
             )
