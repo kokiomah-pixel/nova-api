@@ -1,43 +1,39 @@
 # Overview
 
-Sharpe Nova OS is the canonical control-plane interface for pre-execution decision admissibility.
+Sharpe Nova OS is environmental governance infrastructure that provides derivative environmental context to condition upstream execution environments prior to any capital movement.
 
-It exists to define whether a proposed capital action is admissible before execution by returning an authoritative decision state over a machine-readable API.
+It exists to emit coordination context — structured admissibility environments, constraint pressure indicators, pacing conditions, and derivative telemetry — which integrators consume to adapt orchestration behavior. Nova does not grant execution authority, recommend trades, or act as a signal generator.
 
-The interaction surface is two-step:
+The interaction surface is intentionally narrow and stable:
 
-- `/v1/context` returns a Decision Admission Record and `decision_id`
-- `/v1/proof/{decision_id}` verifies the governed decision state
+- `/v1/context` returns a Coordination Record and `decision_id` (preserved)
+- `/v1/proof/{decision_id}` verifies the derived coordination context
 
-## What the System Does
+## What the System Provides
 
-- receives a proposed decision
-- evaluates admissibility under current constraints
-- returns a binding decision state for downstream systems
-- provides verifiable proof of the governed state
+- receives a proposed decision context
+- derives an admissibility environment and coordination-state telemetry
+- returns conditioning metadata for downstream orchestration
+- provides verifiable proof of the derived environmental state
 
 ## What the System Does Not Do
 
 - generate trades
 - optimize strategy
 - execute orders
-- produce bypassable risk signals
-- act as a generic toolkit
+- provide prescriptive signals or recommendations
 
 ## Core Model
 
-Sharpe Nova OS is denial-first.
+Sharpe Nova OS emphasizes environmental conditioning and coordination. The system is designed so that:
 
-The system is designed so that:
-
-- refusal states are explicit
-- governance layers are visible
-- downstream systems inherit discipline through the API contract
-- execution proceeds only after decision admission
+- emitted coordination postures are explicit
+- governance layers and sovereign internals are not exposed
+- downstream systems consume conditioning telemetry and apply local orchestration rules
 
 ## Authority Model
 
-- `decision_status` is authoritative.
-- Supporting fields explain the state.
-- Proof verifies the governed state.
-- No derived field overrides decision authority.
+- The coordination record is a derivative environmental artifact intended for conditioning.
+- Supporting fields explain telemetry and constraint analysis.
+- Proof verifies the derived context.
+- No external consumer should infer sovereign reasoning or internal policy weights from emitted fields.

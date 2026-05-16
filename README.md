@@ -1,14 +1,12 @@
 # Sharpe Nova OS
 
-Sharpe Nova OS is a pre-execution decision admissibility layer that defines the governed state of a proposed capital decision before execution.
+Sharpe Nova OS is a pre-execution environmental governance layer that emits derivative environmental context to condition upstream execution environments before capital moves.
 
-This repository is the canonical Sharpe Nova OS system repo. It contains the Nova API, proof layer, governance runtime, canonical specs, tests, and runnable examples.
+This repository is the canonical Sharpe Nova OS system repo. It contains the Nova API, proof layer, governance runtime, canonical specs, tests, and runnable examples. The project has been reframed to emphasize environmental coordination, pacing normalization, and sovereignty-preserving boundaries.
 
 ## Start Here (Required)
 
-Before reading further, run one decision through Nova.
-Nova is not understood through explanation.
-Nova is understood when a proposed decision receives an authoritative decision state before execution.
+Before reading further, run one decision through Nova to observe the environmental context it emits. Nova's role is to provide a coordination context — it does not prescribe or perform execution.
 
 ### 1. Start Nova Locally
 
@@ -16,32 +14,27 @@ Nova is understood when a proposed decision receives an authoritative decision s
 NOVA_API_KEY=mytestkey ./.venv/bin/uvicorn app:app --host 127.0.0.1 --port 8000
 ```
 
-### 2. Submit One Decision
+### 2. Submit One Context Request
 
 ```bash
 curl -s -H "Authorization: Bearer mytestkey" \
 "http://127.0.0.1:8000/v1/context?intent=allocate&asset=ETH&size=10000"
 ```
 
-### 3. Read the Authority Field
+### 3. Read the Coordination Fields
 
-Bind execution behavior to:
+Bind orchestration behavior to the emitted environmental context rather than treating Nova as an execution authority.
 
-```text
-decision_status
-```
-
-Execution rules:
+Key emitted fields (examples):
 
 ```text
-ALLOW -> proceed
-CONSTRAIN -> apply governed adjustment before execution
-DENY / DELAY / HALT / VETO -> do not execute
+coordination_state         # descriptive label of environmental posture
+constraint_pressure        # summary of constraint intensity (low/medium/high)
+drift_score                # derivative telemetry metric (0.0 - 1.0)
+admissibility_metadata     # structured context to inform pacing/adjustment
 ```
 
-Supporting fields may explain the outcome.
-
-They do not define permission.
+Supporting fields may explain telemetry and constraint analysis. These fields are intended as conditioning inputs for upstream orchestration logic — they do not, by themselves, grant execution authority.
 
 ### 4. Retrieve Proof
 
@@ -50,49 +43,23 @@ curl -s -H "Authorization: Bearer mytestkey" \
 "http://127.0.0.1:8000/v1/proof/<decision_id>"
 ```
 
-Proof verifies the governed outcome.
-
-Proof does not grant permission.
+Proof verifies the emitted coordination context and the integrity of the derived environmental telemetry. Proof is an audit artifact, not a permission grant.
 
 ### Required Interpretation
 
-Nova is not a callable helper module.
-
-Nova is a pre-execution decision admission layer.
-
-If a decision is not admitted by Nova, execution must not proceed.
-
-Continue only after running the decision and observing `decision_status`.
+Sharpe Nova OS provides environmental conditioning and coordination telemetry that upstream systems consume to adapt pacing and orchestration. Nova does not issue execution commands or permissions, and it does not generate trade signals.
 
 ## What Lives Here
 
-- API implementation and runtime behavior
+- API implementation and runtime behavior (preserved)
 - proof generation and retrieval
 - governance specifications and system contracts
-- tests for decision admission and proof integrity
-- examples showing one-decision flows and integration behavior
+- tests for integrity of emitted environmental context and proof
+- examples showing integration flows that consume coordination context
 
 ## What Nova Is Not
 
-Nova is not an execution engine, strategy system, signal engine, or generic toolkit. It does not move capital on its own. It determines whether a proposed capital action is admitted, constrained, delayed, denied, halted, or vetoed before execution can occur.
-
-## End-to-End Decision Flow
-
-See a complete example of decision admission, decision-state binding, and proof:
-
-[examples/nova_end_to_end_decision_flow.md](examples/nova_end_to_end_decision_flow.md)
-
-For a controlled enforcement example, see [examples/README_controlled_execution_loop.md](examples/README_controlled_execution_loop.md).
-
-Environmental telemetry is governed by the Nova Sovereignty Boundary:
-[docs/environmental_telemetry_doctrine.md](docs/environmental_telemetry_doctrine.md)
-
-Environmental telemetry access and usage are governed separately from sovereign decision authority.
-
-Nova Environmental Telemetry supports:
-- x402-compatible settlement
-- machine-readable orchestration metadata
-- Agentic.Market-compatible discovery infrastructure
+Nova is not an execution engine, strategy system, signal engine, or order execution middleware. It does not move capital or prescribe execution steps. Instead, Nova emits admissibility environments, pacing conditions, and coordination-state telemetry for integrators to use within their orchestration systems.
 
 ## Read Next
 
