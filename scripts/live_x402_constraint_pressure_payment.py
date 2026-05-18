@@ -21,6 +21,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from core.cdp_auth import build_cdp_auth_provider_from_env, load_cdp_credentials_from_env
 from core.x402_config import X402_FACILITATOR_URL
+from nova_api.telemetry.x402_observability import (
+    challenge_metadata,
+    emit_event,
+    facilitator_response_metadata,
+    helper_metadata,
+    wallet_environment_metadata,
+)
 
 
 TARGET_PATH = "/v1/feeds/constraint_pressure"
@@ -165,6 +172,14 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         account = Account.from_key(private_key)
+        emit_event(
+            "x402.wallet.environment.visible",
+            **wallet_environment_metadata(
+                wallet_address=account.address,
+                network=EXPECTED_NETWORK,
+                funding_state_visibility="not_checked",
+            ),
+        )
         x402_client = x402ClientSync()
         x402_client.register(EXPECTED_NETWORK, ExactEvmScheme(signer=account))
         x402_client.register_policy(prefer_network(EXPECTED_NETWORK))
@@ -182,11 +197,26 @@ def main(argv: list[str] | None = None) -> int:
                 http_status = discovery_response.status_code
                 raise RuntimeError("payment required header missing")
 
+            challenge = challenge_metadata(
+                status_code=discovery_response.status_code,
+                headers=dict(discovery_response.headers),
+                facilitator_endpoint=X402_FACILITATOR_URL,
+            )
+            emit_event("x402.challenge.received", **challenge)
+            emit_event("x402.challenge.parsed", **challenge)
+            emit_event(
+                "x402.helper.invoked",
+                helper_path_invoked=True,
+                helper_name="x402HTTPClientSync",
+                facilitator_endpoint=X402_FACILITATOR_URL,
+                network=EXPECTED_NETWORK,
+            )
             payment_headers, payment_payload = x402_http_client.handle_402_response(
                 dict(discovery_response.headers),
                 discovery_response.content,
             )
             _validate_requirements(payment_payload.accepted)
+            emit_event("x402.payload.generated", **helper_metadata(payment_payload=payment_payload))
             _print_payment_diagnostics(
                 payer_address=account.address,
                 payment_payload=payment_payload,
@@ -223,6 +253,22 @@ def main(argv: list[str] | None = None) -> int:
             if not settlement_succeeded and paid_response.text:
                 try:
                     body = paid_response.json()
+                    emit_event(
+                        "x402.facilitator.rejected",
+                        **facilitator_response_metadata(
+                            status_code=paid_response.status_code,
+                            body=body,
+                            headers=dict(paid_response.headers),
+                        ),
+                    )
+                    emit_event(
+                        "x402.interoperability.failure",
+                        **facilitator_response_metadata(
+                            status_code=paid_response.status_code,
+                            body=body,
+                            headers=dict(paid_response.headers),
+                        ),
+                    )
                     compact = {
                         "detail": body.get("detail"),
                         "error": body.get("error"),
@@ -232,6 +278,11 @@ def main(argv: list[str] | None = None) -> int:
                     pass
 
     except Exception as exc:
+        emit_event(
+            "x402.interoperability.failure",
+            error_type=type(exc).__name__,
+            http_status=http_status,
+        )
         print(f"settlement error: {type(exc).__name__}")
 
     print(f"settlement succeeded: {_bool_text(settlement_succeeded)}")
