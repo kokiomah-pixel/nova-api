@@ -8,6 +8,8 @@ Actions recommended (optional follow-up, not implemented in this pass):
 2. SDK updates: Update SDK examples and client libraries to align naming and reduce framing as execution authority.
 3. Deeper telemetry harmonization: Standardize telemetry enums across the stack (would require careful testing).
 4. Internal hardening: Move sovereign data files to an internal-only location or repository and restrict access.
+5. Doctrine lint adoption: Wire `./.venv/bin/python scripts/doctrine_lint.py` into the preferred CI path once the protected branch workflow is confirmed.
+6. Chronology records: Add new governance epoch records only when doctrine posture materially changes.
 
 Risks identified
 

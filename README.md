@@ -67,7 +67,19 @@ Nova is not an execution engine, strategy system, signal engine, or order execut
 2. [docs/overview.md](docs/overview.md)
 3. [docs/integration_entry.md](docs/integration_entry.md)
 4. [docs/telemetry_reframe.md](docs/telemetry_reframe.md)
-5. [specs/decision_admission_contract.json](specs/decision_admission_contract.json)
+5. [docs/canonical-terminology.md](docs/canonical-terminology.md)
+6. [docs/governance-epochs/epoch-2026-05-month-two.md](docs/governance-epochs/epoch-2026-05-month-two.md)
+7. [specs/decision_admission_contract.json](specs/decision_admission_contract.json)
+
+## Doctrine Consistency Check
+
+Run the doctrine lint before changing canonical docs or examples:
+
+```bash
+./.venv/bin/python scripts/doctrine_lint.py
+```
+
+The check blocks prohibited execution-authority wording, code-like ALLOW enforcement examples, and hidden Unicode controls. Deprecated positioning terms are surfaced as warnings for review.
 
 For developer integration doctrine, see:
 https://github.com/kokiomah-pixel/nova-developer-docs

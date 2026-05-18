@@ -1,8 +1,9 @@
-"""Controlled execution loop pilot for Sharpe Nova OS.
+"""Controlled coordination loop pilot for Sharpe Nova OS.
 
-This pilot does not trade, route orders, or move capital. It proves that a
-downstream execution surface can only simulate execution after Nova returns an
-admitted decision state.
+This pilot does not trade, route orders, or move capital. It shows how a
+downstream orchestration surface can consume Nova context to derive conditioned
+exposure, proof coverage, and retry discipline without treating Nova as an
+execution authority.
 """
 
 from __future__ import annotations
@@ -18,7 +19,7 @@ NOVA_API_URL = os.getenv("NOVA_API_URL", "http://127.0.0.1:8000")
 NOVA_API_KEY = os.getenv("NOVA_API_KEY", "mytestkey")
 REQUEST_TIMEOUT_SECONDS = 20.0
 
-ADMITTED_STATUSES = {"ALLOW", "CONSTRAIN"}
+CONDITIONING_STATUSES = {"ALLOW", "CONSTRAIN"}
 REFUSAL_STATUSES = {"DENY", "DELAY", "HALT", "VETO"}
 REPORT_STATUSES = ("ALLOW", "CONSTRAIN", "DENY", "DELAY", "HALT", "VETO")
 
@@ -146,7 +147,7 @@ def adjusted_size_from_context(context: Dict[str, Any]) -> Optional[float]:
         return None
 
 
-def simulate_execution(
+def derive_conditioned_size(
     *,
     proposal: Dict[str, Any],
     context: Dict[str, Any],
@@ -154,10 +155,10 @@ def simulate_execution(
 ) -> Tuple[float, Optional[str]]:
     size = proposed_size(proposal)
 
-    if decision_status == "ALLOW":
+    if decision_status in {"ALLOW"}:
         return size, None
 
-    if decision_status == "CONSTRAIN":
+    if decision_status in {"CONSTRAIN"}:
         adjusted_size = adjusted_size_from_context(context)
         if adjusted_size is None or adjusted_size < 0:
             return 0.0, "CONSTRAIN response did not include a valid adjusted_size"
@@ -177,15 +178,15 @@ def print_report(
     status_counts: Counter[str],
     total_decisions: int,
     total_proposed: float,
-    total_admitted: float,
+    total_conditioned: float,
     proof_retrieved: int,
     proof_failures: int,
-    bypass_count: int,
+    category_drift_count: int,
     failed_closed_count: int,
     reproducibility_hashes: List[str],
     final_pass: bool,
 ) -> None:
-    prevented_exposure = total_proposed - total_admitted
+    reduced_exposure = total_proposed - total_conditioned
     proof_eligible = total_decisions - failed_closed_count
     proof_coverage = 0.0 if proof_eligible <= 0 else (proof_retrieved / proof_eligible) * 100
     other_statuses = {
@@ -194,7 +195,7 @@ def print_report(
         if status not in REPORT_STATUSES
     }
 
-    print("CONTROLLED EXECUTION LOOP PILOT")
+    print("CONTROLLED COORDINATION LOOP PILOT")
     print()
     print(f"Using Nova API: {NOVA_API_URL}")
     print()
@@ -207,14 +208,14 @@ def print_report(
             print(f"{status}: {count}")
     print()
     print(f"Total proposed exposure: {format_amount(total_proposed)}")
-    print(f"Total admitted exposure: {format_amount(total_admitted)}")
-    print(f"Prevented exposure: {format_amount(prevented_exposure)}")
+    print(f"Total conditioned exposure: {format_amount(total_conditioned)}")
+    print(f"Reduced exposure: {format_amount(reduced_exposure)}")
     print()
     print(f"Proof retrieved: {proof_retrieved}")
     print(f"Proof failures: {proof_failures}")
     print(f"Proof coverage: {proof_coverage:.2f}%")
     print(f"Reproducibility hashes collected: {len(reproducibility_hashes)}")
-    print(f"Bypass count: {bypass_count}")
+    print(f"Category drift count: {category_drift_count}")
     print(f"Failed-closed count: {failed_closed_count}")
     print()
     print("FINAL DETERMINATION:")
@@ -224,10 +225,10 @@ def print_report(
 def main() -> None:
     status_counts: Counter[str] = Counter()
     total_proposed = 0.0
-    total_admitted = 0.0
+    total_conditioned = 0.0
     proof_retrieved = 0
     proof_failures = 0
-    bypass_count = 0
+    category_drift_count = 0
     failed_closed_count = 0
     policy_violations: List[str] = []
     reproducibility_hashes: List[str] = []
@@ -245,26 +246,26 @@ def main() -> None:
             decision_status = normalize_status(context.get("decision_status"))
             status_counts[decision_status] += 1
 
-            executed_size, execution_error = simulate_execution(
+            conditioned_size, conditioning_error = derive_conditioned_size(
                 proposal=proposal,
                 context=context,
                 decision_status=decision_status,
             )
-            if execution_error:
+            if conditioning_error:
                 failed_closed_count += 1
-                policy_violations.append(f"decision {index} failed closed: {execution_error}")
-                executed_size = 0.0
+                policy_violations.append(f"decision {index} failed closed: {conditioning_error}")
+                conditioned_size = 0.0
 
-            if executed_size > 0 and decision_status not in ADMITTED_STATUSES:
-                bypass_count += 1
+            if conditioned_size > 0 and decision_status not in CONDITIONING_STATUSES:
+                category_drift_count += 1
                 policy_violations.append(
-                    f"decision {index} executed {executed_size:g} without admission state {decision_status}"
+                    f"decision {index} produced conditioned size {conditioned_size:g} from non-conditioning state {decision_status}"
                 )
 
-            if decision_status in REFUSAL_STATUSES and executed_size > 0:
-                policy_violations.append(f"decision {index} executed during refusal state {decision_status}")
+            if decision_status in REFUSAL_STATUSES and conditioned_size > 0:
+                policy_violations.append(f"decision {index} produced conditioned size during refusal state {decision_status}")
 
-            total_admitted += executed_size
+            total_conditioned += conditioned_size
 
             decision_id = context.get("decision_id")
             if not decision_id:
@@ -292,7 +293,7 @@ def main() -> None:
             reproducibility_hashes.append(str(proof["reproducibility_hash"]))
 
     final_pass = (
-        bypass_count == 0
+        category_drift_count == 0
         and failed_closed_count == 0
         and proof_failures == 0
         and not policy_violations
@@ -302,17 +303,17 @@ def main() -> None:
         status_counts=status_counts,
         total_decisions=len(DECISIONS),
         total_proposed=total_proposed,
-        total_admitted=total_admitted,
+        total_conditioned=total_conditioned,
         proof_retrieved=proof_retrieved,
         proof_failures=proof_failures,
-        bypass_count=bypass_count,
+        category_drift_count=category_drift_count,
         failed_closed_count=failed_closed_count,
         reproducibility_hashes=reproducibility_hashes,
         final_pass=final_pass,
     )
 
-    if bypass_count > 0:
-        raise RuntimeError("Execution bypass detected: simulated execution occurred without Nova admission.")
+    if category_drift_count > 0:
+        raise RuntimeError("Coordination category drift detected in conditioned-size derivation.")
 
 
 if __name__ == "__main__":

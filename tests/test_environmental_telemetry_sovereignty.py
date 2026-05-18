@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 from unittest.mock import patch
 
 from core.feed_metering import reset_feed_usage_state_for_tests
-from examples.controlled_execution_loop import simulate_execution
+from examples.controlled_execution_loop import derive_conditioned_size
 
 
 SOVEREIGNTY_TEST_KEY = "environmental-sovereignty-key"
@@ -294,13 +294,13 @@ def test_feed_does_not_mutate_context_proof_billing_or_controlled_loop_contracts
     assert repeated_context["decision_status"] == constrained_context["decision_status"]
     assert repeated_context["impact_on_outcomes"]["adjusted_size"] == constrained_context["impact_on_outcomes"]["adjusted_size"]
 
-    executed_size, execution_error = simulate_execution(
+    conditioned_size, conditioning_error = derive_conditioned_size(
         proposal={"intent": "trade", "asset": "ETH", "size": 10000},
         context=constrained_context,
         decision_status=constrained_context["decision_status"],
     )
-    assert execution_error is None
-    assert executed_size == constrained_context["impact_on_outcomes"]["adjusted_size"]
+    assert conditioning_error is None
+    assert conditioned_size == constrained_context["impact_on_outcomes"]["adjusted_size"]
 
 
 def test_feed_moves_from_aggregate_state_not_single_decision_leakage(sovereignty_client):

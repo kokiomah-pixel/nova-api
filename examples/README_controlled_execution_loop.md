@@ -1,36 +1,36 @@
-# Controlled Execution Loop Pilot
+# Controlled Coordination Loop Pilot
 
-This example proves that execution is downstream of Sharpe Nova OS.
+This example shows how orchestration can consume Sharpe Nova OS context without treating Nova as an execution authority.
 
 It does not trade.
 It does not route orders.
 It does not move capital.
 
-It simulates execution only after Nova returns an admitted decision state.
+It derives conditioned exposure and proof coverage from Nova context.
 
 ---
 
 ## Flow
 
-Decision Proposal  
+Coordination Proposal  
 -> `/v1/context`  
 -> `decision_status`  
--> simulated execution only if admitted  
+-> conditioned exposure derivation  
 -> `/v1/proof/{decision_id}`  
 -> pilot report  
 
 ---
 
-## Enforcement Rules
+## Conditioning Rules
 
-- `ALLOW` -> simulated execution at proposed size
-- `CONSTRAIN` -> simulated execution at adjusted size
-- `DENY / DELAY / HALT / VETO` -> no simulated execution
+- `ALLOW` -> proposed size remains available as conditioned context
+- `CONSTRAIN` -> adjusted size becomes the conditioned context
+- `DENY / DELAY / HALT / VETO` -> conditioned size is zero
 
 If Nova is unavailable:
 
 -> fail closed  
--> no execution  
+-> no conditioned exposure  
 
 ---
 
@@ -62,27 +62,25 @@ CONSTRAIN: Y
 DENY / DELAY / HALT / VETO: Z
 
 Total proposed exposure: A
-Total admitted exposure: B
-Prevented exposure: C
+Total conditioned exposure: B
+Reduced exposure: C
 
 Proof coverage: 100%
-Bypass count: 0
+Category drift count: 0
 ```
 
 ---
 
 ## What This Demonstrates
 
-Sharpe Nova OS is not advisory.
+Sharpe Nova OS emits environmental context for orchestration stabilization.
 
-It is a pre-execution decision admission layer.
-
-Execution occurs only after Nova admits the decision.
+The example preserves proof chronology, retry discipline, and conditioned exposure accounting without granting downstream permission.
 
 ---
 
-## Non-Bypass Rule
+## Boundary Rule
 
-If a decision is not admitted by Nova, execution does not occur.
+If a decision is not environmentally admissible, the example derives zero conditioned exposure.
 
-If a system ignores this rule, it is outside Nova governance.
+Downstream systems retain their own execution responsibility outside Nova.

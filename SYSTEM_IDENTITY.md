@@ -18,7 +18,7 @@ Sharpe Nova OS is not:
 
 - a trading system
 - an execution engine
-- a signal engine
+- a trade-signal source
 - a generic agent toolkit
 
 ## Core Components

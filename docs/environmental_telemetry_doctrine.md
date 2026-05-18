@@ -210,7 +210,7 @@ Do not use the following framing:
 - market signal
 - execution intelligence
 - AI risk analytics
-- trading optimization
+- trade optimization framing
 
 Correct framing:
 
