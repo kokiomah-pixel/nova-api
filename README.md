@@ -81,5 +81,18 @@ Run the doctrine lint before changing canonical docs or examples:
 
 The check blocks prohibited execution-authority wording, code-like ALLOW enforcement examples, and hidden Unicode controls. Deprecated positioning terms are surfaced as warnings for review.
 
+## Developer Environment Integrity
+
+Sharpe Nova OS treats developer environments as part of the infrastructure trust boundary.
+Contributors should:
+
+- use minimal, trusted editor extensions
+- keep secrets out of repositories and chats
+- keep `.env` files untracked
+- rotate credentials after suspicious extension or tooling activity
+- run doctrine/security lint before opening PRs
+
+See [docs/security/developer-environment-integrity-protocol.md](docs/security/developer-environment-integrity-protocol.md).
+
 For developer integration doctrine, see:
 https://github.com/kokiomah-pixel/nova-developer-docs
