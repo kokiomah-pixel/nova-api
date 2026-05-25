@@ -94,5 +94,11 @@ Contributors should:
 
 See [docs/security/developer-environment-integrity-protocol.md](docs/security/developer-environment-integrity-protocol.md).
 
+## Model Provider Independence
+
+Sharpe Nova OS preserves governance continuity without dependence on a single model provider.
+OpenAI or other reasoning systems may support live interpretation, but the sovereign core of Nova lives in repository doctrine, telemetry schemas, scenario suites, chronology records, governance protocols, and tests.
+If model-provider access is unavailable, operators can continue in degraded governance mode using local linting, decision-intake scenarios, offline templates, and chronology records.
+
 For developer integration doctrine, see:
 https://github.com/kokiomah-pixel/nova-developer-docs
