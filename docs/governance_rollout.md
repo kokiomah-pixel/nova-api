@@ -6,7 +6,7 @@ Sharpe Nova OS exposes governance as part of the control-plane interface.
 
 Governance layers may be activated in phases, but the interpretation boundary remains stable:
 
-- Nova is still a pre-execution decision layer
+- Nova is still a pre-execution 
 - the API remains authoritative
 - refusal states remain binding
 

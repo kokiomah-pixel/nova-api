@@ -4,8 +4,8 @@ from pathlib import Path
 
 # Exact replacements (only public-facing / docs / examples)
 REPLACEMENTS = [
-    (r"decision engine", "governance substrate"),
-    (r"decision layer", "pre-execution governance layer"),
+    (r"", "governance substrate"),
+    (r"", "pre-execution governance layer"),
     (r"\bexecute\b", "admit"),
     (r"\bexecution\b", "admit"),
     (r"control the decision", "condition the intent"),

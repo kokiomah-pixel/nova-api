@@ -248,7 +248,7 @@ Each decision can be anchored to a verifiable record, ensuring that:
 - constraints were applied
 - outputs were not modified post-generation
 
-This repository focuses on the decision layer.
+This repository focuses on the .
 Attestation infrastructure is introduced separately.
 If used, Base serves as an anchoring/settlement layer and does not replace application-level entitlement or billing logic.
 

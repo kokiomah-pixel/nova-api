@@ -26,7 +26,7 @@ rg -n -i --hidden -g '!/.git/**' -g '!/.venv/**' -g '!__pycache__/**' "OPENAI_AP
 
 | File | Reference | Classification | Notes |
 | --- | --- | --- | --- |
-| `docs/openai_workspace_agents.md` | OpenAI workspace agents | optional reasoning interface | Documents how workspace agents may propose actions while Nova remains model-agnostic and binding for decision admission. |
+| `docs/openai_workspace_agents.md` | OpenAI workspace agents | optional reasoning interface | Documents how workspace agents may propose actions while Nova remains model-agnostic and binding for intent admissibility. |
 | `docs/openai_workspace_agents.md` | OpenAI in title | documentation reference | Documentation label only; no runtime import or required API key. |
 | `doctrine-alignment-report.md` | Jarvis-Nova Chief Coherence Officer | documentation reference | Review/audit role language only. |
 | `unresolved-risks-and-actions.md` | Jarvis-Nova Chief Coherence Officer | documentation reference | Follow-up ownership language only. |

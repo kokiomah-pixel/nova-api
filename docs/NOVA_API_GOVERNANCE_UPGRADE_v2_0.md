@@ -185,7 +185,7 @@ Govern whether telemetry itself is admissible.
 
 ### Rule
 Nova must not only ask what telemetry says.
-Nova must ask whether telemetry is trustworthy enough to produce a Decision Admission Record at all.
+Nova must ask whether telemetry is trustworthy enough to produce a intent admissibility Record at all.
 
 ---
 

@@ -2,7 +2,7 @@
 
 OpenAI workspace agents may propose actions.
 
-Nova determines decision admission before capital-moving execution.
+Nova determines intent admissibility before capital-moving execution.
 
 Nova remains external, model-agnostic, and binding.
 

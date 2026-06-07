@@ -275,9 +275,9 @@ def evaluate_test_01(primary: Dict[str, Any]) -> TestResult:
     else:
         gaps.append("Healthy baseline did not resolve to Allowed.")
     if checks["record_created"]:
-        observations.append("Decision Admission Record surface is present via decision_context/timestamp/signature.")
+        observations.append("intent admissibility Record surface is present via decision_context/timestamp/signature.")
     else:
-        gaps.append("Decision Admission Record surface is incomplete.")
+        gaps.append("intent admissibility Record surface is incomplete.")
     if not checks["flow_preserved"]:
         gaps.append("Decision -> Constraint -> Outcome structure is incomplete.")
     outcome = "PASS" if all(checks.values()) else "FAIL"

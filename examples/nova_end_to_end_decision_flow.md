@@ -1,4 +1,4 @@
-# Sharpe Nova OS — End-to-End Decision Admission Flow
+# Sharpe Nova OS — End-to-End intent admissibility Flow
 
 This example demonstrates how Sharpe Nova OS defines the admissible state of a decision before execution and produces verifiable proof.
 
@@ -137,7 +137,7 @@ Decision -> Nova -> Decision Admitted -> Execution
 
 ## Authority Model
 
-* `/v1/context` → determines decision admission
+* `/v1/context` → determines intent admissibility
 * `decision_status` → authoritative decision state
 * `/v1/proof/{decision_id}` → verifies the governed decision state
 

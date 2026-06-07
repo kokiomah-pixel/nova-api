@@ -20,7 +20,7 @@ If you are new to the repository, read in this order:
 - The API is the authoritative interface.
 - The response contract governs interpretation.
 - Nova defines the admissible state of a proposed decision before execution.
-- `/v1/context` returns a Decision Admission Record and `decision_id`.
+- `/v1/context` returns a intent admissibility Record and `decision_id`.
 - `/v1/proof/{decision_id}` returns the authoritative audit surface.
 - Nova is not a trading system or execution framework.
 - Execution without Nova admission is outside system discipline.

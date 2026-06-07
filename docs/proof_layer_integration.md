@@ -1,6 +1,6 @@
 # Proof Layer Integration
 
-`/v1/context` returns the Decision Admission Record.
+`/v1/context` returns the intent admissibility Record.
 
 `/v1/proof/{decision_id}` verifies the governed decision state with proof-backed governance fields.
 

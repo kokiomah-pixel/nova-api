@@ -81,7 +81,7 @@ Telemetry = data exhaust
 
 Telemetry =
 
-> **Decision Admission Records**
+> **intent admissibility Records**
 
 Each record represents:
 
