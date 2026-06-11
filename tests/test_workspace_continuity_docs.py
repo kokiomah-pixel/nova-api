@@ -34,9 +34,11 @@ def test_workspace_deactivation_incident_window_is_recorded():
 
 def test_workspace_continuity_canonical_phrases_are_recorded():
     protocol = _read(PROTOCOL)
+    incident = _read(INCIDENT_RECORD)
 
     assert "Workspace tools are operating interfaces" in protocol
     assert "GitHub remains the durable archive" in protocol
+    assert "Nova can survive interruption if it remembers interruption correctly." in incident
 
 
 def test_workspace_continuity_docs_do_not_contain_secret_patterns():

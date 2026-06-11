@@ -61,6 +61,18 @@ Sharpe Nova OS provides environmental conditioning and coordination telemetry th
 
 Nova is not an execution engine, strategy system, signal engine, or order execution middleware. It does not move capital or prescribe execution steps. Instead, Nova emits admissibility environments, pacing conditions, and coordination-state telemetry for integrators to use within their orchestration systems.
 
+## Proof Determinism and Infrastructure Credibility
+
+Sharpe Nova OS treats proof determinism and classification stability as infrastructure credibility requirements.
+
+The proof layer is designed so identical normalized governance inputs produce the same canonical signature, classification path, and reproducibility hash unless a documented governance epoch, registry version, classification version, or proof schema version intentionally changes the result.
+
+This is not a trading-performance feature.
+
+It protects Reflex Memory chronology, institutional inspectability, governance record integrity, and environmental state reliability.
+
+Nova does not authorize execution, move capital, provide trading signals, or optimize portfolios. It conditions the environment in which autonomous systems and operators make execution decisions locally.
+
 ## Read Next
 
 1. [START_HERE.md](START_HERE.md)

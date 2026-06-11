@@ -122,7 +122,7 @@ Proof determinism does not turn Nova into an execution authority.
 
 Nova remains pre-execution environmental governance infrastructure. It emits governance context, proof records, classifications, and telemetry for upstream systems to inspect. It does not move capital, authorize execution, optimize trades, or control agents.
 
-Reflex calibration improves discipline accuracy.
+Reflex calibration improves chronology consistency and institutional inspectability.
 
 Reflex calibration does not improve trade performance.
 
