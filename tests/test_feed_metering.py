@@ -119,7 +119,8 @@ def test_feed_pricing_metadata_defines_required_cadence_tiers():
 
 def test_feed_metering_tracks_requests_cadence_and_pricing(tmp_path):
     usage_file = tmp_path / "feed_usage.json"
-    started_at = datetime(2026, 5, 12, 12, 0, tzinfo=timezone.utc)
+    now = datetime.now(timezone.utc)
+    started_at = datetime(now.year, now.month, 12, 12, 0, tzinfo=timezone.utc)
 
     with patch.dict(os.environ, {"NOVA_FEED_USAGE_FILE": str(usage_file)}):
         reset_feed_usage_state_for_tests()
