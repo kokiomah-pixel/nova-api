@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-import json
 from typing import Any, Dict, List, Optional
+
+from core.governance_identity import compute_canonical_signature, infer_record_source_type
 
 # NOTE:
 # This runtime is strictly observational.
@@ -18,16 +19,12 @@ REQUIRED_FIELDS = {
     "reproducibility_hash",
     "reflex_ids",
     "account_id",
+    "record_source_type",
 }
 
 
 def _normalized_signature_from_request(normalized_request: Dict[str, Any]) -> str:
-    canonical = {
-        "asset": normalized_request.get("asset"),
-        "intent": normalized_request.get("intent"),
-        "requested_action": normalized_request.get("requested_action"),
-    }
-    return json.dumps(canonical, sort_keys=True, separators=(",", ":"))
+    return compute_canonical_signature(normalized_request)
 
 
 def _reflex_ids_from_payload(payload: Dict[str, Any], reflex_log: Optional[Dict[str, Any]]) -> List[str]:
@@ -81,6 +78,7 @@ def collect_governance_record(
     if not isinstance(classification, list):
         classification = [classification]
 
+    normalized_account_id = str(account_id or proof_record.get("owner") or "")
     record = {
         "decision_id": str(proof_record.get("decision_id") or context_payload.get("decision_id") or ""),
         "observed_at": str(context_payload.get("timestamp_utc") or ""),
@@ -101,7 +99,8 @@ def collect_governance_record(
             for entry in (context_payload.get("reflex_memory", {}).get("registered_entries", []) or [])
             if isinstance(entry, dict) and str(entry.get("registry_id") or "").strip()
         ),
-        "account_id": str(account_id or proof_record.get("owner") or ""),
+        "account_id": normalized_account_id,
+        "record_source_type": infer_record_source_type(normalized_account_id),
         "proof_decision_status": str(proof_payload.get("decision_status") or ""),
         "memory_influence_present": bool(
             proof_payload.get("memory_influence", {}).get("influence_present")

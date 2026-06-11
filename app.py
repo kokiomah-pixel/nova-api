@@ -33,6 +33,7 @@ from core.feed_metering import (
     record_feed_request,
 )
 from core.feed_pricing import pricing_for_tier
+from core.governance_identity import UNCLASSIFIED_GOVERNANCE_EVENT, normalized_canonical_request
 from core.telemetry_engine import InternalTelemetryEngine
 from core.cdp_auth import CDP_API_KEY_ID_ENV, CDP_API_KEY_SECRET_ENV
 from core.x402_config import X402_SETTLEMENT_WALLET, x402_payment_requirement
@@ -1236,11 +1237,11 @@ def _decision_context_for_proof(payload: Dict[str, Any]) -> Dict[str, Any]:
         decision_context = {}
     intent = decision_context.get("intent") or payload.get("intent")
     asset = decision_context.get("asset") or payload.get("asset")
-    return {
+    return normalized_canonical_request({
         "asset": asset,
         "intent": _decision_direction(intent),
         "requested_action": str(intent or "unspecified"),
-    }
+    })
 
 
 def _classify_proof(payload: Dict[str, Any]) -> List[str]:
@@ -1256,20 +1257,15 @@ def _classify_proof(payload: Dict[str, Any]) -> List[str]:
     domain = str(constraint_trace.get("telemetry_domain") or "").strip()
     classifications: List[str] = []
 
-    if category == "billing" or domain == "billing":
-        classifications.append("billing_enforcement")
-    elif category in {
-        "telemetry_integrity",
-    } or domain in {
+    telemetry_domains = {
         "telemetry_integrity",
         "stablecoin_telemetry",
         "validator_telemetry",
         "governance_telemetry",
         "macro_telemetry",
         "execution_telemetry",
-    } and decision_status in {"DENY", "DELAY", "HALT"}:
-        classifications.append("telemetry_integrity")
-    elif category in {
+    }
+    process_categories = {
         "temporal_governance",
         "loop_integrity",
         "halt_release_governance",
@@ -1277,10 +1273,21 @@ def _classify_proof(payload: Dict[str, Any]) -> List[str]:
         "ambiguous_constraint_language",
         "invalid_size_format",
         "process_integrity_violation",
-    }:
+    }
+
+    if category == "billing" or domain == "billing":
+        classifications.append("billing_enforcement")
+    elif category == "telemetry_integrity" or (
+        domain in telemetry_domains and decision_status in {"DENY", "DELAY", "HALT"}
+    ):
+        classifications.append("telemetry_integrity")
+    elif category in process_categories:
         classifications.append("process_integrity")
     elif decision_status != "ALLOW":
         classifications.append("market_system_risk")
+
+    if not classifications:
+        classifications.append(UNCLASSIFIED_GOVERNANCE_EVENT)
 
     return sorted(set(classifications))
 
@@ -3101,16 +3108,17 @@ def _infer_domain_trace(
     venue_text = _normalize_text(venue)
     asset_text = (asset or "").upper()
     advisory_text = _normalize_text(guardrail.get("advisory"))
+    candidates: List[tuple[str, Dict[str, Any]]] = []
 
     if asset_text in STABLECOIN_ASSETS or "peg" in strategy_text or "stablecoin" in strategy_text:
-        trace.update({
+        candidates.append(("stablecoin", {
             "constraint_category": "stablecoin",
             "reflex_memory_class": "stablecoin_defense",
             "domain_signal": "peg_instability",
             "prevented_risk_type": "depeg_exposure",
             "telemetry_domain": "stablecoin_telemetry",
-        })
-    elif asset_text in VALIDATOR_ASSETS or any(term in strategy_text for term in ("validator", "slashing", "uptime", "withdrawal")):
+        }))
+    if asset_text in VALIDATOR_ASSETS or any(term in strategy_text for term in ("validator", "slashing", "uptime", "withdrawal")):
         domain_signal = "validator_pressure"
         if "uptime" in strategy_text:
             domain_signal = "uptime_degradation"
@@ -3118,14 +3126,14 @@ def _infer_domain_trace(
             domain_signal = "slashing_risk"
         elif "withdrawal" in strategy_text:
             domain_signal = "withdrawal_queue_abnormality"
-        trace.update({
+        candidates.append(("validator", {
             "constraint_category": "validator",
             "reflex_memory_class": "validator_reflex",
             "domain_signal": domain_signal,
             "prevented_risk_type": "validator_failure_exposure",
             "telemetry_domain": "validator_telemetry",
-        })
-    elif asset_text in GOVERNANCE_ASSETS or any(term in strategy_text for term in ("governance", "delegate", "proposal", "treasury")):
+        }))
+    if asset_text in GOVERNANCE_ASSETS or any(term in strategy_text for term in ("governance", "delegate", "proposal", "treasury")):
         domain_signal = "governance_pressure"
         if "delegate" in strategy_text:
             domain_signal = "delegate_concentration"
@@ -3133,14 +3141,14 @@ def _infer_domain_trace(
             domain_signal = "proposal_capture_risk"
         elif "treasury" in strategy_text:
             domain_signal = "treasury_compromise_signal"
-        trace.update({
+        candidates.append(("governance", {
             "constraint_category": "governance",
             "reflex_memory_class": "governance_reflex",
             "domain_signal": domain_signal,
             "prevented_risk_type": "governance_capture",
             "telemetry_domain": "governance_telemetry",
-        })
-    elif any(term in strategy_text for term in ("macro", "rate", "inflation", "fx", "volatility")):
+        }))
+    if any(term in strategy_text for term in ("macro", "rate", "inflation", "fx", "volatility")):
         domain_signal = "macro_instability"
         if "rate" in strategy_text:
             domain_signal = "rate_shock"
@@ -3150,22 +3158,33 @@ def _infer_domain_trace(
             domain_signal = "fx_instability"
         elif "volatility" in strategy_text:
             domain_signal = "volatility_expansion"
-        trace.update({
+        candidates.append(("macro", {
             "constraint_category": "macro",
             "reflex_memory_class": "macro_reflex",
             "domain_signal": domain_signal,
             "prevented_risk_type": "macro_regime_exposure",
             "telemetry_domain": "macro_telemetry",
             "regime_context_applied": True,
-        })
-    elif any(term in advisory_text for term in ("liquidity", "fragility")) or "liquidity" in strategy_text or "slippage" in strategy_text or "thin_order_book" in venue_text:
-        trace.update({
+        }))
+    if any(term in advisory_text for term in ("liquidity", "fragility")) or "liquidity" in strategy_text or "slippage" in strategy_text or "thin_order_book" in venue_text:
+        candidates.append(("liquidity", {
             "constraint_category": "liquidity",
             "reflex_memory_class": "liquidity_reflex",
             "domain_signal": "liquidity_deterioration",
             "prevented_risk_type": "execution_slippage_exposure",
             "telemetry_domain": "execution_telemetry",
-        })
+        }))
+
+    domain_priority = {
+        "stablecoin": 0,
+        "validator": 1,
+        "governance": 2,
+        "macro": 3,
+        "liquidity": 4,
+    }
+    if candidates:
+        _, selected_trace = sorted(candidates, key=lambda item: (domain_priority.get(item[0], 99), item[0]))[0]
+        trace.update(selected_trace)
     else:
         trace.update({
             "constraint_category": "general",

@@ -10,7 +10,10 @@ from core.bazaar_metadata import build_services_manifest
 
 
 def _load_services_json() -> dict:
-    return json.loads(Path("services.json").read_text(encoding="utf-8"))
+    path = Path("services.json")
+    if not path.exists():
+        return build_services_manifest()
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def test_services_json_is_valid_crawler_manifest():

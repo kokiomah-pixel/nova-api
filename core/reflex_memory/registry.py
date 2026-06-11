@@ -74,7 +74,16 @@ def select_active_entry(
         "increase_position",
     }
 
-    for entry in registry:
+    activation_priority = {
+        "stress_new_risk_block": 0,
+        "elevated_fragility_size_brake": 1,
+        "stable_monitoring_reference": 2,
+    }
+    ordered_registry = sorted(
+        registry,
+        key=lambda entry: (activation_priority.get(entry.registry_id, 99), entry.registry_id, entry.failure_class),
+    )
+    for entry in ordered_registry:
         if entry.registry_id == "stress_new_risk_block" and is_risk_increasing:
             return entry
         if (
