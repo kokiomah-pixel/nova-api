@@ -45,6 +45,14 @@ rg -n -i --hidden -g '!/.git/**' -g '!/.venv/**' -g '!__pycache__/**' "OPENAI_AP
 - `docs/continuity/model-provider-dependency-audit.md`
 - `tests/test_model_provider_independence.py`
 
+## Workspace Continuity Reference
+
+The May 25 to June 11, 2026 Business workspace deactivation confirmed why model-provider independence and workspace continuity must be treated as separate but related continuity layers.
+
+Model-provider independence protects reasoning continuity.
+
+Workspace continuity protects operating-environment availability.
+
 ## Runtime Dependency Finding
 
 No required runtime dependency on OpenAI was found in the core Nova API, governance runtime, telemetry engine, decision-intake scenario suite, x402 observability helpers, billing state, proof layer, or doctrine lint tooling.

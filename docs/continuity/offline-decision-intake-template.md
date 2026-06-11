@@ -1,5 +1,13 @@
 # Offline Decision Intake Template
 
+## Workspace Continuity Note
+
+The May 25 to June 11, 2026 Business workspace deactivation confirmed why model-provider independence and workspace continuity must be treated as separate but related continuity layers.
+
+Model-provider independence protects reasoning continuity.
+
+Workspace continuity protects operating-environment availability.
+
 ## Decision Context
 
 Describe the decision being evaluated.

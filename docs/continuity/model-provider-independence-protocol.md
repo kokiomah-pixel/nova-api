@@ -8,6 +8,12 @@ GitHub repository history is the durable archive for Nova doctrine, telemetry sc
 
 OpenAI and other model providers may support live reasoning, drafting, interpretation, and conversational operation. They are optional reasoning interfaces. They are not the sovereign core of Sharpe Nova OS.
 
+The May 25 to June 11, 2026 Business workspace deactivation confirmed why model-provider independence and workspace continuity must be treated as separate but related continuity layers.
+
+Model-provider independence protects reasoning continuity.
+
+Workspace continuity protects operating-environment availability.
+
 ## Continuity Principle
 
 The sovereign core remains in repository-controlled artifacts:

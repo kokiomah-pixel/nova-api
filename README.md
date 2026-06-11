@@ -100,5 +100,15 @@ Sharpe Nova OS preserves governance continuity without dependence on a single mo
 OpenAI or other reasoning systems may support live interpretation, but the sovereign core of Nova lives in repository doctrine, telemetry schemas, scenario suites, chronology records, governance protocols, and tests.
 If model-provider access is unavailable, operators can continue in degraded governance mode using local linting, decision-intake scenarios, offline templates, and chronology records.
 
+## Workspace Continuity
+
+Sharpe Nova OS treats workspace availability as part of the operating-environment trust boundary.
+
+The canonical doctrine, chronology, governance protocols, tests, and decision-intake infrastructure are preserved in GitHub.
+
+Workspace tools may support live operations, but they are not the sovereign core of the OS.
+
+Workspace interruptions must be recorded as continuity events, reconciled into chronology, and reviewed for sovereignty, billing, access, and archive-risk implications.
+
 For developer integration doctrine, see:
 https://github.com/kokiomah-pixel/nova-developer-docs
