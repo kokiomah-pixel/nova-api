@@ -8,7 +8,7 @@ Sharpe Nova OS is pre-execution environmental governance infrastructure for auto
 
 Nova emits pre-action environmental state that local operators, agents, and orchestration systems can consume before making their own execution decisions. The system combines telemetry, Reflex Memory chronology, constraint logic, classification stability, proof reproducibility, source segmentation, and governance continuity.
 
-The clearest technical interface is the Pre-Action Context Contract. A consuming system submits an intended action and surrounding environmental context. Nova returns environmental state, classification context, reproducibility metadata, source segmentation, and non-authority telemetry. The consumer remains responsible for local governance and execution decisions.
+The clearest technical interface is the Pre-Action Context Contract (`docs/architecture/pre-action-context-contract.md`). A consuming system submits an intended action and surrounding environmental context. Nova returns environmental state, classification context, reproducibility metadata, source segmentation, and non-authority telemetry. The consumer remains responsible for local governance and execution decisions.
 
 The innovation is not a new execution path. It is a reproducible governance layer that makes pre-action context inspectable, testable, and usable before autonomous capital workflows proceed.
 
@@ -29,7 +29,7 @@ Phase I will validate whether Nova can provide a reliable governance substrate u
 
 This is R&D rather than ordinary implementation because the hard problem is not exposing another API field. The hard problem is proving that pre-execution environmental state can remain reproducible, interpretable, and useful across autonomous workflows while avoiding hidden execution authority.
 
-Phase I evidence should include doctrine lint results, deterministic replay, proof reproducibility tests, classification determinism tests, source segmentation validation, continuity workflows, and pre-action context examples.
+Phase I evidence should include doctrine lint results, deterministic replay, proof reproducibility tests, classification determinism tests, source segmentation validation, continuity workflows, and pre-action context examples (`examples/pre_action_context/`).
 
 ## 3. Market Opportunity
 

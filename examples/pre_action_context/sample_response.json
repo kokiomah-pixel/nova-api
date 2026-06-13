@@ -1,0 +1,26 @@
+{
+  "decision_context": {
+    "intent": "settlement",
+    "asset": "USDC",
+    "requested_size": 1000
+  },
+  "environmental_state": {
+    "constraint_pressure": "elevated",
+    "timing_pressure": "high",
+    "retry_escalation_risk": "elevated",
+    "telemetry_integrity_state": "operational"
+  },
+  "classification_context": {
+    "classification_path": [
+      "telemetry_integrity",
+      "process_integrity"
+    ],
+    "record_source_type": "production_like"
+  },
+  "reproducibility": {
+    "canonical_signature": "example_canonical_signature",
+    "proof_schema_version": "v1",
+    "reproducibility_hash": "example_hash"
+  },
+  "non_authority_boundary": "Consumer remains responsible for all execution decisions."
+}

@@ -40,6 +40,21 @@ Sharpe Nova OS emphasizes environmental conditioning and coordination. The syste
 
 ## Architecture Diagrams
 
+### Pre-Action Context Flow
+
+```mermaid
+flowchart LR
+    A[Local Orchestrator / Agent] --> B[Request /v1/context]
+    B --> C[Sharpe Nova OS]
+    C --> D[Environmental State]
+    C --> E[Classification Context]
+    C --> F[Proof + Reproducibility Metadata]
+    D --> G[Local Governance Review]
+    E --> G
+    F --> G
+    G --> H[Local Decision Outside Nova]
+```
+
 ### Governance Loop
 
 ```mermaid
@@ -76,4 +91,16 @@ flowchart TB
     C --> D[Optional Reasoning Provider]
     C --> E[Offline Decision Intake]
     E --> F[Manual Architect / Operator Review]
+```
+
+### Deterministic Proof and Classification Loop
+
+```mermaid
+flowchart LR
+    A[Normalized Governance Input] --> B[Canonical Signature]
+    B --> C[Classification Path]
+    C --> D[Reproducibility Hash]
+    D --> E[Proof Record]
+    E --> F[Replay / Review]
+    F --> A
 ```

@@ -1,0 +1,15 @@
+{
+  "actor_type": "local_orchestrator",
+  "intent": {
+    "requested_action": "settlement",
+    "intent_type": "machine_payment",
+    "asset": "USDC",
+    "urgency": "high"
+  },
+  "environment": {
+    "recent_retry_count": 4,
+    "operator_review_available": true,
+    "telemetry_reliability": 0.91,
+    "telemetry_age_seconds": 12
+  }
+}

@@ -4833,7 +4833,16 @@ def get_feed_usage(
     return JSONResponse(payload)
 
 
-@app.get("/v1/context")
+@app.get(
+    "/v1/context",
+    tags=["Pre-Action Context"],
+    summary="Get pre-action environmental context",
+    description=(
+        "Returns pre-action environmental state for local governance review before execution. "
+        "The response is non-authority telemetry; consumers remain responsible for all "
+        "local governance and execution decisions."
+    ),
+)
 def get_context(
     request: Request,
     authorization: Optional[str] = Header(default=None),

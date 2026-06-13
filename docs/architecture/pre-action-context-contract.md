@@ -1,15 +1,22 @@
 # Pre-Action Context Contract
-## Sharpe Nova OS
 
 ## Purpose
 
-This contract describes what autonomous systems consume from Nova before action. It is a reviewer-facing interface artifact, not a runtime schema migration.
+This contract is the canonical builder-facing explanation of how autonomous systems consume Nova before action. It describes the existing pre-action context surface and the meaning of the environmental state Nova emits.
 
 Nova emits environmental state before execution; it does not decide whether execution occurs.
 
+## Canonical Endpoint
+
+`/v1/context` is the canonical pre-action context endpoint.
+
+Builders should inspect this endpoint first. It accepts an intended action context through query parameters such as `intent`, `asset`, `size`, `venue`, `strategy`, telemetry fields, and governance evidence fields. It returns a signed coordination record with environmental state, classification context, reproducibility metadata, and proof material.
+
+`/v1/proof/{decision_id}` verifies the derived coordination context after a context response creates a proof-bearing record.
+
 ## What Pre-Action Context Means
 
-Pre-action context is governance information produced before a local operator, agent, or orchestration system decides how to proceed. It can describe constraint pressure, timing pressure, classification state, source segmentation, and proof reproducibility.
+Pre-action context is governance information produced before a local operator, agent, or orchestration system decides how to proceed. It can describe constraint pressure, timing pressure, retry escalation risk, classification state, source segmentation, proof reproducibility, and continuity posture.
 
 ## What Nova Emits
 
@@ -17,7 +24,7 @@ Nova may emit:
 
 - canonical governance identity
 - environmental state
-- classification path
+- classification context and classification path
 - reproducibility metadata
 - source segmentation
 - conditioning guidance
@@ -26,15 +33,42 @@ Nova may emit:
 
 ## What Nova Does Not Emit
 
-Nova does not emit execution commands, trade recommendations, capital allocation guidance, custody instructions, or local decision authority.
+Nova does not emit execution commands, trade recommendations, capital allocation guidance, custody instructions, local decision authority, or agent-control instructions.
 
 ## Input Shape
 
 A pre-action context request describes an intended action and the surrounding environment. The input should be treated as context for environmental classification, not as a request for permission.
 
+Current `/v1/context` inputs are query fields, not a JSON body. Common builder-facing inputs include:
+
+- `intent`
+- `asset`
+- `size`
+- `venue`
+- `strategy`
+- `telemetry_age_seconds`
+- `telemetry_reliability`
+- `telemetry_source_scores`
+- `halt_release_authority_input`
+- `halt_release_evidence_input`
+
 ## Output Shape
 
 A pre-action context response returns environmental state and reproducibility metadata. The consuming system remains responsible for all local governance and execution decisions.
+
+Current `/v1/context` responses include a signed coordination record with fields such as:
+
+- `decision_admission_record`
+- `decision_context`
+- `constraint_analysis`
+- `constraint_trace`
+- `decision_status`
+- `loop_classification`
+- `telemetry_integrity_state`
+- `permission_budget_class`
+- `reflex_memory_class`
+- proof and reproducibility fields attached by the proof layer
+- `signature`
 
 ## Environmental State Fields
 
@@ -46,14 +80,17 @@ Common environmental fields may include:
 - `retry_escalation_risk`
 - `operator_review_available`
 - `continuity_posture`
+- `loop_classification`
+- `telemetry_integrity_state`
+- `permission_budget_class`
 
-## Classification Path
+## Classification Context
 
-The classification path explains how Nova categorized the environmental pressure. It should be reproducible for equivalent normalized inputs unless a documented governance epoch or schema version changes the result.
+Classification context explains how Nova categorized the environmental pressure. The classification path should be reproducible for equivalent normalized inputs unless a documented governance epoch, registry version, classification version, or proof schema version changes the result.
 
-## Reproducibility Hash
+## Reproducibility Metadata
 
-The reproducibility hash supports replay, auditability, and institutional review. It is not a permission token.
+Reproducibility metadata can include canonical signature, proof schema version, classification path, and reproducibility hash. These fields support replay, auditability, and institutional review. They are not permission tokens.
 
 ## Source Segmentation
 
@@ -64,6 +101,8 @@ Source segmentation distinguishes synthetic, production-like, and live records s
 Nova conditions the environment before execution; it does not authorize execution. The consumer retains local execution authority.
 
 ## Example Input
+
+Conceptual JSON shape:
 
 ```json
 {
@@ -83,7 +122,15 @@ Nova conditions the environment before execution; it does not authorize executio
 }
 ```
 
+Equivalent current endpoint shape:
+
+```text
+GET /v1/context?intent=settlement&asset=USDC&size=1000&telemetry_reliability=0.91&telemetry_age_seconds=12
+```
+
 ## Example Output
+
+Conceptual response shape:
 
 ```json
 {
@@ -124,6 +171,12 @@ An autonomous agent can request pre-action context before routing an intended ac
 
 If model-provider access is unavailable, an operator can use offline decision intake and chronology records to preserve governance context until normal review resumes.
 
+## Local Execution Responsibility
+
+Consumers remain responsible for all local governance and execution decisions. Nova can inform review, pacing, delay, escalation, or cancellation logic, but those actions happen outside Nova.
+
 ## Final Boundary
 
 Nova emits environmental state before execution; it does not decide whether execution occurs.
+
+Consumers remain responsible for all local governance and execution decisions.

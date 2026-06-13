@@ -73,6 +73,15 @@ It protects Reflex Memory chronology, institutional inspectability, governance r
 
 Nova does not authorize execution, move capital, provide trading signals, or optimize portfolios. It conditions the environment in which autonomous systems and operators make execution decisions locally.
 
+## Builder Entry Points
+
+- Pre-Action Context Contract: [docs/architecture/pre-action-context-contract.md](docs/architecture/pre-action-context-contract.md)
+- Pre-Action Context Example: [examples/pre_action_context/](examples/pre_action_context/)
+- Proof Replay Example: [examples/proof_replay/](examples/proof_replay/)
+- NSF Fundability Materials: [docs/grants/nsf-seed-fund/](docs/grants/nsf-seed-fund/)
+- Proof Determinism Note: [docs/governance/proof-determinism-and-classification-stability.md](docs/governance/proof-determinism-and-classification-stability.md)
+- Continuity Protocols: [docs/continuity/](docs/continuity/)
+
 ## NSF Seed Fund Readiness
 
 Sharpe Nova OS is preparing an NSF Seed Fund research and commercialization packet focused on pre-execution environmental governance for autonomous capital systems.
