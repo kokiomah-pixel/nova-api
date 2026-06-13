@@ -67,7 +67,7 @@ Sharpe Nova OS treats proof determinism and classification stability as infrastr
 
 The proof layer is designed so identical normalized governance inputs produce the same canonical signature, classification path, and reproducibility hash unless a documented governance epoch, registry version, classification version, or proof schema version intentionally changes the result.
 
-This is not a trading-performance feature.
+This is not a market-outcome feature.
 
 It protects Reflex Memory chronology, institutional inspectability, governance record integrity, and environmental state reliability.
 
@@ -80,6 +80,21 @@ Sharpe Nova OS is preparing an NSF Seed Fund research and commercialization pack
 The grant-readiness materials describe the system's technical novelty, research risk, validation plan, commercialization pathway, and societal impact.
 
 See [docs/grants/nsf-seed-fund/](docs/grants/nsf-seed-fund/).
+
+## NSF Fundability Materials
+
+Sharpe Nova OS maintains reviewer-facing NSF Seed Fund materials that explain the system's technical novelty, research risk, Phase I validation plan, commercialization pathway, societal impact, and non-trading boundary.
+
+Key materials:
+
+- [Project Pitch Draft](docs/grants/nsf-seed-fund/project-pitch-draft.md)
+- [Non-Trading Positioning Memo](docs/grants/nsf-seed-fund/non-trading-positioning-memo.md)
+- [Phase I Validation Matrix](docs/grants/nsf-seed-fund/phase-i-validation-matrix.md)
+- [Reviewer Risk and Response Memo](docs/grants/nsf-seed-fund/reviewer-risk-and-response.md)
+- [Pre-Action Context Contract](docs/architecture/pre-action-context-contract.md)
+- [Pre-Action Context Example](examples/pre_action_context/)
+
+Sharpe Nova OS conditions the environment before execution; it does not authorize execution.
 
 ## Read Next
 
