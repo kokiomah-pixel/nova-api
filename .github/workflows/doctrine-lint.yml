@@ -1,4 +1,4 @@
-name: Doctrine Lint
+name: CI
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ main, master ]
 
 jobs:
-  doctrine-lint:
+  validation:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,5 +24,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Doctrine Lint
-        run: python -m pytest tests/test_doctrine_lint.py -q --tb=no
+      - name: Run doctrine lint
+        run: python scripts/doctrine_lint.py
+
+      - name: Run decision scenario suite
+        run: python scripts/run_decision_scenario_suite.py
+
+      - name: Run tests
+        run: python -m pytest
+
+      - name: Check whitespace
+        run: git diff --check

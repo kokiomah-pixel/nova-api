@@ -73,6 +73,14 @@ It protects Reflex Memory chronology, institutional inspectability, governance r
 
 Nova does not authorize execution, move capital, provide trading signals, or optimize portfolios. It conditions the environment in which autonomous systems and operators make execution decisions locally.
 
+## NSF Seed Fund Readiness
+
+Sharpe Nova OS is preparing an NSF Seed Fund research and commercialization packet focused on pre-execution environmental governance for autonomous capital systems.
+
+The grant-readiness materials describe the system's technical novelty, research risk, validation plan, commercialization pathway, and societal impact.
+
+See [docs/grants/nsf-seed-fund/](docs/grants/nsf-seed-fund/).
+
 ## Read Next
 
 1. [START_HERE.md](START_HERE.md)

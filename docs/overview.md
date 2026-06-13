@@ -37,3 +37,43 @@ Sharpe Nova OS emphasizes environmental conditioning and coordination. The syste
 - Supporting fields explain telemetry and constraint analysis.
 - Proof verifies the derived context.
 - No external consumer should infer sovereign reasoning or internal policy weights from emitted fields.
+
+## Architecture Diagrams
+
+### Governance Loop
+
+```mermaid
+flowchart LR
+    A[Reflex Memory] --> B[Telemetry]
+    B --> C[Environmental State]
+    C --> D[Pattern Engine]
+    D --> E[Alert Engine]
+    E --> F[Human / Operator Review]
+    F --> G[Registry Evolution]
+    G --> A
+```
+
+### Sovereignty Boundary
+
+```mermaid
+flowchart LR
+    A[Autonomous System / Operator] --> B[Request Pre-Action Context]
+    B --> C[Sharpe Nova OS]
+    C --> D[Environmental State + Constraint Context]
+    D --> E[Local Governance Decision]
+    E --> F[Execution Environment]
+
+    C -. does not authorize .-> E
+    C -. does not execute .-> F
+```
+
+### Continuity Stack
+
+```mermaid
+flowchart TB
+    A[GitHub Durable Archive] --> B[Doctrine + Tests + Chronology]
+    B --> C[Deterministic Governance Tools]
+    C --> D[Optional Reasoning Provider]
+    C --> E[Offline Decision Intake]
+    E --> F[Manual Architect / Operator Review]
+```
