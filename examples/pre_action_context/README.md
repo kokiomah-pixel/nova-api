@@ -1,19 +1,18 @@
 # Pre-Action Context Example
-## Local Orchestrator Consuming Nova Environmental State
 
-## Purpose
+This example shows how a local orchestrator or agent workflow can request Nova context before taking action.
 
-This conceptual example shows how a local orchestrator can consume Nova environmental state before applying its own governance rules. It does not implement execution behavior.
+Nova returns environmental state and non-authority telemetry. The local system remains responsible for deciding whether to proceed, slow down, escalate, delay, or cancel.
 
 This example does not execute trades, move capital, approve payments, route transactions, or authorize action.
 
 ## Flow
 
-1. Local orchestrator prepares an intended action.
-2. Orchestrator requests pre-action context from Nova.
-3. Nova returns environmental state and reproducibility metadata.
-4. Orchestrator applies local governance rules.
-5. Execution, delay, escalation, or cancellation happens outside Nova.
+1. Prepare intended action locally.
+2. Request Nova pre-action context.
+3. Inspect environmental state.
+4. Apply local governance rules.
+5. Decide locally.
 
 ## Example Request
 
@@ -71,6 +70,8 @@ if context["environmental_state"]["constraint_pressure"] == "elevated":
 
 local_orchestrator.decide_locally()
 ```
+
+The final decision remains outside Nova.
 
 ## Non-Authority Boundary
 

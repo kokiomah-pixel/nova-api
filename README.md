@@ -4,7 +4,26 @@ Sharpe Nova OS is a pre-execution environmental governance layer that emits deri
 
 This repository is the canonical Sharpe Nova OS system repo. It contains the Nova API, proof layer, governance runtime, canonical specs, tests, and runnable examples. The project has been reframed to emphasize environmental coordination, pacing normalization, and sovereignty-preserving boundaries.
 
-## Start Here (Required)
+## Start Here
+
+Sharpe Nova OS is pre-execution environmental governance infrastructure for autonomous capital systems.
+
+Nova emits pre-action context before execution. It does not authorize execution, move capital, recommend trades, generate alpha, or optimize portfolios.
+
+If you are reviewing the project for the first time, start with this path:
+
+1. Read the system overview: [docs/overview.md](docs/overview.md)
+2. Inspect the Pre-Action Context Contract: [docs/architecture/pre-action-context-contract.md](docs/architecture/pre-action-context-contract.md)
+3. Review the builder example: [examples/pre_action_context/](examples/pre_action_context/)
+4. Review proof determinism and classification stability: [docs/governance/proof-determinism-and-classification-stability.md](docs/governance/proof-determinism-and-classification-stability.md)
+5. Review continuity posture: [docs/continuity/](docs/continuity/)
+6. Review NSF Phase I framing: [docs/grants/nsf-seed-fund/project-pitch-submission-draft.md](docs/grants/nsf-seed-fund/project-pitch-submission-draft.md)
+
+Canonical boundary:
+
+> Nova conditions the environment before execution; it does not authorize execution.
+
+## Quick Local Check
 
 Before reading further, run one decision through Nova to observe the environmental context it emits. Nova's role is to provide a coordination context — it does not prescribe or perform execution.
 
@@ -57,9 +76,38 @@ Sharpe Nova OS provides environmental conditioning and coordination telemetry th
 - tests for integrity of emitted environmental context and proof
 - examples showing integration flows that consume coordination context
 
+## What Nova Is
+
+Sharpe Nova OS is a pre-execution environmental governance layer that emits deterministic pre-action context for autonomous capital systems.
+
+It helps local operators, agents, and orchestration systems inspect environmental state before they make their own execution decisions.
+
 ## What Nova Is Not
 
-Nova is not an execution engine, strategy system, signal engine, or order execution middleware. It does not move capital or prescribe execution steps. Instead, Nova emits admissibility environments, pacing conditions, and coordination-state telemetry for integrators to use within their orchestration systems.
+Nova is not any of the following:
+
+- not a trading system
+- not a signal engine
+- not an execution engine
+- not an agent framework
+- not a payment processor
+- not a portfolio optimizer
+- not an investment recommendation system
+- not an authority layer that approves or denies execution
+
+Consumers remain responsible for all local governance and execution decisions.
+
+## Ten-Minute Reviewer Path
+
+| Reviewer Question | Where To Look |
+|---|---|
+| What is Nova? | [docs/overview.md](docs/overview.md) |
+| What does Nova emit before action? | [docs/architecture/pre-action-context-contract.md](docs/architecture/pre-action-context-contract.md) |
+| How would a builder consume Nova? | [examples/pre_action_context/](examples/pre_action_context/) |
+| How does Nova preserve determinism? | [docs/governance/proof-determinism-and-classification-stability.md](docs/governance/proof-determinism-and-classification-stability.md) |
+| How does Nova handle continuity failures? | [docs/continuity/](docs/continuity/) |
+| Why is this Phase I R&D? | [docs/grants/nsf-seed-fund/project-pitch-submission-draft.md](docs/grants/nsf-seed-fund/project-pitch-submission-draft.md) |
+| What is the current direction? | [ROADMAP.md](ROADMAP.md) |
 
 ## Proof Determinism and Infrastructure Credibility
 
@@ -72,6 +120,22 @@ This is not a market-outcome feature.
 It protects Reflex Memory chronology, institutional inspectability, governance record integrity, and environmental state reliability.
 
 Nova does not authorize execution, move capital, provide trading signals, or optimize portfolios. It conditions the environment in which autonomous systems and operators make execution decisions locally.
+
+## Trust Surface
+
+Nova's trust posture is based on inspectable governance behavior, not execution performance.
+
+Key trust surfaces include:
+
+- classification stability
+- proof reproducibility
+- deterministic canonical signatures
+- source segmentation
+- governance chronology
+- doctrine linting
+- continuity under model-provider or workspace interruption
+
+These controls support reviewability before autonomous capital workflows proceed.
 
 ## Builder Entry Points
 
@@ -115,15 +179,27 @@ Sharpe Nova OS conditions the environment before execution; it does not authoriz
 6. [docs/governance-epochs/epoch-2026-05-month-two.md](docs/governance-epochs/epoch-2026-05-month-two.md)
 7. [specs/decision_admission_contract.json](specs/decision_admission_contract.json)
 
-## Doctrine Consistency Check
+## Verification
 
-Run the doctrine lint before changing canonical docs or examples:
+Run doctrine lint:
 
 ```bash
 ./.venv/bin/python scripts/doctrine_lint.py
 ```
 
-The check blocks prohibited execution-authority wording, code-like ALLOW enforcement examples, and hidden Unicode controls. Deprecated positioning terms are surfaced as warnings for review.
+Run the decision scenario suite:
+
+```bash
+./.venv/bin/python scripts/run_decision_scenario_suite.py
+```
+
+Run tests:
+
+```bash
+./.venv/bin/python -m pytest
+```
+
+The doctrine check blocks prohibited execution-authority wording, code-like ALLOW enforcement examples, and hidden Unicode controls. Deprecated positioning terms are surfaced as warnings for review.
 
 ## Developer Environment Integrity
 

@@ -1,5 +1,15 @@
 # Pre-Action Context Contract
 
+## Reviewer Summary
+
+The Pre-Action Context Contract is the clearest integration surface for Sharpe Nova OS.
+
+A local system submits an intended action and surrounding environmental context. Nova returns pre-action environmental state, classification context, reproducibility metadata, source segmentation, and non-authority telemetry.
+
+The consuming system remains responsible for all local governance and execution decisions.
+
+Nova emits context before action. It does not authorize action.
+
 ## Purpose
 
 This contract is the canonical builder-facing explanation of how autonomous systems consume Nova before action. It describes the existing pre-action context surface and the meaning of the environmental state Nova emits.
@@ -17,6 +27,14 @@ Builders should inspect this endpoint first. It accepts an intended action conte
 ## What Pre-Action Context Means
 
 Pre-action context is governance information produced before a local operator, agent, or orchestration system decides how to proceed. It can describe constraint pressure, timing pressure, retry escalation risk, classification state, source segmentation, proof reproducibility, and continuity posture.
+
+## Flow
+
+1. Local system prepares intended action.
+2. Local system requests Nova pre-action context.
+3. Nova returns environmental state and reproducibility metadata.
+4. Local system applies local governance rules.
+5. Any execution, delay, escalation, or cancellation happens outside Nova.
 
 ## What Nova Emits
 
