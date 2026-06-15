@@ -1,10 +1,10 @@
-# Proof of Prevented Failure 02 — Stablecoin Depeg Defense
+# Scenario Proof 02 — Stablecoin Depeg Containment
 
 Sharpe Nova OS — Institutional Proof Surface
 
-Sharpe Nova OS is a pre-execution decision admissibility layer that resolves proposed capital actions into governed decision states before execution.
+Sharpe Nova OS is a pre-execution environmental governance layer that emits non-authority context for proposed capital actions before execution.
 
-This proof documents a stablecoin depeg failure class, the unconstrained path that would have remained execution-permitted without Nova, the governed decision state Nova returned before execution, and the prevented outcomes attributable to pre-execution discipline.
+This proof documents a stablecoin depeg failure class, the unconstrained path modeled without Nova, the constrained context Nova returned before execution, and the scenario outcomes attributable to pre-execution discipline.
 
 ## 1. Failure Class
 
@@ -25,7 +25,7 @@ The fragile state is characterized by:
 - false stability assumptions
 - deteriorating redemption confidence
 
-Under these conditions, capital can remain in an execution-permitted state even as the stablecoin regime becomes structurally fragile.
+Under these conditions, capital can remain in an unconstrained local path even as the stablecoin regime becomes structurally fragile.
 
 ## 3. Unconstrained Path
 
@@ -33,7 +33,7 @@ Without Nova, full exposure remains in the unstable stablecoin.
 
 Capital remains exposed to depeg risk, liquidity trap risk, and delayed recognition of regime deterioration.
 
-Without pre-execution discipline, the proposed allocation continues with no authoritative decision state bound before capital deployment.
+Without pre-execution discipline, the proposed allocation continues with no pre-action context bound before capital deployment.
 
 The unconstrained outcome is explicit:
 
@@ -44,7 +44,7 @@ The unconstrained outcome is explicit:
 
 Without Nova, capital remains exposed.
 
-## 4. Nova Decision State
+## 4. Nova Context State
 
 Nova intervenes before execution through a governed pre-execution discipline chain.
 
@@ -52,11 +52,11 @@ The decision-state path is explicit:
 
 1. telemetry-driven classification detects depeg conditions and liquidity instability
 2. the environment is classified as a fragility state associated with false stability assumptions
-3. Nova returns a constrained decision state before execution
+3. Nova returns constrained pre-action context before execution
 4. unstable stablecoin exposure is reduced or reallocated before capital deployment
-5. the decision is converted from an execution-permitted state to a constrained state
+5. the decision context is converted from an unconstrained state to a constrained state
 
-This is a governed decision state returned before capital moves, not a post-event response.
+This is a governed context state returned before any local system decides whether capital moves, not a post-event response.
 
 With Nova, exposure is reduced before execution.
 
@@ -67,30 +67,30 @@ The relevant measurement surface in this proof is the change in execution state 
 | Measurement Surface | No Reflex / No Nova | With Nova |
 |---------------------|---------------------|-----------|
 | Stablecoin exposure state | Full exposure remains in unstable stablecoin | Exposure reduced or reallocated before execution |
-| Liquidity stress handling | Delayed reaction to depeg | Constrained decision state returned before deployment |
+| Liquidity stress handling | Delayed reaction to depeg | Constrained context returned before deployment |
 | Capital impairment path | Potential drawdown amplification remains open | Impairment path materially constrained |
 | Volatility propagation | Stress transmits into downstream positions | Propagation reduced through conditioned exposure |
 
-This proof records a disciplined change in allowed execution state. Quantitative scenario-specific metrics should be added only when validated for this failure class.
+This proof records a disciplined change in pre-action context state. Quantitative scenario-specific metrics should be added only when validated for this failure class.
 
-## 6. Prevented Outcomes
+## 6. Modeled Outcome Deltas
 
-Because Nova returned a governed decision state before execution, the following outcomes were prevented from propagating further:
+Because Nova returned constrained context before execution, the modeled scenario records the following deltas from the unconstrained path:
 
 - capital impairment from full unstable stablecoin exposure was avoided
 - liquidity trap exposure was avoided
 - delayed reaction to depeg conditions was reduced
 - volatility propagation into downstream capital paths was reduced
-- compromised stablecoin exposure was prevented from remaining execution-permitted
+- compromised stablecoin exposure moved from unconstrained context to constrained context
 
 This proof does not claim that depeg conditions disappeared.
 
-It proves that Nova constrained the failure path before execution and prevented the unconstrained exposure state from remaining active.
+It records that Nova constrained the modeled failure path before execution and changed the scenario outcome relative to the unconstrained path.
 
 ## 7. Institutional Conclusion
 
 This proof documents stablecoin depeg defense as a pre-execution discipline outcome.
 
-The addressed failure class is stablecoin instability under liquidity stress and false stability assumptions. Nova resolved the proposed allocation into a constrained decision state through telemetry-driven classification before execution, reducing or reallocating unstable stablecoin exposure before capital deployment.
+The addressed failure class is stablecoin instability under liquidity stress and false stability assumptions. Nova emitted constrained context for the proposed allocation through telemetry-driven classification before execution, reducing or reallocating unstable stablecoin exposure in the scenario before capital deployment.
 
-For allocators, treasuries, and agentic capital systems, the significance is infrastructural. Nova did not repair the failure after the fact. It constrained a fragile, execution-permitted exposure state before capital moved, reducing capital impairment risk and limiting downstream volatility propagation through governed intervention.
+For allocators, treasuries, and agentic capital systems, the significance is infrastructural. Nova did not repair the failure after the fact. It emitted constrained context for a fragile exposure state before capital moved in the scenario, reducing modeled capital impairment risk and limiting downstream volatility propagation.

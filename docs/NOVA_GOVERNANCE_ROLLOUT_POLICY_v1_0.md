@@ -330,7 +330,7 @@ They do not:
 - override `decision_status`
 - introduce execution-side logic into Nova
 
-Nova remains the sole source of decision authority.
+Nova remains the source of pre-action context, while execution authority stays with local systems.
 
 ---
 

@@ -1,8 +1,8 @@
 # Proof Layer Integration
 
-`/v1/context` returns the intent admissibility Record.
+`/v1/context` returns a pre-action context record.
 
-`/v1/proof/{decision_id}` verifies the governed decision state with proof-backed governance fields.
+`/v1/proof/{decision_id}` verifies the emitted context state with proof-backed governance fields.
 
 ## Required Fields
 
@@ -17,8 +17,8 @@
 
 - audit verification
 - governance tracking
-- proof-backed review of the governed decision state
+- proof-backed review of the emitted context state
 
-Execution authority remains with `decision_status` from `/v1/context`.
+Execution authority remains outside Nova.
 
-Proof may inform audit and downstream review, but it must not replace `decision_status` as decision authority.
+Proof may inform audit and downstream review, but it does not authorize action.

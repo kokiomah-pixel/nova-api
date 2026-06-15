@@ -89,8 +89,8 @@ Bypassing Nova due to convenience is outside governed decision discipline.
 
 ## Non-Bypass Rule
 
-Sharpe Nova OS is a decision discipline layer.
+Sharpe Nova OS is a pre-action context discipline layer.
 
-If a system ignores or bypasses governed decision state, it is no longer operating under Nova's decision discipline.
+If a system ignores or bypasses emitted context state, it is no longer operating under Nova's context discipline.
 
-Nova is only integrated when `decision_status` is binding.
+Nova is only integrated when `decision_status` is treated as required non-authority review context.

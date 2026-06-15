@@ -6,29 +6,29 @@ Sharpe Nova OS integrates through a machine-readable API contract.
 
 1. Submit a decision candidate to `/v1/context`.
 2. Parse `decision_status`, `decision_id`, and `system_state`.
-3. Retrieve `/v1/proof/{decision_id}` when you need the authoritative audit surface.
-4. Bind downstream execution behavior to the returned decision state before any execution step.
+3. Retrieve `/v1/proof/{decision_id}` when you need the proof-backed audit surface.
+4. Feed returned context into local governance before any execution step.
 
 ## Required Binding
 
-- `ALLOW`: proceed
-- `CONSTRAIN`: proceed only with returned limits
-- `DELAY`: hold and re-evaluate later
-- `DENY`: refuse
-- `HALT`: suspend downstream admission
+- `ALLOW`: inspect and decide locally
+- `CONSTRAIN`: review returned limits before acting
+- `DELAY`: consider holding and re-evaluating later
+- `DENY`: consider refusing locally
+- `HALT`: consider suspending local downstream action
 
-`decision_status` is authoritative. Supporting fields explain why the state was returned; they do not create alternate permission.
+`decision_status` is non-authority context. Supporting fields explain why the state was returned; they do not create permission.
 
 ## Integration Boundary
 
-No integration should reinterpret Nova output as a bypassable suggestion.
+No integration should reinterpret Nova output as execution authority.
 
-The response contract is authoritative, and proof fields should be read from the proof endpoint rather than inferred from internal traces.
+The response contract is an audit and review surface, and proof fields should be read from the proof endpoint rather than inferred from internal traces.
 
 The correct integration posture is:
 
 ```text
-Decision Proposed -> Nova -> Decision Admitted -> Execution
+Decision Proposed -> Nova -> Pre-Action Context -> Local Decision
 ```
 
-If the decision is not admitted, execution does not occur.
+The local system remains responsible for any execution, delay, escalation, or cancellation.

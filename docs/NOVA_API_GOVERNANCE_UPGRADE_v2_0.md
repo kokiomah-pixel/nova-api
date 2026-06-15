@@ -26,7 +26,7 @@ This upgrade must not turn Nova into:
 
 # 1. Purpose
 
-Nova’s admission layer now returns authoritative decision states.
+Nova's context layer now returns non-authority decision context.
 
 The next requirement is governance across:
 
@@ -47,9 +47,9 @@ This upgrade is required because autonomous systems can now:
 
 Nova must therefore govern:
 
-> not only **what decision is allowed**
+> not only **what decision context indicates**
 > but also
-> **how decision pressure is allowed to exist over time**
+> **how decision pressure should be surfaced over time**
 
 ---
 
@@ -61,7 +61,7 @@ Sharpe Nova OS remains:
 - a pre-execution decision discipline layer
 - a decision-context infrastructure system
 - a coordination layer between strategy and execution
-- a system that determines whether capital may move
+- a system that conditions the environment before local systems decide whether capital moves
 
 Nova is not:
 

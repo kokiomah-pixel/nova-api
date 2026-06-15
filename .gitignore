@@ -2,6 +2,7 @@
 __pycache__/
 *.py[codz]
 *$py.class
+.DS_Store
 
 # C extensions
 *.so
@@ -202,11 +203,13 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 
 # Local runtime state
+.internal/
 .usage.json
 .usage.manual.json
 .usage_state.json
 .billing_state.json
 .proof_registry.json
+proof_retrieval_audit.jsonl
 .reflex_governance_records.jsonl
 .reflex_governance_signals.json
 .reflex_governance_escalations.json

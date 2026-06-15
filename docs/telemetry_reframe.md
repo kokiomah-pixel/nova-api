@@ -1,15 +1,15 @@
-# Sharpe Nova OS -- Telemetry Reframe (Decision Authority Layer)
+# Sharpe Nova OS -- Telemetry Reframe (Non-Authority Context Layer)
 
 ## Objective
 
-Reframe Sharpe Nova OS telemetry from informational output to:
+Reframe Sharpe Nova OS telemetry from raw informational output to:
 
-> **authoritative records of governed decision states**
+> **reviewable pre-action context records**
 
 to ensure:
 
-- pre-execution dependency
-- non-bypass integration
+- pre-execution reviewability
+- non-authority integration
 - infrastructure positioning
 - protection from tooling misclassification
 
@@ -35,9 +35,9 @@ The market can map Nova to observational systems:
 
 > **what is happening**
 
-instead of decision authority systems:
+instead of pre-action context systems:
 
-> **what is allowed to happen**
+> **what environmental posture exists before local action**
 
 ## Required Shift
 
@@ -47,29 +47,25 @@ From:
 
 To:
 
-> **"Nova defines the admissible state of a decision before execution"**
+> **"Nova emits pre-action context before local execution decisions"**
 
 ## Structural Definition
 
 Sharpe Nova OS is:
 
-> **a pre-execution decision admissibility layer**
+> **a pre-execution environmental governance layer**
 
-Execution is not parallel to Nova.
+Execution authority is not inside Nova.
 
-Execution is downstream of Nova.
+Execution remains downstream and local.
 
 ## Canonical Flow
 
 ```text
-Decision Proposed -> Nova -> Decision Admitted -> Execution
+Decision Proposed -> Nova -> Pre-Action Context -> Local Decision
 ```
 
-If a decision is not admitted:
-
-```text
-Execution does not occur
-```
+Nova does not authorize execution. Local systems remain responsible for any execution, delay, escalation, or cancellation.
 
 ## Telemetry Reclassification
 
@@ -81,13 +77,13 @@ Telemetry = data exhaust
 
 Telemetry =
 
-> **intent admissibility Records**
+> **pre-action context records**
 
 Each record represents:
 
 - a proposed decision
 - evaluated under system conditions
-- resolved into an admissible or non-admissible state
+- resolved into a non-authority context state
 - bound to proof
 
 ## Output Interpretation
@@ -98,7 +94,7 @@ Each record represents:
 { "decision_status": "DENY" }
 ```
 
-This is not a signal to interpret.
+This is not an execution command.
 
 ### Correct Interpretation
 
@@ -106,14 +102,14 @@ This is not a signal to interpret.
 { "decision_status": "DENY" }
 ```
 
-> **This decision is not admissible. Execution must not proceed.**
+> **This context state indicates elevated constraint. The local system remains responsible for deciding whether to delay, escalate, cancel, or act under its own governance rules.**
 
 ## Authority Model
 
-- `decision_status` is authoritative.
+- `decision_status` is non-authority context.
 - Supporting fields are explanatory.
-- Proof verifies the governed outcome.
-- No derived field overrides decision authority.
+- Proof verifies the emitted context state.
+- No derived field creates execution authority.
 
 ## Behavioral Impact
 
@@ -125,10 +121,10 @@ This is not a signal to interpret.
 
 ### With Reframe
 
-- Nova becomes a precondition
-- execution binds to decision state
-- systems adapt to constraint
-- dependency forms
+- Nova becomes a review input
+- local execution decisions remain local
+- systems adapt to context
+- review discipline forms
 
 ## Conversion Mechanism
 
@@ -137,8 +133,8 @@ The shift moves Nova from:
 | State | Outcome |
 | --- | --- |
 | Informational | Low usage |
-| Non-binding | Experimental usage |
-| Decision Authority | System dependency |
+| Unreviewed | Experimental usage |
+| Non-authority context | Reviewable infrastructure |
 
 ## Strategic Implication
 
@@ -148,11 +144,11 @@ If Nova is framed as data:
 - pricing compresses
 - category collapses into tooling
 
-If Nova is framed as decision authority:
+If Nova is framed as pre-action context infrastructure:
 
 - becomes infrastructure
-- pricing expands
-- dependency increases
+- pricing can reflect review value
+- review discipline increases
 - category leadership stabilizes
 
 ## Implementation Scope
@@ -171,8 +167,8 @@ Systems do not depend on information.
 
 Systems depend on:
 
-> **authoritative decision states**
+> **reviewable pre-action context states**
 
 Sharpe Nova OS defines:
 
-> **whether capital is allowed to move before execution occurs**
+> **the environmental posture before local systems decide whether capital moves**

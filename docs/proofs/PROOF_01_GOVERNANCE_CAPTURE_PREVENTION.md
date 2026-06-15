@@ -1,12 +1,12 @@
-# Proof of Prevented Failure 01 — Governance Capture Prevention
+# Scenario Proof 01 — Governance Capture Containment
 
 Sharpe Nova OS — Institutional Proof Surface
 
 Based on Simulation K — Governance Exploit Reflex
 
-Sharpe Nova OS is a pre-execution decision admissibility layer that resolves proposed capital actions into governed decision states before execution.
+Sharpe Nova OS is a pre-execution environmental governance layer that emits non-authority context for proposed capital actions before execution.
 
-This proof documents a governance capture failure class, the unconstrained path that would have remained execution-permitted without Nova, the governed decision state Nova returned before execution, and the measurable difference that followed.
+This proof documents a governance capture failure class, the unconstrained path modeled without Nova, the constrained context Nova returned before execution, and the measured scenario difference.
 
 ## 1. Failure Class
 
@@ -33,9 +33,9 @@ Under these conditions, governance exposure becomes vulnerable to compromised pr
 
 Without Nova, governance exposure remains materially elevated.
 
-Capital remains exposed to compromised protocol risk in an execution-permitted state.
+Capital remains exposed to compromised protocol risk in the modeled unconstrained path.
 
-Without pre-execution discipline, the governance exploit path continues with no authoritative decision state bound to the proposed allocation.
+Without pre-execution discipline, the governance exploit path continues with no pre-action context bound to the proposed allocation.
 
 The unconstrained outcome is explicit:
 
@@ -47,7 +47,7 @@ The unconstrained outcome is explicit:
 
 This is the failure propagation path that would have continued without Nova intervention.
 
-## 4. Nova Decision State
+## 4. Nova Context State
 
 Nova intervenes before execution through a governed pre-execution discipline chain.
 
@@ -55,7 +55,7 @@ The decision-state path is explicit:
 
 1. telemetry-driven classification detects governance anomaly conditions
 2. the environment is classified as a fragility state associated with governance capture risk
-3. Nova returns a constrained decision state before execution
+3. Nova returns constrained pre-action context before execution
 4. exposure is reduced from `8%` to `1%`
 5. capital is reallocated into higher-trust governance assets and stable yield buffer
 
@@ -66,9 +66,9 @@ The constrained allocation path preserves the validated reallocation surface:
 - reallocation into `COMP`
 - reallocation into stable yield buffer
 
-This is a governed decision state returned before capital moves, not a post-event response.
+This is a governed context state returned before any local system decides whether capital moves, not a post-event response.
 
-Nova converted this governance exposure from an execution-permitted state to a constrained state before capital deployment.
+Nova converted the modeled governance exposure from unconstrained context to constrained context before capital deployment.
 
 ## 5. Measured Difference
 
@@ -84,26 +84,26 @@ The following metrics preserve the validated Simulation K measurement surface.
 
 The relevant comparison is between the unconstrained path and the constrained path. Without Nova, the exploit path remains materially exposed. With Nova, conditioned exposure reduces impairment and shortens recovery under the same failure class.
 
-## 6. Prevented Outcomes
+## 6. Modeled Outcome Deltas
 
-Because Nova returned a governed decision state before execution, the following outcomes were prevented from propagating further:
+Because Nova returned constrained context before execution, the modeled scenario records the following deltas from the unconstrained path:
 
-- additional drawdown beyond the constrained path was avoided
-- prolonged recovery was avoided
-- governance contagion was contained
-- capital impairment was reduced
-- compromised exposure was prevented from remaining execution-permitted
-- treasury impairment risk was materially constrained before execution
-- governance token devaluation pressure was not allowed to remain at the unconstrained exposure level
+- additional drawdown was lower than the unconstrained path
+- recovery time was shorter than the unconstrained path
+- governance contagion was more contained in the scenario
+- capital impairment was lower in the scenario
+- compromised exposure moved from unconstrained context to constrained context
+- treasury impairment risk was constrained before execution
+- governance token devaluation pressure did not remain at the unconstrained exposure level
 
 This proof does not claim that the failure class disappeared.
 
-It proves that Nova constrained the failure path before execution and prevented further propagation of the unconstrained outcome.
+It records that Nova constrained the modeled failure path before execution and changed the scenario outcome relative to the unconstrained path.
 
 ## 7. Institutional Conclusion
 
-This proof documents governance capture prevention as a pre-execution discipline outcome.
+This proof documents governance capture containment as a pre-execution discipline outcome.
 
-The addressed failure class is governance capture with associated treasury impairment risk and governance token devaluation risk. Nova resolved the proposed allocation into a constrained decision state through telemetry-driven classification and reflex memory before execution, reducing exposure from `8%` to `1%` and reallocating capital into `LDO`, `COMP`, and stable yield buffer.
+The addressed failure class is governance capture with associated treasury impairment risk and governance token devaluation risk. Nova emitted constrained context for the proposed allocation through telemetry-driven classification and reflex memory before execution, reducing modeled exposure from `8%` to `1%` and reallocating capital into `LDO`, `COMP`, and stable yield buffer in the scenario.
 
-For allocators, treasuries, and agentic capital systems, the significance is infrastructural. Nova did not repair the failure after the fact. It constrained an execution-permitted fragile state before capital moved, reducing capital impairment and containing governance failure propagation through governed intervention.
+For allocators, treasuries, and agentic capital systems, the significance is infrastructural. Nova did not repair the failure after the fact. It emitted constrained context for a fragile state before capital moved in the scenario, reducing modeled capital impairment and containing governance failure propagation.

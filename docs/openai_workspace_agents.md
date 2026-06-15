@@ -2,24 +2,24 @@
 
 OpenAI workspace agents may propose actions.
 
-Nova determines intent admissibility before capital-moving execution.
+Nova emits pre-action context before any local system decides whether capital-moving execution should occur.
 
-Nova remains external, model-agnostic, and binding.
+Nova remains external, model-agnostic, and non-authority.
 
 ## Required Flow
 
-Agent -> Decision Proposal -> Nova -> Execution
+Agent -> Decision Proposal -> Nova -> Pre-Action Context -> Local Decision
 
 ## Rules
 
-- Agent must call `/v1/context` before execution
-- `decision_status` is binding
+- Agent should call `/v1/context` before local execution decisions
+- `decision_status` is context for local governance review
 - Agent may not treat its own reasoning as permission
 - Agent may retrieve `/v1/proof/{decision_id}` when proof-backed verification is required
-- Refusal states must fail closed
+- Refusal states should be escalated through local governance rules
 
 ## Outcome Handling
 
-ALLOW -> execute  
-CONSTRAIN -> adjust, then execute  
-DENY / DELAY / HALT / VETO -> do not execute
+ALLOW -> inspect and decide locally
+CONSTRAIN -> inspect conditioned context before acting
+DENY / DELAY / HALT / VETO -> delay, escalate, cancel, or apply local governance rules
