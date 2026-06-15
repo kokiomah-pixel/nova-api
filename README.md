@@ -162,6 +162,8 @@ Key materials:
 
 - [Project Pitch Draft](docs/grants/nsf-seed-fund/project-pitch-draft.md)
 - [Non-Trading Positioning Memo](docs/grants/nsf-seed-fund/non-trading-positioning-memo.md)
+- [Economic Value and Buyer Wedge](docs/market/economic-value-and-buyer-wedge.md)
+- [Phase I Outcome Validation Plan](docs/validation/phase-i-outcome-validation-plan.md)
 - [Phase I Validation Matrix](docs/grants/nsf-seed-fund/phase-i-validation-matrix.md)
 - [Reviewer Risk and Response Memo](docs/grants/nsf-seed-fund/reviewer-risk-and-response.md)
 - [Pre-Action Context Contract](docs/architecture/pre-action-context-contract.md)
