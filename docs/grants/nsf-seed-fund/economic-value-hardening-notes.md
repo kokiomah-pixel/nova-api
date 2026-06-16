@@ -70,6 +70,14 @@ Sharpe Nova OS is researching pre-execution governance infrastructure for agenti
 
 This is external grant-facing translation. It does not replace the canonical doctrine of pre-execution environmental governance infrastructure.
 
+## Grant Interpretation Rule
+
+Nova should not claim that commercial value is already proven. The NSF framing should present commercial value as a testable Phase I hypothesis.
+
+The strongest hypothesis is that reviewable pre-action context and reproducible governance evidence can reduce decision ambiguity, improve incident reconstruction, clarify escalation behavior, and support safer local review in agentic financial workflows.
+
+The grant should not ask reviewers to believe that Nova has already created a market category. It should ask reviewers to fund validation of whether this governance layer produces measurable workflow value.
+
 ## Evidence Needed During Phase I
 
 Phase I should gather evidence that Nova can produce useful workflow outcomes without becoming the local decision authority.

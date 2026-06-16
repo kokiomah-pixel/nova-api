@@ -18,6 +18,7 @@ If you are reviewing the project for the first time, start with this path:
 4. Review proof determinism and classification stability: [docs/governance/proof-determinism-and-classification-stability.md](docs/governance/proof-determinism-and-classification-stability.md)
 5. Review continuity posture: [docs/continuity/](docs/continuity/)
 6. Review NSF Phase I framing: [docs/grants/nsf-seed-fund/project-pitch-submission-draft.md](docs/grants/nsf-seed-fund/project-pitch-submission-draft.md)
+- Public Boundary and Terminology Clarification: `docs/governance/public-boundary-and-terminology-clarification.md`
 
 Canonical boundary:
 

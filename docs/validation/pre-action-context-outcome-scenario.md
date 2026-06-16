@@ -62,6 +62,19 @@ The potential value comes from:
 
 These outcomes would matter economically if they reduce review burden, shorten incident reconstruction, improve operational resilience, or make high-risk agentic financial workflows easier to govern.
 
+## Phase I Measurement Targets
+
+| Metric | Baseline Measurement | Nova-Conditioned Measurement | Why It Matters |
+|---|---|---|---|
+| Decision delta | What the local workflow does without Nova context | Whether local review, delay, escalation, retry, or cancellation changes after Nova context | Shows whether Nova is more than logging |
+| Time-to-reconstruct incident | Time required to reconstruct a workflow decision from baseline logs | Time required using Nova reproducibility metadata and governance chronology | Tests auditability value |
+| Proof replay success | Whether prior records can be replayed consistently | Whether Nova records preserve reproducible governance meaning | Tests evidence durability |
+| Classification consistency | Whether similar inputs produce stable classification | Whether Nova-conditioned inputs preserve classification stability | Tests deterministic governance identity |
+| Source-segmentation coverage | Whether reviewers can distinguish synthetic, production-like, and live-labeled records | Whether Nova makes source origin visible | Tests interpretation quality |
+| Non-authority boundary violations | Any case where Nova appears to approve, deny, route, settle, or execute | Target is zero | Protects category and integration safety |
+
+If Nova-conditioned context does not change local review, delay, retry, escalation, cancellation, or reconstruction behavior compared with the baseline workflow, the economic value claim remains weak.
+
 ## What This Scenario Does Not Prove
 
 This scenario does not prove:

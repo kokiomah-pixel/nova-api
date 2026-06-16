@@ -1,7 +1,18 @@
-# Archive
+# Archive Notice
 
-This directory contains legacy or exploratory materials.
+This directory contains historical, experimental, deprecated, or non-canonical artifacts.
 
-They do not represent the current Sharpe Nova OS architecture or positioning.
+Files in this directory may contain older terminology that does not represent the current canonical doctrine of Sharpe Nova OS.
 
-Specific venue names, comparison demos, and older client wrappers in this directory are historical artifacts only. Current integration should use Nova as a venue-agnostic pre-execution intent admissibility layer.
+Current canonical boundary:
+
+> Nova conditions the environment before execution; it does not authorize execution.
+
+Archived references to admission, enforcement, routing, execution, payment, or settlement should not be interpreted as current runtime authority, execution behavior, or product positioning.
+
+For current doctrine, see:
+
+- `README.md`
+- `docs/overview.md`
+- `docs/architecture/pre-action-context-contract.md`
+- `docs/governance/public-boundary-and-terminology-clarification.md`
