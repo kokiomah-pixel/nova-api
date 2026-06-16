@@ -229,3 +229,7 @@ __marimo__/
 .internal/
 
 services.json
+
+# Local research-transfer artifacts
+research_snapshots/
+*.zip
