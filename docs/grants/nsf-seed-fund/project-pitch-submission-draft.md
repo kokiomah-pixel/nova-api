@@ -10,7 +10,9 @@ Nova emits pre-action environmental state that local operators, agents, and orch
 
 The clearest technical interface is the Pre-Action Context Contract (`docs/architecture/pre-action-context-contract.md`). A consuming system submits an intended action and surrounding environmental context. Nova returns environmental state, classification context, reproducibility metadata, source segmentation, and non-authority telemetry. The consumer remains responsible for local governance and execution decisions.
 
-The innovation is not a new execution path. It is a reproducible governance layer that makes pre-action context inspectable, testable, and usable before autonomous capital workflows proceed.
+Agent communication protocols such as A2A and tool-access standards such as MCP help agents discover one another, exchange instructions, and access external capabilities. They do not by themselves provide deterministic pre-action governance context, retained classification discipline, source segmentation, or replayable evidence before high-stakes workflows act. Nova addresses this upstream gap by emitting non-authority pre-action context that local systems can review while execution authority remains with those systems.
+
+The technical novelty is not agent messaging, policy enforcement, observability, or workflow orchestration. Nova investigates whether a separate pre-execution governance layer can derive deterministic environmental state, preserve classification stability, maintain Reflex Memory, segment source context, and generate replayable governance evidence without becoming the execution authority.
 
 ## 2. Technical Objectives and Challenges
 
@@ -30,6 +32,8 @@ Phase I will validate whether Nova can provide a reliable governance substrate u
 This is R&D rather than ordinary implementation because the hard problem is not exposing another API field. The hard problem is proving that pre-execution environmental state can remain reproducible, interpretable, and useful across autonomous workflows while avoiding hidden execution authority.
 
 Phase I evidence should include doctrine lint results, deterministic replay, proof reproducibility tests, classification determinism tests, source segmentation validation, continuity workflows, and pre-action context examples (`examples/pre_action_context/`).
+
+Phase I will test whether Nova-conditioned pre-action context produces measurable improvements over baseline workflows in deterministic replay, classification consistency, source-segmentation clarity, time-to-reconstruct incidents, and local review behavior. The work is successful only if the emitted context improves decision review or reconstruction without Nova becoming an authorization or execution layer.
 
 ## 3. Market Opportunity
 
@@ -51,6 +55,8 @@ builders consume state -> workflows stabilize -> governance proofs accumulate ->
 Potential commercial surfaces include a pre-action context API, reproducible governance proof records, orchestration pacing telemetry, settlement environment observability, Reflex Memory chronology, institutional governance review artifacts, source-segmented environmental state, and continuity or audit reports.
 
 This draft does not claim confirmed customer adoption, production dependency, institutional partnerships, or external integrations. Phase I should identify which users have the strongest pre-action governance need, which environmental fields are most useful, and which validation artifacts reduce diligence friction.
+
+Broader impact: As autonomous workflows become more capable, high-stakes systems will need governance evidence that is reviewable before action and reproducible after incidents. Nova supports responsible autonomous systems by improving decision-context clarity, auditability, and incident reconstruction without centralizing execution authority.
 
 ## 4. Company and Team
 
