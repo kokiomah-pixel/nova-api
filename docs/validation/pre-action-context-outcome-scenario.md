@@ -6,6 +6,14 @@ This scenario shows how Nova could create economic value without executing, appr
 
 The scenario is intentionally narrow and non-trading. It focuses on an agentic treasury workflow preparing for a settlement-related operation.
 
+The scenario should compare:
+
+1. Baseline workflow without Nova-conditioned context.
+2. Workflow with Nova-conditioned pre-execution review context.
+3. Replay and reconstruction comparison after the review event.
+
+The purpose of the scenario is not to show that Nova approves or blocks an action. The purpose is to test whether Nova makes the pre-execution decision environment more reviewable and replayable before local authority acts.
+
 ## Scenario
 
 An autonomous treasury workflow prepares to initiate a stablecoin settlement-related operation. Before the local orchestrator proceeds, it requests Nova pre-action context. Nova returns elevated timing pressure, retry escalation risk, source segmentation metadata, and reproducibility metadata. The local orchestrator applies its own governance rules and delays, escalates, or proceeds outside Nova.

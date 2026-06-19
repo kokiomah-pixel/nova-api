@@ -14,6 +14,12 @@ Agent communication protocols such as A2A and tool-access standards such as MCP 
 
 The technical novelty is not agent messaging, policy enforcement, observability, or workflow orchestration. Nova investigates whether a separate pre-execution governance layer can derive deterministic environmental state, preserve classification stability, maintain Reflex Memory, segment source context, and generate replayable governance evidence without becoming the execution authority.
 
+### Authority-chain position
+
+Nova's first market-owned moment is pre-execution governance review: the point after an agentic financial workflow has formed an intended action, but before local execution authority is exercised. Nova does not form the agent's objective, authorize the action, or execute the workflow. It emits governed pre-action context so the local authority system can review the decision environment before acting.
+
+This creates a practical Phase I path: replay and reconstruction prove that Nova captures useful governance evidence; pre-execution review tests whether that evidence improves local review, escalation, retry discipline, delay, or reconstruction; Reflex Memory then compounds into long-term technical defensibility by preserving governance context before similar workflows form future objectives.
+
 ## 2. Technical Objectives and Challenges
 
 The core technical risk is whether environmental governance state can remain deterministic, interpretable, and operationally useful across heterogeneous autonomous financial actors without becoming an execution authority or collapsing into trading-signal infrastructure.

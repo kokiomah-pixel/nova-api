@@ -78,6 +78,14 @@ The strongest hypothesis is that reviewable pre-action context and reproducible 
 
 The grant should not ask reviewers to believe that Nova has already created a market category. It should ask reviewers to fund validation of whether this governance layer produces measurable workflow value.
 
+## Commercial Wedge
+
+The initial commercial wedge is pre-execution governance review for agentic financial workflows. Buyers do not need to adopt Nova as an execution system or agent controller. They need a way to preserve and review the decision environment before local systems exercise financial authority.
+
+The near-term value proposition is reduced review ambiguity, faster incident reconstruction, clearer authority scoping, improved source-context discipline, and better evidence preservation for autonomous or semi-autonomous financial workflows.
+
+Likely early adopters include digital-asset operations teams, stablecoin workflow operators, onchain treasury teams, custody workflow owners, agent platform teams, and risk infrastructure groups responsible for allowing autonomous workflows near financial authority.
+
 ## Evidence Needed During Phase I
 
 Phase I should gather evidence that Nova can produce useful workflow outcomes without becoming the local decision authority.

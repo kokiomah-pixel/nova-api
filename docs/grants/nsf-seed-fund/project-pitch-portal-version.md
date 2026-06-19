@@ -12,7 +12,9 @@ The clearest technical interface is the Pre-Action Context Contract. A local sys
 
 The innovation is not a new execution path. It is reproducible governance state before autonomous workflows proceed. The research goal is to make pre-action governance context inspectable, testable, and usable by autonomous capital workflows without moving decision authority into Nova.
 
-<!-- Characters: 1213 -->
+Nova's first Phase I test is the pre-execution review boundary: after an agentic financial workflow has formed an intended action, but before local execution authority is exercised. Nova does not authorize or execute. It emits governed pre-action context that can improve reviewability before action and replayability after the event.
+
+<!-- Characters: 1551 -->
 
 ## 2. Technical Objectives and Challenges
 

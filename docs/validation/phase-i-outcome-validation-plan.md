@@ -33,6 +33,20 @@ Phase I should track measurable targets such as:
 
 These are validation targets. They should not be presented as achieved outcomes unless supported by recorded evidence.
 
+## Pre-Execution Review Validation
+
+Phase I will evaluate Nova at the pre-execution review boundary: after an agentic financial workflow has formed an intended action, but before local execution authority is exercised. The validation question is whether Nova-conditioned pre-action context improves review quality, escalation clarity, retry discipline, delay or cancellation decisions, classification consistency, or reconstruction speed without Nova becoming an authorization or execution layer.
+
+Representative Phase I measures include:
+
+- time-to-reconstruct the decision environment
+- classification consistency across repeated runs
+- source-segmentation clarity
+- reviewer ability to identify authority scope
+- reviewer ability to identify memory/source conflicts
+- retry suppression or escalation clarity under constraint pressure
+- preservation of the non-authority boundary
+
 ## Baseline Comparison
 
 Each outcome should compare at least two conditions:
