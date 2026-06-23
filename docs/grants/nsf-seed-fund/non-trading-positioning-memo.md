@@ -11,7 +11,7 @@ Sharpe Nova OS does not move capital.
 Sharpe Nova OS does not custody funds.
 Sharpe Nova OS does not act as an autonomous agent.
 
-Sharpe Nova OS emits environmental governance state before execution so local operators, agents, and orchestration systems can make their own execution decisions with better context.
+Sharpe Nova OS emits governed pre-action context before local authority acts so local operators, agents, and orchestration systems can review the decision environment before making their own execution decisions.
 
 Nova conditions the environment before execution; it does not authorize execution.
 
@@ -19,11 +19,12 @@ Nova conditions the environment before execution; it does not authorize executio
 
 Nova provides:
 
-- pre-action environmental state
+- governed pre-action context
 - classification stability checks
-- reproducible governance proof records
-- Reflex Memory chronology
+- replayable governance evidence
+- Reflex Memory references
 - source-segmented context
+- constraint posture
 - continuity controls
 - non-authority telemetry for local operator review
 
@@ -31,6 +32,6 @@ These artifacts support autonomous system safety and institutional inspectabilit
 
 ## NSF Boundary
 
-Sharpe Nova OS is not asking NSF to fund a trading system. It is asking NSF to fund research and validation of pre-execution environmental governance infrastructure for autonomous capital systems.
+Sharpe Nova OS is not asking NSF to fund a trading system. It is asking NSF to fund research and validation of a non-authority pre-execution governance review layer for agentic financial workflows.
 
-The NSF-facing question is not whether Nova improves market outcomes. The question is whether deterministic, pre-action environmental governance can improve auditability, pacing discipline, continuity, and reviewability for autonomous machine-native capital behavior.
+The NSF-facing question is not whether Nova improves market outcomes. The question is whether deterministic environmental state, Reflex Memory references, classification stability, source segmentation, constraint posture, and replayable governance evidence can improve reviewability before local authority acts.

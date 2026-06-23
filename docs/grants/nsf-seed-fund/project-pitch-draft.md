@@ -2,73 +2,65 @@
 
 ## 1. Technology Innovation
 
-Sharpe Nova OS is researching and validating a pre-execution environmental governance layer that allows autonomous capital systems to consume deterministic governance state before local execution decisions occur.
+Sharpe Nova OS is researching and validating a non-authority pre-execution governance review layer for agentic financial workflows. When a workflow forms an intended action but before local execution authority is exercised, Nova emits governed pre-action context.
 
-Nova is not an agent framework, trading system, signal engine, or execution middleware. It does not move capital, recommend trades, optimize portfolios, custody funds, or act as an autonomous agent. Nova emits non-authority telemetry and governance context that local operators, agents, and orchestration systems may consume before deciding locally how to proceed.
+Nova is not an agent framework, trading system, signal engine, or execution middleware. It does not authorize, execute, route, settle, trade, optimize portfolios, custody funds, or act as an autonomous agent. Nova emits governed pre-action context that local operators, agents, and orchestration systems may review before local authority acts.
 
 Sharpe Nova OS conditions the environment before execution; it does not authorize execution.
 
 The innovation combines:
 
-- pre-action environmental state
-- Reflex Memory chronology
+- governed pre-action context
+- Reflex Memory references
 - deterministic governance identity
 - classification stability
-- reproducible proof records
+- replayable governance evidence
+- source segmentation
+- constraint posture
 - non-authority telemetry
-- autonomous system safety context
 - local execution responsibility
 - governance continuity under model-provider or workspace interruption
 
-The research premise is that autonomous capital systems need context before action, not a new authority layer. Nova preserves governance chronology, proof reproducibility, and source-segmented environmental state so reviewers and builders can inspect how a pre-action context was produced.
+The research premise is that agentic financial workflows need reviewable pre-action decision context, not a new authority layer. Nova gives local systems reviewable governance context before they act, and that context remains replayable afterward.
 
 ## 2. Technical Objectives and Challenges
 
-This work remains unresolved R&D rather than completed product polish. The technical objective is to validate whether pre-execution environmental state can be deterministic, interpretable, and useful to autonomous systems without becoming a local execution authority.
+This work remains unresolved R&D rather than completed product polish. The technical objective is to validate whether deterministic environmental state, Reflex Memory references, classification stability, source segmentation, constraint posture, and replayable governance evidence can improve reviewability before local authority acts.
 
 Phase I should investigate:
 
-- whether pre-execution environmental state can reduce unsafe autonomous financial behavior
+- whether governed pre-action context improves institutional review of agentic financial workflows
 - whether classification stability can hold under ambiguous autonomous-system inputs
-- whether reproducible governance proofs can remain stable across governance epochs
-- whether Reflex Memory can preserve chronology without becoming prediction
+- whether replayable governance evidence improves reconstruction quality
+- whether Reflex Memory can preserve chronology and support long-term objective-context conditioning without becoming prediction
 - whether autonomous systems can consume environmental state without transferring execution authority to Nova
-- whether synthetic decision-pressure testing can translate into production-like governance reliability
+- whether source segmentation and constraint posture improve source-context clarity
 - whether continuity protocols can preserve governance operation during model-provider or workspace failure
 
-The core technical risk is whether environmental governance state can remain deterministic, interpretable, and operationally useful across heterogeneous autonomous financial actors without becoming an execution authority or collapsing into trading-signal infrastructure.
+The Phase I proof should compare baseline workflows using ordinary logs and post-hoc context against Nova-conditioned workflows that receive structured pre-action context before local execution authority is exercised. Evaluation should measure reconstruction speed, classification consistency, source-context clarity, authority-scope recognition, reviewer decision quality, and retry/escalation clarity.
 
 ## 3. Market Opportunity
 
-The market opportunity is emerging around autonomous financial systems, programmable capital movement, agentic payment workflows, orchestration frameworks, and institutional digital asset infrastructure.
+The market opportunity is emerging around teams responsible for allowing autonomous or semi-autonomous financial workflows near authority without losing reviewability.
 
 Candidate target users include:
 
-- orchestration framework builders
-- autonomous agent builders
-- programmable settlement infrastructure teams
-- onchain treasury operators
-- institutional digital asset infrastructure teams
-- governance and risk teams reviewing autonomous capital workflows
+- digital-asset operations teams
+- stablecoin workflow operators
+- onchain treasury teams
+- custody workflow owners
+- agent platform teams
+- risk infrastructure groups
 
-Potential commercial surfaces include:
+Potential commercial artifacts include governed pre-action context, replayable governance evidence, Reflex Memory references, source-segmented environmental state, continuity summaries, and institutional governance review artifacts.
 
-- pre-action context API
-- reproducible governance proof records
-- orchestration pacing telemetry
-- settlement environment observability
-- Reflex Memory chronology
-- institutional governance review artifacts
-- source-segmented environmental state
-- continuity and audit reports
-
-The initial market wedge is builder and orchestration infrastructure that needs pre-action context before automated workflows proceed. The broader commercial pathway extends to institutional review, governance reporting, and autonomous capital infrastructure diligence.
+The initial market wedge is pre-execution governance review for agentic financial workflows. Replay is the proof mechanism for that wedge, and Reflex Memory is the long-term compounding path toward objective-context conditioning over time.
 
 This draft does not claim current customer adoption, production dependency, market leadership, or guaranteed adoption.
 
 ## 4. Company and Team
 
-Sharpe Nova OS is being built as a disciplined infrastructure layer around autonomous capital governance. The Architect's focus is pre-execution decision discipline: how autonomous systems should observe constraint pressure, chronology, classification state, and continuity conditions before local decisions occur.
+Sharpe Nova OS is being built as a disciplined infrastructure layer around non-authority governance review. The Architect's focus is pre-execution governance review: how local systems should inspect constraint posture, chronology, classification state, source context, and continuity conditions before local authority acts.
 
 Nova is intentionally non-authority infrastructure because autonomous financial systems should not outsource execution authority to a hidden governance layer. The repo demonstrates technical discipline through doctrine linting, reproducible proof work, classification stability tests, source segmentation, continuity documentation, and scenario validation.
 

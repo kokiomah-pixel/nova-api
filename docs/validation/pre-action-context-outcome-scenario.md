@@ -2,17 +2,17 @@
 
 ## Purpose
 
-This scenario shows how Nova could create economic value without executing, approving, denying, or optimizing an action.
+This scenario shows how Nova could create economic value without executing, approving, denying, routing, settling, trading, or optimizing an action.
 
 The scenario is intentionally narrow and non-trading. It focuses on an agentic treasury workflow preparing for a settlement-related operation.
 
 The scenario should compare:
 
-1. Baseline workflow without Nova-conditioned context.
-2. Workflow with Nova-conditioned pre-execution review context.
+1. Baseline workflow using ordinary logs, source notes, and post-hoc context.
+2. Workflow with Nova-conditioned pre-execution review context before local authority acts.
 3. Replay and reconstruction comparison after the review event.
 
-The purpose of the scenario is not to show that Nova approves or blocks an action. The purpose is to test whether Nova makes the pre-execution decision environment more reviewable and replayable before local authority acts.
+The purpose of the scenario is not to show approval or blocking authority. The purpose is to test whether Nova makes the pre-execution decision environment more reviewable and replayable before local authority acts.
 
 ## Scenario
 
@@ -26,7 +26,7 @@ After an incident, reviewers may need to reconstruct chronology from fragmented 
 
 ## Nova-Conditioned Workflow
 
-With Nova, the local workflow requests pre-action context before the next consequential step. Nova emits reviewable environmental state and reproducible governance evidence. The local orchestrator then applies its own rules.
+With Nova, the local workflow requests pre-action context before the next consequential step. Nova emits governed pre-action context and replayable governance evidence. The local orchestrator then applies its own rules.
 
 Nova does not tell the workflow what to do. It gives the workflow additional pre-action context that can be reviewed by local systems and operators.
 
@@ -34,12 +34,14 @@ Nova does not tell the workflow what to do. It gives the workflow additional pre
 
 Nova may emit:
 
+- deterministic environmental state
 - timing pressure context
 - retry escalation risk
 - source segmentation metadata
 - classification metadata
-- reproducibility metadata
-- proof replay references
+- constraint posture
+- replayable governance evidence
+- Reflex Memory references
 - continuity or chronology indicators
 - environmental state relevant to operator review
 
@@ -51,7 +53,7 @@ Local systems may decide to:
 
 - delay the operation for review
 - escalate to an operator
-- suppress an unsafe retry under local policy
+- suppress a poorly reviewed retry under local policy
 - continue under local rules
 - attach the proof record to the workflow
 - use the source segmentation metadata during audit reconstruction
@@ -62,8 +64,8 @@ Those decisions happen outside Nova.
 
 The potential value comes from:
 
-- reduced unsafe retry behavior
-- clearer escalation path
+- reduced poorly reviewed retry behavior
+- clearer retry/escalation path
 - faster audit reconstruction
 - lower operator ambiguity
 - better evidence for governance review
@@ -75,10 +77,13 @@ These outcomes would matter economically if they reduce review burden, shorten i
 | Metric | Baseline Measurement | Nova-Conditioned Measurement | Why It Matters |
 |---|---|---|---|
 | Decision delta | What the local workflow does without Nova context | Whether local review, delay, escalation, retry, or cancellation changes after Nova context | Shows whether Nova is more than logging |
-| Time-to-reconstruct incident | Time required to reconstruct a workflow decision from baseline logs | Time required using Nova reproducibility metadata and governance chronology | Tests auditability value |
+| Reconstruction speed | Time required to reconstruct a workflow decision from baseline logs | Time required using Nova replayable governance evidence and governance chronology | Tests reconstruction value |
 | Proof replay success | Whether prior records can be replayed consistently | Whether Nova records preserve reproducible governance meaning | Tests evidence durability |
 | Classification consistency | Whether similar inputs produce stable classification | Whether Nova-conditioned inputs preserve classification stability | Tests deterministic governance identity |
-| Source-segmentation coverage | Whether reviewers can distinguish synthetic, production-like, and live-labeled records | Whether Nova makes source origin visible | Tests interpretation quality |
+| Source-context clarity | Whether reviewers can distinguish synthetic, production-like, and live-labeled records | Whether Nova makes source origin visible | Tests interpretation quality |
+| Authority-scope recognition | Whether reviewers can identify who owns execution authority | Whether Nova makes local authority boundaries clearer | Tests non-authority review value |
+| Reviewer decision quality | Reviewer rubric score using baseline context | Reviewer rubric score using Nova-conditioned context | Tests institutional reviewability |
+| Retry/escalation clarity | Clarity of retry or escalation options under baseline context | Clarity of retry or escalation options under Nova-conditioned context | Tests local review usefulness |
 | Non-authority boundary violations | Any case where Nova appears to approve, deny, route, settle, or execute | Target is zero | Protects category and integration safety |
 
 If Nova-conditioned context does not change local review, delay, retry, escalation, cancellation, or reconstruction behavior compared with the baseline workflow, the economic value claim remains weak.

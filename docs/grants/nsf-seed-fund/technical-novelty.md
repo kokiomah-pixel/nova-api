@@ -1,28 +1,27 @@
 # Technical Novelty
 
-Sharpe Nova OS is researching and validating a pre-execution environmental governance layer for autonomous capital systems.
+Sharpe Nova OS is researching and validating a non-authority pre-execution governance review layer for agentic financial workflows.
 
-Nova is not an agent framework, execution middleware, trading system, signal engine, or portfolio optimizer. It does not move capital, recommend trades, authorize action, or become the system of record for local execution decisions.
+Nova is not an agent framework, execution middleware, trading system, signal engine, payment processor, settlement router, or portfolio optimizer. It does not move capital, recommend trades, authorize action, route transactions, settle transactions, or become the system of record for local execution decisions.
 
-Nova conditions autonomous capital environments before action by combining:
+Nova emits governed pre-action context before local authority acts by combining:
 
-- Reflex Memory chronology
-- environmental telemetry
-- constraint pressure analysis
+- deterministic environmental state
+- Reflex Memory references
+- constraint posture
 - classification stability
-- reproducible governance proofs
+- replayable governance evidence
 - source segmentation
 - documented governance epochs
 
-The technical novelty is retained-discipline governance for machine-native financial systems. Nova preserves environmental state, classification paths, proof artifacts, and chronology so autonomous systems and operators can consume context before making local execution decisions.
+The technical novelty is retained-discipline governance review for machine-native financial systems. Nova preserves environmental state, classification paths, proof artifacts, source context, and chronology so reviewers can inspect the decision environment before local execution authority is exercised.
 
 Sharpe Nova OS conditions the environment before execution; it does not authorize execution.
 
 ## Novel Research Surface
 
-Autonomous capital systems can operate faster than human review loops. They may retry prematurely, act on incomplete context, collapse external settlement feedback into local confidence, or continue operating through model-provider and workspace interruption.
+Agentic financial workflows can form intended actions, call tools, retry routes, and approach operational or settlement systems faster than human review loops. They may act near authority with incomplete source context, unstable classification, unclear constraint posture, or fragmented review evidence.
 
-Nova studies whether a pre-action environmental layer can reduce this class of coordination failure without becoming the authority that decides whether capital moves.
+Nova studies whether a governed pre-action context layer can improve reviewability, reconstruction quality, classification consistency, source-context clarity, and authority-scope recognition without becoming the authority that decides whether capital moves.
 
-The system's novelty is not a new execution path. It is the preservation and emission of governance context before execution, including deterministic proofs that make the context reproducible, inspectable, and reviewable across governance epochs.
-
+The system's novelty is not a new execution path. It is the preservation and emission of governed pre-action context before local authority acts, with replayable governance evidence that makes the context reproducible, inspectable, and reviewable across governance epochs.

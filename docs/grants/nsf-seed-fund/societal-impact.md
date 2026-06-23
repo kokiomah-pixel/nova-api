@@ -16,7 +16,6 @@ Potential public-interest benefits include:
 
 ## Boundary of the Claim
 
-Nova should not overclaim financial risk reduction or imply that it prevents losses. Its impact claim is narrower and more technical: pre-execution environmental governance may improve the context, auditability, pacing discipline, and reviewability of autonomous capital systems before local systems decide how to act.
+Nova should not overclaim financial risk reduction or imply that it prevents losses. Its impact claim is narrower and more technical: governed pre-action context may improve reviewability, reconstruction quality, source-context clarity, authority-scope recognition, and retry/escalation clarity for agentic financial workflows before local authority acts.
 
 This matters because governance infrastructure that preserves local authority can support safer adoption without concentrating execution control inside a new middleware layer.
-

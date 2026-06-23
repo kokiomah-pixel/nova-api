@@ -20,10 +20,10 @@ Preserve the canonical boundary:
 Nova conditions the environment before execution; it does not authorize execution.
 ```
 
-Preserve the canonical doctrine:
+Preserve the canonical NSF frame:
 
 ```text
-pre-execution environmental governance infrastructure for autonomous capital systems
+non-authority pre-execution governance review layer for agentic financial workflows
 ```
 
 Preserve these core mechanics:
@@ -45,7 +45,7 @@ Tighten external framing around:
 - workflow risk
 - operator review
 - audit reconstruction
-- unsafe retry suppression under local policy
+- retry/escalation clarity under local policy
 - clearer escalation paths
 - measurable Phase I validation
 - buyer wedge and budget path
@@ -60,7 +60,7 @@ Do not claim confirmed adoption.
 Do not claim Nova reduces losses today.
 Do not claim Nova prevents unsafe execution.
 Do not claim Nova is a compliance engine.
-Do not claim Nova approves or denies actions.
+Do not claim approval or denial authority for Nova.
 
 Also avoid implying that Nova is a payment processor, trading system, execution engine, portfolio optimizer, or investment recommendation system.
 
@@ -68,7 +68,7 @@ Also avoid implying that Nova is a payment processor, trading system, execution 
 
 Sharpe Nova OS is researching pre-execution governance infrastructure for agentic financial workflows. The system emits reviewable pre-action context and reproducible governance evidence before local systems decide how to act.
 
-This is external grant-facing translation. It does not replace the canonical doctrine of pre-execution environmental governance infrastructure.
+This is external grant-facing translation. It preserves the canonical NSF frame of non-authority pre-execution governance review.
 
 ## Grant Interpretation Rule
 
@@ -96,11 +96,11 @@ Evidence should include:
 - decision delta under local governance rules
 - time-to-reconstruct incident scenarios
 - classification consistency rate
-- proof replay success rate
+- replay and reconstruction success rate
 - source-segmentation coverage
 - operator review clarity score
 - non-authority boundary violation count
-- unsafe retry suppression under local policy
+- retry/escalation clarity under local policy
 - design partner or reviewer feedback on concrete workflow pain
 
 ## Final Submission Implication

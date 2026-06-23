@@ -1,12 +1,12 @@
 # Sharpe Nova OS
 
-Sharpe Nova OS is a pre-execution environmental governance layer that emits derivative environmental context to condition upstream execution environments before capital moves.
+Sharpe Nova OS is a non-authority pre-execution governance review layer for agentic financial workflows. When a workflow forms an intended action but before local execution authority is exercised, Nova emits governed pre-action context that improves reviewability, reconstruction, classification consistency, source-context clarity, and authority-scope recognition without authorizing or executing the action.
 
 This repository is the canonical Sharpe Nova OS system repo. It contains the Nova API, proof layer, governance runtime, canonical specs, tests, and runnable examples. The project has been reframed to emphasize environmental coordination, pacing normalization, and sovereignty-preserving boundaries.
 
 ## Start Here
 
-Sharpe Nova OS is pre-execution environmental governance infrastructure for autonomous capital systems.
+Sharpe Nova OS emits governed pre-action context for agentic financial workflows before local authority acts, improving reviewability and replayability without authorizing or executing actions.
 
 Nova emits pre-action context before execution. It does not authorize execution, move capital, recommend trades, generate alpha, or optimize portfolios.
 
@@ -79,9 +79,9 @@ Sharpe Nova OS provides environmental conditioning and coordination telemetry th
 
 ## What Nova Is
 
-Sharpe Nova OS is a pre-execution environmental governance layer that emits deterministic pre-action context for autonomous capital systems.
+Sharpe Nova OS is a non-authority pre-execution governance review layer for agentic financial workflows.
 
-It helps local operators, agents, and orchestration systems inspect environmental state before they make their own execution decisions.
+It helps local operators, agents, and orchestration systems inspect governed pre-action context after an intended action has formed but before local execution authority is exercised.
 
 ## What Nova Is Not
 
@@ -136,7 +136,7 @@ Key trust surfaces include:
 - doctrine linting
 - continuity under model-provider or workspace interruption
 
-These controls support reviewability before autonomous capital workflows proceed.
+These controls support reviewability before local authority acts.
 
 ## Builder Entry Points
 
@@ -149,15 +149,15 @@ These controls support reviewability before autonomous capital workflows proceed
 
 ## NSF Seed Fund Readiness
 
-Sharpe Nova OS is preparing an NSF Seed Fund research and commercialization packet focused on pre-execution environmental governance for autonomous capital systems.
+Sharpe Nova OS is preparing an NSF Seed Fund research and commercialization packet focused on non-authority pre-execution governance review for agentic financial workflows.
 
-The grant-readiness materials describe the system's technical novelty, research risk, validation plan, commercialization pathway, and societal impact.
+The grant-readiness materials describe the system's technical novelty, research risk, validation plan, commercialization pathway, societal impact, and non-authority boundary.
 
 See [docs/grants/nsf-seed-fund/](docs/grants/nsf-seed-fund/).
 
 ## NSF Fundability Materials
 
-Sharpe Nova OS maintains reviewer-facing NSF Seed Fund materials that explain the system's technical novelty, research risk, Phase I validation plan, commercialization pathway, societal impact, and non-trading boundary.
+Sharpe Nova OS maintains reviewer-facing NSF Seed Fund materials that explain the system's technical novelty, research risk, Phase I validation plan, commercialization pathway, societal impact, and non-authority boundary.
 
 Key materials:
 

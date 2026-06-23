@@ -13,39 +13,39 @@ Nova must be able to answer a practical question:
 Is Sharpe Nova OS working on something economically valuable?
 ```
 
-The near-term answer should be framed as a hypothesis, not a proven commercial claim. Nova may create value if reviewable pre-action context helps regulated or high-risk agentic financial workflows reduce ambiguity before consequential workflow steps.
+The near-term answer should be framed as a hypothesis, not a proven commercial claim. Nova may create value if governed pre-action context helps regulated or high-risk agentic financial workflows reduce ambiguity before local authority acts.
 
 Nova's strongest near-term wedge is not broad "autonomous capital systems" as a buyer category.
 
-The strongest near-term wedge is likely regulated or high-risk agentic financial workflows where local systems need reviewable pre-action context before retry, escalation, settlement preparation, or other consequential workflow steps.
+The strongest near-term wedge is pre-execution governance review for regulated or high-risk agentic financial workflows where local systems need reviewable pre-action context before retry, escalation, settlement preparation, or other consequential workflow steps.
 
 ## Primary Buyer/User Hypothesis
 
-The primary buyer or user is likely not a generic AI buyer. The stronger hypothesis is a team already operating agentic financial workflows with timing pressure, governance review burden, audit reconstruction needs, or escalation ambiguity.
+The primary buyer or user is likely not a generic AI buyer. The stronger hypothesis is a team already responsible for allowing autonomous or semi-autonomous financial workflows near authority without losing reviewability.
 
-Candidate buyers include platform risk teams, agent orchestration builders, digital asset infrastructure teams, treasury operators, institutional digital asset teams, and AI governance teams responsible for reviewable financial-agent behavior.
+Candidate buyers include digital-asset operations teams, stablecoin workflow operators, onchain treasury teams, custody workflow owners, agent platform teams, and risk infrastructure groups.
 
 ## First Wedge
 
-The first wedge should be described externally as governance infrastructure for agentic financial workflows or agentic workflow risk infrastructure.
+The first wedge should be described externally as pre-execution governance review for agentic financial workflows.
 
 This is market translation. It does not replace the canonical doctrine:
 
 ```text
-pre-execution environmental governance infrastructure for autonomous capital systems
+non-authority pre-execution governance review layer for agentic financial workflows
 ```
 
-The mechanism remains pre-action context. The boundary remains non-authority telemetry before local execution decisions.
+The mechanism remains governed pre-action context. The boundary remains non-authority review before local execution authority is exercised.
 
 ## Pain Points Nova May Reduce
 
 Nova may reduce pain in workflows where teams face:
 
-- lower tolerance for unsafe retries
+- lower tolerance for poorly reviewed retries
 - unclear escalation paths
 - high operator review burden
 - slow incident reconstruction
-- weak proof replay
+- weak replay and reconstruction evidence
 - ambiguous source provenance
 - fragmented audit evidence
 - limited pre-action operator review
@@ -73,24 +73,25 @@ The budget path is likely strongest where Nova is positioned as reviewable envir
 
 | Buyer/User | Pain | Budget Path | Why Nova May Matter | Adoption Friction | Evidence Needed |
 |---|---|---|---|---|---|
-| Agent orchestration builders | Unsafe retries, tool calls, escalation ambiguity | Developer infrastructure / platform risk | Pre-action context before local decisions | May prefer embedded controls | Integration test or design partner feedback |
-| Digital asset infrastructure teams | Pre-settlement risk, compliance review, incident reconstruction | Risk / compliance / infrastructure | Replayable governance context before workflow progression | Existing vendors already provide controls | Comparison against embedded controls |
-| Onchain treasury operators | Review burden, timing pressure, operational ambiguity | Treasury ops / risk | Environmental state for operator review | Budget volatility | Scenario showing reduced review ambiguity |
-| Institutional digital asset teams | Auditability, governance evidence, operational resilience | Risk / compliance / operational resilience | Reproducible proof records and continuity posture | Long diligence cycles | Reviewer feedback and validation artifacts |
-| AI governance / risk teams | Need auditable agent behavior | AI governance / model risk | Non-authority telemetry and replayable context | May view Nova as too finance-specific | Finance-agent workflow use case |
+| Digital-asset operations teams | Review burden, authority ambiguity, incident reconstruction | Risk / operations / infrastructure | Governed pre-action context before local authority acts | Existing operations controls | Baseline vs Nova-conditioned review comparison |
+| Stablecoin workflow operators | Settlement-adjacent timing pressure, retry ambiguity | Risk / operations / compliance support | Replayable governance evidence before local systems exercise authority | Existing vendors already provide controls | Reconstruction and retry/escalation scoring |
+| Onchain treasury teams | Review burden, timing pressure, source ambiguity | Treasury ops / risk | Source-segmented context for operator review | Budget volatility | Scenario showing improved source-context clarity |
+| Custody workflow owners | Authority-scope recognition, approval confusion, audit evidence | Risk / custody operations | Non-authority review layer that preserves local execution authority | Diligence and control concerns | Authority-scope recognition score |
+| Agent platform teams | Tool calls, retry routes, escalation ambiguity | Developer infrastructure / platform risk | Pre-action context before local decisions | May prefer embedded controls | Integration test or design partner feedback |
+| Risk infrastructure groups | Need auditable agentic financial behavior | Risk infrastructure / model risk | Replayable context and reviewer decision quality | May view Nova as too finance-specific | Finance-agent workflow use case |
 
 ## What Nova Improves
 
 Nova's economic value hypothesis is that pre-action context can improve:
 
-- lower review burden
-- faster incident reconstruction
-- fewer unsafe retries
-- clearer escalation paths
-- better proof replay
-- better source segmentation
-- improved audit evidence
-- better pre-action operator review
+- reconstruction speed
+- classification consistency
+- source-context clarity
+- authority-scope recognition
+- reviewer decision quality
+- retry/escalation clarity
+- replayable governance evidence
+- pre-action operator review
 
 Phase I should test whether these improvements appear in baseline-versus-Nova-conditioned workflow scenarios.
 
@@ -116,11 +117,12 @@ Local systems retain execution authority and decision responsibility.
 Useful evidence would include:
 
 - baseline versus Nova-conditioned workflow comparisons
-- decision delta under local rules
-- reduced time-to-reconstruct an incident scenario
-- operator review clarity scores
-- proof replay success rates
-- source-segmentation coverage
+- reconstruction speed
+- classification consistency
+- source-context clarity
+- authority-scope recognition
+- reviewer decision quality
+- retry/escalation clarity
 - design partner feedback on whether the context is useful
 - comparisons against embedded controls already available to target users
 - documented cases where Nova's non-authority boundary makes integration easier
@@ -129,7 +131,7 @@ Useful evidence would include:
 
 The economic value claim remains weak if:
 
-- Nova-conditioned context does not change local review, delay, retry, escalation, or reconstruction behavior
+- Nova-conditioned context does not improve reviewability, reconstruction, or retry/escalation clarity
 - reviewers cannot interpret the emitted environmental state
 - proof replay does not improve reconstruction
 - source segmentation adds noise instead of clarity

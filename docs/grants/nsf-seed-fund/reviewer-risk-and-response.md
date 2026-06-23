@@ -3,7 +3,7 @@
 
 ## 1. Is this a trading system?
 
-No. Nova is governance infrastructure, not trading infrastructure. It emits environmental state and reproducibility metadata before local systems decide how to act.
+No. Nova is non-authority governance review infrastructure, not trading infrastructure. It emits governed pre-action context and replayable governance evidence before local authority acts.
 
 ## 2. Is this just an AI wrapper?
 
@@ -11,32 +11,32 @@ No. OpenAI and other model providers may serve as optional reasoning interfaces,
 
 ## 3. Is this ordinary software engineering rather than R&D?
 
-The R&D challenge is not ordinary API construction. The technical risk is deterministic, interpretable, non-authority environmental governance for autonomous financial systems operating under ambiguous inputs, repeated pressure, provider interruption, and evolving governance epochs.
+The R&D challenge is not ordinary API construction. The technical risk is whether deterministic environmental state, Reflex Memory references, classification stability, source segmentation, constraint posture, and replayable governance evidence improve pre-execution review of agentic financial workflows before local authority acts.
 
 ## 4. Is this too crypto-specific?
 
-No. Nova can observe programmable settlement and machine-native payment contexts, but the research problem is broader: autonomous capital systems need governance context before action. The repo should avoid rail-specific expansion unless it supports protocol-neutral governance validation.
+No. Nova can observe programmable settlement and machine-native payment contexts, but the research problem is broader: agentic financial workflows need reviewable decision context before local authority acts. The repo should avoid rail-specific expansion unless it supports protocol-neutral governance validation.
 
 ## 5. What is technically risky?
 
-The risk is whether pre-action environmental state, Reflex Memory chronology, classification stability, and proof reproducibility can remain useful across heterogeneous actors without becoming execution authority or trading-signal infrastructure.
+The risk is whether governed pre-action context, Reflex Memory references, classification stability, source segmentation, constraint posture, and replayable governance evidence can improve reviewability across heterogeneous actors without becoming execution authority or trading-signal infrastructure.
 
 ## 6. Who is the customer?
 
-The customer pathway begins with builders and orchestration frameworks that need pre-action context. It can expand to autonomous agent builders, programmable settlement infrastructure teams, onchain treasury operators, institutional digital asset infrastructure teams, and governance or risk teams reviewing autonomous capital workflows.
+The customer pathway begins with teams responsible for allowing autonomous or semi-autonomous financial workflows near authority without losing reviewability. This includes digital-asset operations teams, stablecoin workflow operators, onchain treasury teams, custody workflow owners, agent platform teams, and risk infrastructure groups.
 
 ## 7. Why does this require NSF funding?
 
-NSF funding supports validation of the technical substrate before commercial pressure pulls the system toward narrow product features. Phase I would validate the core research questions around reproducibility, classification stability, continuity, non-authority boundaries, and autonomous-system consumption.
+NSF funding supports validation of the technical substrate before commercial pressure pulls the system toward narrow product features. Phase I would validate whether governed pre-action context improves reconstruction speed, classification consistency, source-context clarity, authority-scope recognition, reviewer decision quality, and retry/escalation clarity.
 
 ## 8. How does this create societal value?
 
-Nova supports safer and more auditable autonomous financial behavior by making pre-action context inspectable. It can reduce opaque automated action, expose retry pressure, improve continuity under provider loss, and strengthen operator review without concentrating execution authority.
+Nova supports more reviewable autonomous financial behavior by making pre-action decision context inspectable before local authority acts. It can expose retry pressure, improve continuity under provider loss, support reconstruction, and strengthen operator review without concentrating execution authority.
 
 ## 9. How does Nova avoid becoming an execution authority?
 
-Nova emits environmental state, proof metadata, classification context, and chronology. It does not decide whether capital moves. Local operators, agents, and orchestration systems retain execution responsibility.
+Nova emits governed pre-action context, proof metadata, classification context, source segmentation, and chronology. It does not decide whether capital moves. Local operators, agents, and orchestration systems retain execution responsibility.
 
 ## 10. What will Phase I prove?
 
-Phase I should validate proof reproducibility, classification stability, pre-action context consumption, source segmentation, continuity under provider or workspace interruption, and preservation of the non-authority boundary.
+Phase I should compare baseline agentic workflow review against Nova-conditioned workflow review. Replay and reconstruction provide the proof mechanism; pre-execution governance review is the first market wedge; Reflex Memory is technical depth and the long-term path toward upstream objective-context conditioning.

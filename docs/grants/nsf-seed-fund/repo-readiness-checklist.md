@@ -30,5 +30,4 @@ Use this checklist before NSF Seed Fund review and before public partner review.
 
 Sharpe Nova OS is not asking NSF to fund a trading system.
 
-It is asking NSF to fund research and validation of pre-execution environmental governance infrastructure for autonomous capital systems.
-
+It is asking NSF to fund research and validation of a non-authority pre-execution governance review layer for agentic financial workflows.
