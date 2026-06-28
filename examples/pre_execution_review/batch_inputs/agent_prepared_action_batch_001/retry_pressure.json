@@ -1,0 +1,19 @@
+{
+  "action_id": "apfarh-example-001",
+  "agent_id": "simulated-agent-alpha",
+  "action_type": "material_financial_action",
+  "materiality": "material",
+  "route_confirmed": false,
+  "confirmation_status": "incomplete",
+  "retry_count": 3,
+  "same_route_retry": true,
+  "liquidity_source_age_minutes": 2,
+  "expected_source_freshness_minutes": 5,
+  "settlement_context": "unknown",
+  "source_conflict": false,
+  "source_conflict_description": null,
+  "venue_condition_summary": null,
+  "authority_proximity": "high",
+  "local_authority_context": "pending review"
+}
+
