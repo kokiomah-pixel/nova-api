@@ -1,4 +1,5 @@
 from .batch_replay import run_batch_replay, run_batch_replay_for_directory
+from .chronology_acceptance import create_manual_chronology_acceptance_decision
 from .chronology_package import build_chronology_ingestion_package
 from .exporter import export_governance_records, safe_filename
 from .governance_record import build_governance_record
@@ -10,6 +11,7 @@ __all__ = [
     "ReviewOutput",
     "build_chronology_ingestion_package",
     "build_governance_record",
+    "create_manual_chronology_acceptance_decision",
     "review_agent_prepared_action",
     "export_governance_records",
     "run_batch_replay",
