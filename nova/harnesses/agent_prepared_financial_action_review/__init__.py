@@ -3,6 +3,7 @@ from .chronology_acceptance import create_manual_chronology_acceptance_decision
 from .chronology_acceptance_ledger import (
     create_or_append_chronology_acceptance_ledger_entry,
 )
+from .chronology_lifecycle_report import summarize_chronology_acceptance_ledger
 from .chronology_movement_plan import create_accepted_records_manual_movement_plan
 from .chronology_package import build_chronology_ingestion_package
 from .exporter import export_governance_records, safe_filename
@@ -18,6 +19,7 @@ __all__ = [
     "create_accepted_records_manual_movement_plan",
     "create_manual_chronology_acceptance_decision",
     "create_or_append_chronology_acceptance_ledger_entry",
+    "summarize_chronology_acceptance_ledger",
     "review_agent_prepared_action",
     "export_governance_records",
     "run_batch_replay",
