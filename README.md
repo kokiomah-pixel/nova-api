@@ -184,6 +184,12 @@ Sharpe Nova OS conditions the environment before execution; it does not authoriz
 
 ## Verification
 
+Install local development test dependencies:
+
+```bash
+python3 -m pip install -r requirements-dev.txt
+```
+
 Run doctrine lint:
 
 ```bash
@@ -201,6 +207,14 @@ Run tests:
 ```bash
 ./.venv/bin/python -m pytest
 ```
+
+Or, after installing the local development test dependencies:
+
+```bash
+python3 -m pytest
+```
+
+The development test dependency setup is for local verification only. It does not change harness runtime behavior.
 
 The doctrine check blocks prohibited execution-authority wording, code-like ALLOW enforcement examples, and hidden Unicode controls. Deprecated positioning terms are surfaced as warnings for review.
 
