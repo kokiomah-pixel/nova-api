@@ -4,6 +4,25 @@ Sharpe Nova OS is a non-authority pre-execution governance review layer for agen
 
 This repository is the canonical Sharpe Nova OS system repo. It contains the Nova API, proof layer, governance runtime, canonical specs, tests, and runnable examples. The project has been reframed to emphasize environmental coordination, pacing normalization, and sovereignty-preserving boundaries.
 
+## Phase 1 status
+
+The Agent-Prepared Financial Action Review Harness has completed its Phase 1 public offline proof chain through v0.8.1.
+
+The Phase 1 chain demonstrates offline pre-execution governance context formation for agent-prepared financial actions. It includes pre-action review, batch replay, governance-record export, chronology candidate packaging, manual acceptance, manual movement planning, chronology acceptance ledgering, lifecycle reporting, and a documented pytest verification path.
+
+This harness is offline, boundary-safe, reportable, and test-verifiable.
+
+It is not production readiness, market validation, buyer validation, live integration, execution infrastructure, audit reporting, compliance reporting, production audit infrastructure, automatic chronology ingestion, automatic Reflex Memory mutation, or automatic acceptance.
+
+Canonical boundary:
+
+```text
+Agent prepares action.
+Nova structures review context.
+Local authority decides.
+Nova does not execute.
+```
+
 ## Start Here
 
 Sharpe Nova OS emits governed pre-action context for agentic financial workflows before local authority acts, improving reviewability and replayability without authorizing or executing actions.
