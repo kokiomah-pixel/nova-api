@@ -25,23 +25,17 @@ Nova does not execute.
 
 ## Start Here
 
-Sharpe Nova OS emits governed pre-action context for agentic financial workflows before local authority acts, improving reviewability and replayability without authorizing or executing actions.
+New readers should begin with:
 
-Nova emits pre-action context before execution. It does not authorize execution, move capital, recommend trades, generate alpha, or optimize portfolios.
+- [docs/start-here.md](docs/start-here.md)
+- [docs/phase_1_offline_proof_chain.md](docs/phase_1_offline_proof_chain.md)
+- [docs/for-agent-builders.md](docs/for-agent-builders.md)
 
-If you are reviewing the project for the first time, start with this path:
+Sharpe Nova OS is pre-execution governance infrastructure for programmable capital systems.
 
-1. Read the system overview: [docs/overview.md](docs/overview.md)
-2. Inspect the Pre-Action Context Contract: [docs/architecture/pre-action-context-contract.md](docs/architecture/pre-action-context-contract.md)
-3. Review the builder example: [examples/pre_action_context/](examples/pre_action_context/)
-4. Review proof determinism and classification stability: [docs/governance/proof-determinism-and-classification-stability.md](docs/governance/proof-determinism-and-classification-stability.md)
-5. Review continuity posture: [docs/continuity/](docs/continuity/)
-6. Review NSF Phase I framing: [docs/grants/nsf-seed-fund/project-pitch-submission-draft.md](docs/grants/nsf-seed-fund/project-pitch-submission-draft.md)
-- Public Boundary and Terminology Clarification: `docs/governance/public-boundary-and-terminology-clarification.md`
+Nova structures review context before local authority acts.
 
-Canonical boundary:
-
-> Nova conditions the environment before execution; it does not authorize execution.
+Nova does not execute.
 
 ## Quick Local Check
 
