@@ -1,30 +1,24 @@
 # Start Here
 
-Sharpe Nova OS should be interpreted as a pre-execution decision admissibility layer.
+This root entry file is legacy.
 
-If you are new to the repository, read in this order:
-
-1. [SYSTEM_IDENTITY.md](SYSTEM_IDENTITY.md)
-2. [CONSTRAINT_POLICY.md](CONSTRAINT_POLICY.md)
-3. [nova.system.json](nova.system.json)
-4. [docs/overview.md](docs/overview.md)
-
-## Entry Points
-
-- Allocator-facing entry: [docs/allocator_entry.md](docs/allocator_entry.md)
-- Integration-facing entry: [docs/integration_entry.md](docs/integration_entry.md)
-- Governance rollout reference: [docs/governance_rollout.md](docs/governance_rollout.md)
+Use [docs/start-here.md](docs/start-here.md) as the current public starting point.
 
 ## Canonical Boundary
 
-- The API is the authoritative interface.
-- The response contract governs interpretation.
-- Nova defines the admissible state of a proposed decision before execution.
-- `/v1/context` returns a intent admissibility Record and `decision_id`.
-- `/v1/proof/{decision_id}` returns the authoritative audit surface.
-- Nova is not a trading system or execution framework.
-- Execution without Nova admission is outside system discipline.
+Agent prepares action.
+Nova structures review context.
+Local authority decides.
+Nova does not execute.
 
-The correct integration question is not "what does Nova suggest?"
+## Current Entry Point
 
-The correct question is "what does Nova allow?"
+Read [docs/start-here.md](docs/start-here.md) first.
+
+That file describes Nova as pre-execution governance infrastructure that structures review context for agent-prepared financial actions before local authority acts.
+
+## Legacy Note
+
+Older copies of this root file used authority-adjacent language. That framing is superseded.
+
+The correct integration posture is the pre-execution review context Nova structures before local authority decides.
