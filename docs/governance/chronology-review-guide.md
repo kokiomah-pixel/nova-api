@@ -332,3 +332,9 @@ Chronology is not yet Nova's moat.
 Chronology is the condition under which a moat could form if continuity becomes relied upon.
 
 Until then, chronology should be treated as institutional review-context discipline.
+
+---
+
+## Related Governance Concepts
+
+- [Governance-Context Rot](governance-context-rot.md)

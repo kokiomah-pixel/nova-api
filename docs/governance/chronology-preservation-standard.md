@@ -469,3 +469,9 @@ Maintain signal quality.
 ```
 
 Chronology should be complete enough to reconstruct decision context, but selective enough to remain reviewable.
+
+---
+
+## Related Governance Concepts
+
+- [Governance-Context Rot](governance-context-rot.md)

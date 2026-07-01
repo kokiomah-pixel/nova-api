@@ -158,6 +158,7 @@ These controls support reviewability before local authority acts.
 - Proof Replay Example: [examples/proof_replay/](examples/proof_replay/)
 - NSF Fundability Materials: [docs/grants/nsf-seed-fund/](docs/grants/nsf-seed-fund/)
 - Proof Determinism Note: [docs/governance/proof-determinism-and-classification-stability.md](docs/governance/proof-determinism-and-classification-stability.md)
+- Governance-Context Rot: [docs/governance/governance-context-rot.md](docs/governance/governance-context-rot.md) — defines decision-context degradation risk and explains why Nova emphasizes governed pre-action review context, chronology, source segmentation, proof reproducibility, and authority-scope recognition.
 - Chronology Preservation Standard: [docs/governance/chronology-preservation-standard.md](docs/governance/chronology-preservation-standard.md)
 - Chronology Review Guide: [docs/governance/chronology-review-guide.md](docs/governance/chronology-review-guide.md) — explains how reviewers should interpret chronology, source classifications, continuity gaps, and CCO-reconciled events without treating chronology as execution authority, performance history, or market validation.
 - Continuity Protocols: [docs/continuity/](docs/continuity/)
