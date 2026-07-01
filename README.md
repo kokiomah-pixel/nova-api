@@ -158,6 +158,7 @@ These controls support reviewability before local authority acts.
 - Proof Replay Example: [examples/proof_replay/](examples/proof_replay/)
 - NSF Fundability Materials: [docs/grants/nsf-seed-fund/](docs/grants/nsf-seed-fund/)
 - Proof Determinism Note: [docs/governance/proof-determinism-and-classification-stability.md](docs/governance/proof-determinism-and-classification-stability.md)
+- Chronology Preservation Standard: [docs/governance/chronology-preservation-standard.md](docs/governance/chronology-preservation-standard.md)
 - Continuity Protocols: [docs/continuity/](docs/continuity/)
 
 ## NSF Seed Fund Readiness
