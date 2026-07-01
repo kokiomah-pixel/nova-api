@@ -18,6 +18,14 @@ It is not execution authority.
 
 ---
 
+## Companion Guide
+
+For reviewer-facing interpretation guidance, see:
+
+- [Chronology Review Guide](chronology-review-guide.md)
+
+---
+
 ## Canonical Boundary
 
 Agent prepares action.  

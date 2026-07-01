@@ -159,6 +159,7 @@ These controls support reviewability before local authority acts.
 - NSF Fundability Materials: [docs/grants/nsf-seed-fund/](docs/grants/nsf-seed-fund/)
 - Proof Determinism Note: [docs/governance/proof-determinism-and-classification-stability.md](docs/governance/proof-determinism-and-classification-stability.md)
 - Chronology Preservation Standard: [docs/governance/chronology-preservation-standard.md](docs/governance/chronology-preservation-standard.md)
+- Chronology Review Guide: [docs/governance/chronology-review-guide.md](docs/governance/chronology-review-guide.md) — explains how reviewers should interpret chronology, source classifications, continuity gaps, and CCO-reconciled events without treating chronology as execution authority, performance history, or market validation.
 - Continuity Protocols: [docs/continuity/](docs/continuity/)
 
 ## NSF Seed Fund Readiness
