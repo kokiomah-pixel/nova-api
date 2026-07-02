@@ -363,6 +363,12 @@ Keep the context disciplined.
 
 ---
 
+## Related Governance Concepts
+
+- [Source Reconciliation Runbook](source-reconciliation-runbook.md)
+
+---
+
 ## Final Principle
 
 Nova should not compete on having the largest context surface.

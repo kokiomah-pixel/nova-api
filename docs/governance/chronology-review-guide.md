@@ -338,3 +338,4 @@ Until then, chronology should be treated as institutional review-context discipl
 ## Related Governance Concepts
 
 - [Governance-Context Rot](governance-context-rot.md)
+- [Source Reconciliation Runbook](source-reconciliation-runbook.md)

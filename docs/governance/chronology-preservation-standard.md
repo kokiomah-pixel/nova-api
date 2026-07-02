@@ -475,3 +475,4 @@ Chronology should be complete enough to reconstruct decision context, but select
 ## Related Governance Concepts
 
 - [Governance-Context Rot](governance-context-rot.md)
+- [Source Reconciliation Runbook](source-reconciliation-runbook.md)
