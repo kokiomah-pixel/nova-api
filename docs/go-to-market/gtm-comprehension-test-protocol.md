@@ -143,7 +143,7 @@ comprehension_score:
     description: Reader understands Nova is pre-action context but confuses one important boundary, such as approval, compliance, or integration with execution systems.
 
   2_confused:
-    description: Reader treats Nova as an approval system, compliance workflow, audit product, wallet layer, payment authorization layer, agent supervisor, or execution checkpoint.
+    description: Reader treats Nova as an approval system, compliance workflow, audit product, wallet layer, payment-permission layer, agent supervisor, or execution checkpoint.
 
   1_failed:
     description: Reader cannot explain where Nova sits or what Nova returns.

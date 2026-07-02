@@ -23,7 +23,7 @@ Nova does not execute.
 Nova is not:
 
 - a trading system
-- a signal engine
+- a trading-signal system
 - a portfolio optimizer
 - a payment rail
 - a wallet

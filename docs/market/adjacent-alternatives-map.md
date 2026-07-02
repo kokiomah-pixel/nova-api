@@ -7,7 +7,7 @@ Nova operates near several existing categories, but its positioning should remai
 
 Nova should not be positioned as a replacement for policy engines, orchestration platforms, agent observability tools, custody controls, compliance analytics, or transaction simulation systems. Those systems may enforce rules, coordinate workflows, monitor traces, custody assets, screen transactions, or simulate outcomes. Nova's narrower role is to assemble reviewable pre-action governance context before local systems act, preserve reproducible governance evidence, and retain the non-authority boundary so execution authority remains local.
 
-Nova is closest to these systems at the review and evidence layer, not at the execution or authorization layer.
+Nova is closest to these systems at the review and evidence layer, not at the execution or payment-permission layer.
 
 ## Why This Map Matters
 

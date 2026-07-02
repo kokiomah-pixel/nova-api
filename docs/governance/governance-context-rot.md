@@ -307,7 +307,7 @@ Governance-context rot does not mean Nova is:
 - a wallet
 - a signing tool
 - a trading system
-- a signal engine
+- a trading-signal system
 - a portfolio optimizer
 - a compliance product
 - an audit system

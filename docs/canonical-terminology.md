@@ -49,10 +49,10 @@ Preferred short form:
 
 Use these only inside explicit migration, audit, or boundary-validation artifacts.
 
-- authorization layer
+- payment-permission layer
 - execution permission
 - decision approval
-- signal engine
+- trading-signal system
 - prediction system
 - optimization engine
 - execution middleware
@@ -64,10 +64,10 @@ Use these only inside explicit migration, audit, or boundary-validation artifact
 
 ## Migration Mappings
 
-- authorization layer -> environmental governance layer
+- payment-permission layer -> environmental governance layer
 - execution permission -> environmental admissibility context
 - decision approval -> coordination-state emission
-- signal engine -> derivative telemetry surface
+- trading-signal system -> derivative telemetry surface
 - prediction system -> environmental telemetry interpretation
 - optimization engine -> pacing normalization infrastructure
 - execution middleware -> upstream environmental conditioning infrastructure
@@ -85,7 +85,7 @@ The following wording is prohibited outside this registry and explicit test fixt
 - decision approval
 - execute if admitted
 - execute only if admitted
-- Nova authorizes
+- Nova grants authority
 - retry until ALLOW
 - if decision_status == ALLOW
 - block execution

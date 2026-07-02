@@ -2,7 +2,7 @@
 
 Sharpe Nova OS is researching and validating a non-authority pre-execution governance review layer for agentic financial workflows.
 
-Nova is not an agent framework, execution middleware, trading system, signal engine, payment processor, settlement router, or portfolio optimizer. It does not move capital, recommend trades, authorize action, route transactions, settle transactions, or become the system of record for local execution decisions.
+Nova is not an agent framework, execution middleware, trading system, trading-signal system, payment processor, settlement router, or portfolio optimizer. It does not move capital, recommend trades, authorize action, route transactions, settle transactions, or become the system of record for local execution decisions.
 
 Nova emits governed pre-action context before local authority acts by combining:
 

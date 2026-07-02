@@ -4,7 +4,7 @@
 
 Agentic financial workflows are beginning to operate near financial authority before institutions have reliable ways to review the decision context that existed before action.
 
-Sharpe Nova OS is a non-authority pre-execution governance review layer for agentic financial workflows. When a workflow forms an intended action but before local execution authority is exercised, Nova emits governed pre-action context. It is not a trading system, signal engine, execution engine, agent framework, payment processor, or portfolio optimizer.
+Sharpe Nova OS is a non-authority pre-execution governance review layer for agentic financial workflows. When a workflow forms an intended action but before local execution authority is exercised, Nova emits governed pre-action context. It is not a trading system, trading-signal system, execution engine, agent framework, payment processor, or portfolio optimizer.
 
 Nova conditions the environment before execution; it does not authorize execution. Consumers remain responsible for all local governance and execution decisions.
 

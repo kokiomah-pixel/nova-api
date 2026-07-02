@@ -260,10 +260,10 @@ Nova is not:
 * a compliance product
 * an audit system
 * an approval engine
-* an authorization layer
+* a payment-permission layer
 * an agent supervisor
 * a trading system
-* a signal engine
+* a trading-signal system
 * a portfolio optimizer
 
 Nova structures governed review context before local authority acts.

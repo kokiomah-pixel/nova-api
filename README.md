@@ -101,7 +101,7 @@ It helps local operators, agents, and orchestration systems inspect governed pre
 Nova is not any of the following:
 
 - not a trading system
-- not a signal engine
+- not a trading-signal system
 - not an execution engine
 - not an agent framework
 - not a payment processor
