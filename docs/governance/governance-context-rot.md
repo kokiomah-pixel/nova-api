@@ -365,6 +365,7 @@ Keep the context disciplined.
 
 ## Related Governance Concepts
 
+- [Institution-Owned Governance Chronology](institution-owned-governance-chronology.md)
 - [Source Reconciliation Runbook](source-reconciliation-runbook.md)
 
 ---
