@@ -297,3 +297,9 @@ Local authority decides.
 Execution happens elsewhere.
 Chronology preserves the institution's governance memory.
 ```
+
+---
+
+## Related GTM Context
+
+- [GTM Comprehension Test Protocol](gtm-comprehension-test-protocol.md)

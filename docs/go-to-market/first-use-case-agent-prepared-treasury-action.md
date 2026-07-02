@@ -341,7 +341,7 @@ Do not say:
 
 * Nova approves treasury actions
 * Nova denies treasury actions
-* Nova authorizes payments
+* Nova provides payment authorization
 * Nova blocks execution
 * Nova routes transactions
 * Nova settles stablecoins
@@ -367,3 +367,9 @@ Execution happens elsewhere.
 
 Chronology preserves the institution's governance memory.
 ```
+
+---
+
+## Related GTM Context
+
+- [GTM Comprehension Test Protocol](gtm-comprehension-test-protocol.md)
