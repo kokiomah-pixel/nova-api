@@ -64,7 +64,7 @@ Key emitted fields (examples):
 coordination_state         # descriptive label of environmental posture
 constraint_pressure        # summary of constraint intensity (low/medium/high)
 drift_score                # derivative telemetry metric (0.0 - 1.0)
-admissibility_metadata     # structured context to inform pacing/adjustment
+review_context_metadata    # structured context to inform pacing/adjustment
 ```
 
 Supporting fields may explain telemetry and constraint analysis. These fields are intended as conditioning inputs for upstream orchestration logic — they do not, by themselves, grant execution authority.
