@@ -189,6 +189,11 @@ An autonomous agent can request pre-action context before routing an intended ac
 
 If model-provider access is unavailable, an operator can use offline decision intake and chronology records to preserve governance context until normal review resumes.
 
+## Related GTM Context
+
+- [Where Nova Sits](../go-to-market/where-nova-sits.md)
+- [First Use Case: Agent-Prepared Treasury Action](../go-to-market/first-use-case-agent-prepared-treasury-action.md)
+
 ## Local Execution Responsibility
 
 Consumers remain responsible for all local governance and execution decisions. Nova can inform review, pacing, delay, escalation, or cancellation logic, but those actions happen outside Nova.

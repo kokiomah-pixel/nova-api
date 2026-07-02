@@ -368,6 +368,11 @@ Keep the context disciplined.
 - [Institution-Owned Governance Chronology](institution-owned-governance-chronology.md)
 - [Source Reconciliation Runbook](source-reconciliation-runbook.md)
 
+## Related GTM Context
+
+- [Where Nova Sits](../go-to-market/where-nova-sits.md)
+- [First Use Case: Agent-Prepared Treasury Action](../go-to-market/first-use-case-agent-prepared-treasury-action.md)
+
 ---
 
 ## Final Principle
