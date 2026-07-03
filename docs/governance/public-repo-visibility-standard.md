@@ -89,3 +89,19 @@ Sharpe Nova OS must not be framed as:
 The repo should prove Nova is real and disciplined.
 
 It should not expose the full operating nervous system of Sharpe Nova OS.
+
+## Pull Request Visibility Discipline
+
+Public-facing changes should use the repository pull request checklist before merge.
+
+The checklist operationalizes this standard by requiring:
+
+- file visibility classification
+- canonical boundary preservation
+- unsupported claim review
+- memory-language safety
+- CCO review when required
+
+See:
+
+- `.github/pull_request_template.md`
