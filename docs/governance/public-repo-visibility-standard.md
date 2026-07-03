@@ -105,3 +105,11 @@ The checklist operationalizes this standard by requiring:
 See:
 
 - `.github/pull_request_template.md`
+
+## Strategy Hypothesis Visibility
+
+Controlled strategy hypotheses may be preserved in the public repo only when they are clearly marked as hypotheses and explicitly separated from market validation, buyer validation, adoption evidence, and production claims.
+
+See:
+
+- `docs/strategy/coherence-infrastructure-value-hypothesis.md`

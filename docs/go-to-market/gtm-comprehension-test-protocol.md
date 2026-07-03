@@ -378,6 +378,47 @@ Escalate to CCO if:
 
 ---
 
+## Optional Advanced Question - Review-Context Capacity Gap
+
+This question should be used only after the reader understands the basic Nova boundary.
+
+### Question
+
+In agentic financial workflows, what happens when actions can be prepared faster than institutions can assemble governed review context?
+
+### Strong Answer
+
+The institution needs pre-execution review-context infrastructure before local authority decides.
+
+The prepared action may exist, and the rail may be capable of movement, but local authority still needs governed context around source state, classification, proof evidence, chronology, and authority boundaries.
+
+### Weak or Confused Answers
+
+- The agent should execute automatically.
+- Nova should approve or block the action.
+- The payment rail should handle governance.
+- The custodian should own the decision record.
+- The API should decide based on Reflex Memory.
+- The review step can be skipped if the action is formatted correctly.
+
+### What This Tests
+
+This question tests whether the reader sees the distinction between:
+
+- action preparation
+- movement capacity
+- governed review context
+- local authority
+- execution
+
+It also tests whether the reader understands that Nova's value is not execution, approval, or payment control.
+
+Nova structures review context before local authority acts.
+
+Execution happens elsewhere.
+
+---
+
 ## Final Compression
 
 ```text
