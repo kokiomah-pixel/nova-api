@@ -68,6 +68,19 @@ Phase 1 does not show:
 - automatic acceptance
 - authority over capital movement
 
+## Public Repo Visibility
+
+This repository is maintained as a controlled public proof surface for Sharpe Nova OS.
+
+The repo is intended to show Nova's pre-execution governance boundary, review-context architecture, and offline proof discipline.
+
+It is not the full operating archive of the Sharpe Nova OS living system.
+
+See:
+
+- `docs/governance/public-repo-visibility-standard.md`
+- `docs/governance/public-file-review-checklist.md`
+
 ## Suggested Reading Path
 
 1. Read this file.
