@@ -25,3 +25,15 @@ Agentic financial workflows can form intended actions, call tools, retry routes,
 Nova studies whether a governed pre-action context layer can improve reviewability, reconstruction quality, classification consistency, source-context clarity, and authority-scope recognition without becoming the authority that decides whether capital moves.
 
 The system's novelty is not a new execution path. It is the preservation and emission of governed pre-action context before local authority acts, with replayable governance evidence that makes the context reproducible, inspectable, and reviewable across governance epochs.
+
+## Reflex Memory R&D
+
+Reflex Memory is treated as bounded R&D rather than production capability.
+
+The current v0.1 path demonstrates specification, fixture testing, and API review-context exposure with `authority_effect: none`.
+
+The next technical objective is to test whether this pattern remains deterministic, replayable, source-classified, and non-authority across multiple governance-stress scenarios.
+
+See:
+
+- `docs/grants/nsf-seed-fund/reflex-memory-rd-plan.md`
