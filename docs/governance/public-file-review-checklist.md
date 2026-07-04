@@ -39,6 +39,25 @@ If the file discusses memory, does it preserve the distinction?
 - Reflex Memory is accepted governance memory that may condition future review posture.
 - API output remains review context, not authority.
 
+## Reflex Memory Check
+
+If the file discusses Reflex Memory, does it preserve the following?
+
+- Reflex Memory is accepted governance memory.
+- Reflex Memory may condition future review posture.
+- Reflex Memory cannot mutate automatically.
+- Reflex Memory cannot approve, deny, authorize, block, route, settle, sign, or execute.
+- Reflex Memory must reference source chronology.
+- API output remains review context, not authority.
+
+Unsafe phrasing to avoid:
+
+- Reflex Memory powers live API decisions.
+- Nova's API decides based on memory.
+- Nova learns from capital actions.
+- Reflex Memory restores authority.
+- Reflex Memory blocks execution.
+
 ## Evidence Check
 
 Does the file avoid claiming:

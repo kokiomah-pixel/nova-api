@@ -144,6 +144,18 @@ Safe compression:
 > Authority remains local.
 > Execution happens elsewhere.
 
+### Reflex Memory Specific Check
+
+If this PR discusses Reflex Memory, confirm:
+
+- [ ] Reflex Memory is framed as accepted governance memory.
+- [ ] Reflex Memory conditions review posture only.
+- [ ] Reflex Memory does not mutate automatically.
+- [ ] Reflex Memory does not approve, deny, authorize, block, route, settle, sign, or execute.
+- [ ] Reflex Memory references source chronology.
+- [ ] API output remains review context, not authority.
+- [ ] Not applicable; this PR does not discuss Reflex Memory.
+
 ---
 
 ## 7. API / Proof Language Check
