@@ -1,0 +1,24 @@
+{
+  "chronology_event_id": "CHR-2026-07-03-001",
+  "event_type": "source_reconciliation",
+  "status": "reviewed",
+  "accepted_for_reflex_candidate": true,
+  "created_at": "2026-07-03T08:02:09Z",
+  "source_state": {
+    "classification": "source_conflict",
+    "limitations": [
+      "Connector state was stale or unverified relative to Architect-confirmed repo head.",
+      "Architect-confirmed repo head remained authoritative for current repo state."
+    ]
+  },
+  "summary": "A source-state conflict was identified where connector-derived repo state differed from Architect-confirmed current repo state.",
+  "boundary_risk": [
+    "Stale connector state could be mistaken for current repo truth.",
+    "Source conflict could create false governance conclusions if not surfaced before review."
+  ],
+  "evidence_refs": [
+    "docs/governance/source-reconciliation-runbook.md",
+    "docs/governance/public-repo-visibility-standard.md"
+  ],
+  "non_authority_statement": "This chronology event does not approve, deny, authorize, block, route, settle, sign, execute, or replace local authority."
+}

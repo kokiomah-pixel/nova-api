@@ -276,6 +276,22 @@ Before Reflex Memory can be described as production-reviewable, Sharpe Nova OS s
 - API context output examples
 - documentation showing how local authority remains responsible
 
+## Reference Fixture
+
+A non-production Reflex Memory v0.1 fixture is available at:
+
+- `docs/governance/reflex-memory-v0-1-fixture.md`
+
+The fixture demonstrates:
+
+- reviewed chronology event
+- Reflex Memory candidate
+- accepted Reflex Memory entry
+- API review-context exposure
+- `authority_effect: none`
+
+The fixture does not demonstrate production readiness, adoption, market validation, buyer validation, live deployment, approval, denial, authorization, blocking, routing, settlement, signing, execution, compliance review, audit reporting, wallet control, or agent supervision.
+
 ## Final Rule
 
 Reflex Memory is valuable only if it improves review continuity without becoming authority.

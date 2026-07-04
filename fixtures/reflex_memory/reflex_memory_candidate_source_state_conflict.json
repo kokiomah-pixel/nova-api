@@ -1,0 +1,28 @@
+{
+  "reflex_id": "RM-CANDIDATE-0001",
+  "version": "reflex_memory_v0_1",
+  "status": "candidate",
+  "source_chronology_event_ids": [
+    "CHR-2026-07-03-001"
+  ],
+  "created_at": "2026-07-03T08:10:00Z",
+  "reviewed_at": null,
+  "accepted_at": null,
+  "accepted_by": null,
+  "source_state": {
+    "classification": "source_conflict",
+    "limitations": [
+      "Candidate is derived from a reviewed chronology event.",
+      "Candidate is not active Reflex Memory until explicitly accepted."
+    ]
+  },
+  "trigger_pattern": "source_state_conflict",
+  "stress_type": "source_reconciliation_required",
+  "boundary_risk": "Stale or unverified source state may be treated as current truth if not surfaced in future review context.",
+  "review_posture_effect": "require_source_reconciliation_context",
+  "evidence_refs": [
+    "fixtures/reflex_memory/chronology_event_source_state_conflict.json"
+  ],
+  "expiration_or_review_after": "2026-10-01",
+  "non_authority_statement": "This candidate does not approve, deny, authorize, block, route, settle, sign, execute, or replace local authority."
+}

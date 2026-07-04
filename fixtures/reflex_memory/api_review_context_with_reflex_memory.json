@@ -1,0 +1,36 @@
+{
+  "context_id": "CTX-REFLEX-0001",
+  "version": "pre_action_context_v0_1",
+  "prepared_action": {
+    "action_type": "treasury_action_review",
+    "status": "prepared_for_review",
+    "execution_status": "not_executed"
+  },
+  "canonical_boundary": [
+    "Agent prepares action.",
+    "Nova structures review context.",
+    "Local authority decides.",
+    "Nova does not execute."
+  ],
+  "reflex_memory_context": {
+    "present": true,
+    "version": "reflex_memory_v0_1",
+    "entries": [
+      {
+        "reflex_id": "RM-0001",
+        "source_chronology_event_ids": [
+          "CHR-2026-07-03-001"
+        ],
+        "trigger_pattern": "source_state_conflict",
+        "review_posture_effect": "require_source_reconciliation_context",
+        "authority_effect": "none",
+        "note": "Prior accepted governance memory indicates that source-state reconciliation context should be visible before local authority acts."
+      }
+    ]
+  },
+  "local_authority": {
+    "decision_responsibility": "local_authority",
+    "nova_authority": "none"
+  },
+  "non_authority_statement": "API output is governed review context only. It is not approval, denial, authorization, blocking, routing, settlement, signing, execution, compliance review, audit reporting, or wallet control."
+}
