@@ -198,6 +198,12 @@ If model-provider access is unavailable, an operator can use offline decision in
 
 Consumers remain responsible for all local governance and execution decisions. Nova can inform review, pacing, delay, escalation, or cancellation logic, but those actions happen outside Nova.
 
+## Related Concept
+
+For a systems-level explanation of how Nova turns agent-prepared actions into review-ready context, see:
+
+- `docs/architecture/review-context-loop.md`
+
 ## Final Boundary
 
 Nova emits environmental state before execution; it does not decide whether execution occurs.

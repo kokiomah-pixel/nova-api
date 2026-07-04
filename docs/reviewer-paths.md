@@ -79,13 +79,14 @@ Use this path to inspect implementation behavior.
 1. `README.md`
 2. `docs/architecture/pre-action-context-contract.md`
 3. `examples/pre_action_context/`
-4. `core/reflex_memory/context.py`
-5. `fixtures/reflex_memory/`
-6. `tests/test_reflex_memory_v0_1.py`
-7. `tests/test_reflex_memory_loader.py`
-8. `tests/test_reflex_memory_context_endpoint.py`
-9. `tests/test_reflex_memory_legacy_semantics_cleanup.py`
-10. `docs/validation/technical-evidence-map.md`
+4. `docs/architecture/review-context-loop.md`
+5. `core/reflex_memory/context.py`
+6. `fixtures/reflex_memory/`
+7. `tests/test_reflex_memory_v0_1.py`
+8. `tests/test_reflex_memory_loader.py`
+9. `tests/test_reflex_memory_context_endpoint.py`
+10. `tests/test_reflex_memory_legacy_semantics_cleanup.py`
+11. `docs/validation/technical-evidence-map.md`
 
 Suggested local checks:
 
@@ -111,9 +112,10 @@ Use this path to understand category, positioning, and institutional logic.
 1. `docs/start-here.md`
 2. `docs/go-to-market/where-nova-sits.md`
 3. `docs/go-to-market/first-use-case-agent-prepared-treasury-action.md`
-4. `docs/governance/institution-owned-governance-chronology.md`
-5. `docs/governance/governance-context-rot.md`
-6. `docs/go-to-market/gtm-comprehension-test-protocol.md`
+4. `docs/architecture/review-context-loop.md`
+5. `docs/governance/institution-owned-governance-chronology.md`
+6. `docs/governance/governance-context-rot.md`
+7. `docs/go-to-market/gtm-comprehension-test-protocol.md`
 
 What this path shows:
 
