@@ -15,6 +15,7 @@ from fastapi import FastAPI, Header, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from core.reflex_memory import (
+    build_reflex_memory_context,
     ReflexMemoryState,
     build_registry,
     select_active_entry,
@@ -5177,6 +5178,17 @@ def get_context(
         "guardrail": guardrail,
         "memory_context": historical_reference,
         "reflex_memory": reflex_memory_state.model_dump(),
+        "reflex_memory_context": build_reflex_memory_context(),
+        "canonical_boundary": [
+            "Agent prepares action.",
+            "Nova structures review context.",
+            "Local authority decides.",
+            "Nova does not execute.",
+        ],
+        "local_authority": {
+            "decision_responsibility": "local_authority",
+            "nova_authority": "none",
+        },
         "transition_state": "stable_to_elevated_recent" if DEFAULT_REGIME == "Elevated Fragility" else "stable",
         "constitution_version": CONSTITUTION_VERSION,
         "tier": entitlement["tier"],

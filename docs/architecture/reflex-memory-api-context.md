@@ -84,6 +84,27 @@ A replay should be able to reconstruct:
 - what review posture effect was surfaced
 - why the effect did not constitute authority
 
+## v0.1 Fixture-Backed Integration
+
+The initial `/v1/context` Reflex Memory integration is fixture-backed.
+
+It exists to demonstrate how accepted Reflex Memory may appear in API-emitted review context.
+
+It is not dynamic Reflex Memory storage.
+It is not autonomous pattern detection.
+It is not automatic memory mutation.
+It is not a production persistence layer.
+
+The v0.1 integration must preserve:
+
+```yaml
+authority_effect: none
+```
+
+The field exists so local authority can inspect relevant accepted governance memory before deciding.
+
+It does not approve, deny, authorize, block, route, settle, sign, execute, perform compliance review, perform audit reporting, manage wallets, supervise agents, or replace local authority.
+
 ## Final Rule
 
 Reflex Memory may shape review context.

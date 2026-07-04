@@ -1,6 +1,7 @@
 from .registry import build_registry, select_active_entry
 from .schema import ReflexMemoryState, ReflexProof, ReflexRegistryEntry
 from .validation import validate_reflex_memory_state
+from .context import ReflexMemoryError, build_reflex_memory_context, validate_reflex_memory_entry
 
 __all__ = [
     "build_registry",
@@ -9,4 +10,7 @@ __all__ = [
     "ReflexProof",
     "ReflexRegistryEntry",
     "validate_reflex_memory_state",
+    "ReflexMemoryError",
+    "build_reflex_memory_context",
+    "validate_reflex_memory_entry",
 ]

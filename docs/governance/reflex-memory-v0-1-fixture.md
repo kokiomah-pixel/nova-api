@@ -93,6 +93,16 @@ Memory conditions review.
 Authority remains local.
 Execution happens elsewhere.
 
+## Endpoint Integration
+
+The v0.1 fixture may be surfaced through `/v1/context` as `reflex_memory_context`.
+
+This integration is bounded and fixture-backed.
+
+It demonstrates review-context exposure only.
+
+It does not demonstrate production persistence, live Reflex Memory mutation, autonomous learning, approval, denial, authorization, blocking, routing, settlement, signing, execution, compliance review, audit reporting, wallet control, or agent supervision.
+
 ## Final Rule
 
 This fixture exists to make Reflex Memory inspectable.
