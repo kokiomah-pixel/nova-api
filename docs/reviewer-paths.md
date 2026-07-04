@@ -29,6 +29,7 @@ Use this path if you are reviewing Sharpe Nova OS for the first time.
 4. `examples/pre_action_context/`
 5. `docs/governance/reflex-memory-specification.md`
 6. `docs/governance/reflex-memory-v0-1-fixture.md`
+7. `docs/validation/technical-evidence-map.md`
 
 You should leave this path understanding:
 
@@ -84,6 +85,7 @@ Use this path to inspect implementation behavior.
 7. `tests/test_reflex_memory_loader.py`
 8. `tests/test_reflex_memory_context_endpoint.py`
 9. `tests/test_reflex_memory_legacy_semantics_cleanup.py`
+10. `docs/validation/technical-evidence-map.md`
 
 Suggested local checks:
 

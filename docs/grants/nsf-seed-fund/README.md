@@ -25,6 +25,12 @@ Sharpe Nova OS is framed here as bounded R&D for non-authority pre-execution gov
 6. `commercialization-pathway.md`
 7. `societal-impact.md`
 
+## Supporting Materials
+
+- `docs/validation/technical-evidence-map.md`
+
+The technical evidence map distinguishes implemented proof surface from R&D frontier, production claims, adoption evidence, buyer validation, and market validation.
+
 ## What These Materials Show
 
 - technical novelty
