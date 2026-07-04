@@ -81,6 +81,23 @@ See:
 - `docs/governance/public-repo-visibility-standard.md`
 - `docs/governance/public-file-review-checklist.md`
 
+## Reviewer Paths
+
+Different readers should use different paths through the repo.
+
+See:
+
+- `docs/reviewer-paths.md`
+
+The reviewer paths cover:
+
+- ten-minute first read
+- NSF review
+- developer inspection
+- strategic positioning
+- Reflex Memory
+- public repo visibility
+
 ## Suggested Reading Path
 
 1. Read this file.

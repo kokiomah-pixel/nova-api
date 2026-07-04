@@ -28,6 +28,7 @@ Nova does not execute.
 New readers should begin with:
 
 - [docs/start-here.md](docs/start-here.md)
+- [docs/reviewer-paths.md](docs/reviewer-paths.md)
 - [docs/phase_1_offline_proof_chain.md](docs/phase_1_offline_proof_chain.md)
 - [docs/for-agent-builders.md](docs/for-agent-builders.md)
 
@@ -113,15 +114,18 @@ Consumers remain responsible for all local governance and execution decisions.
 
 ## Ten-Minute Reviewer Path
 
-| Reviewer Question | Where To Look |
-|---|---|
-| What is Nova? | [docs/overview.md](docs/overview.md) |
-| What does Nova emit before action? | [docs/architecture/pre-action-context-contract.md](docs/architecture/pre-action-context-contract.md) |
-| How would a builder consume Nova? | [examples/pre_action_context/](examples/pre_action_context/) |
-| How does Nova preserve determinism? | [docs/governance/proof-determinism-and-classification-stability.md](docs/governance/proof-determinism-and-classification-stability.md) |
-| How does Nova handle continuity failures? | [docs/continuity/](docs/continuity/) |
-| Why is this Phase I R&D? | [docs/grants/nsf-seed-fund/project-pitch-submission-draft.md](docs/grants/nsf-seed-fund/project-pitch-submission-draft.md) |
-| What is the current direction? | [ROADMAP.md](ROADMAP.md) |
+For a role-based review path, see:
+
+- [docs/reviewer-paths.md](docs/reviewer-paths.md)
+
+The shortest first-read path is:
+
+1. [docs/start-here.md](docs/start-here.md)
+2. [docs/phase_1_offline_proof_chain.md](docs/phase_1_offline_proof_chain.md)
+3. [docs/architecture/pre-action-context-contract.md](docs/architecture/pre-action-context-contract.md)
+4. [examples/pre_action_context/](examples/pre_action_context/)
+5. [docs/governance/reflex-memory-specification.md](docs/governance/reflex-memory-specification.md)
+6. [docs/governance/reflex-memory-v0-1-fixture.md](docs/governance/reflex-memory-v0-1-fixture.md)
 
 ## Proof Determinism and Infrastructure Credibility
 
@@ -153,6 +157,7 @@ These controls support reviewability before local authority acts.
 
 ## Builder Entry Points
 
+- Reviewer Paths: [docs/reviewer-paths.md](docs/reviewer-paths.md) - gives NSF reviewers, developers, strategic readers, and Reflex Memory reviewers a short path through the repo.
 - Pre-Action Context Contract: [docs/architecture/pre-action-context-contract.md](docs/architecture/pre-action-context-contract.md)
 - Pre-Action Context Example: [examples/pre_action_context/](examples/pre_action_context/)
 - Proof Replay Example: [examples/proof_replay/](examples/proof_replay/)
