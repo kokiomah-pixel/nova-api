@@ -96,8 +96,8 @@ def test_admitted_exposure_consumes_permission_budget(client):
     assert response.status_code == 200
     payload = response.json()
     assert payload["permission_budget_class"] == "risk_increasing"
-    assert payload["budget_consumed_by_request"] == 4000.0
-    assert payload["permission_budget_remaining"] == 6000.0
+    assert payload["budget_consumed_by_request"] == 5000.0
+    assert payload["permission_budget_remaining"] == 5000.0
     assert payload["budget_exhausted"] is False
     assert payload["exception_budget_remaining"] == 3
 
@@ -118,8 +118,8 @@ def test_low_remaining_budget_can_trigger_reduced_admission(client):
     assert reduced.status_code == 200
     payload = reduced.json()
     assert payload["decision_status"] == "REDUCE"
-    assert payload["impact_on_outcomes"]["adjusted_size"] == 6000.0
-    assert payload["budget_consumed_by_request"] == 6000.0
+    assert payload["impact_on_outcomes"]["adjusted_size"] == 5000.0
+    assert payload["budget_consumed_by_request"] == 5000.0
     assert payload["permission_budget_remaining"] == 0.0
     assert payload["budget_exhausted"] is True
 
@@ -179,7 +179,7 @@ def test_budget_behavior_is_deterministic_across_repeated_requests(client):
         params={"intent": "trade", "asset": "ETH", "size": 1000},
     ).json()
 
-    assert first["permission_budget_remaining"] == 6000.0
+    assert first["permission_budget_remaining"] == 5000.0
     assert second["decision_status"] == "REDUCE"
     assert second["permission_budget_remaining"] == 0.0
     assert third["decision_status"] == "DENY"

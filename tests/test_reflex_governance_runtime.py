@@ -230,7 +230,7 @@ def test_runtime_is_observational_and_does_not_interfere_with_context_or_proof(r
     assert response.status_code == 200
     payload = response.json()
     assert payload["decision_status"] == "CONSTRAIN"
-    assert payload["impact_on_outcomes"]["adjusted_size"] == 4000.0
+    assert payload["impact_on_outcomes"]["adjusted_size"] == 5000.0
 
     proof = client.get(f"/v1/proof/{payload['decision_id']}", headers=_headers())
     assert proof.status_code == 200

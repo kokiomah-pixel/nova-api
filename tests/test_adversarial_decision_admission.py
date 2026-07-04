@@ -245,19 +245,18 @@ def test_split_order_evasion_pack_detects_cross_decision_pressure_and_caps_aggre
 
     assert responses[0].status_code == 200
     assert first["decision_status"] == "CONSTRAIN"
-    assert first["impact_on_outcomes"]["adjusted_size"] == 4000.0
-    assert first["permission_budget_remaining"] == 6000.0
+    assert first["impact_on_outcomes"]["adjusted_size"] == 5000.0
+    assert first["permission_budget_remaining"] == 5000.0
 
     assert responses[1].status_code == 200
     assert second["decision_status"] == "CONSTRAIN"
-    assert second["impact_on_outcomes"]["adjusted_size"] == 4000.0
-    assert second["permission_budget_remaining"] == 2000.0
+    assert second["impact_on_outcomes"]["adjusted_size"] == 5000.0
+    assert second["permission_budget_remaining"] == 0.0
     assert second["constraint_trace"]["exposure_compounding_detected"] is True
     assert second["constraint_trace"]["cross_decision_pressure"] is True
 
-    assert responses[2].status_code == 200
-    assert third["decision_status"] == "REDUCE"
-    assert third["impact_on_outcomes"]["adjusted_size"] == 2000.0
+    assert responses[2].status_code == 429
+    assert third["decision_status"] in {"DELAY", "DENY"}
     assert third["permission_budget_remaining"] == 0.0
     assert third["budget_exhausted"] is True
 
@@ -444,4 +443,4 @@ def test_downstream_interpretation_drift_pack_keeps_decision_status_authoritativ
     assert constrained.json()["decision_status"] == "CONSTRAIN"
     assert constrained_result["allowed_to_proceed"] is True
     assert constrained_result["authoritative_decision_status"] == "CONSTRAIN"
-    assert constrained_result["effective_constraints"]["effective_size"] == 4000.0
+    assert constrained_result["effective_constraints"]["effective_size"] == 5000.0

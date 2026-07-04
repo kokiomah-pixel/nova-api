@@ -11,32 +11,32 @@ def build_registry(regime: str) -> list[ReflexRegistryEntry]:
     if regime == "Stress":
         entries.append(
             ReflexRegistryEntry(
-                registry_id="stress_new_risk_block",
+                registry_id="stress_prior_stress_review_attention",
                 origin="historical_validation",
                 failure_class="fragility_escalation",
                 activation_condition="regime=Stress and risk-increasing intent",
-                behavioral_effect="blocks new risk and forces zero-allocation output",
+                behavioral_effect="surfaces prior stress and preserves manual review attention",
                 persistence_state="retained",
                 validation_status="validated",
-                decision_effect="VETO",
-                adjustment_factor=0.0,
-                public_reason="Retained discipline blocks new risk when stress conditions are already escalated.",
+                review_posture_effect="elevated_review_attention",
+                review_context_weight=None,
+                public_reason="Accepted governance memory surfaces prior stress so local authority can review with heightened context.",
             )
         )
 
     if regime == "Elevated Fragility":
         entries.append(
             ReflexRegistryEntry(
-                registry_id="elevated_fragility_size_brake",
+                registry_id="elevated_fragility_constraint_context",
                 origin="historical_validation",
                 failure_class="liquidity_deterioration",
                 activation_condition="regime=Elevated Fragility and risk-increasing intent with positive requested size",
-                behavioral_effect="tightens allowed participation before execution",
+                behavioral_effect="adds constraint context before local authority review",
                 persistence_state="retained",
                 validation_status="validated",
-                decision_effect="CONSTRAIN",
-                adjustment_factor=0.4,
-                public_reason="Retained discipline trims exposure because elevated fragility historically worsens under unrestricted participation.",
+                review_posture_effect="constrained_review",
+                review_context_weight=0.4,
+                public_reason="Accepted governance memory surfaces elevated fragility so local authority can review constraint context before deciding.",
             )
         )
 
@@ -50,8 +50,8 @@ def build_registry(regime: str) -> list[ReflexRegistryEntry]:
                 behavioral_effect="records stable operating discipline without intervention",
                 persistence_state="retained",
                 validation_status="observed",
-                decision_effect=None,
-                adjustment_factor=None,
+                review_posture_effect="baseline_review",
+                review_context_weight=None,
                 public_reason="Retained discipline is present, but no intervention is required under stable conditions.",
             )
         )
@@ -75,8 +75,8 @@ def select_active_entry(
     }
 
     activation_priority = {
-        "stress_new_risk_block": 0,
-        "elevated_fragility_size_brake": 1,
+        "stress_prior_stress_review_attention": 0,
+        "elevated_fragility_constraint_context": 1,
         "stable_monitoring_reference": 2,
     }
     ordered_registry = sorted(
@@ -84,10 +84,10 @@ def select_active_entry(
         key=lambda entry: (activation_priority.get(entry.registry_id, 99), entry.registry_id, entry.failure_class),
     )
     for entry in ordered_registry:
-        if entry.registry_id == "stress_new_risk_block" and is_risk_increasing:
+        if entry.registry_id == "stress_prior_stress_review_attention" and is_risk_increasing:
             return entry
         if (
-            entry.registry_id == "elevated_fragility_size_brake"
+            entry.registry_id == "elevated_fragility_constraint_context"
             and is_risk_increasing
             and requested_size is not None
             and requested_size > 0

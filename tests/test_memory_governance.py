@@ -131,7 +131,7 @@ def test_admissible_memory_class_and_invocation_are_surfaced(memory_client):
     assert payload["reflex_memory_class"] == "liquidity_deterioration"
     assert payload["memory_age_state"] == "fresh"
     assert payload["stale_memory_flag"] is False
-    assert payload["reflex_memory"]["influence_applied"] is True
+    assert payload["reflex_memory"]["review_context_applied"] is True
 
 
 def test_memory_confidence_weight_is_machine_readable_and_discounted(memory_client):
@@ -146,7 +146,7 @@ def test_memory_confidence_weight_is_machine_readable_and_discounted(memory_clie
     payload = response.json()
     assert payload["memory_confidence_weight"] == 0.25
     assert payload["memory_influence_invoked"] is True
-    assert payload["impact_on_outcomes"]["adjusted_size"] == 8500.0
+    assert payload["impact_on_outcomes"]["adjusted_size"] == 5000.0
     assert payload["decision_status"] == "CONSTRAIN"
 
 
@@ -164,7 +164,7 @@ def test_stale_memory_is_flagged_and_blocked_from_governing(memory_client):
     assert payload["memory_age_state"] == "stale"
     assert payload["stale_memory_flag"] is True
     assert payload["memory_influence_invoked"] is False
-    assert payload["reflex_memory"]["influence_applied"] is False
+    assert payload["reflex_memory"]["review_context_applied"] is False
     assert payload["reflex_memory"]["proof"] is None
     assert payload["impact_on_outcomes"]["adjusted_size"] == 5000.0
 
@@ -182,7 +182,7 @@ def test_inadmissible_memory_does_not_silently_govern_admission(memory_client):
     assert payload["reflex_memory_class"] == "liquidity_deterioration"
     assert payload["stale_memory_flag"] is False
     assert payload["memory_influence_invoked"] is False
-    assert payload["reflex_memory"]["influence_applied"] is False
+    assert payload["reflex_memory"]["review_context_applied"] is False
     assert payload["impact_on_outcomes"]["adjusted_size"] == 5000.0
 
 

@@ -336,7 +336,7 @@ def test_context_includes_guardrail_action_policy(client):
     assert payload["adjustment"]
     assert payload["decision_status"] in {"ALLOW", "CONSTRAIN", "VETO"}
     assert "reflex_memory" in payload
-    assert payload["decision_context"]["reflex_influence_applied"] is True
+    assert payload["decision_context"]["reflex_review_context_applied"] is True
     assert "decision_id" in payload
 
 
@@ -747,7 +747,7 @@ def test_context_changes_with_large_size(client):
 
     assert baseline_payload["decision_status"] == "CONSTRAIN"
     assert oversized_payload["decision_status"] == "VETO"
-    assert baseline_payload["impact_on_outcomes"]["adjusted_size"] == 4000.0
+    assert baseline_payload["impact_on_outcomes"]["adjusted_size"] == 5000.0
     assert oversized_payload["impact_on_outcomes"]["adjusted_size"] == 0.0
 
 
@@ -767,11 +767,12 @@ def test_reflex_memory_state_present_in_canonical_path(client):
     assert reflex_memory["mode"] == "retained_discipline"
     assert reflex_memory["persistence_state"] == "retained"
     assert reflex_memory["validation_status"] == "validated"
-    assert reflex_memory["active_registry_id"] == "elevated_fragility_size_brake"
+    assert reflex_memory["active_registry_id"] == "elevated_fragility_constraint_context"
     assert reflex_memory["triggered"] is True
-    assert reflex_memory["influence_applied"] is True
-    assert reflex_memory["decision_before_reflex"] == "CONSTRAIN"
-    assert reflex_memory["decision_after_reflex"] == "CONSTRAIN"
+    assert reflex_memory["review_context_applied"] is True
+    assert reflex_memory["review_posture_before_reflex"] == "baseline_review"
+    assert reflex_memory["review_posture_after_reflex"] == "constrained_review"
+    assert reflex_memory["authority_effect"] == "none"
     assert isinstance(reflex_memory["registered_entries"], list)
 
 
@@ -798,11 +799,11 @@ def test_reflex_influence_changes_decision_output(client, monkeypatch):
 
     assert constrained.status_code == 200
     assert baseline.status_code == 200
-    assert constrained_payload["impact_on_outcomes"]["adjusted_size"] == 4000.0
+    assert constrained_payload["impact_on_outcomes"]["adjusted_size"] == 5000.0
     assert baseline_payload["impact_on_outcomes"]["adjusted_size"] == 10000.0
     assert constrained_payload["adjustment"] != baseline_payload["adjustment"]
-    assert constrained_payload["reflex_memory"]["influence_applied"] is True
-    assert baseline_payload["reflex_memory"]["influence_applied"] is False
+    assert constrained_payload["reflex_memory"]["review_context_applied"] is True
+    assert baseline_payload["reflex_memory"]["review_context_applied"] is False
 
 
 def test_reflex_proof_emits_coherently(client):
@@ -817,12 +818,13 @@ def test_reflex_proof_emits_coherently(client):
     proof = response.json()["reflex_memory"]["proof"]
 
     assert proof["schema_version"] == "1.0"
-    assert proof["intervention_class"] == "allocation_tightening"
+    assert proof["intervention_class"] == "review_context_conditioning"
     assert proof["failure_class"] == "liquidity_deterioration"
-    assert proof["decision_before_reflex"] == "CONSTRAIN"
-    assert proof["decision_after_reflex"] == "CONSTRAIN"
-    assert proof["decision_altered"] is False
-    assert proof["triggered_registry_id"] == "elevated_fragility_size_brake"
+    assert proof["review_posture_before_reflex"] == "baseline_review"
+    assert proof["review_posture_after_reflex"] == "constrained_review"
+    assert proof["review_context_changed"] is True
+    assert proof["authority_effect"] == "none"
+    assert proof["triggered_registry_id"] == "elevated_fragility_constraint_context"
     assert proof["why_intervention_happened"]
 
 

@@ -98,7 +98,7 @@ def get_current_epoch() -> int:
 app = FastAPI(
     title="Sharpe Nova OS API",
     version="1.1.0",
-    description="Pre-execution decision admissibility infrastructure for autonomous capital systems."
+    description="Non-authority pre-execution governance review infrastructure for programmable capital workflows."
 )
 
 SIGNING_SECRET = os.getenv("NOVA_SIGNING_SECRET", "replace_me")
@@ -1375,9 +1375,9 @@ def _proof_memory_influence(payload: Dict[str, Any]) -> Dict[str, Any]:
     reflex_memory = payload.get("reflex_memory", {})
     influence_present = bool(payload.get("memory_influence_invoked"))
     if isinstance(decision_context, dict):
-        influence_present = influence_present or bool(decision_context.get("reflex_influence_applied"))
+        influence_present = influence_present or bool(decision_context.get("reflex_review_context_applied"))
     if isinstance(reflex_memory, dict):
-        influence_present = influence_present or bool(reflex_memory.get("influence_applied"))
+        influence_present = influence_present or bool(reflex_memory.get("review_context_applied"))
     return {
         "influence_present": influence_present,
         "influence_type": "historical_constraint",
@@ -3305,7 +3305,7 @@ def _build_structured_response(
             "timestamp_utc": timestamp,
             "constitution_version": CONSTITUTION_VERSION,
             "tier": tier,
-            "reflex_influence_applied": False,
+            "reflex_review_context_applied": False,
         },
         "constraint_analysis": {
             "intent": intent,
@@ -4290,13 +4290,13 @@ def build_memory_context() -> dict:
 
 
 def build_historical_reference_from_reflex(state: ReflexMemoryState) -> dict:
-    if state.active_registry_id == "stress_new_risk_block":
+    if state.active_registry_id == "stress_prior_stress_review_attention":
         return {
             "sequence_type": "stress_escalation_cycle",
             "consequence_pattern": "historically associated with rapid de-risking and elevated fragility persistence",
         }
 
-    if state.active_registry_id == "elevated_fragility_size_brake":
+    if state.active_registry_id == "elevated_fragility_constraint_context":
         return {
             "sequence_type": "liquidity_deterioration_cycle",
             "consequence_pattern": "historically escalates to Stress within 3-6 epochs under worsening conditions",
@@ -4323,22 +4323,13 @@ def apply_reflex_memory(
     effective_decision = decision_status
     adjustment_factor: Optional[float] = None
 
-    if active_entry and memory_fields["memory_influence_invoked"] and active_entry.decision_effect == "VETO":
-        effective_decision = "VETO"
-        adjustment_factor = active_entry.adjustment_factor
-    elif (
-        active_entry
-        and memory_fields["memory_influence_invoked"]
-        and active_entry.decision_effect == "CONSTRAIN"
-        and decision_status != "VETO"
-    ):
-        effective_decision = "CONSTRAIN"
-        adjustment_factor = _weighted_adjustment_factor(
-            active_entry.adjustment_factor,
-            memory_fields["memory_confidence_weight"],
-        )
-
     proof_entry = active_entry if memory_fields["memory_influence_invoked"] else None
+    review_posture_before_reflex = "baseline_review"
+    review_posture_after_reflex = (
+        active_entry.review_posture_effect
+        if active_entry and memory_fields["memory_influence_invoked"] and active_entry.review_posture_effect
+        else review_posture_before_reflex
+    )
 
     state = ReflexMemoryState(
         persistence_state=active_entry.persistence_state if active_entry else "retained",
@@ -4346,9 +4337,10 @@ def apply_reflex_memory(
         registered_entries=registry,
         active_registry_id=active_entry.registry_id if active_entry else None,
         triggered=active_entry is not None,
-        influence_applied=bool(memory_fields["memory_influence_invoked"]),
-        decision_before_reflex=decision_status,
-        decision_after_reflex=effective_decision,
+        review_context_applied=bool(memory_fields["memory_influence_invoked"]),
+        review_posture_before_reflex=review_posture_before_reflex,
+        review_posture_after_reflex=review_posture_after_reflex,
+        authority_effect="none",
         metadata={
             "regime": regime,
             "intent": intent,
@@ -4365,8 +4357,8 @@ def apply_reflex_memory(
         },
         proof=build_reflex_proof(
             entry=proof_entry,
-            decision_before_reflex=decision_status,
-            decision_after_reflex=effective_decision,
+            review_posture_before_reflex=review_posture_before_reflex,
+            review_posture_after_reflex=review_posture_after_reflex,
         ),
     )
     return validate_reflex_memory_state(state), effective_decision, adjustment_factor, {
@@ -5100,7 +5092,7 @@ def get_context(
         "timestamp_utc": timestamp,
         "constitution_version": CONSTITUTION_VERSION,
         "tier": entitlement["tier"],
-        "reflex_influence_applied": reflex_memory_state.influence_applied,
+        "reflex_review_context_applied": reflex_memory_state.review_context_applied,
     }
     constraint_analysis = build_constraint_analysis(
         intent=intent,

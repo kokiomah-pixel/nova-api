@@ -8,20 +8,19 @@ from .schema import ReflexProof, ReflexRegistryEntry
 def build_reflex_proof(
     *,
     entry: Optional[ReflexRegistryEntry],
-    decision_before_reflex: str,
-    decision_after_reflex: str,
+    review_posture_before_reflex: str,
+    review_posture_after_reflex: str,
 ) -> Optional[ReflexProof]:
     if entry is None:
         return None
 
-    intervention_class = "decision_override" if entry.decision_effect == "VETO" else "allocation_tightening"
-
     return ReflexProof(
-        intervention_class=intervention_class,
+        intervention_class="review_context_conditioning",
         failure_class=entry.failure_class,
-        decision_before_reflex=decision_before_reflex,
-        decision_after_reflex=decision_after_reflex,
-        decision_altered=decision_before_reflex != decision_after_reflex,
+        review_posture_before_reflex=review_posture_before_reflex,
+        review_posture_after_reflex=review_posture_after_reflex,
+        review_context_changed=review_posture_before_reflex != review_posture_after_reflex,
+        authority_effect="none",
         triggered_registry_id=entry.registry_id,
         why_intervention_happened=entry.public_reason,
     )
