@@ -64,6 +64,7 @@ technical_evidence_state:
 | --- | --- | --- |
 | Nova structures pre-execution review context | `README.md`, `docs/start-here.md`, `docs/architecture/pre-action-context-contract.md`, `/v1/context` tests | Implemented |
 | Nova structures a bounded review-context loop | `docs/architecture/review-context-loop.md`, `docs/architecture/pre-action-context-contract.md` | Concept note |
+| Nova has a bounded governed context-flow explanation | `docs/architecture/governed-context-flow.md` | Concept / integration-path artifact |
 | Agent-prepared action package can be consumed as review context | `examples/agent_prepared_action/`, `tests/test_agent_prepared_action_example.py` | Bounded example |
 | Nova preserves non-authority boundary | `README.md`, `docs/start-here.md`, doctrine lint, tests, reviewer paths | Implemented |
 | Phase 1 proof chain is offline and bounded | `docs/phase_1_offline_proof_chain.md`, Phase 1 validation docs, tests | Implemented |

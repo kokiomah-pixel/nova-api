@@ -216,6 +216,12 @@ It does not replace those documents.
 
 It gives readers a systems-level interpretation of why review context must be structured before action.
 
+## Related Concept
+
+For a broader context-flow explanation of what Nova receives, structures, emits, and preserves, see:
+
+- `docs/architecture/governed-context-flow.md`
+
 ## Final Rule
 
 Prepared action is not review readiness.

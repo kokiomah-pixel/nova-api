@@ -78,22 +78,23 @@ Use this path to inspect implementation behavior.
 
 1. `README.md`
 2. `docs/architecture/pre-action-context-contract.md`
-3. `examples/pre_action_context/`
-4. `docs/architecture/review-context-loop.md`
-5. `examples/agent_prepared_action/`
-6. `core/reflex_memory/context.py`
-7. `core/reflex_memory/replay.py`
-8. `fixtures/reflex_memory/`
-9. `schemas/reflex_memory/`
-10. `tests/test_agent_prepared_action_example.py`
-11. `tests/test_reflex_memory_v0_1.py`
-12. `tests/test_reflex_memory_loader.py`
-13. `tests/test_reflex_memory_context_endpoint.py`
-14. `tests/test_reflex_memory_legacy_semantics_cleanup.py`
-15. `tests/test_reflex_memory_multi_scenario.py`
-16. `tests/test_reflex_memory_schema_validation.py`
-17. `tests/test_reflex_memory_replay.py`
-18. `docs/validation/technical-evidence-map.md`
+3. `docs/architecture/governed-context-flow.md`
+4. `examples/pre_action_context/`
+5. `docs/architecture/review-context-loop.md`
+6. `examples/agent_prepared_action/`
+7. `core/reflex_memory/context.py`
+8. `core/reflex_memory/replay.py`
+9. `fixtures/reflex_memory/`
+10. `schemas/reflex_memory/`
+11. `tests/test_agent_prepared_action_example.py`
+12. `tests/test_reflex_memory_v0_1.py`
+13. `tests/test_reflex_memory_loader.py`
+14. `tests/test_reflex_memory_context_endpoint.py`
+15. `tests/test_reflex_memory_legacy_semantics_cleanup.py`
+16. `tests/test_reflex_memory_multi_scenario.py`
+17. `tests/test_reflex_memory_schema_validation.py`
+18. `tests/test_reflex_memory_replay.py`
+19. `docs/validation/technical-evidence-map.md`
 
 Suggested local checks:
 
@@ -120,9 +121,10 @@ Use this path to understand category, positioning, and institutional logic.
 2. `docs/go-to-market/where-nova-sits.md`
 3. `docs/go-to-market/first-use-case-agent-prepared-treasury-action.md`
 4. `docs/architecture/review-context-loop.md`
-5. `docs/governance/institution-owned-governance-chronology.md`
-6. `docs/governance/governance-context-rot.md`
-7. `docs/go-to-market/gtm-comprehension-test-protocol.md`
+5. `docs/architecture/governed-context-flow.md`
+6. `docs/governance/institution-owned-governance-chronology.md`
+7. `docs/governance/governance-context-rot.md`
+8. `docs/go-to-market/gtm-comprehension-test-protocol.md`
 
 What this path shows:
 
