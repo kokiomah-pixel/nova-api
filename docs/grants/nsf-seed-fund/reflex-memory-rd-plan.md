@@ -112,6 +112,14 @@ Success criteria:
 - unsupported review posture effects are rejected
 - missing non-authority statement is rejected
 
+### Current Progress
+
+Bounded v0.1 schema validation is implemented for deterministic Reflex Memory fixtures.
+
+The schema validation currently covers accepted entries and chronology events.
+
+It does not yet claim production persistence, dynamic storage validation, external integration validation, or autonomous memory mutation.
+
 ### Objective 3 - Demonstrate Replayability
 
 Demonstrate that a Reflex Memory API-context output can be traced back to:
@@ -128,6 +136,14 @@ Success criteria:
 - replay fixture reconstructs why Reflex Memory appeared
 - replay proves the field is review context only
 - replay preserves local authority
+
+### Current Progress
+
+A fixture-backed replay artifact is implemented for Reflex Memory v0.1.
+
+The replay artifact reconstructs API-emitted Reflex Memory context back to accepted Reflex Memory entries and source chronology IDs.
+
+It is not an audit report, compliance review, production lineage system, or authority mechanism.
 
 ### Objective 4 - Test Non-Authority Invariants
 

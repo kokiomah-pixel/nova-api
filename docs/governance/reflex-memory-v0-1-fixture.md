@@ -65,6 +65,26 @@ Each accepted entry must preserve:
 authority_effect: none
 ```
 
+## Schema Validation
+
+Reflex Memory v0.1 fixtures are validated against machine-readable schemas under:
+
+```text
+schemas/reflex_memory/
+```
+
+This validation is fixture-backed.
+
+It does not claim production persistence, dynamic storage, autonomous memory mutation, compliance review, audit reporting, or external integration.
+
+## Replayability
+
+Reflex Memory v0.1 includes a fixture-backed replay artifact that reconstructs API-emitted Reflex Memory context back to accepted Reflex Memory entries and source chronology IDs.
+
+This replay artifact is for review-context inspection only.
+
+It is not an audit report, compliance review, production lineage system, or authority mechanism.
+
 ## What This Demonstrates
 
 The fixture demonstrates:

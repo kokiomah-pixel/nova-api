@@ -1,6 +1,6 @@
 {
   "chronology_event_id": "CHR-2026-07-03-001",
-  "event_type": "source_reconciliation",
+  "event_type": "source_state_review",
   "status": "reviewed",
   "accepted_for_reflex_candidate": true,
   "created_at": "2026-07-03T08:02:09Z",

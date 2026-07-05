@@ -82,14 +82,18 @@ Use this path to inspect implementation behavior.
 4. `docs/architecture/review-context-loop.md`
 5. `examples/agent_prepared_action/`
 6. `core/reflex_memory/context.py`
-7. `fixtures/reflex_memory/`
-8. `tests/test_agent_prepared_action_example.py`
-9. `tests/test_reflex_memory_v0_1.py`
-10. `tests/test_reflex_memory_loader.py`
-11. `tests/test_reflex_memory_context_endpoint.py`
-12. `tests/test_reflex_memory_legacy_semantics_cleanup.py`
-13. `tests/test_reflex_memory_multi_scenario.py`
-14. `docs/validation/technical-evidence-map.md`
+7. `core/reflex_memory/replay.py`
+8. `fixtures/reflex_memory/`
+9. `schemas/reflex_memory/`
+10. `tests/test_agent_prepared_action_example.py`
+11. `tests/test_reflex_memory_v0_1.py`
+12. `tests/test_reflex_memory_loader.py`
+13. `tests/test_reflex_memory_context_endpoint.py`
+14. `tests/test_reflex_memory_legacy_semantics_cleanup.py`
+15. `tests/test_reflex_memory_multi_scenario.py`
+16. `tests/test_reflex_memory_schema_validation.py`
+17. `tests/test_reflex_memory_replay.py`
+18. `docs/validation/technical-evidence-map.md`
 
 Suggested local checks:
 
@@ -139,12 +143,16 @@ Use this path to inspect Reflex Memory specifically.
 3. `docs/governance/reflex-memory-v0-1-fixture.md`
 4. `docs/grants/nsf-seed-fund/reflex-memory-rd-plan.md`
 5. `fixtures/reflex_memory/`
-6. `core/reflex_memory/context.py`
-7. `tests/test_reflex_memory_v0_1.py`
-8. `tests/test_reflex_memory_loader.py`
-9. `tests/test_reflex_memory_context_endpoint.py`
-10. `tests/test_reflex_memory_legacy_semantics_cleanup.py`
-11. `tests/test_reflex_memory_multi_scenario.py`
+6. `schemas/reflex_memory/`
+7. `core/reflex_memory/context.py`
+8. `core/reflex_memory/replay.py`
+9. `tests/test_reflex_memory_v0_1.py`
+10. `tests/test_reflex_memory_loader.py`
+11. `tests/test_reflex_memory_context_endpoint.py`
+12. `tests/test_reflex_memory_legacy_semantics_cleanup.py`
+13. `tests/test_reflex_memory_multi_scenario.py`
+14. `tests/test_reflex_memory_schema_validation.py`
+15. `tests/test_reflex_memory_replay.py`
 
 Reflex Memory should be interpreted as:
 

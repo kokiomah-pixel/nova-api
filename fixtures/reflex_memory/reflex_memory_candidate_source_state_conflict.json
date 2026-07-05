@@ -17,7 +17,7 @@
     ]
   },
   "trigger_pattern": "source_state_conflict",
-  "stress_type": "source_reconciliation_required",
+  "stress_type": "source_integrity_risk",
   "boundary_risk": "Stale or unverified source state may be treated as current truth if not surfaced in future review context.",
   "review_posture_effect": "require_source_reconciliation_context",
   "evidence_refs": [
