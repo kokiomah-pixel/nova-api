@@ -1,0 +1,32 @@
+{
+  "reflex_id": "RM-0002",
+  "version": "reflex_memory_v0_1",
+  "status": "accepted",
+  "source_chronology_event_ids": [
+    "CHR-2026-07-04-002"
+  ],
+  "created_at": "2026-07-04T10:05:00Z",
+  "reviewed_at": "2026-07-04T10:10:00Z",
+  "accepted_at": "2026-07-04T10:15:00Z",
+  "accepted_by": "local_governance_review",
+  "source_state": {
+    "classification": "cco_reconciled",
+    "limitations": [
+      "Entry is derived from a reviewed boundary-language chronology event.",
+      "Entry may condition review posture only.",
+      "Entry has no authority effect."
+    ]
+  },
+  "trigger_pattern": "boundary_language_drift",
+  "stress_type": "authority_boundary_risk",
+  "boundary_risk": "Execution-adjacent or authority-adjacent language may cause reviewers to misread Nova as an approval, denial, execution, compliance, audit, wallet, or agent-supervision layer.",
+  "review_posture_effect": "flag_boundary_language_risk",
+  "evidence_refs": [
+    "fixtures/reflex_memory/chronology_event_boundary_language_drift.json",
+    "fixtures/reflex_memory/reflex_memory_candidate_boundary_language_drift.json",
+    "docs/governance/reflex-memory-specification.md"
+  ],
+  "expiration_or_review_after": "2026-10-01",
+  "authority_effect": "none",
+  "non_authority_statement": "This Reflex Memory entry informs review context only. It does not approve, deny, authorize, block, route, settle, sign, execute, or replace local authority."
+}

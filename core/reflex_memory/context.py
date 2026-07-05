@@ -19,6 +19,12 @@ ALLOWED_REVIEW_POSTURE_EFFECTS = {
     "highlight_recurring_context_pattern",
 }
 
+ACCEPTED_REFLEX_MEMORY_FIXTURES = [
+    "reflex_memory_entry_source_state_conflict.json",
+    "reflex_memory_entry_boundary_language_drift.json",
+    "reflex_memory_entry_proof_reference_missing.json",
+]
+
 
 class ReflexMemoryError(ValueError):
     """Raised when Reflex Memory fixture state violates v0.1 invariants."""
@@ -36,6 +42,16 @@ def load_reflex_memory_entry(filename: str = "reflex_memory_entry_source_state_c
 
     validate_reflex_memory_entry(entry)
     return entry
+
+
+def load_reflex_memory_entries(filenames: list[str] | None = None) -> list[dict[str, Any]]:
+    """Load deterministic Reflex Memory v0.1 fixture entries.
+
+    This loader is fixture-backed. It is not dynamic storage,
+    autonomous detection, automatic memory mutation, or production persistence.
+    """
+    selected = filenames or ACCEPTED_REFLEX_MEMORY_FIXTURES
+    return [load_reflex_memory_entry(filename) for filename in selected]
 
 
 def validate_reflex_memory_entry(entry: dict[str, Any]) -> None:
@@ -66,10 +82,10 @@ def build_reflex_memory_context() -> dict[str, Any]:
     The returned object is review context only. It does not approve, deny,
     grant authority, route, settle, sign, execute, or replace local authority.
     """
-    entry = load_reflex_memory_entry()
+    entries = load_reflex_memory_entries()
 
     return {
-        "present": True,
+        "present": bool(entries),
         "version": "reflex_memory_v0_1",
         "entries": [
             {
@@ -78,7 +94,8 @@ def build_reflex_memory_context() -> dict[str, Any]:
                 "trigger_pattern": entry["trigger_pattern"],
                 "review_posture_effect": entry["review_posture_effect"],
                 "authority_effect": "none",
-                "note": "Accepted governance memory indicates that source-state reconciliation context should be visible before local authority acts.",
+                "note": "Accepted governance memory indicates that prior governance stress should be visible before local authority acts.",
             }
+            for entry in entries
         ],
     }

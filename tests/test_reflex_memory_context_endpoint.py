@@ -78,10 +78,9 @@ def test_context_endpoint_includes_reflex_memory_context(reflex_context_client) 
     assert reflex_context["present"] is True
     assert reflex_context["version"] == "reflex_memory_v0_1"
 
-    entry = reflex_context["entries"][0]
-    assert entry["reflex_id"] == "RM-0001"
-    assert entry["review_posture_effect"] == "require_source_reconciliation_context"
-    assert entry["authority_effect"] == "none"
+    by_id = {entry["reflex_id"]: entry for entry in reflex_context["entries"]}
+    assert by_id["RM-0001"]["review_posture_effect"] == "require_source_reconciliation_context"
+    assert by_id["RM-0001"]["authority_effect"] == "none"
 
 
 def test_context_endpoint_preserves_non_authority_boundary(reflex_context_client) -> None:

@@ -1,0 +1,45 @@
+{
+  "package_id": "APA-0001",
+  "package_type": "agent_prepared_financial_action",
+  "scenario": "treasury_action_review",
+  "prepared_by": {
+    "actor_type": "agent",
+    "actor_id": "example_agent",
+    "authority_scope": "preparation_only"
+  },
+  "prepared_action": {
+    "intent": "rebalance_stablecoin_liquidity",
+    "asset": "USDC",
+    "notional_amount": "10000",
+    "venue_or_destination": "example_external_execution_system",
+    "execution_status": "not_executed"
+  },
+  "source_context": {
+    "source_state_classification": "source_confirmed",
+    "inputs": [
+      "cash_position_snapshot",
+      "liquidity_requirement_note",
+      "venue_dependency_note"
+    ],
+    "limitations": [
+      "Example fixture only.",
+      "No live market data.",
+      "No execution instruction.",
+      "No wallet action."
+    ]
+  },
+  "authority_context": {
+    "local_authority_required": true,
+    "nova_authority": "none",
+    "agent_authority": "prepare_action_only",
+    "execution_layer": "external"
+  },
+  "review_requirements": {
+    "requires_source_context": true,
+    "requires_constraint_context": true,
+    "requires_chronology_context": true,
+    "requires_reflex_memory_context": true,
+    "requires_local_authority_decision": true
+  },
+  "non_authority_statement": "This package is an agent-prepared action example. It is not approval, denial, authorization, routing, settlement, signing, execution, compliance review, audit reporting, wallet control, or local authority replacement."
+}

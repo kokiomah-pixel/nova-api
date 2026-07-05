@@ -64,10 +64,11 @@ technical_evidence_state:
 | --- | --- | --- |
 | Nova structures pre-execution review context | `README.md`, `docs/start-here.md`, `docs/architecture/pre-action-context-contract.md`, `/v1/context` tests | Implemented |
 | Nova structures a bounded review-context loop | `docs/architecture/review-context-loop.md`, `docs/architecture/pre-action-context-contract.md` | Concept note |
+| Agent-prepared action package can be consumed as review context | `examples/agent_prepared_action/`, `tests/test_agent_prepared_action_example.py` | Bounded example |
 | Nova preserves non-authority boundary | `README.md`, `docs/start-here.md`, doctrine lint, tests, reviewer paths | Implemented |
 | Phase 1 proof chain is offline and bounded | `docs/phase_1_offline_proof_chain.md`, Phase 1 validation docs, tests | Implemented |
 | Reflex Memory is specified | `docs/governance/reflex-memory-specification.md` | Implemented |
-| Reflex Memory has deterministic fixture evidence | `fixtures/reflex_memory/`, `docs/governance/reflex-memory-v0-1-fixture.md` | Implemented |
+| Reflex Memory has deterministic fixture evidence | `fixtures/reflex_memory/`, `docs/governance/reflex-memory-v0-1-fixture.md`, `tests/test_reflex_memory_multi_scenario.py` | Implemented across bounded v0.1 scenarios |
 | Reflex Memory appears in API review context | `core/reflex_memory/context.py`, `/v1/context` endpoint tests | Implemented as bounded v0.1 |
 | Reflex Memory preserves `authority_effect: none` | fixture tests, loader tests, endpoint tests, legacy semantics cleanup test | Implemented |
 | Reflex Memory works across multiple stress scenarios | `docs/grants/nsf-seed-fund/reflex-memory-rd-plan.md` | R&D frontier |

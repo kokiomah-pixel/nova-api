@@ -80,13 +80,16 @@ Use this path to inspect implementation behavior.
 2. `docs/architecture/pre-action-context-contract.md`
 3. `examples/pre_action_context/`
 4. `docs/architecture/review-context-loop.md`
-5. `core/reflex_memory/context.py`
-6. `fixtures/reflex_memory/`
-7. `tests/test_reflex_memory_v0_1.py`
-8. `tests/test_reflex_memory_loader.py`
-9. `tests/test_reflex_memory_context_endpoint.py`
-10. `tests/test_reflex_memory_legacy_semantics_cleanup.py`
-11. `docs/validation/technical-evidence-map.md`
+5. `examples/agent_prepared_action/`
+6. `core/reflex_memory/context.py`
+7. `fixtures/reflex_memory/`
+8. `tests/test_agent_prepared_action_example.py`
+9. `tests/test_reflex_memory_v0_1.py`
+10. `tests/test_reflex_memory_loader.py`
+11. `tests/test_reflex_memory_context_endpoint.py`
+12. `tests/test_reflex_memory_legacy_semantics_cleanup.py`
+13. `tests/test_reflex_memory_multi_scenario.py`
+14. `docs/validation/technical-evidence-map.md`
 
 Suggested local checks:
 
@@ -141,6 +144,7 @@ Use this path to inspect Reflex Memory specifically.
 8. `tests/test_reflex_memory_loader.py`
 9. `tests/test_reflex_memory_context_endpoint.py`
 10. `tests/test_reflex_memory_legacy_semantics_cleanup.py`
+11. `tests/test_reflex_memory_multi_scenario.py`
 
 Reflex Memory should be interpreted as:
 

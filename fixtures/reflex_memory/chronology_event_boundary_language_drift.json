@@ -1,0 +1,25 @@
+{
+  "chronology_event_id": "CHR-2026-07-04-002",
+  "event_type": "boundary_language_review",
+  "status": "reviewed",
+  "accepted_for_reflex_candidate": true,
+  "created_at": "2026-07-04T10:00:00Z",
+  "source_state": {
+    "classification": "cco_reconciled",
+    "limitations": [
+      "Execution-adjacent language required review.",
+      "Boundary-safe replacement language was required before public use."
+    ]
+  },
+  "summary": "A review found that language could imply Nova approves, blocks, controls, or executes financial actions.",
+  "boundary_risk": [
+    "Readers could misinterpret review context as authority.",
+    "Execution-adjacent language could weaken Nova's non-authority boundary."
+  ],
+  "evidence_refs": [
+    "docs/governance/reflex-memory-specification.md",
+    "docs/architecture/review-context-loop.md",
+    "docs/governance/public-file-review-checklist.md"
+  ],
+  "non_authority_statement": "This chronology event does not approve, deny, authorize, block, route, settle, sign, execute, or replace local authority."
+}

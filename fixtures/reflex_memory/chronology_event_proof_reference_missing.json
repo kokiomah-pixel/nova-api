@@ -1,0 +1,25 @@
+{
+  "chronology_event_id": "CHR-2026-07-04-003",
+  "event_type": "proof_reference_review",
+  "status": "reviewed",
+  "accepted_for_reflex_candidate": true,
+  "created_at": "2026-07-04T11:00:00Z",
+  "source_state": {
+    "classification": "source_incomplete",
+    "limitations": [
+      "Prepared review context lacked complete proof-reference metadata.",
+      "Reviewer could inspect context but could not fully reconstruct proof lineage from the package alone."
+    ]
+  },
+  "summary": "A review found that proof-reference metadata was incomplete in a prepared-action review package.",
+  "boundary_risk": [
+    "Review context may appear complete when proof lineage is missing.",
+    "Local authority may lack sufficient reconstruction context before deciding."
+  ],
+  "evidence_refs": [
+    "docs/architecture/pre-action-context-contract.md",
+    "docs/governance/proof-determinism-and-classification-stability.md",
+    "docs/validation/technical-evidence-map.md"
+  ],
+  "non_authority_statement": "This chronology event does not approve, deny, authorize, block, route, settle, sign, execute, or replace local authority."
+}

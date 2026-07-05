@@ -1,0 +1,32 @@
+{
+  "reflex_id": "RM-0003",
+  "version": "reflex_memory_v0_1",
+  "status": "accepted",
+  "source_chronology_event_ids": [
+    "CHR-2026-07-04-003"
+  ],
+  "created_at": "2026-07-04T11:05:00Z",
+  "reviewed_at": "2026-07-04T11:10:00Z",
+  "accepted_at": "2026-07-04T11:15:00Z",
+  "accepted_by": "local_governance_review",
+  "source_state": {
+    "classification": "source_incomplete",
+    "limitations": [
+      "Entry is derived from a reviewed proof-reference chronology event.",
+      "Entry may condition review posture only.",
+      "Entry has no authority effect."
+    ]
+  },
+  "trigger_pattern": "proof_reference_missing",
+  "stress_type": "proof_lineage_incomplete",
+  "boundary_risk": "Prepared review context may appear complete even when proof-reference metadata is incomplete.",
+  "review_posture_effect": "require_proof_reference",
+  "evidence_refs": [
+    "fixtures/reflex_memory/chronology_event_proof_reference_missing.json",
+    "fixtures/reflex_memory/reflex_memory_candidate_proof_reference_missing.json",
+    "docs/governance/reflex-memory-specification.md"
+  ],
+  "expiration_or_review_after": "2026-10-01",
+  "authority_effect": "none",
+  "non_authority_statement": "This Reflex Memory entry informs review context only. It does not approve, deny, authorize, block, route, settle, sign, execute, or replace local authority."
+}

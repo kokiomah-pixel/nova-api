@@ -3,6 +3,7 @@ import pytest
 from core.reflex_memory import (
     ReflexMemoryError,
     build_reflex_memory_context,
+    load_reflex_memory_entries,
     validate_reflex_memory_entry,
 )
 
@@ -13,9 +14,16 @@ def test_build_reflex_memory_context_is_review_context_only() -> None:
     assert context["present"] is True
     assert context["version"] == "reflex_memory_v0_1"
 
-    entry = context["entries"][0]
-    assert entry["authority_effect"] == "none"
-    assert entry["review_posture_effect"] == "require_source_reconciliation_context"
+    by_id = {entry["reflex_id"]: entry for entry in context["entries"]}
+
+    assert by_id["RM-0001"]["authority_effect"] == "none"
+    assert by_id["RM-0001"]["review_posture_effect"] == "require_source_reconciliation_context"
+
+
+def test_load_reflex_memory_entries_preserves_single_entry_selection() -> None:
+    entries = load_reflex_memory_entries(["reflex_memory_entry_source_state_conflict.json"])
+
+    assert [entry["reflex_id"] for entry in entries] == ["RM-0001"]
 
 
 def test_reflex_memory_rejects_non_accepted_entry() -> None:

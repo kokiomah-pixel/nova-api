@@ -85,6 +85,21 @@ Success criteria:
 - each fixture appears as API review context only
 - each fixture has targeted tests
 
+### Current Progress
+
+The first multi-scenario expansion is implemented as deterministic fixtures for:
+
+- source-state conflict
+- boundary-language drift
+- proof-reference missing
+
+Remaining R&D may include:
+
+- stale-context recurrence
+- chronology continuity interruption
+- replay artifacts
+- reader/operator usefulness evaluation
+
 ### Objective 2 - Formalize Schema Validation
 
 Add machine-readable schema validation for Reflex Memory entries and API context exposure.

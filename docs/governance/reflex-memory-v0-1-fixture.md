@@ -47,6 +47,24 @@ The Reflex Memory entry does not decide anything.
 
 It only causes the API review context to surface that prior source-state reconciliation context is relevant before local authority acts.
 
+## Multi-Scenario Fixtures
+
+Reflex Memory v0.1 now includes deterministic fixtures for multiple governance-stress scenarios:
+
+- source-state conflict
+- boundary-language drift
+- proof-reference missing
+
+These fixtures demonstrate scenario breadth.
+
+They do not demonstrate production persistence, autonomous pattern detection, automatic memory mutation, market validation, buyer validation, adoption, or external integration.
+
+Each accepted entry must preserve:
+
+```yaml
+authority_effect: none
+```
+
 ## What This Demonstrates
 
 The fixture demonstrates:
