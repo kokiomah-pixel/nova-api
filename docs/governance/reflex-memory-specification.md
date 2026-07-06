@@ -38,6 +38,26 @@ Chronology is accepted decision-state lineage.
 Reflex Memory is accepted governance memory that may condition future review posture.
 API output remains review context, not authority.
 
+## Reflex Memory Is Not Agent Memory
+
+Reflex Memory should not be interpreted as agent self-reflection, episodic agent memory, vector recall, prompt memory, or autonomous learning.
+
+Reflex Memory is governed institutional memory.
+
+It is derived from reviewed chronology events and accepted through governance process.
+
+It may condition future review posture.
+
+It does not improve an agent by itself.
+
+It does not become the memory of an external agent framework.
+
+It does not approve, deny, authorize, block, route, settle, sign, execute, perform compliance review, produce audit reports, supervise agents, manage wallets, or replace local authority.
+
+For the architecture boundary distinction, see:
+
+- `docs/architecture/reflex-memory-vs-agent-memory.md`
+
 ## Relationship to Chronology
 
 Chronology preserves decision-state lineage.

@@ -387,6 +387,12 @@ For the distinction between onchain transaction records, attribution layers, gov
 
 * `docs/architecture/attribution-vs-governance-context.md`
 
+## Related Integration Boundary
+
+For future agent-framework adapter boundaries, see:
+
+* `docs/architecture/agent-framework-adapter-contract.md`
+
 ## Related Governance Standards
 
 For review-readiness conditions and source-state classification, see:

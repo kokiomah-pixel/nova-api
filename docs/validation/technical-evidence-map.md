@@ -72,9 +72,11 @@ technical_evidence_state:
 | Nova defines review completeness without creating authority | `docs/governance/review-completeness-standard.md` | Governance hardening standard |
 | Nova defines source-state taxonomy for review context | `docs/governance/source-state-taxonomy.md` | Governance hardening taxonomy |
 | Agent-prepared action package can be consumed as review context | `examples/agent_prepared_action/`, `tests/test_agent_prepared_action_example.py` | Bounded example |
+| Nova defines a future non-authority agent framework adapter boundary | `docs/architecture/agent-framework-adapter-contract.md` | Future integration boundary note |
 | Nova preserves non-authority boundary | `README.md`, `docs/start-here.md`, doctrine lint, tests, reviewer paths | Implemented |
 | Phase 1 proof chain is offline and bounded | `docs/phase_1_offline_proof_chain.md`, Phase 1 validation docs, tests | Implemented |
 | Reflex Memory is specified | `docs/governance/reflex-memory-specification.md` | Implemented |
+| Nova distinguishes Reflex Memory from agent memory | `docs/architecture/reflex-memory-vs-agent-memory.md`, `docs/governance/reflex-memory-specification.md` | Architecture boundary note |
 | Reflex Memory has deterministic fixture evidence | `fixtures/reflex_memory/`, `docs/governance/reflex-memory-v0-1-fixture.md`, `tests/test_reflex_memory_multi_scenario.py` | Implemented across bounded v0.1 scenarios |
 | Reflex Memory has machine-readable fixture validation | `schemas/reflex_memory/`, `tests/test_reflex_memory_schema_validation.py` | Implemented for bounded v0.1 fixtures |
 | Reflex Memory context can replay back to accepted entries and source chronology IDs | `core/reflex_memory/replay.py`, `tests/test_reflex_memory_replay.py` | Fixture-backed replay artifact |
@@ -129,6 +131,8 @@ The remaining Reflex Memory R&D frontier includes:
 - external integration examples
 - controlled reader/operator usefulness evaluation
 - traction evidence
+
+Future framework adapters remain R&D. The repo may define a non-authority adapter boundary, but it does not currently claim LangGraph, CrewAI, OpenAI Agents, AutoGen, enterprise TMS/ERP, wallet, custodian, or production framework integrations.
 
 The following are already implemented for bounded v0.1 fixture-backed evidence:
 
