@@ -196,7 +196,7 @@ No governed review context, no local decision.
 
 That does not mean Nova executes.
 
-That does not mean Nova authorizes.
+That does not mean Nova provides authority.
 
 That does not mean Nova blocks.
 
@@ -330,7 +330,7 @@ Nova enforces execution policy.
 Do not say:
 
 ```text
-Nova authorizes capital movement.
+Nova provides capital-movement authorization.
 ```
 
 Do not say:
@@ -412,6 +412,12 @@ Safe response:
 ```text
 No. Nova structures pre-action review context, source state, chronology, Reflex Memory, proof metadata, and review completeness before local authority decides.
 ```
+
+## Related Commercial Boundary
+
+For the open-source and business-model boundary, see:
+
+- `docs/strategy/open-source-commercial-boundary.md`
 
 ## Final Rule
 

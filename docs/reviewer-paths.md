@@ -130,6 +130,7 @@ Use this path to understand category, positioning, and institutional logic.
 8. `docs/governance/governance-context-rot.md`
 9. `docs/go-to-market/gtm-comprehension-test-protocol.md`
 10. `docs/strategy/non-authority-commercial-boundary.md`
+11. `docs/strategy/open-source-commercial-boundary.md`
 
 What this path shows:
 
