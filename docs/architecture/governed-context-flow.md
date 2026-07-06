@@ -320,7 +320,7 @@ Do not interpret this document to mean:
 * Nova controls financial workflows.
 * Nova runs agent loops.
 * Nova approves or denies actions.
-* Nova authorizes capital movement.
+* Nova has capital-movement authority.
 * Nova performs compliance review.
 * Nova produces audit reports.
 * Nova controls wallets.
@@ -380,6 +380,12 @@ This artifact supports:
 It does not replace those documents.
 
 It explains how the context flows through them.
+
+## Related Boundary Note
+
+For the distinction between onchain transaction records, attribution layers, governed pre-action review context, and governance chronology, see:
+
+* `docs/architecture/attribution-vs-governance-context.md`
 
 ## Final Rule
 

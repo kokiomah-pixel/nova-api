@@ -122,9 +122,10 @@ Use this path to understand category, positioning, and institutional logic.
 3. `docs/go-to-market/first-use-case-agent-prepared-treasury-action.md`
 4. `docs/architecture/review-context-loop.md`
 5. `docs/architecture/governed-context-flow.md`
-6. `docs/governance/institution-owned-governance-chronology.md`
-7. `docs/governance/governance-context-rot.md`
-8. `docs/go-to-market/gtm-comprehension-test-protocol.md`
+6. `docs/architecture/attribution-vs-governance-context.md`
+7. `docs/governance/institution-owned-governance-chronology.md`
+8. `docs/governance/governance-context-rot.md`
+9. `docs/go-to-market/gtm-comprehension-test-protocol.md`
 
 What this path shows:
 
