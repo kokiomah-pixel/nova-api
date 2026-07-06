@@ -47,6 +47,69 @@ The Reflex Memory entry does not decide anything.
 
 It only causes the API review context to surface that prior source-state reconciliation context is relevant before local authority acts.
 
+## Record to Chronology to Reflex Memory Lifecycle
+
+Reflex Memory does not arise automatically from raw events.
+
+Nova distinguishes between preserved records, reviewed chronology events, Reflex Memory candidates, and accepted Reflex Memory.
+
+```yaml
+record_to_memory_lifecycle:
+  raw_record:
+    meaning: captured or preserved information from a review or operating context
+    may_be_preserved: true
+    reviewed_and_classified: false
+    may_condition_future_review: false
+    authority_effect: none
+
+  chronology_event:
+    meaning: reviewed and classified decision-state lineage
+    may_be_preserved: true
+    reviewed_and_classified: true
+    may_condition_future_review: false
+    authority_effect: none
+
+  reflex_memory_candidate:
+    meaning: candidate governance memory derived from reviewed chronology
+    may_be_preserved: true
+    reviewed_and_classified: true
+    may_condition_future_review: false
+    requires_acceptance: true
+    authority_effect: none
+
+  accepted_reflex_memory:
+    meaning: manually accepted governance memory that may condition future review posture
+    may_be_preserved: true
+    reviewed_and_classified: true
+    may_condition_future_review: true
+    requires_acceptance: completed
+    authority_effect: none
+```
+
+The lifecycle protects Nova from automatic memory mutation.
+
+A raw record does not become Reflex Memory.
+
+A chronology event does not automatically condition future review.
+
+A Reflex Memory candidate does not condition future review until accepted.
+
+Accepted Reflex Memory may condition review posture only.
+
+It does not approve, deny, authorize, block, route, settle, sign, execute, perform compliance review, produce audit reports, supervise agents, control wallets, or replace local authority.
+
+Safe compression:
+
+```text
+Raw records do not become memory automatically.
+```
+
+```text
+Memory conditions review.
+Authority remains local.
+Execution happens elsewhere.
+```
+
 ## Multi-Scenario Fixtures
 
 Reflex Memory v0.1 now includes deterministic fixtures for multiple governance-stress scenarios:

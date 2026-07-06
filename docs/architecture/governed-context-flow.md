@@ -387,6 +387,13 @@ For the distinction between onchain transaction records, attribution layers, gov
 
 * `docs/architecture/attribution-vs-governance-context.md`
 
+## Related Governance Standards
+
+For review-readiness conditions and source-state classification, see:
+
+* `docs/governance/review-completeness-standard.md`
+* `docs/governance/source-state-taxonomy.md`
+
 ## Final Rule
 
 Agent-prepared action is not enough.

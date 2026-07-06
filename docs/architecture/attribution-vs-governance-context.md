@@ -124,6 +124,27 @@ That context may include:
 * authority path
 * review completeness
 
+## Stablecoins as Wedge, Not Category
+
+Stablecoin and tokenized-asset workflows are useful early examples because they make movement, attribution, wallet context, corridor context, and execution-boundary questions easier to see.
+
+They should not be treated as the full category for Sharpe Nova OS.
+
+Nova's broader category is programmable capital review.
+
+Safe interpretation:
+
+```text
+Stablecoins are an early wedge.
+Programmable capital review is the category.
+```
+
+Do not interpret Nova as a stablecoin-only governance system, stablecoin analytics platform, wallet-labeling product, payment-control layer, or tokenized-asset execution system.
+
+The stablecoin example helps reveal the context gap.
+
+It does not define the whole OS.
+
 ## Nova's Layer
 
 Nova sits before local authority decides.

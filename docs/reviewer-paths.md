@@ -79,22 +79,24 @@ Use this path to inspect implementation behavior.
 1. `README.md`
 2. `docs/architecture/pre-action-context-contract.md`
 3. `docs/architecture/governed-context-flow.md`
-4. `examples/pre_action_context/`
-5. `docs/architecture/review-context-loop.md`
-6. `examples/agent_prepared_action/`
-7. `core/reflex_memory/context.py`
-8. `core/reflex_memory/replay.py`
-9. `fixtures/reflex_memory/`
-10. `schemas/reflex_memory/`
-11. `tests/test_agent_prepared_action_example.py`
-12. `tests/test_reflex_memory_v0_1.py`
-13. `tests/test_reflex_memory_loader.py`
-14. `tests/test_reflex_memory_context_endpoint.py`
-15. `tests/test_reflex_memory_legacy_semantics_cleanup.py`
-16. `tests/test_reflex_memory_multi_scenario.py`
-17. `tests/test_reflex_memory_schema_validation.py`
-18. `tests/test_reflex_memory_replay.py`
-19. `docs/validation/technical-evidence-map.md`
+4. `docs/governance/review-completeness-standard.md`
+5. `docs/governance/source-state-taxonomy.md`
+6. `examples/pre_action_context/`
+7. `docs/architecture/review-context-loop.md`
+8. `examples/agent_prepared_action/`
+9. `core/reflex_memory/context.py`
+10. `core/reflex_memory/replay.py`
+11. `fixtures/reflex_memory/`
+12. `schemas/reflex_memory/`
+13. `tests/test_agent_prepared_action_example.py`
+14. `tests/test_reflex_memory_v0_1.py`
+15. `tests/test_reflex_memory_loader.py`
+16. `tests/test_reflex_memory_context_endpoint.py`
+17. `tests/test_reflex_memory_legacy_semantics_cleanup.py`
+18. `tests/test_reflex_memory_multi_scenario.py`
+19. `tests/test_reflex_memory_schema_validation.py`
+20. `tests/test_reflex_memory_replay.py`
+21. `docs/validation/technical-evidence-map.md`
 
 Suggested local checks:
 
@@ -143,19 +145,20 @@ Use this path to inspect Reflex Memory specifically.
 
 1. `docs/governance/reflex-memory-specification.md`
 2. `docs/architecture/reflex-memory-api-context.md`
-3. `docs/governance/reflex-memory-v0-1-fixture.md`
-4. `docs/grants/nsf-seed-fund/reflex-memory-rd-plan.md`
-5. `fixtures/reflex_memory/`
-6. `schemas/reflex_memory/`
-7. `core/reflex_memory/context.py`
-8. `core/reflex_memory/replay.py`
-9. `tests/test_reflex_memory_v0_1.py`
-10. `tests/test_reflex_memory_loader.py`
-11. `tests/test_reflex_memory_context_endpoint.py`
-12. `tests/test_reflex_memory_legacy_semantics_cleanup.py`
-13. `tests/test_reflex_memory_multi_scenario.py`
-14. `tests/test_reflex_memory_schema_validation.py`
-15. `tests/test_reflex_memory_replay.py`
+3. `docs/governance/source-state-taxonomy.md`
+4. `docs/governance/reflex-memory-v0-1-fixture.md`
+5. `docs/grants/nsf-seed-fund/reflex-memory-rd-plan.md`
+6. `fixtures/reflex_memory/`
+7. `schemas/reflex_memory/`
+8. `core/reflex_memory/context.py`
+9. `core/reflex_memory/replay.py`
+10. `tests/test_reflex_memory_v0_1.py`
+11. `tests/test_reflex_memory_loader.py`
+12. `tests/test_reflex_memory_context_endpoint.py`
+13. `tests/test_reflex_memory_legacy_semantics_cleanup.py`
+14. `tests/test_reflex_memory_multi_scenario.py`
+15. `tests/test_reflex_memory_schema_validation.py`
+16. `tests/test_reflex_memory_replay.py`
 
 Reflex Memory should be interpreted as:
 

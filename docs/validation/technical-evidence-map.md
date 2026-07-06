@@ -49,6 +49,9 @@ technical_evidence_state:
   reflex_memory_fixture: implemented
   reflex_memory_context_exposure: implemented
   reflex_memory_legacy_semantics_cleanup: implemented
+  reflex_memory_multi_scenario_fixtures: implemented_bounded_v0_1
+  reflex_memory_schema_validation: implemented_fixture_backed
+  reflex_memory_replayability: implemented_fixture_backed
   nsf_rd_plan: documented
   external_integrations: not_claimed
   production_deployment: not_claimed
@@ -66,6 +69,8 @@ technical_evidence_state:
 | Nova structures a bounded review-context loop | `docs/architecture/review-context-loop.md`, `docs/architecture/pre-action-context-contract.md` | Concept note |
 | Nova has a bounded governed context-flow explanation | `docs/architecture/governed-context-flow.md` | Concept / integration-path artifact |
 | Nova distinguishes attribution inputs from governed review context | `docs/architecture/attribution-vs-governance-context.md` | Boundary / category hardening note |
+| Nova defines review completeness without creating authority | `docs/governance/review-completeness-standard.md` | Governance hardening standard |
+| Nova defines source-state taxonomy for review context | `docs/governance/source-state-taxonomy.md` | Governance hardening taxonomy |
 | Agent-prepared action package can be consumed as review context | `examples/agent_prepared_action/`, `tests/test_agent_prepared_action_example.py` | Bounded example |
 | Nova preserves non-authority boundary | `README.md`, `docs/start-here.md`, doctrine lint, tests, reviewer paths | Implemented |
 | Phase 1 proof chain is offline and bounded | `docs/phase_1_offline_proof_chain.md`, Phase 1 validation docs, tests | Implemented |
@@ -73,6 +78,7 @@ technical_evidence_state:
 | Reflex Memory has deterministic fixture evidence | `fixtures/reflex_memory/`, `docs/governance/reflex-memory-v0-1-fixture.md`, `tests/test_reflex_memory_multi_scenario.py` | Implemented across bounded v0.1 scenarios |
 | Reflex Memory has machine-readable fixture validation | `schemas/reflex_memory/`, `tests/test_reflex_memory_schema_validation.py` | Implemented for bounded v0.1 fixtures |
 | Reflex Memory context can replay back to accepted entries and source chronology IDs | `core/reflex_memory/replay.py`, `tests/test_reflex_memory_replay.py` | Fixture-backed replay artifact |
+| Nova distinguishes raw records, chronology events, Reflex Memory candidates, and accepted Reflex Memory | `docs/governance/reflex-memory-v0-1-fixture.md` | Reflex Memory lifecycle hardening |
 | Reflex Memory appears in API review context | `core/reflex_memory/context.py`, `/v1/context` endpoint tests | Implemented as bounded v0.1 |
 | Reflex Memory preserves `authority_effect: none` | fixture tests, loader tests, endpoint tests, legacy semantics cleanup test | Implemented |
 | Reflex Memory works across multiple stress scenarios | `docs/grants/nsf-seed-fund/reflex-memory-rd-plan.md` | R&D frontier |
@@ -113,17 +119,23 @@ It is not enough to claim production readiness or broad deployment.
 
 The remaining Reflex Memory R&D frontier includes:
 
-- multiple governance-stress fixtures
-- machine-readable schema validation
-- replayability from API context back to source chronology
-- review-context usefulness evaluation
-- controlled reader/operator comprehension testing
+- additional governance-stress fixtures beyond the current bounded v0.1 set
+- dynamic Reflex Memory persistence design
+- production storage validation
+- live chronology ingestion design
 - external integration examples
+- controlled reader/operator usefulness evaluation
 - traction evidence
 
-These are research and validation targets.
+The following are already implemented for bounded v0.1 fixture-backed evidence:
 
-They are not current claims.
+- multi-scenario Reflex Memory fixtures
+- machine-readable fixture validation
+- fixture-backed replayability from API context back to accepted entries and source chronology IDs
+
+These implemented artifacts are technical risk-reduction evidence.
+
+They are not production persistence, external integration, adoption evidence, market validation, buyer validation, or production proof.
 
 ---
 

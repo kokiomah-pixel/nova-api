@@ -222,6 +222,16 @@ For a broader context-flow explanation of what Nova receives, structures, emits,
 
 - `docs/architecture/governed-context-flow.md`
 
+## Related Governance Standards
+
+For the distinction between prepared action and review readiness, see:
+
+- `docs/governance/review-completeness-standard.md`
+
+For source-state classification, see:
+
+- `docs/governance/source-state-taxonomy.md`
+
 ## Final Rule
 
 Prepared action is not review readiness.
