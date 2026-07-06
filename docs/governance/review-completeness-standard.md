@@ -228,6 +228,26 @@ Do not say Nova determines compliance readiness.
 
 Do not say Nova certifies the action.
 
+## Required Review Context Is Not Execution Control
+
+An institution may require governed review context before local authority decides.
+
+That does not make Nova an execution controller.
+
+Nova does not approve, deny, authorize, block, route, settle, sign, execute, perform compliance review, produce audit reports, supervise agents, manage wallets, or replace local authority.
+
+Safe compression:
+
+```text
+No governed review context, no local decision.
+```
+
+Unsafe compression:
+
+```text
+No Nova, no execution.
+```
+
 ## Final Rule
 
 Review completeness is about governed context.

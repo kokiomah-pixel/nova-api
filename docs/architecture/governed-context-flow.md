@@ -393,6 +393,12 @@ For future agent-framework adapter boundaries, see:
 
 * `docs/architecture/agent-framework-adapter-contract.md`
 
+## Related Strategy Boundary
+
+For the commercial boundary around Nova's non-authority stance, see:
+
+* `docs/strategy/non-authority-commercial-boundary.md`
+
 ## Related Governance Standards
 
 For review-readiness conditions and source-state classification, see:
