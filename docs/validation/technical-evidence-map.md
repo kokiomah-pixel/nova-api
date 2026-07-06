@@ -79,6 +79,7 @@ technical_evidence_state:
 | Reflex Memory has machine-readable fixture validation | `schemas/reflex_memory/`, `tests/test_reflex_memory_schema_validation.py` | Implemented for bounded v0.1 fixtures |
 | Reflex Memory context can replay back to accepted entries and source chronology IDs | `core/reflex_memory/replay.py`, `tests/test_reflex_memory_replay.py` | Fixture-backed replay artifact |
 | Nova distinguishes raw records, chronology events, Reflex Memory candidates, and accepted Reflex Memory | `docs/governance/reflex-memory-v0-1-fixture.md` | Reflex Memory lifecycle hardening |
+| Nova defines temporal-state discipline for Reflex Memory relevance | `docs/governance/reflex-memory-temporal-state-standard.md`, `docs/governance/reflex-memory-v0-1-fixture.md` | Governance hardening standard |
 | Reflex Memory appears in API review context | `core/reflex_memory/context.py`, `/v1/context` endpoint tests | Implemented as bounded v0.1 |
 | Reflex Memory preserves `authority_effect: none` | fixture tests, loader tests, endpoint tests, legacy semantics cleanup test | Implemented |
 | Reflex Memory works across multiple stress scenarios | `docs/grants/nsf-seed-fund/reflex-memory-rd-plan.md` | R&D frontier |
@@ -123,6 +124,8 @@ The remaining Reflex Memory R&D frontier includes:
 - dynamic Reflex Memory persistence design
 - production storage validation
 - live chronology ingestion design
+- temporal-state validation for future Reflex Memory entries
+- transition-reason and relevance-condition testing
 - external integration examples
 - controlled reader/operator usefulness evaluation
 - traction evidence
@@ -136,6 +139,10 @@ The following are already implemented for bounded v0.1 fixture-backed evidence:
 These implemented artifacts are technical risk-reduction evidence.
 
 They are not production persistence, external integration, adoption evidence, market validation, buyer validation, or production proof.
+
+Temporal-state discipline is currently a governance standard.
+
+It is not a production regime engine, automatic epoch transition system, autonomous expiration mechanism, compliance artifact, audit report, or authority mechanism.
 
 ---
 

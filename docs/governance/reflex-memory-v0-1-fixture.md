@@ -110,6 +110,38 @@ Authority remains local.
 Execution happens elsewhere.
 ```
 
+## Temporal-State Context
+
+Reflex Memory entries should not be interpreted as permanently current.
+
+Current bounded v0.1 fixtures preserve:
+
+- `accepted_at`
+- `expiration_or_review_after`
+- `source_state`
+- `authority_effect: none`
+
+These fields help reviewers understand when the entry was accepted, what source-state limitations existed, and when review should reconsider the entry.
+
+Future Reflex Memory entries may add explicit temporal-state fields such as:
+
+- `temporal_scope`
+- `transition_reason`
+- `relevance_condition`
+- `staleness_handling`
+
+These fields would qualify review relevance.
+
+They would not create authority, production persistence, automatic expiration, autonomous memory mutation, market-regime detection, compliance review, audit reporting, or execution logic.
+
+Replay reconstructs where Reflex Memory came from.
+
+Replay does not prove current relevance by itself.
+
+See:
+
+- `docs/governance/reflex-memory-temporal-state-standard.md`
+
 ## Multi-Scenario Fixtures
 
 Reflex Memory v0.1 now includes deterministic fixtures for multiple governance-stress scenarios:

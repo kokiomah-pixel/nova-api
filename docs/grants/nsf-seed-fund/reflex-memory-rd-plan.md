@@ -145,6 +145,28 @@ The replay artifact reconstructs API-emitted Reflex Memory context back to accep
 
 It is not an audit report, compliance review, production lineage system, or authority mechanism.
 
+### Temporal-State Hardening
+
+Reflex Memory replayability introduces a staleness and relevance question:
+
+```text
+Replay reconstructs where memory came from.
+Replay does not prove current relevance by itself.
+```
+
+Bounded v0.1 fixtures currently preserve `accepted_at`, `expiration_or_review_after`, `source_state`, and `authority_effect: none`.
+
+Future R&D may evaluate additional temporal-state fields such as:
+
+* `temporal_scope`
+* `transition_reason`
+* `relevance_condition`
+* `staleness_handling`
+
+These fields would help qualify whether accepted governance memory remains review-relevant across changing review environments.
+
+This does not imply production regime management, market-regime detection, automatic epoch transition, autonomous memory expiration, compliance review, audit reporting, or authority.
+
 ### Objective 4 - Test Non-Authority Invariants
 
 Add tests showing Reflex Memory cannot cross into approval, denial, authorization, blocking, routing, settlement, signing, execution, compliance review, audit reporting, wallet control, or agent supervision.
