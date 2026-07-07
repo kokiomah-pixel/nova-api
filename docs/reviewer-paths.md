@@ -19,6 +19,14 @@ Nova does not approve, deny, authorize, block, route, settle, sign, trade, optim
 
 ---
 
+## Phase 1 Inspection Status
+
+- `docs/inspection/phase-1-inspection-status.md`
+
+Use this document to understand what Phase 1 proves, what it does not prove, and what reviewers should inspect before moving into deeper architecture, governance, or strategy artifacts.
+
+---
+
 ## Ten-Minute Path
 
 Use this path if you are reviewing Sharpe Nova OS for the first time.

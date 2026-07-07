@@ -73,6 +73,7 @@ technical_evidence_state:
 | Nova defines source-state taxonomy for review context | `docs/governance/source-state-taxonomy.md` | Governance hardening taxonomy |
 | Nova defines non-authority as a commercial boundary, not missing execution capability | `docs/strategy/non-authority-commercial-boundary.md` | Strategy / commercial hardening note |
 | Nova defines the open-source commercial boundary without claiming business validation | `docs/strategy/open-source-commercial-boundary.md` | Strategy / commercial hardening note |
+| Nova defines the Phase 1 inspection boundary without claiming production, adoption, buyer validation, market validation, audit readiness, compliance determination, execution control, or authority | `docs/inspection/phase-1-inspection-status.md` | Inspection boundary artifact |
 | Agent-prepared action package can be consumed as review context | `examples/agent_prepared_action/`, `tests/test_agent_prepared_action_example.py` | Bounded example |
 | Nova defines a future non-authority agent framework adapter boundary | `docs/architecture/agent-framework-adapter-contract.md` | Future integration boundary note |
 | Nova preserves non-authority boundary | `README.md`, `docs/start-here.md`, doctrine lint, tests, reviewer paths | Implemented |
@@ -172,6 +173,8 @@ Future integration examples should remain non-authority.
 Nova may define how governed review context can become required before local authority decides, but it does not claim execution control, policy enforcement, blocking, authorization, routing, settlement, signing, wallet control, compliance determination, or audit reporting.
 
 The repo may describe possible commercial value surfaces such as hosted review-context services, proof/replay services, enterprise configuration, certified schema discipline, and chronology preservation. These are strategic possibilities, not current revenue, buyer validation, market validation, adoption evidence, or production deployment claims.
+
+Phase 1 is complete enough for inspection, but it does not prove production deployment, enterprise adoption, paid pilots, buyer validation, market validation, hosted-service readiness, audit readiness, compliance determination, execution control, payment authorization, wallet control, agent supervision, or live agent-framework integration.
 
 Safe integration frame:
 

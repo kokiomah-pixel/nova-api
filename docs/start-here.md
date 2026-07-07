@@ -87,6 +87,7 @@ Different readers should use different paths through the repo.
 
 See:
 
+- `docs/inspection/phase-1-inspection-status.md`
 - `docs/reviewer-paths.md`
 
 The reviewer paths cover:

@@ -114,6 +114,8 @@ Consumers remain responsible for all local governance and execution decisions.
 
 ## Ten-Minute Reviewer Path
 
+For the current Phase 1 inspection boundary, see `docs/inspection/phase-1-inspection-status.md`.
+
 For a role-based review path, see:
 
 - [docs/reviewer-paths.md](docs/reviewer-paths.md)
