@@ -95,7 +95,7 @@ These are review-context states.
 
 They are not:
 
-* execution permissions
+* execution grants
 * approvals
 * denials
 * blocking instructions
