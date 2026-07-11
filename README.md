@@ -246,6 +246,21 @@ The development test dependency setup is for local verification only. It does no
 
 The doctrine check blocks prohibited execution-authority wording, code-like ALLOW enforcement examples, and hidden Unicode controls. Deprecated positioning terms are surfaced as warnings for review.
 
+### Deep Scenario Validation
+
+The repository includes a deterministic offline suite of multi-stage institutional decision scenarios covering:
+
+- authority-boundary pressure
+- incomplete and conflicting context
+- temporal and Reflex Memory relevance
+- operator and executive pressure
+- neutral outcomes
+- recovery and de-escalation
+
+The suite tests whether Nova preserves provenance, chronology, review posture, and local authority as evidence changes.
+
+It does not simulate live execution, validate investment decisions, establish production readiness, or prove institutional adoption.
+
 ## Developer Environment Integrity
 
 Sharpe Nova OS treats developer environments as part of the infrastructure trust boundary.

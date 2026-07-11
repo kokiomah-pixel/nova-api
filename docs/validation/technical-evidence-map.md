@@ -80,6 +80,12 @@ technical_evidence_state:
 | Nova exercises its internal decision-triage, reconciliation, falsification, language-behavior, and model-handoff standards | `docs/operations/internal-integrity-exercise-001.md`, `docs/operations/records/` | Internal operating exercise |
 | Nova defines and records a strict fresh-context continuity test | `docs/operations/tests/fresh-context-handoff-test-001-prompt.md`, `docs/operations/tests/fresh-context-handoff-test-001-execution.md`, `docs/operations/tests/fresh-context-handoff-test-001-scoring.md`, `docs/operations/tests/results/` | Internal continuity test |
 | Nova defines a one-request stateless API procedure for isolated fresh-context testing | `scripts/run_stateless_fresh_context_request_001.py`, `docs/operations/tests/fresh-context-handoff-test-001-vscode-runbook.md` | Internal test execution control |
+| Nova defines a canonical deep-scenario standard for multi-stage institutional decision environments | `docs/validation/deep-scenario-validation-standard.md`, `docs/validation/deep-scenario-matrix.md` | Internal validation design |
+| Nova validates at least 16 multi-stage scenarios across authority, incomplete context, temporal memory, operator pressure, neutral outcomes, and recovery | `fixtures/deep_scenarios/`, `scripts/run_deep_scenario_suite.py`, `tests/test_deep_scenario_suite.py` | Offline scenario evidence |
+| Nova verifies review-posture transitions occur only when evidence changes | `tests/test_deep_scenario_state_transitions.py` | State-transition evidence |
+| Nova verifies authority remains local under operator, executive, and integration pressure | `tests/test_deep_scenario_authority_boundary.py` | Non-authority evidence |
+| Nova verifies constraints can reduce when resolution evidence becomes sufficient | `tests/test_deep_scenario_recovery.py` | Recovery and de-escalation evidence |
+| Nova preserves neutral outcomes where no chronology candidate or Reflex Memory effect is warranted | `fixtures/deep_scenarios/neutral_outcomes.yaml`, `tests/test_deep_scenario_recovery.py` | Anti-escalation-bias evidence |
 | Nova defines non-authority as a commercial boundary, not missing execution capability | `docs/strategy/non-authority-commercial-boundary.md` | Strategy / commercial hardening note |
 | Nova defines the open-source commercial boundary without claiming business validation | `docs/strategy/open-source-commercial-boundary.md` | Strategy / commercial hardening note |
 | Nova defines the Phase 1 inspection boundary without claiming production, adoption, buyer validation, market validation, audit readiness, compliance determination, execution control, or authority | `docs/inspection/phase-1-inspection-status.md` | Inspection boundary artifact |
@@ -112,6 +118,8 @@ The internal integrity exercise tests whether Nova's operating standards work as
 The fresh-context handoff test evaluates whether accepted Nova state is reconstructable from canonical artifacts without prior model-session memory. It does not validate Nova externally, certify model equivalence, prove production failover, establish buyer or market validation, or grant the model authority.
 
 The stateless API procedure omits prior-response and conversation linkage, supplies no model tools or repository access, and preserves the first model output. It demonstrates operator-controlled request isolation for this test scope. It does not certify undisclosed provider-side model state, production failover, model equivalence, external validation, or model authority.
+
+The Deep Scenario Validation Layer provides internal evidence that Nova's review context remains coherent across fictional, offline, multi-stage decision environments. It does not establish production readiness, execution safety, external validation, buyer validation, market validation, compliance readiness, audit readiness, or institutional adoption.
 
 ---
 

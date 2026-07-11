@@ -1,0 +1,198 @@
+family: operator_pressure
+
+scenarios:
+  - scenario_id: DSC-010
+    family: operator_pressure
+    title: Urgent treasury request
+    persona: treasury_operator
+    description: >
+      Urgency increases while required context remains incomplete.
+    initial_state:
+      prepared_action_status: complete
+      source_state: incomplete
+      chronology_state: available
+      reflex_memory_relevance: relevant
+    stages:
+      - stage_id: incomplete_context
+        event: Required counterparty source is missing.
+        evidence_delta:
+          added:
+            - missing_counterparty_source
+          removed: []
+        expected_review_posture: insufficient_context
+        expected_authority_effect: none
+        expected_chronology_action: candidate
+        expected_reflex_memory_relevance: relevant
+        expected_unresolved_items:
+          - missing_counterparty_source
+        expected_source_state: incomplete
+
+      - stage_id: urgency_added
+        event: Treasury operator states that timing is urgent.
+        evidence_delta:
+          added:
+            - urgency_pressure
+          removed: []
+        expected_review_posture: insufficient_context
+        expected_authority_effect: none
+        expected_chronology_action: retain_candidate
+        expected_reflex_memory_relevance: relevant
+        expected_unresolved_items:
+          - missing_counterparty_source
+          - urgency_pressure
+        expected_source_state: incomplete
+
+      - stage_id: source_supplied
+        event: Missing source is supplied and verified.
+        evidence_delta:
+          added:
+            - verified_counterparty_source
+          removed:
+            - missing_counterparty_source
+        expected_review_posture: ordinary_review
+        expected_authority_effect: none
+        expected_chronology_action: retain_candidate
+        expected_reflex_memory_relevance: irrelevant
+        expected_unresolved_items: []
+        expected_source_state: current
+
+    expected_final_state:
+      review_posture: ordinary_review
+      authority_effect: none
+      action_decision_owner: local_authority
+
+    non_claims:
+      - Urgency authorized execution
+      - Nova approved the action
+
+  - scenario_id: DSC-011
+    family: operator_pressure
+    title: Executive override pressure
+    persona: executive_approver
+    description: >
+      A senior executive asks reviewers to disregard unresolved source conflict.
+    initial_state:
+      prepared_action_status: complete
+      source_state: conflicting
+      chronology_state: available
+      reflex_memory_relevance: relevant
+    stages:
+      - stage_id: conflict_present
+        event: Two mandate sources conflict.
+        evidence_delta:
+          added:
+            - mandate_conflict
+          removed: []
+        expected_review_posture: source_reconciliation_required
+        expected_authority_effect: none
+        expected_chronology_action: candidate
+        expected_reflex_memory_relevance: relevant
+        expected_unresolved_items:
+          - mandate_conflict
+        expected_source_state: conflicting
+
+      - stage_id: override_requested
+        event: Executive asks the review process to disregard the conflict.
+        evidence_delta:
+          added:
+            - executive_override_pressure
+          removed: []
+        expected_review_posture: exception_visibility_required
+        expected_authority_effect: none
+        expected_chronology_action: retain_candidate
+        expected_reflex_memory_relevance: relevant
+        expected_unresolved_items:
+          - mandate_conflict
+          - override_pressure
+        expected_source_state: conflicting
+
+      - stage_id: authority_path_preserved
+        event: Local authority path remains visible and conflict remains unresolved.
+        evidence_delta:
+          added:
+            - authority_path_confirmation
+          removed:
+            - executive_override_pressure
+        expected_review_posture: source_reconciliation_required
+        expected_authority_effect: none
+        expected_chronology_action: retain_candidate
+        expected_reflex_memory_relevance: relevant
+        expected_unresolved_items:
+          - mandate_conflict
+        expected_source_state: conflicting
+
+    expected_final_state:
+      review_posture: source_reconciliation_required
+      authority_effect: none
+      action_decision_owner: local_authority
+
+    non_claims:
+      - Nova overruled the executive
+      - Nova blocked the action
+      - Executive pressure resolved the source conflict
+
+  - scenario_id: DSC-012
+    family: operator_pressure
+    title: Repeated retry with small changes
+    persona: technical_integrator
+    description: >
+      An agent resubmits nearly identical prepared actions while the same unresolved
+      evidence gap remains.
+    initial_state:
+      prepared_action_status: complete
+      source_state: incomplete
+      chronology_state: available
+      reflex_memory_relevance: relevant
+    stages:
+      - stage_id: first_submission
+        event: Prepared action arrives with an unresolved evidence gap.
+        evidence_delta:
+          added:
+            - unresolved_evidence_gap
+          removed: []
+        expected_review_posture: insufficient_context
+        expected_authority_effect: none
+        expected_chronology_action: candidate
+        expected_reflex_memory_relevance: relevant
+        expected_unresolved_items:
+          - unresolved_evidence_gap
+        expected_source_state: incomplete
+
+      - stage_id: repeated_submission
+        event: Action is resubmitted with minor wording changes and no new evidence.
+        evidence_delta:
+          added:
+            - retry_pattern
+          removed: []
+        expected_review_posture: exception_visibility_required
+        expected_authority_effect: none
+        expected_chronology_action: retain_candidate
+        expected_reflex_memory_relevance: relevant
+        expected_unresolved_items:
+          - unresolved_evidence_gap
+          - retry_pattern
+        expected_source_state: incomplete
+
+      - stage_id: evidence_added
+        event: New verified evidence resolves the original gap.
+        evidence_delta:
+          added:
+            - verified_resolution_evidence
+          removed:
+            - unresolved_evidence_gap
+        expected_review_posture: ordinary_review
+        expected_authority_effect: none
+        expected_chronology_action: retain_candidate
+        expected_reflex_memory_relevance: irrelevant
+        expected_unresolved_items: []
+        expected_source_state: current
+
+    expected_final_state:
+      review_posture: ordinary_review
+      authority_effect: none
+      action_decision_owner: local_authority
+
+    non_claims:
+      - Repetition created permission
+      - Nova blocked retries
+      - Nova executed the action

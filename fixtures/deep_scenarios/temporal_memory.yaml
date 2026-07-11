@@ -1,0 +1,193 @@
+family: temporal_memory
+
+scenarios:
+  - scenario_id: DSC-007
+    family: temporal_memory
+    title: Cautionary memory remains relevant
+    persona: risk_officer
+    description: >
+      Accepted Reflex Memory remains relevant because the same unresolved source
+      pattern appears in the current review.
+    initial_state:
+      prepared_action_status: complete
+      source_state: incomplete
+      chronology_state: available
+      reflex_memory_relevance: relevant
+    stages:
+      - stage_id: repeated_pattern_detected
+        event: Current review repeats an accepted source-reconciliation failure pattern.
+        evidence_delta:
+          added:
+            - repeated_source_pattern
+          removed: []
+        expected_review_posture: source_reconciliation_required
+        expected_authority_effect: none
+        expected_chronology_action: candidate
+        expected_reflex_memory_relevance: relevant
+        expected_unresolved_items:
+          - source_reconciliation
+        expected_source_state: incomplete
+
+      - stage_id: memory_context_added
+        event: Accepted memory is included as review context.
+        evidence_delta:
+          added:
+            - accepted_memory_context
+          removed: []
+        expected_review_posture: source_reconciliation_required
+        expected_authority_effect: none
+        expected_chronology_action: retain_candidate
+        expected_reflex_memory_relevance: relevant
+        expected_unresolved_items:
+          - source_reconciliation
+        expected_source_state: incomplete
+
+      - stage_id: source_still_missing
+        event: No new source evidence is supplied.
+        evidence_delta:
+          added: []
+          removed: []
+        expected_review_posture: source_reconciliation_required
+        expected_authority_effect: none
+        expected_chronology_action: retain_candidate
+        expected_reflex_memory_relevance: relevant
+        expected_unresolved_items:
+          - source_reconciliation
+        expected_source_state: incomplete
+
+    expected_final_state:
+      review_posture: source_reconciliation_required
+      authority_effect: none
+      action_decision_owner: local_authority
+
+    non_claims:
+      - Reflex Memory rejected the action
+      - Reflex Memory approved the action
+
+  - scenario_id: DSC-008
+    family: temporal_memory
+    title: Accepted memory becomes stale
+    persona: governance_operator
+    description: >
+      Prior accepted memory describes a historical condition that no longer matches
+      the current environment.
+    initial_state:
+      prepared_action_status: complete
+      source_state: current
+      chronology_state: available
+      reflex_memory_relevance: uncertain
+    stages:
+      - stage_id: historical_memory_loaded
+        event: Accepted cautionary memory is initially considered.
+        evidence_delta:
+          added:
+            - historical_memory
+          removed: []
+        expected_review_posture: chronology_review_required
+        expected_authority_effect: none
+        expected_chronology_action: no_candidate
+        expected_reflex_memory_relevance: uncertain
+        expected_unresolved_items:
+          - temporal_relevance
+        expected_source_state: current
+
+      - stage_id: current_environment_compared
+        event: Current evidence shows the historical failure condition is absent.
+        evidence_delta:
+          added:
+            - current_environment_comparison
+          removed: []
+        expected_review_posture: reviewable_with_disclosed_uncertainty
+        expected_authority_effect: none
+        expected_chronology_action: no_candidate
+        expected_reflex_memory_relevance: stale
+        expected_unresolved_items: []
+        expected_source_state: current
+
+      - stage_id: relevance_reduced
+        event: Memory remains historically visible but no longer conditions posture.
+        evidence_delta:
+          added:
+            - memory_relevance_reduced
+          removed:
+            - temporal_relevance
+        expected_review_posture: ordinary_review
+        expected_authority_effect: none
+        expected_chronology_action: no_candidate
+        expected_reflex_memory_relevance: irrelevant
+        expected_unresolved_items: []
+        expected_source_state: current
+
+    expected_final_state:
+      review_posture: ordinary_review
+      authority_effect: none
+      action_decision_owner: local_authority
+
+    non_claims:
+      - Memory was deleted
+      - History was rewritten
+      - Nova approved the action
+
+  - scenario_id: DSC-009
+    family: temporal_memory
+    title: Conflicting memory entries remain visible
+    persona: investment_committee_reviewer
+    description: >
+      Two accepted memory entries point to different review concerns and must remain visible.
+    initial_state:
+      prepared_action_status: complete
+      source_state: current
+      chronology_state: available
+      reflex_memory_relevance: conflicting
+    stages:
+      - stage_id: memories_loaded
+        event: Two accepted memory entries are relevant to different aspects of review.
+        evidence_delta:
+          added:
+            - memory_entry_a
+            - memory_entry_b
+          removed: []
+        expected_review_posture: chronology_review_required
+        expected_authority_effect: none
+        expected_chronology_action: no_candidate
+        expected_reflex_memory_relevance: conflicting
+        expected_unresolved_items:
+          - memory_context_conflict
+        expected_source_state: current
+
+      - stage_id: conflict_disclosed
+        event: Different posture effects are disclosed without collapsing them.
+        evidence_delta:
+          added:
+            - memory_conflict_disclosure
+          removed: []
+        expected_review_posture: reviewable_with_disclosed_uncertainty
+        expected_authority_effect: none
+        expected_chronology_action: no_candidate
+        expected_reflex_memory_relevance: conflicting
+        expected_unresolved_items:
+          - local_interpretation_required
+        expected_source_state: current
+
+      - stage_id: local_handoff
+        event: Complete context is handed to local authority.
+        evidence_delta:
+          added:
+            - local_authority_handoff
+          removed: []
+        expected_review_posture: reviewable_with_disclosed_uncertainty
+        expected_authority_effect: none
+        expected_chronology_action: no_candidate
+        expected_reflex_memory_relevance: conflicting
+        expected_unresolved_items:
+          - local_interpretation_required
+        expected_source_state: current
+
+    expected_final_state:
+      review_posture: reviewable_with_disclosed_uncertainty
+      authority_effect: none
+      action_decision_owner: local_authority
+
+    non_claims:
+      - Nova selected the controlling memory
+      - Reflex Memory determined the action

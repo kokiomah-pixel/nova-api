@@ -1,0 +1,183 @@
+family: neutral_outcomes
+
+scenarios:
+  - scenario_id: DSC-013
+    family: neutral_outcomes
+    title: Complete context with no material exception
+    persona: treasury_operator
+    description: >
+      Current sources, provenance, chronology, and prepared-action context are complete.
+    initial_state:
+      prepared_action_status: complete
+      source_state: current
+      chronology_state: available
+      reflex_memory_relevance: none
+    stages:
+      - stage_id: context_received
+        event: Complete review package is received.
+        evidence_delta:
+          added:
+            - complete_review_package
+          removed: []
+        expected_review_posture: ordinary_review
+        expected_authority_effect: none
+        expected_chronology_action: no_candidate
+        expected_reflex_memory_relevance: none
+        expected_unresolved_items: []
+        expected_source_state: current
+
+      - stage_id: provenance_confirmed
+        event: Source provenance and freshness are confirmed.
+        evidence_delta:
+          added:
+            - provenance_confirmation
+          removed: []
+        expected_review_posture: ordinary_review
+        expected_authority_effect: none
+        expected_chronology_action: no_candidate
+        expected_reflex_memory_relevance: none
+        expected_unresolved_items: []
+        expected_source_state: current
+
+      - stage_id: local_handoff
+        event: Review context is handed to local authority.
+        evidence_delta:
+          added:
+            - local_authority_handoff
+          removed: []
+        expected_review_posture: ordinary_review
+        expected_authority_effect: none
+        expected_chronology_action: no_candidate
+        expected_reflex_memory_relevance: none
+        expected_unresolved_items: []
+        expected_source_state: current
+
+    expected_final_state:
+      review_posture: ordinary_review
+      authority_effect: none
+      action_decision_owner: local_authority
+
+    non_claims:
+      - Nova approved the action
+      - Nova recommended execution
+
+  - scenario_id: DSC-014
+    family: neutral_outcomes
+    title: Reflex Memory is not relevant
+    persona: risk_officer
+    description: >
+      Accepted Reflex Memory exists but does not match the current decision environment.
+    initial_state:
+      prepared_action_status: complete
+      source_state: current
+      chronology_state: available
+      reflex_memory_relevance: none
+    stages:
+      - stage_id: memory_available
+        event: Accepted memory entries are available.
+        evidence_delta:
+          added:
+            - accepted_memory_available
+          removed: []
+        expected_review_posture: ordinary_review
+        expected_authority_effect: none
+        expected_chronology_action: no_candidate
+        expected_reflex_memory_relevance: irrelevant
+        expected_unresolved_items: []
+        expected_source_state: current
+
+      - stage_id: relevance_checked
+        event: Current context does not match memory-trigger conditions.
+        evidence_delta:
+          added:
+            - relevance_check_complete
+          removed: []
+        expected_review_posture: ordinary_review
+        expected_authority_effect: none
+        expected_chronology_action: no_candidate
+        expected_reflex_memory_relevance: irrelevant
+        expected_unresolved_items: []
+        expected_source_state: current
+
+      - stage_id: context_emitted
+        event: Review context excludes irrelevant memory effects.
+        evidence_delta:
+          added:
+            - bounded_review_context
+          removed: []
+        expected_review_posture: ordinary_review
+        expected_authority_effect: none
+        expected_chronology_action: no_candidate
+        expected_reflex_memory_relevance: irrelevant
+        expected_unresolved_items: []
+        expected_source_state: current
+
+    expected_final_state:
+      review_posture: ordinary_review
+      authority_effect: none
+      action_decision_owner: local_authority
+
+    non_claims:
+      - Reflex Memory always conditions review
+      - Memory approved the action
+
+  - scenario_id: DSC-015
+    family: neutral_outcomes
+    title: No chronology candidate required
+    persona: governance_operator
+    description: >
+      A normal review produces no material boundary event, conflict, exception,
+      or state transition requiring chronology candidacy.
+    initial_state:
+      prepared_action_status: complete
+      source_state: current
+      chronology_state: available
+      reflex_memory_relevance: none
+    stages:
+      - stage_id: routine_review
+        event: Routine complete context is reviewed.
+        evidence_delta:
+          added:
+            - routine_review
+          removed: []
+        expected_review_posture: ordinary_review
+        expected_authority_effect: none
+        expected_chronology_action: no_candidate
+        expected_reflex_memory_relevance: none
+        expected_unresolved_items: []
+        expected_source_state: current
+
+      - stage_id: no_material_change
+        event: No material change or exception is identified.
+        evidence_delta:
+          added:
+            - no_material_change
+          removed: []
+        expected_review_posture: ordinary_review
+        expected_authority_effect: none
+        expected_chronology_action: no_candidate
+        expected_reflex_memory_relevance: none
+        expected_unresolved_items: []
+        expected_source_state: current
+
+      - stage_id: local_handoff
+        event: Context is handed to local authority without chronology candidacy.
+        evidence_delta:
+          added:
+            - local_authority_handoff
+          removed: []
+        expected_review_posture: ordinary_review
+        expected_authority_effect: none
+        expected_chronology_action: no_candidate
+        expected_reflex_memory_relevance: none
+        expected_unresolved_items: []
+        expected_source_state: current
+
+    expected_final_state:
+      review_posture: ordinary_review
+      authority_effect: none
+      action_decision_owner: local_authority
+
+    non_claims:
+      - Every review becomes chronology
+      - Nova approved the action

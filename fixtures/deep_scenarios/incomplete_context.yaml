@@ -1,0 +1,195 @@
+family: incomplete_context
+
+scenarios:
+  - scenario_id: DSC-004
+    family: incomplete_context
+    title: Missing source later supplied
+    persona: risk_officer
+    description: >
+      A required mandate source is missing, later supplied, and then verified.
+    initial_state:
+      prepared_action_status: complete
+      source_state: incomplete
+      chronology_state: available
+      reflex_memory_relevance: none
+    stages:
+      - stage_id: source_missing
+        event: Required mandate source is absent.
+        evidence_delta:
+          added:
+            - missing_mandate_source
+          removed: []
+        expected_review_posture: insufficient_context
+        expected_authority_effect: none
+        expected_chronology_action: candidate
+        expected_reflex_memory_relevance: none
+        expected_unresolved_items:
+          - missing_mandate_source
+        expected_source_state: incomplete
+
+      - stage_id: source_supplied
+        event: A mandate document is supplied but provenance is not yet verified.
+        evidence_delta:
+          added:
+            - unverified_mandate_source
+          removed:
+            - missing_mandate_source
+        expected_review_posture: constrained_review
+        expected_authority_effect: none
+        expected_chronology_action: retain_candidate
+        expected_reflex_memory_relevance: none
+        expected_unresolved_items:
+          - source_provenance_unverified
+        expected_source_state: unverified
+
+      - stage_id: provenance_verified
+        event: Mandate source provenance is verified.
+        evidence_delta:
+          added:
+            - verified_mandate_source
+          removed:
+            - unverified_mandate_source
+        expected_review_posture: ordinary_review
+        expected_authority_effect: none
+        expected_chronology_action: retain_candidate
+        expected_reflex_memory_relevance: none
+        expected_unresolved_items: []
+        expected_source_state: current
+
+    expected_final_state:
+      review_posture: ordinary_review
+      authority_effect: none
+      action_decision_owner: local_authority
+
+    non_claims:
+      - Nova approved the mandate
+      - Nova authorized the action
+
+  - scenario_id: DSC-005
+    family: incomplete_context
+    title: Conflicting sources remain unresolved
+    persona: investment_committee_reviewer
+    description: >
+      Two current sources conflict and no reconciliation authority has resolved them.
+    initial_state:
+      prepared_action_status: complete
+      source_state: conflicting
+      chronology_state: available
+      reflex_memory_relevance: relevant
+    stages:
+      - stage_id: conflict_visible
+        event: Two current mandate sources disagree.
+        evidence_delta:
+          added:
+            - source_a
+            - source_b
+          removed: []
+        expected_review_posture: source_reconciliation_required
+        expected_authority_effect: none
+        expected_chronology_action: candidate
+        expected_reflex_memory_relevance: relevant
+        expected_unresolved_items:
+          - source_conflict
+        expected_source_state: conflicting
+
+      - stage_id: operator_preference_added
+        event: Operator prefers source A but cannot establish precedence.
+        evidence_delta:
+          added:
+            - operator_source_preference
+          removed: []
+        expected_review_posture: source_reconciliation_required
+        expected_authority_effect: none
+        expected_chronology_action: retain_candidate
+        expected_reflex_memory_relevance: relevant
+        expected_unresolved_items:
+          - source_conflict
+          - precedence_unresolved
+        expected_source_state: conflicting
+
+      - stage_id: review_handoff
+        event: Conflict is handed to local authority without reconciliation.
+        evidence_delta:
+          added:
+            - local_authority_handoff
+          removed: []
+        expected_review_posture: reviewable_with_disclosed_uncertainty
+        expected_authority_effect: none
+        expected_chronology_action: retain_candidate
+        expected_reflex_memory_relevance: relevant
+        expected_unresolved_items:
+          - source_conflict
+        expected_source_state: conflicting
+
+    expected_final_state:
+      review_posture: reviewable_with_disclosed_uncertainty
+      authority_effect: none
+      action_decision_owner: local_authority
+
+    non_claims:
+      - Nova selected source A
+      - Nova resolved the conflict
+      - Nova approved the action
+
+  - scenario_id: DSC-006
+    family: incomplete_context
+    title: Stale source replaced by current source
+    persona: treasury_operator
+    description: >
+      A stale operating source is superseded by a current verified source.
+    initial_state:
+      prepared_action_status: complete
+      source_state: stale
+      chronology_state: available
+      reflex_memory_relevance: none
+    stages:
+      - stage_id: stale_source_detected
+        event: Existing source exceeds its accepted freshness window.
+        evidence_delta:
+          added:
+            - stale_source
+          removed: []
+        expected_review_posture: constrained_review
+        expected_authority_effect: none
+        expected_chronology_action: candidate
+        expected_reflex_memory_relevance: none
+        expected_unresolved_items:
+          - source_freshness
+        expected_source_state: stale
+
+      - stage_id: replacement_received
+        event: A current source is received but not yet reconciled against prior state.
+        evidence_delta:
+          added:
+            - current_replacement_source
+          removed: []
+        expected_review_posture: source_reconciliation_required
+        expected_authority_effect: none
+        expected_chronology_action: retain_candidate
+        expected_reflex_memory_relevance: none
+        expected_unresolved_items:
+          - replacement_reconciliation
+        expected_source_state: mixed
+
+      - stage_id: replacement_verified
+        event: Current source is verified and the stale source is marked superseded.
+        evidence_delta:
+          added:
+            - verified_current_source
+          removed:
+            - stale_source
+        expected_review_posture: ordinary_review
+        expected_authority_effect: none
+        expected_chronology_action: retain_candidate
+        expected_reflex_memory_relevance: none
+        expected_unresolved_items: []
+        expected_source_state: current
+
+    expected_final_state:
+      review_posture: ordinary_review
+      authority_effect: none
+      action_decision_owner: local_authority
+
+    non_claims:
+      - Historical source was deleted
+      - Nova approved the replacement

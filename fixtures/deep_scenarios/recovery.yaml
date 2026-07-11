@@ -1,0 +1,83 @@
+family: recovery
+
+scenarios:
+  - scenario_id: DSC-016
+    family: recovery
+    title: Exception resolved and posture reduced
+    persona: investment_committee_reviewer
+    description: >
+      An unresolved exception initially constrains review, then verified resolution
+      evidence supports a lower review posture.
+    initial_state:
+      prepared_action_status: complete
+      source_state: incomplete
+      chronology_state: available
+      reflex_memory_relevance: relevant
+    stages:
+      - stage_id: exception_open
+        event: A material exception remains unresolved.
+        evidence_delta:
+          added:
+            - open_exception
+          removed: []
+        expected_review_posture: constrained_review
+        expected_authority_effect: none
+        expected_chronology_action: candidate
+        expected_reflex_memory_relevance: relevant
+        expected_unresolved_items:
+          - open_exception
+        expected_source_state: incomplete
+
+      - stage_id: resolution_claimed
+        event: Operator states that the exception is resolved without supporting evidence.
+        evidence_delta:
+          added:
+            - unsupported_resolution_claim
+          removed: []
+        expected_review_posture: constrained_review
+        expected_authority_effect: none
+        expected_chronology_action: retain_candidate
+        expected_reflex_memory_relevance: relevant
+        expected_unresolved_items:
+          - open_exception
+          - resolution_evidence_missing
+        expected_source_state: incomplete
+
+      - stage_id: resolution_verified
+        event: Verified evidence establishes that the exception is resolved.
+        evidence_delta:
+          added:
+            - verified_resolution
+          removed:
+            - open_exception
+            - unsupported_resolution_claim
+        expected_review_posture: reviewable_with_disclosed_uncertainty
+        expected_authority_effect: none
+        expected_chronology_action: retain_candidate
+        expected_reflex_memory_relevance: stale
+        expected_unresolved_items: []
+        expected_source_state: current
+
+      - stage_id: ordinary_review_restored
+        event: Current state is stable and historical exception remains visible in chronology.
+        evidence_delta:
+          added:
+            - stable_current_state
+          removed:
+            - resolution_evidence_missing
+        expected_review_posture: ordinary_review
+        expected_authority_effect: none
+        expected_chronology_action: retain_candidate
+        expected_reflex_memory_relevance: irrelevant
+        expected_unresolved_items: []
+        expected_source_state: current
+
+    expected_final_state:
+      review_posture: ordinary_review
+      authority_effect: none
+      action_decision_owner: local_authority
+
+    non_claims:
+      - History was deleted
+      - Nova approved the action
+      - Nova automatically changed Reflex Memory

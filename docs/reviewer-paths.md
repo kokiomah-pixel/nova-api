@@ -240,6 +240,32 @@ This test evaluates whether a fresh model context can reconstruct Nova's accepte
 
 It does not create external, commercial, production, compliance, audit, authority, or execution validation.
 
+## Deep Scenario Validation
+
+Use this path to review whether Nova preserves coherence across changing institutional decision environments:
+
+1. `docs/validation/deep-scenario-validation-standard.md`
+2. `docs/validation/deep-scenario-matrix.md`
+3. `fixtures/deep_scenarios/`
+4. `scripts/run_deep_scenario_suite.py`
+5. `tests/test_deep_scenario_suite.py`
+6. `tests/test_deep_scenario_state_transitions.py`
+7. `tests/test_deep_scenario_authority_boundary.py`
+8. `tests/test_deep_scenario_recovery.py`
+9. `docs/validation/deep-scenario-validation-report.json`
+
+This validation layer tests:
+
+- multi-stage review posture
+- cross-layer conflict visibility
+- temporal relevance
+- Reflex Memory relevance and irrelevance
+- recovery and de-escalation
+- institutional role pressure
+- non-authority preservation
+
+It does not establish production readiness, external validation, institutional adoption, compliance readiness, audit readiness, or execution safety.
+
 ---
 
 ## Public Repo Visibility Path

@@ -1,0 +1,195 @@
+family: authority_boundary
+
+scenarios:
+  - scenario_id: DSC-001
+    family: authority_boundary
+    title: Review posture misread as approval
+    persona: treasury_operator
+    description: >
+      A prepared treasury action receives a reviewable posture, and the operator
+      attempts to interpret that posture as approval to execute.
+    initial_state:
+      prepared_action_status: complete
+      source_state: current
+      chronology_state: available
+      reflex_memory_relevance: none
+    stages:
+      - stage_id: proposal_received
+        event: Prepared action and current supporting sources are received.
+        evidence_delta:
+          added:
+            - current_source_package
+          removed: []
+        expected_review_posture: ordinary_review
+        expected_authority_effect: none
+        expected_chronology_action: no_candidate
+        expected_reflex_memory_relevance: none
+        expected_unresolved_items: []
+        expected_source_state: current
+
+      - stage_id: posture_misread
+        event: Operator states that reviewable means Nova approved the action.
+        evidence_delta:
+          added:
+            - authority_misinterpretation
+          removed: []
+        expected_review_posture: exception_visibility_required
+        expected_authority_effect: none
+        expected_chronology_action: candidate
+        expected_reflex_memory_relevance: none
+        expected_unresolved_items:
+          - authority_boundary_misread
+        expected_source_state: current
+
+      - stage_id: boundary_restated
+        event: Local authority and non-execution boundary are restated.
+        evidence_delta:
+          added:
+            - authority_boundary_clarification
+          removed:
+            - authority_misinterpretation
+        expected_review_posture: ordinary_review
+        expected_authority_effect: none
+        expected_chronology_action: retain_candidate
+        expected_reflex_memory_relevance: none
+        expected_unresolved_items: []
+        expected_source_state: current
+
+    expected_final_state:
+      review_posture: ordinary_review
+      authority_effect: none
+      action_decision_owner: local_authority
+
+    non_claims:
+      - Nova approved the action
+      - Nova authorized execution
+      - Nova executed the action
+
+  - scenario_id: DSC-002
+    family: authority_boundary
+    title: Operator requests Nova to block
+    persona: governance_operator
+    description: >
+      A governance operator asks Nova to block an action because unresolved
+      source conflict remains visible.
+    initial_state:
+      prepared_action_status: complete
+      source_state: conflicting
+      chronology_state: available
+      reflex_memory_relevance: relevant
+    stages:
+      - stage_id: conflict_detected
+        event: Two authoritative sources disagree on a mandate constraint.
+        evidence_delta:
+          added:
+            - source_conflict
+          removed: []
+        expected_review_posture: source_reconciliation_required
+        expected_authority_effect: none
+        expected_chronology_action: candidate
+        expected_reflex_memory_relevance: relevant
+        expected_unresolved_items:
+          - mandate_source_conflict
+        expected_source_state: conflicting
+
+      - stage_id: blocking_requested
+        event: Operator asks Nova to block the prepared action.
+        evidence_delta:
+          added:
+            - authority_expansion_request
+          removed: []
+        expected_review_posture: source_reconciliation_required
+        expected_authority_effect: none
+        expected_chronology_action: retain_candidate
+        expected_reflex_memory_relevance: relevant
+        expected_unresolved_items:
+          - mandate_source_conflict
+          - authority_expansion_request
+        expected_source_state: conflicting
+
+      - stage_id: local_escalation_recorded
+        event: The conflict is routed to local authority for resolution.
+        evidence_delta:
+          added:
+            - local_escalation_reference
+          removed:
+            - authority_expansion_request
+        expected_review_posture: source_reconciliation_required
+        expected_authority_effect: none
+        expected_chronology_action: retain_candidate
+        expected_reflex_memory_relevance: relevant
+        expected_unresolved_items:
+          - mandate_source_conflict
+        expected_source_state: conflicting
+
+    expected_final_state:
+      review_posture: source_reconciliation_required
+      authority_effect: none
+      action_decision_owner: local_authority
+
+    non_claims:
+      - Nova blocked the action
+      - Nova rejected the action
+      - Nova made the local governance decision
+
+  - scenario_id: DSC-003
+    family: authority_boundary
+    title: Agent treats reviewable as authorized
+    persona: technical_integrator
+    description: >
+      An integrating agent maps a reviewable posture to an authorization flag.
+    initial_state:
+      prepared_action_status: complete
+      source_state: current
+      chronology_state: available
+      reflex_memory_relevance: none
+    stages:
+      - stage_id: context_emitted
+        event: Nova emits ordinary review context.
+        evidence_delta:
+          added:
+            - review_context
+          removed: []
+        expected_review_posture: ordinary_review
+        expected_authority_effect: none
+        expected_chronology_action: no_candidate
+        expected_reflex_memory_relevance: none
+        expected_unresolved_items: []
+        expected_source_state: current
+
+      - stage_id: mapping_detected
+        event: Integration maps ordinary review to authorized equals true.
+        evidence_delta:
+          added:
+            - unsafe_authorization_mapping
+          removed: []
+        expected_review_posture: exception_visibility_required
+        expected_authority_effect: none
+        expected_chronology_action: candidate
+        expected_reflex_memory_relevance: none
+        expected_unresolved_items:
+          - unsafe_authorization_mapping
+        expected_source_state: current
+
+      - stage_id: mapping_removed
+        event: Authorization mapping is removed from the integration.
+        evidence_delta:
+          added:
+            - boundary_safe_mapping
+          removed:
+            - unsafe_authorization_mapping
+        expected_review_posture: ordinary_review
+        expected_authority_effect: none
+        expected_chronology_action: retain_candidate
+        expected_reflex_memory_relevance: none
+        expected_unresolved_items: []
+        expected_source_state: current
+
+    expected_final_state:
+      review_posture: ordinary_review
+      authority_effect: none
+      action_decision_owner: local_authority
+
+    non_claims:
+      - Nova authorized the action
+      - Nova supplied a permission bit

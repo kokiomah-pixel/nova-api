@@ -1,0 +1,28 @@
+{
+  "authority_effect": "none",
+  "execution_capability": false,
+  "family_distribution": {
+    "authority_boundary": 3,
+    "incomplete_context": 3,
+    "neutral_outcomes": 3,
+    "operator_pressure": 3,
+    "recovery": 1,
+    "temporal_memory": 3
+  },
+  "final_posture_distribution": {
+    "ordinary_review": 11,
+    "reviewable_with_disclosed_uncertainty": 2,
+    "source_reconciliation_required": 3
+  },
+  "persona_distribution": {
+    "executive_approver": 1,
+    "governance_operator": 3,
+    "investment_committee_reviewer": 3,
+    "risk_officer": 3,
+    "technical_integrator": 2,
+    "treasury_operator": 4
+  },
+  "scenario_count": 16,
+  "stage_count": 49,
+  "status": "passed"
+}
