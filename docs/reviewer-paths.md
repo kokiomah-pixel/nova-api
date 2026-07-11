@@ -228,6 +228,18 @@ The integrity exercise tests whether decision triage, reconciliation, falsificat
 
 These artifacts do not initialize Phase 2 or create external, commercial, production, compliance, audit, or authority claims.
 
+### Fresh-Context Continuity Test
+
+- `docs/operations/tests/fresh-context-handoff-test-001-prompt.md`
+- `docs/operations/tests/fresh-context-handoff-test-001-execution.md`
+- `docs/operations/tests/fresh-context-handoff-test-001-scoring.md`
+- `docs/operations/tests/results/fresh-context-handoff-test-001-raw.md`
+- `docs/operations/tests/results/fresh-context-handoff-test-001-evaluation.md`
+
+This test evaluates whether a fresh model context can reconstruct Nova's accepted operating state from canonical repository artifacts without prior conversational memory.
+
+It does not create external, commercial, production, compliance, audit, authority, or execution validation.
+
 ---
 
 ## Public Repo Visibility Path

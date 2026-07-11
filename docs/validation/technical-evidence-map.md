@@ -78,6 +78,7 @@ technical_evidence_state:
 | Nova defines model-independent continuity and canonical-state precedence | `docs/operations/model-independence-and-context-continuity-standard.md` | Operating resilience standard |
 | Nova maintains a canonical current operating-state record outside temporary model context | `docs/operations/current-system-state.md` | Internal continuity artifact |
 | Nova exercises its internal decision-triage, reconciliation, falsification, language-behavior, and model-handoff standards | `docs/operations/internal-integrity-exercise-001.md`, `docs/operations/records/` | Internal operating exercise |
+| Nova defines and records a strict fresh-context continuity test | `docs/operations/tests/fresh-context-handoff-test-001-prompt.md`, `docs/operations/tests/fresh-context-handoff-test-001-execution.md`, `docs/operations/tests/fresh-context-handoff-test-001-scoring.md`, `docs/operations/tests/results/` | Internal continuity test |
 | Nova defines non-authority as a commercial boundary, not missing execution capability | `docs/strategy/non-authority-commercial-boundary.md` | Strategy / commercial hardening note |
 | Nova defines the open-source commercial boundary without claiming business validation | `docs/strategy/open-source-commercial-boundary.md` | Strategy / commercial hardening note |
 | Nova defines the Phase 1 inspection boundary without claiming production, adoption, buyer validation, market validation, audit readiness, compliance determination, execution control, or authority | `docs/inspection/phase-1-inspection-status.md` | Inspection boundary artifact |
@@ -106,6 +107,8 @@ technical_evidence_state:
 Internal decision triage, chronology reconciliation, falsification review, language-behavior classification, and model-continuity controls improve operating discipline. They do not create external validation, market validation, buyer validation, production readiness, autonomous governance, execution authority, compliance determination, or audit readiness.
 
 The internal integrity exercise tests whether Nova's operating standards work as intended. It does not create external validation, buyer validation, market validation, operational dependency, production readiness, compliance determination, audit readiness, execution authority, or autonomous governance.
+
+The fresh-context handoff test evaluates whether accepted Nova state is reconstructable from canonical artifacts without prior model-session memory. It does not validate Nova externally, certify model equivalence, prove production failover, establish buyer or market validation, or grant the model authority.
 
 ---
 
