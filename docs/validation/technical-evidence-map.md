@@ -71,6 +71,11 @@ technical_evidence_state:
 | Nova distinguishes attribution inputs from governed review context | `docs/architecture/attribution-vs-governance-context.md` | Boundary / category hardening note |
 | Nova defines review completeness without creating authority | `docs/governance/review-completeness-standard.md` | Governance hardening standard |
 | Nova defines source-state taxonomy for review context | `docs/governance/source-state-taxonomy.md` | Governance hardening taxonomy |
+| Nova defines Architect decision triage without delegating directional authority | `docs/operations/architect-decision-triage-standard.md`, `docs/operations/current-authority-and-escalation-map.md` | Internal operating standard |
+| Nova defines chronology capture and state reconciliation across fragmented operating surfaces | `docs/operations/chronology-capture-and-reconciliation-standard.md`, `docs/operations/templates/state-reconciliation-record.md`, `docs/operations/templates/decision-state-handoff.md` | Internal continuity standard |
+| Nova defines internal falsification without claiming external validation | `docs/operations/internal-falsification-standard.md`, `docs/operations/templates/adversarial-review-record.md` | Internal adversarial-review standard |
+| Nova separates language precision from demonstrated operating behavior | `docs/operations/language-behavior-integrity-standard.md` | Claim-discipline standard |
+| Nova defines model-independent continuity and canonical-state precedence | `docs/operations/model-independence-and-context-continuity-standard.md` | Operating resilience standard |
 | Nova defines non-authority as a commercial boundary, not missing execution capability | `docs/strategy/non-authority-commercial-boundary.md` | Strategy / commercial hardening note |
 | Nova defines the open-source commercial boundary without claiming business validation | `docs/strategy/open-source-commercial-boundary.md` | Strategy / commercial hardening note |
 | Nova defines the Phase 1 inspection boundary without claiming production, adoption, buyer validation, market validation, audit readiness, compliance determination, execution control, or authority | `docs/inspection/phase-1-inspection-status.md` | Inspection boundary artifact |
@@ -93,6 +98,10 @@ technical_evidence_state:
 | Nova has external production integrations | Not claimed | Not validated |
 | Nova has buyer validation | Not claimed | Not validated |
 | Nova has market validation | Not claimed | Not validated |
+
+---
+
+Internal decision triage, chronology reconciliation, falsification review, language-behavior classification, and model-continuity controls improve operating discipline. They do not create external validation, market validation, buyer validation, production readiness, autonomous governance, execution authority, compliance determination, or audit readiness.
 
 ---
 

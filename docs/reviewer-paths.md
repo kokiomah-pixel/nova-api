@@ -199,6 +199,26 @@ It should not be interpreted as:
 
 ---
 
+## Internal Operating Integrity Path
+
+Use this path to inspect how Sharpe Nova OS preserves coherence without depending on one chat window, one model session, or continuous Architect attention:
+
+1. `docs/operations/current-authority-and-escalation-map.md`
+2. `docs/operations/architect-decision-triage-standard.md`
+3. `docs/operations/chronology-capture-and-reconciliation-standard.md`
+4. `docs/operations/internal-falsification-standard.md`
+5. `docs/operations/language-behavior-integrity-standard.md`
+6. `docs/operations/model-independence-and-context-continuity-standard.md`
+7. `docs/operations/templates/decision-state-handoff.md`
+8. `docs/operations/templates/state-reconciliation-record.md`
+9. `docs/operations/templates/adversarial-review-record.md`
+
+These artifacts define internal operating discipline.
+
+They do not claim production deployment, external validation, autonomous governance, execution authority, compliance determination, or audit readiness.
+
+---
+
 ## Public Repo Visibility Path
 
 Use this path to understand what belongs in the public repo and what does not.
