@@ -217,6 +217,17 @@ These artifacts define internal operating discipline.
 
 They do not claim production deployment, external validation, autonomous governance, execution authority, compliance determination, or audit readiness.
 
+### Current State and First Integrity Exercise
+
+- `docs/operations/current-system-state.md`
+- `docs/operations/internal-integrity-exercise-001.md`
+
+The current-state record identifies the accepted operating posture.
+
+The integrity exercise tests whether decision triage, reconciliation, falsification, language-behavior discipline, and model-independent handoff work in practice.
+
+These artifacts do not initialize Phase 2 or create external, commercial, production, compliance, audit, or authority claims.
+
 ---
 
 ## Public Repo Visibility Path

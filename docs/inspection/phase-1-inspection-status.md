@@ -22,6 +22,12 @@ Phase 1 exists to prove that Nova has a coherent, inspectable, non-authority, pr
 
 Phase 1 does not prove production adoption, buyer demand, paid usage, institutional validation, compliance readiness, audit readiness, execution control, or live agent-framework integration.
 
+## Current Operating State
+
+For the current accepted operating posture after Phase 1 inspection closure, see:
+
+- `docs/operations/current-system-state.md`
+
 ## Canonical Boundary
 
 Agent prepares action.

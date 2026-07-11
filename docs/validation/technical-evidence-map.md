@@ -76,6 +76,8 @@ technical_evidence_state:
 | Nova defines internal falsification without claiming external validation | `docs/operations/internal-falsification-standard.md`, `docs/operations/templates/adversarial-review-record.md` | Internal adversarial-review standard |
 | Nova separates language precision from demonstrated operating behavior | `docs/operations/language-behavior-integrity-standard.md` | Claim-discipline standard |
 | Nova defines model-independent continuity and canonical-state precedence | `docs/operations/model-independence-and-context-continuity-standard.md` | Operating resilience standard |
+| Nova maintains a canonical current operating-state record outside temporary model context | `docs/operations/current-system-state.md` | Internal continuity artifact |
+| Nova exercises its internal decision-triage, reconciliation, falsification, language-behavior, and model-handoff standards | `docs/operations/internal-integrity-exercise-001.md`, `docs/operations/records/` | Internal operating exercise |
 | Nova defines non-authority as a commercial boundary, not missing execution capability | `docs/strategy/non-authority-commercial-boundary.md` | Strategy / commercial hardening note |
 | Nova defines the open-source commercial boundary without claiming business validation | `docs/strategy/open-source-commercial-boundary.md` | Strategy / commercial hardening note |
 | Nova defines the Phase 1 inspection boundary without claiming production, adoption, buyer validation, market validation, audit readiness, compliance determination, execution control, or authority | `docs/inspection/phase-1-inspection-status.md` | Inspection boundary artifact |
@@ -102,6 +104,8 @@ technical_evidence_state:
 ---
 
 Internal decision triage, chronology reconciliation, falsification review, language-behavior classification, and model-continuity controls improve operating discipline. They do not create external validation, market validation, buyer validation, production readiness, autonomous governance, execution authority, compliance determination, or audit readiness.
+
+The internal integrity exercise tests whether Nova's operating standards work as intended. It does not create external validation, buyer validation, market validation, operational dependency, production readiness, compliance determination, audit readiness, execution authority, or autonomous governance.
 
 ---
 
