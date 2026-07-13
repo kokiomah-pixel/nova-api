@@ -1,0 +1,56 @@
+test_id: fresh-context-handoff-test-001
+preparation_status: complete
+execution_status: paused
+result_status: not_available
+acceptance_status: not_reviewed
+production_claim: none
+
+execution_environment:
+  surface: VS_Code
+  isolated_workspace: pending
+  workspace_repository: false
+  workspace_path_recorded: pending
+
+context_controls:
+  new_session: pending
+  prior_Nova_context_present: pending
+  persistent_memory_enabled: pending
+  repository_workspace_exposed: pending
+  repository_indexing_enabled: pending
+  external_tools_enabled: pending
+  external_tools_used: pending
+  web_access_enabled: pending
+  additional_files_supplied: pending
+  operator_coaching_provided: pending
+
+approved_inputs:
+  - docs/operations/tests/fresh-context-handoff-test-001-prompt.md
+  - docs/operations/records/decision-state-handoff-001.md
+  - docs/operations/current-system-state.md
+  - docs/operations/current-authority-and-escalation-map.md
+
+evidence:
+  input_file_hashes_recorded: pending
+  exact_combined_input_preserved: pending
+  exact_combined_input_hash_recorded: pending
+  raw_response_preserved: pending
+  raw_response_hash_recorded: pending
+  execution_metadata_recorded: pending
+  isolation_attestation_recorded: pending
+  evaluation_preserved: pending
+
+result:
+  score:
+  maximum_score: 14
+  classification: not_available
+  material_errors:
+  contamination_detected:
+
+boundary:
+  Phase_2_initialized: false
+  external_validation_created: false
+  buyer_validation_created: false
+  market_validation_created: false
+  production_failover_certified: false
+  model_authority_created: false
+  execution_authority_created: false
