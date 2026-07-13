@@ -14,6 +14,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Resolve chronology evidence provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            reviewed_source_commit="${{ github.event.pull_request.head.sha }}"
+          else
+            reviewed_source_commit="${{ github.sha }}"
+          fi
+          ci_checkout_commit="$(git rev-parse HEAD)"
+          echo "NOVA_REVIEWED_SOURCE_COMMIT=${reviewed_source_commit}" >> "${GITHUB_ENV}"
+          echo "NOVA_CI_CHECKOUT_COMMIT=${ci_checkout_commit}" >> "${GITHUB_ENV}"
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -21,26 +34,58 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip
+          .venv/bin/python -m pip install -r requirements.txt
 
       - name: Run doctrine lint
-        run: python scripts/doctrine_lint.py
+        run: .venv/bin/python scripts/doctrine_lint.py
 
       - name: Run decision scenario suite
-        run: python scripts/run_decision_scenario_suite.py
+        run: .venv/bin/python scripts/run_decision_scenario_suite.py
 
       - name: Run tests
-        run: python -m pytest
+        run: .venv/bin/python -m pytest
 
       - name: Validate chronology reconciliation
-        run: make chronology-verify PYTHON=python
+        run: make chronology-verify
+
+      - name: Validate chronology artifact provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          .venv/bin/python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          report_path = Path("reports/chronology/chronology-cleanliness.json")
+          if not report_path.is_file():
+              raise SystemExit(f"Missing chronology report: {report_path}")
+
+          report = json.loads(report_path.read_text(encoding="utf-8"))
+          expected = os.environ["NOVA_REVIEWED_SOURCE_COMMIT"]
+          actual = report.get("source_commit")
+          checkout = report.get("ci_checkout_commit")
+          if actual != expected:
+              raise SystemExit(
+                  "Chronology artifact source commit mismatch: "
+                  f"expected={expected} actual={actual}"
+              )
+          if not isinstance(checkout, str) or len(checkout) != 40:
+              raise SystemExit(
+                  "Chronology artifact checkout commit is missing or invalid"
+              )
+          print(
+              "Chronology artifact provenance passed: "
+              f"source_commit={actual} ci_checkout_commit={checkout}"
+          )
+          PY
 
       - name: Check whitespace
         run: git diff --check
 
       - name: Upload chronology cleanliness report
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: chronology-cleanliness-report

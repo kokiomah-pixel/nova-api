@@ -3,6 +3,8 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
+import subprocess
 import tempfile
 from datetime import datetime
 from pathlib import Path
@@ -16,10 +18,59 @@ LANE_PATHS = {
     "operations": ROOT / "chronology/operations/operational-events.jsonl",
     "governance": ROOT / "chronology/governance/governance-events.jsonl",
 }
+FULL_SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 
 
 class ChronologyError(ValueError):
     """Raised when chronology evidence is malformed or unsafe."""
+
+
+class ChronologyProvenanceError(RuntimeError):
+    """Raised when chronology evidence provenance is invalid."""
+
+
+def git_commit(root: Path, revision: str = "HEAD") -> str:
+    completed = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", revision],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if completed.returncode != 0:
+        raise ChronologyProvenanceError(
+            completed.stderr.strip() or f"Unable to resolve Git revision: {revision}"
+        )
+    commit = completed.stdout.strip().lower()
+    if not FULL_SHA_PATTERN.fullmatch(commit):
+        raise ChronologyProvenanceError(
+            f"Invalid Git commit resolved for {revision}: {commit!r}"
+        )
+    return commit
+
+
+def validate_full_commit(value: str, *, field_name: str) -> str:
+    commit = value.strip().lower()
+    if not FULL_SHA_PATTERN.fullmatch(commit):
+        raise ChronologyProvenanceError(
+            f"{field_name} must be a 40-character lowercase Git SHA"
+        )
+    return commit
+
+
+def resolve_reviewed_source_commit(root: Path) -> str:
+    explicit = os.environ.get("NOVA_REVIEWED_SOURCE_COMMIT", "").strip()
+    if explicit:
+        return validate_full_commit(
+            explicit, field_name="NOVA_REVIEWED_SOURCE_COMMIT"
+        )
+    return git_commit(root, "HEAD")
+
+
+def resolve_ci_checkout_commit(root: Path) -> str:
+    explicit = os.environ.get("NOVA_CI_CHECKOUT_COMMIT", "").strip()
+    if explicit:
+        return validate_full_commit(explicit, field_name="NOVA_CI_CHECKOUT_COMMIT")
+    return git_commit(root, "HEAD")
 
 
 def read_jsonl(path: Path) -> list[dict[str, Any]]:

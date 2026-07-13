@@ -212,11 +212,21 @@ Sharpe Nova OS conditions the environment before execution; it does not authoriz
 
 ## Verification
 
-Install local development test dependencies:
+Create the canonical repository environment and install local development test dependencies:
 
 ```bash
-python3 -m pip install -r requirements-dev.txt
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements-dev.txt
 ```
+
+Run the canonical repository verification commands:
+
+```bash
+make chronology-verify
+make verify
+```
+
+Both commands use the repository `.venv` by default. Host Python is not the canonical chronology validation environment.
 
 Run doctrine lint:
 
