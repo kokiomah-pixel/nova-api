@@ -40,3 +40,17 @@ def test_console_marks_commit_mismatch_stale(tmp_path) -> None:
     report = build_report(); report["source_commit"] = "0" * 40
     path = tmp_path / "report.json"; path.write_text(json.dumps(report))
     assert set(load_chronology_status(path)["current_cleanliness_diagnosis"].values()) == {"stale_commit_mismatch"}
+
+
+def test_console_uses_reviewed_source_commit_during_pr_ci(tmp_path, monkeypatch) -> None:
+    reviewed = "1da25a1be3b0408e36bf1411189cf72fa91a1804"
+    checkout = "0269e8456e182dd14739ff59c74f86bdc176956a"
+    monkeypatch.setenv("NOVA_REVIEWED_SOURCE_COMMIT", reviewed)
+    monkeypatch.setenv("NOVA_CI_CHECKOUT_COMMIT", checkout)
+    report = build_report()
+    path = tmp_path / "report.json"
+    path.write_text(json.dumps(report))
+    result = load_chronology_status(path)["current_cleanliness_diagnosis"]
+    assert result["operational_chronology"] == "clean_reconciled"
+    assert report["source_commit"] == reviewed
+    assert report["ci_checkout_commit"] == checkout

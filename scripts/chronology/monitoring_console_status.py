@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import json
-import subprocess
 from pathlib import Path
 
-from chronology_common import ROOT
+from chronology_common import (
+    ROOT,
+    ChronologyProvenanceError,
+    resolve_reviewed_source_commit,
+)
 
 UNKNOWN = {lane: "unknown_report_unavailable" for lane in ("reflex_chronology", "archive_chronology", "operational_chronology", "governance_chronology")}
 
@@ -13,8 +16,8 @@ def load_chronology_status(report_path: Path | None = None) -> dict:
     path = report_path or ROOT / "reports/chronology/chronology-cleanliness.json"
     try:
         report = json.loads(path.read_text(encoding="utf-8"))
-        head = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "HEAD"], check=True, capture_output=True, text=True).stdout.strip()
-        if report.get("source_commit") != head:
+        reviewed_source_commit = resolve_reviewed_source_commit(ROOT)
+        if report.get("source_commit") != reviewed_source_commit:
             return {"current_cleanliness_diagnosis": {lane: "stale_commit_mismatch" for lane in UNKNOWN}}
         if report.get("validation_status") != "passed" or report.get("unsupported_claims") != 0:
             raise ValueError("Report did not pass chronology validation")
@@ -37,6 +40,6 @@ def load_chronology_status(report_path: Path | None = None) -> dict:
             diagnosis[lane] = expected
     except FileNotFoundError:
         diagnosis = UNKNOWN.copy()
-    except (OSError, ValueError, KeyError, json.JSONDecodeError, subprocess.SubprocessError):
+    except (OSError, ValueError, KeyError, json.JSONDecodeError, ChronologyProvenanceError):
         diagnosis = {lane: "invalid_report" for lane in UNKNOWN}
     return {"current_cleanliness_diagnosis": diagnosis}
