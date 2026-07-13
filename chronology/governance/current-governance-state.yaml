@@ -1,0 +1,13 @@
+schema_version: 1.0.0
+gates:
+  Gate_4B:
+    implementation: merged
+    execution: blocked_no_nonproduction_endpoint
+    accepted: false
+    governing_event_ids:
+      - GOV-20260713-GATE4B-IMPLEMENTATION-ACCEPTED
+      - GOV-20260713-GATE4B-EXECUTION-BLOCKED
+  Gate_5:
+    authorized: false
+    governing_event_ids:
+      - GOV-20260713-GATE5-NOT-AUTHORIZED

@@ -33,5 +33,16 @@ jobs:
       - name: Run tests
         run: python -m pytest
 
+      - name: Validate chronology reconciliation
+        run: make chronology-verify PYTHON=python
+
       - name: Check whitespace
         run: git diff --check
+
+      - name: Upload chronology cleanliness report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chronology-cleanliness-report
+          path: reports/chronology/
+          if-no-files-found: warn

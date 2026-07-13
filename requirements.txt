@@ -11,3 +11,4 @@ stripe>=10.0.0
 x402==2.9.0
 cdp-sdk==1.45.0
 PyYAML>=6.0,<7.0
+jsonschema>=4.23,<5.0

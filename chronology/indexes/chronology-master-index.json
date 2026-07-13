@@ -1,0 +1,30 @@
+{
+  "generated_at": "2026-07-13T14:11:32Z",
+  "lanes": {
+    "archive": {
+      "event_count": 1,
+      "latest_event_id": "ARC-20260713-ARCHIVE-INVENTORY-UNKNOWNS",
+      "latest_occurred_at": "2026-07-13T14:11:32Z",
+      "path": "chronology/archive/archive-events.jsonl"
+    },
+    "governance": {
+      "event_count": 8,
+      "latest_event_id": "GOV-20260713-GATE5-NOT-AUTHORIZED",
+      "latest_occurred_at": "2026-07-13T14:11:32Z",
+      "path": "chronology/governance/governance-events.jsonl"
+    },
+    "operations": {
+      "event_count": 7,
+      "latest_event_id": "OPS-20260713-MAIN-CI-PASSED",
+      "latest_occurred_at": "2026-07-13T02:59:17Z",
+      "path": "chronology/operations/operational-events.jsonl"
+    },
+    "reflex": {
+      "event_count": 0,
+      "latest_event_id": null,
+      "latest_occurred_at": null,
+      "path": "chronology/reflex/reflex-events.jsonl"
+    }
+  },
+  "schema_version": "1.0.0"
+}

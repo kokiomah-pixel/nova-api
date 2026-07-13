@@ -233,3 +233,9 @@ services.json
 # Local research-transfer artifacts
 research_snapshots/
 *.zip
+# Generated chronology reports
+reports/chronology/*
+!reports/chronology/.gitkeep
+
+# Chronology reconciliation working files
+work/chronology/
