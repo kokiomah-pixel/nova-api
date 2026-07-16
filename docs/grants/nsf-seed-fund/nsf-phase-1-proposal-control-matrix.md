@@ -667,7 +667,16 @@ The following current NSF draft language should be removed or recast before subm
 | `docs/grants/nsf-seed-fund/reviewer-risk-and-response.md:26` | “The customer pathway begins...” and “customer” language may imply established commercial validation. | Use “commercial discovery will test candidate user groups...” | `external_evidence_required` |
 | `docs/grants/nsf-seed-fund/societal-impact.md:12` | “Improved auditability” can compress Nova into an audit product and reads as a realized benefit. | Prefer “potentially improved inspectability and reconstruction of pre-action context.” | `hypothesis` |
 
-No unsupported customer, partner, design-partner, institutional-adoption, or product-market-fit claim was verified in the repository. Negative disclaimers in existing drafts do not validate the corresponding positive claims.
+No verified evidence was found supporting confirmed customers, partners,
+design partners, institutional adoption, or product-market fit.
+
+Several existing draft passages present candidate buyers, institutional need,
+reviewer benefit, or broader impact more strongly than current evidence
+supports. Those passages remain controlled by the claim-removal and recast
+register above.
+
+Negative disclaimers in existing drafts do not validate the corresponding
+positive claims.
 
 ## Unresolved Architect decisions
 
@@ -692,7 +701,7 @@ No unsupported customer, partner, design-partner, institutional-adoption, or pro
 NSF_control_matrix_implementation:
   artifact_path: docs/grants/nsf-seed-fund/nsf-phase-1-proposal-control-matrix.md
   branch: grant/nsf-phase-1-control-matrix
-  commit_sha: populated_after_commit
+  commit_sha: 37554fcbfee12085e302483db6bd31484f0c1804
   core_research_thesis_present: true
   research_question_count: 3
   baseline_defined: true
