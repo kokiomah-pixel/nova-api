@@ -273,6 +273,19 @@ architect_data_operations_snapshot:
     end:
   environment:
   data_mode:
+  runtime_observation:
+    status:
+    evidence_state:
+    connected_sources: []
+    discovered_sources: []
+    records_ingested:
+    limitations: []
+  runtime_evidence:
+    candidate_source_surfaces_discovered: []
+    source_surfaces_verified: []
+    runtime_records_ingested: {}
+    live_operating_health_established:
+  live_operating_health_established:
   evidence_sources: []
   service_health:
   intake_health:
@@ -285,6 +298,12 @@ architect_data_operations_snapshot:
   Architect_action:
     required:
     reasons: []
+  source_dependencies:
+    missing_or_unconnected: []
+  policy_dependencies:
+    unresolved: []
+  candidate_source_surfaces_missing: []
+  required_operating_sources_unconnected: []
   limitations: []
   snapshot_identity:
     canonical_hash:
@@ -300,6 +319,29 @@ Allowed `data_mode` values:
 - `unknown`
 
 A mixed snapshot must report counts by source class.
+
+Allowed runtime observation status values:
+
+```yaml
+runtime_observation_status:
+  - no_sources_connected
+  - sources_discovered_no_records_ingested
+  - partial_records_ingested
+  - bounded_observation_complete
+  - unavailable
+  - unknown
+```
+
+When no records are ingested and no critical configuration defect exists:
+
+```yaml
+Architect_action:
+  required: false
+  reasons: []
+```
+
+This means no Architect action is required for the observation window. It does
+not mean system health has been established.
 
 ## Snapshot Identity
 
@@ -326,6 +368,16 @@ hash.
 
 ## Evidence Sources
 
+Evidence-source discovery establishes that a potential source surface exists. It
+does not establish that records were ingested, that the source is authoritative
+for operating health, or that any health state has been observed.
+
+Repository contracts, tests, and fixtures may validate implementation behavior.
+They are not live operating evidence.
+
+A bounded runtime report with zero ingested records is an evidence-gap report,
+not a health report.
+
 Candidate bounded sources:
 
 ```yaml
@@ -348,54 +400,119 @@ Each evidence source must document:
 evidence_source:
   name:
   path_or_interface:
+  source_kind:
   data_mode:
   contains_sensitive_data:
   retention_policy:
-  available_in_current_environment:
+  availability:
+    available:
+    basis:
+    verified_at:
+    records_ingested:
+    record_count:
   authoritative_for:
   not_authoritative_for:
 ```
 
 Do not invent runtime data sources. When a source does not exist, report the gap.
+Do not mark a `repository_contract` source as runtime-observed.
+
+Allowed source kinds:
+
+```yaml
+source_kind:
+  - runtime_record_source
+  - runtime_interface
+  - configured_source
+  - repository_contract
+  - fixture_source
+```
+
+Allowed availability basis values:
+
+```yaml
+availability_basis:
+  - verified_path
+  - runtime_discovery
+  - configured
+  - repository_contract
+  - unavailable
+  - unknown
+```
+
+Availability basis definitions:
+
+```yaml
+availability_basis_definitions:
+  verified_path:
+    meaning: path existence was directly checked in the current environment
+
+  runtime_discovery:
+    meaning: source was discovered through a bounded runtime interface
+
+  configured:
+    meaning: source was declared through configuration but not independently verified
+
+  repository_contract:
+    meaning: source represents code, tests, fixtures, or documentation rather than runtime observations
+
+  unavailable:
+    meaning: expected source could not be accessed
+
+  unknown:
+    meaning: availability could not be determined
+```
 
 Current bounded implementation source map:
 
 ```yaml
 verified_evidence_source_map:
-  proof_records:
+  proof_registry:
     path_or_interface: .proof_registry.json
-    current_status: optional_runtime_file
+    source_kind: runtime_record_source
+    current_status: candidate_runtime_surface_only
+    records_ingested: false
     authoritative_for:
-      - proof_records_created_when_present
+      - candidate_proof_record_surface
     not_authoritative_for:
       - live_provenance
       - external_execution
+      - operating_health
 
   reflex_governance_records:
     path_or_interface: .reflex_governance_records.jsonl
-    current_status: optional_runtime_file
+    source_kind: runtime_record_source
+    current_status: candidate_runtime_surface_only
+    records_ingested: false
     authoritative_for:
-      - classification_context_observations_when_present
+      - candidate_classification_context_surface
     not_authoritative_for:
       - Reflex_Memory_acceptance
       - production_health
+      - operating_health
 
   application_code_contract:
     path_or_interface: app.py and core modules
+    source_kind: repository_contract
     current_status: repository_available
+    records_ingested: false
     authoritative_for:
       - designed_endpoints
       - repository_validated_behavior
     not_authoritative_for:
       - observed_runtime_activity
+      - operating_health
 
-  test_or_fixture_results:
+  test_and_fixture_contract:
     path_or_interface: tests/ and fixtures/
+    source_kind: fixture_source
     current_status: repository_available
+    records_ingested: false
     authoritative_for:
       - contract_validation
     not_authoritative_for:
       - live_operating_evidence
+      - operating_health
 ```
 
 ## Anomaly Model
@@ -555,6 +672,10 @@ The Markdown brief must use:
 
 ## What the Architect Should Know Now
 
+## Runtime Observation Status
+
+## Connected and Discovered Sources
+
 ## Service Health
 
 ## Data and Provenance Health
@@ -573,6 +694,10 @@ The Markdown brief must use:
 
 ## Architect Action
 
+## Source Dependencies
+
+## Policy Dependencies
+
 ## Evidence Limitations
 ```
 
@@ -586,6 +711,16 @@ Do not use "all systems normal" when evidence is incomplete. Use:
 
 ```text
 No decision-relevant anomaly was observed in the available evidence.
+```
+
+When no records are ingested, the brief must state:
+
+```text
+Runtime evidence surfaces were discovered, but no bounded operating records were ingested for this observation.
+
+Service, intake, context, proof, chronology, and authority-boundary health therefore remain unknown.
+
+No decision-relevant anomaly was observed in the available evidence. This statement does not establish that the operating environment is healthy.
 ```
 
 ## API, Data, Proof, Chronology, and Governance Health

@@ -21,6 +21,29 @@ EVIDENCE_STATES = {
 DATA_MODES = {"synthetic", "offline_fixture", "production_like", "live", "mixed", "unknown"}
 SOURCE_CLASSES = {"synthetic", "production_like", "live", "inferred", "unavailable", "unknown"}
 STATUS_VALUES = {"healthy", "degraded", "unavailable", "unknown"}
+AVAILABILITY_BASIS = {
+    "verified_path",
+    "runtime_discovery",
+    "configured",
+    "repository_contract",
+    "unavailable",
+    "unknown",
+}
+SOURCE_KINDS = {
+    "runtime_record_source",
+    "runtime_interface",
+    "configured_source",
+    "repository_contract",
+    "fixture_source",
+}
+RUNTIME_OBSERVATION_STATUSES = {
+    "no_sources_connected",
+    "sources_discovered_no_records_ingested",
+    "partial_records_ingested",
+    "bounded_observation_complete",
+    "unavailable",
+    "unknown",
+}
 AUTHORITY_EFFECTS = {"none"}
 ANOMALY_TYPES = {
     "source_provenance_missing",
@@ -69,6 +92,24 @@ SENSITIVE_KEYS = {
     "raw_prompt",
     "policy_weights",
 }
+SOURCE_DEPENDENCIES = [
+    "production_API_request_metadata",
+    "chronology_validation_results",
+    "bounded_proof_record_ingestion",
+    "bounded_reflex_governance_record_ingestion",
+    "verified_live_provenance_source",
+]
+POLICY_DEPENDENCIES = [
+    "operating_observation_window",
+    "reporting_cadence",
+    "source_freshness_thresholds",
+    "anomaly_repeat_thresholds",
+    "severity_mapping",
+    "runtime_evidence_retention",
+    "permitted_record_identifiers",
+    "live_provenance_standard",
+    "who_receives_material_alerts",
+]
 
 
 def evidence_value(value: Any, evidence_state: str, reason: Optional[str] = None) -> Dict[str, Any]:
@@ -123,6 +164,8 @@ def build_bounded_runtime_evidence() -> Dict[str, Any]:
         "limitations": [
             "Bounded runtime mode reports only evidence sources discoverable in the current environment.",
             "No live operating records are simulated by this generator.",
+            "Source existence does not establish service, proof, chronology, or governance health.",
+            "Live operating health remains unknown.",
         ],
     }
 
@@ -181,54 +224,117 @@ def normalize_records(records: Iterable[Mapping[str, Any]]) -> List[Dict[str, An
     return [normalize_record(record, index) for index, record in enumerate(records)]
 
 
-def discover_runtime_evidence_sources(repo_root: Path) -> Tuple[List[Dict[str, Any]], List[str]]:
+def _availability(
+    *,
+    available: bool,
+    basis: str,
+    verified_at: Optional[str],
+    records_ingested: bool = False,
+    record_count: int = 0,
+    reason: Optional[str] = None,
+) -> Dict[str, Any]:
+    if basis not in AVAILABILITY_BASIS:
+        raise ValueError(f"Unsupported availability basis: {basis}")
+    result = {
+        "available": available,
+        "basis": basis,
+        "verified_at": verified_at,
+        "records_ingested": records_ingested,
+        "record_count": record_count,
+    }
+    if reason:
+        result["reason"] = reason
+    return result
+
+
+def _normalize_evidence_source(source: Mapping[str, Any]) -> Dict[str, Any]:
+    normalized = dict(source)
+    source_kind = str(normalized.get("source_kind") or "configured_source")
+    if source_kind not in SOURCE_KINDS:
+        source_kind = "configured_source"
+    normalized["source_kind"] = source_kind
+    if "availability" not in normalized:
+        available = bool(normalized.pop("available_in_current_environment", False))
+        normalized["availability"] = _availability(
+            available=available,
+            basis="configured" if available else "unknown",
+            verified_at=None,
+        )
+    normalized.setdefault("contains_sensitive_data", False)
+    normalized.setdefault("retention_policy", "not declared")
+    normalized.setdefault("authoritative_for", [])
+    normalized.setdefault("not_authoritative_for", ["operating_health"])
+    return normalized
+
+
+def discover_runtime_evidence_sources(
+    repo_root: Path,
+    *,
+    verified_at: Optional[str] = None,
+) -> Tuple[List[Dict[str, Any]], List[str]]:
     candidates = [
         {
-            "name": "proof_records",
+            "name": "proof_registry",
             "path_or_interface": ".proof_registry.json",
+            "source_kind": "runtime_record_source",
             "data_mode": "unknown",
             "contains_sensitive_data": False,
             "retention_policy": "runtime_configured_file; not governed by this layer",
-            "authoritative_for": ["proof_records_created", "proof_verification_inputs_if_present"],
-            "not_authoritative_for": ["live_provenance", "chronology_acceptance", "external_execution"],
+            "authoritative_for": ["candidate_proof_record_surface"],
+            "not_authoritative_for": ["live_provenance", "chronology_acceptance", "external_execution", "operating_health"],
         },
         {
             "name": "reflex_governance_records",
             "path_or_interface": ".reflex_governance_records.jsonl",
+            "source_kind": "runtime_record_source",
             "data_mode": "unknown",
             "contains_sensitive_data": False,
             "retention_policy": "runtime_configured_file; not governed by this layer",
-            "authoritative_for": ["classification_context_observations_if_present"],
-            "not_authoritative_for": ["Reflex Memory acceptance", "production health"],
+            "authoritative_for": ["candidate_classification_context_surface"],
+            "not_authoritative_for": ["Reflex Memory acceptance", "production_health", "operating_health"],
         },
         {
             "name": "application_code_contract",
             "path_or_interface": "app.py and core modules",
+            "source_kind": "repository_contract",
             "data_mode": "repository_validated",
             "contains_sensitive_data": False,
             "retention_policy": "git repository",
             "authoritative_for": ["designed_endpoints", "repository_validated_behavior"],
-            "not_authoritative_for": ["observed_runtime_activity"],
+            "not_authoritative_for": ["observed_runtime_activity", "operating_health"],
         },
         {
-            "name": "test_or_fixture_results",
+            "name": "test_and_fixture_contract",
             "path_or_interface": "tests/ and fixtures/",
+            "source_kind": "fixture_source",
             "data_mode": "offline_fixture",
             "contains_sensitive_data": False,
             "retention_policy": "git repository",
             "authoritative_for": ["contract_validation"],
-            "not_authoritative_for": ["live operating evidence"],
+            "not_authoritative_for": ["live_operating_evidence", "operating_health"],
         },
     ]
     available: List[Dict[str, Any]] = []
     missing: List[str] = []
     for source in candidates:
         source = dict(source)
-        interface = str(source["path_or_interface"]).split(" and ")[0]
-        available_now = (repo_root / interface).exists() if "." in interface or "/" in interface else False
-        if source["name"] in {"application_code_contract", "test_or_fixture_results"}:
-            available_now = True
-        source["available_in_current_environment"] = available_now
+        if source["name"] == "application_code_contract":
+            available_now = (repo_root / "app.py").exists() and (repo_root / "core").exists()
+            basis = "repository_contract" if available_now else "unavailable"
+        elif source["name"] == "test_and_fixture_contract":
+            available_now = (repo_root / "tests").exists() and (repo_root / "fixtures").exists()
+            basis = "repository_contract" if available_now else "unavailable"
+        else:
+            available_now = (repo_root / str(source["path_or_interface"])).exists()
+            basis = "verified_path" if available_now else "unavailable"
+        source["availability"] = _availability(
+            available=available_now,
+            basis=basis,
+            verified_at=verified_at if basis == "verified_path" else None,
+            records_ingested=False,
+            record_count=0,
+            reason="ingestion_policy_not_yet_approved",
+        )
         available.append(source)
         if not available_now:
             missing.append(source["name"])
@@ -243,6 +349,12 @@ def _status_from_counts(total: int, failures: int) -> str:
     if failures < total:
         return "degraded"
     return "unavailable"
+
+
+def health_status(total: int, failures: int, observed: bool) -> Dict[str, Any]:
+    if not observed:
+        return evidence_value("unknown", "unknown", "no_runtime_records_ingested")
+    return evidence_value(_status_from_counts(total, failures), "inferred")
 
 
 def compute_service_health(records: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -271,7 +383,7 @@ def compute_service_health(records: List[Dict[str, Any]]) -> Dict[str, Any]:
             "median_ms": evidence_value(median, "observed_runtime" if latencies else "unknown", None if latencies else "no_observations"),
             "p95_ms": evidence_value(p95, "observed_runtime" if latencies else "unknown", None if latencies else "no_observations"),
         },
-        "status": evidence_value(_status_from_counts(len(requests), failures), "inferred" if requests else "unknown"),
+        "status": health_status(len(requests), failures, bool(requests)),
     }
 
 
@@ -303,7 +415,7 @@ def compute_intake_health(records: List[Dict[str, Any]]) -> Dict[str, Any]:
             "unknown": evidence_value(freshness["unknown"], "observed_runtime" if records else "unknown"),
         },
         "invalid_input_count": evidence_value(invalid, "observed_runtime" if records else "unknown"),
-        "status": evidence_value(_status_from_counts(len(records), unhealthy), "inferred" if records else "unknown"),
+        "status": health_status(len(records), unhealthy, bool(records)),
     }
 
 
@@ -322,7 +434,7 @@ def compute_context_health(records: List[Dict[str, Any]]) -> Dict[str, Any]:
         "constraint_contexts_created": evidence_value(sum(1 for record in records if record.get("constraint_context_created")), "observed_runtime" if records else "unknown"),
         "governance_epoch_ids_observed": evidence_value(sorted({record.get("governance_epoch_id") for record in records if record.get("governance_epoch_id")}), "observed_runtime" if records else "unknown"),
         "governance_epoch_mismatches": evidence_value(epoch_mismatches, "observed_runtime" if records else "unknown"),
-        "status": evidence_value(_status_from_counts(len(records), classification_failures + unexplained_changes + epoch_mismatches), "inferred" if records else "unknown"),
+        "status": health_status(len(records), classification_failures + unexplained_changes + epoch_mismatches, bool(records)),
     }
 
 
@@ -344,7 +456,7 @@ def compute_proof_health(records: List[Dict[str, Any]]) -> Dict[str, Any]:
         "replay_rate": rate_value(sum(1 for record in replay_attempts if record.get("replay_passed")), len(replay_attempts)),
         "canonical_signature_mismatches": evidence_value(signature_mismatches, "observed_runtime" if records else "unknown"),
         "unexplained_output_variance": evidence_value(variance, "observed_runtime" if records else "unknown"),
-        "status": evidence_value(_status_from_counts(len(proof_records) + len(replay_attempts), proof_failures + replay_failures + signature_mismatches + variance), "inferred" if records else "unknown"),
+        "status": health_status(len(proof_records) + len(replay_attempts), proof_failures + replay_failures + signature_mismatches + variance, bool(records)),
     }
 
 
@@ -364,7 +476,7 @@ def compute_chronology_health(records: List[Dict[str, Any]]) -> Dict[str, Any]:
         "governance_epoch_links_verified": evidence_value(sum(1 for record in records if record.get("governance_epoch_link_verified")), "observed_runtime" if records else "unknown"),
         "continuity_interruptions": evidence_value(interruptions, "observed_runtime" if records else "unknown"),
         "unresolved_archive_dependencies": evidence_value(archive_deps, "observed_runtime" if records else "unknown"),
-        "status": evidence_value(_status_from_counts(len(records), link_failures + interruptions + archive_deps), "inferred" if records else "unknown"),
+        "status": health_status(len(records), link_failures + interruptions + archive_deps, bool(records)),
     }
 
 
@@ -382,7 +494,80 @@ def compute_boundary_health(records: List[Dict[str, Any]]) -> Dict[str, Any]:
         "execution_attempts_by_Nova": evidence_value(attempts, "observed_runtime" if records else "unknown"),
         "authorization_or_approval_language_detected": evidence_value(approval_language, "observed_runtime" if records else "unknown"),
         "local_authority_ownership_preserved": evidence_value(local_preserved, "observed_runtime" if records else "unknown"),
-        "status": evidence_value(_status_from_counts(len(records), failures), "inferred" if records else "unknown"),
+        "status": health_status(len(records), failures, bool(records)),
+    }
+
+
+def runtime_observation_from_sources(sources: List[Dict[str, Any]]) -> Dict[str, Any]:
+    discovered = [
+        source["name"]
+        for source in sources
+        if source.get("availability", {}).get("available")
+    ]
+    connected = [
+        source["name"]
+        for source in sources
+        if source.get("availability", {}).get("records_ingested")
+    ]
+    records_ingested = sum(int(source.get("availability", {}).get("record_count", 0)) for source in sources)
+    if records_ingested > 0 and connected:
+        status = "bounded_observation_complete" if len(connected) == len(discovered) else "partial_records_ingested"
+    elif discovered:
+        status = "sources_discovered_no_records_ingested"
+    else:
+        status = "no_sources_connected"
+    limitations = []
+    if records_ingested == 0:
+        limitations = [
+            "No bounded runtime records were ingested.",
+            "Source existence does not establish service, proof, chronology, or governance health.",
+            "Live operating health remains unknown.",
+        ]
+    return {
+        "status": status,
+        "evidence_state": "observed_runtime",
+        "connected_sources": connected,
+        "discovered_sources": discovered,
+        "records_ingested": records_ingested,
+        "limitations": limitations,
+    }
+
+
+def runtime_evidence_report(sources: List[Dict[str, Any]]) -> Dict[str, Any]:
+    source_lookup = {source["name"]: source for source in sources}
+    display_paths = {
+        "proof_registry": ".proof_registry.json",
+        "reflex_governance_records": ".reflex_governance_records.jsonl",
+        "application_code_contract": "app.py_and_core_modules",
+        "test_and_fixture_contract": "tests_and_fixtures",
+    }
+    return {
+        "candidate_source_surfaces_discovered": [
+            ".proof_registry.json",
+            ".reflex_governance_records.jsonl",
+            "app.py",
+            "core_modules",
+            "tests",
+            "fixtures",
+        ],
+        "source_surfaces_verified": [
+            {
+                "name": source["name"],
+                "path": display_paths.get(source["name"], source["path_or_interface"]),
+                "available": source["availability"]["available"],
+                "availability_basis": source["availability"]["basis"],
+                "records_ingested": source["availability"]["records_ingested"],
+                "record_count": source["availability"]["record_count"],
+            }
+            for source in sources
+        ],
+        "runtime_records_ingested": {
+            "proof_registry": bool(source_lookup.get("proof_registry", {}).get("availability", {}).get("records_ingested")),
+            "reflex_governance_records": bool(source_lookup.get("reflex_governance_records", {}).get("availability", {}).get("records_ingested")),
+            "API_request_metadata": False,
+            "chronology_validation_results": False,
+        },
+        "live_operating_health_established": False,
     }
 
 
@@ -528,8 +713,13 @@ def generate_canonical_snapshot(
     records = normalize_records(evidence.get("records", []))
     now = generated_at or utc_now()
     observation_window = evidence.get("observation_window") or {"start": None, "end": None}
-    runtime_sources, missing_sources = discover_runtime_evidence_sources(repo_root or Path.cwd())
-    evidence_sources = list(evidence.get("evidence_sources") or []) + runtime_sources
+    runtime_sources, missing_sources = discover_runtime_evidence_sources(repo_root or Path.cwd(), verified_at=now)
+    evidence_sources = [
+        _normalize_evidence_source(source)
+        for source in list(evidence.get("evidence_sources") or []) + runtime_sources
+    ]
+    runtime_observation = runtime_observation_from_sources(evidence_sources)
+    runtime_evidence = runtime_evidence_report(evidence_sources)
     anomalies = apply_notification_rules(detect_anomalies(records), repeat_threshold=repeat_threshold)
     quiet_tracking = quiet_tracking_from_anomalies(anomalies)
     action_reasons = [
@@ -539,8 +729,11 @@ def generate_canonical_snapshot(
     ]
     data_mode = infer_data_mode(records, str(evidence.get("data_mode") or "unknown"))
     limitations = list(evidence.get("limitations") or [])
+    for limitation in runtime_observation["limitations"]:
+        if limitation not in limitations:
+            limitations.append(limitation)
     if missing_sources:
-        limitations.append("Some expected runtime evidence sources were unavailable in the current environment.")
+        limitations.append("Some candidate source surfaces were unavailable in the current environment.")
         for source_name in missing_sources:
             anomalies.append(
                 {
@@ -563,6 +756,9 @@ def generate_canonical_snapshot(
             "observation_window": observation_window,
             "environment": evidence.get("environment", "unknown"),
             "data_mode": data_mode,
+            "runtime_observation": runtime_observation,
+            "runtime_evidence": runtime_evidence,
+            "live_operating_health_established": False,
             "evidence_sources": evidence_sources,
             "service_health": compute_service_health(records),
             "intake_health": compute_intake_health(records),
@@ -576,6 +772,18 @@ def generate_canonical_snapshot(
                 "required": bool(action_reasons),
                 "reasons": action_reasons,
             },
+            "source_dependencies": {
+                "missing_or_unconnected": SOURCE_DEPENDENCIES,
+            },
+            "policy_dependencies": {
+                "unresolved": POLICY_DEPENDENCIES,
+            },
+            "candidate_source_surfaces_missing": missing_sources,
+            "required_operating_sources_unconnected": [
+                "production_API_request_metadata",
+                "chronology_validation_results",
+                "live_provenance_source",
+            ],
             "limitations": limitations,
             "snapshot_identity": {},
         }
@@ -599,6 +807,8 @@ def _value(item: Mapping[str, Any]) -> Any:
 def render_architect_brief(snapshot: Mapping[str, Any]) -> str:
     root = snapshot["architect_data_operations_snapshot"]
     action = root["Architect_action"]
+    runtime_observation = root["runtime_observation"]
+    input_record_count = int(root["snapshot_identity"].get("input_record_count", 0))
     lines = [
         "# Architect Data Operations Brief",
         "",
@@ -612,13 +822,44 @@ def render_architect_brief(snapshot: Mapping[str, Any]) -> str:
         "## What the Architect Should Know Now",
         "",
     ]
+    if input_record_count == 0:
+        lines.append("The operating visibility contract is active.")
+        if runtime_observation["discovered_sources"]:
+            lines.append("Potential evidence surfaces were discovered.")
+        lines.append("Runtime evidence surfaces were discovered, but no bounded operating records were ingested for this observation.")
+        lines.append("Service, intake, context, proof, chronology, and authority-boundary health therefore remain unknown.")
+        lines.append(
+            "No decision-relevant anomaly was observed in the available evidence. This statement does not establish that the operating environment is healthy."
+        )
     if action["required"]:
         lines.append("Architect action is required for this observation window.")
         for reason in action["reasons"]:
             lines.append(f"- {reason}")
     else:
         lines.append("No Architect action is required for this observation window.")
-        lines.append("No decision-relevant anomaly was observed in the available evidence.")
+        if input_record_count > 0:
+            lines.append("No decision-relevant anomaly was observed in the available evidence.")
+    lines.extend(["", "## Runtime Observation Status", ""])
+    status_label = runtime_observation["status"].replace("_", " ")
+    if runtime_observation["status"] == "sources_discovered_no_records_ingested":
+        lines.append("Observation status: Sources discovered; no records ingested.")
+    else:
+        lines.append(f"Observation status: {status_label}.")
+    lines.append(f"- Evidence state: {runtime_observation['evidence_state']}")
+    lines.append(f"- Records ingested: {runtime_observation['records_ingested']}")
+    lines.extend(["", "## Connected and Discovered Sources", ""])
+    if runtime_observation["connected_sources"]:
+        lines.append("Connected sources:")
+        for source in runtime_observation["connected_sources"]:
+            lines.append(f"- {source}")
+    else:
+        lines.append("Connected sources: []")
+    if runtime_observation["discovered_sources"]:
+        lines.append("Discovered sources:")
+        for source in runtime_observation["discovered_sources"]:
+            lines.append(f"- {source}")
+    else:
+        lines.append("Discovered sources: []")
     sections = [
         ("Service Health", "service_health", "status"),
         ("Data and Provenance Health", "intake_health", "status"),
@@ -649,6 +890,12 @@ def render_architect_brief(snapshot: Mapping[str, Any]) -> str:
             lines.append(f"    - {reason}")
     else:
         lines.append("    []")
+    lines.extend(["", "## Source Dependencies", ""])
+    for dependency in root["source_dependencies"]["missing_or_unconnected"]:
+        lines.append(f"- {dependency}")
+    lines.extend(["", "## Policy Dependencies", ""])
+    for dependency in root["policy_dependencies"]["unresolved"]:
+        lines.append(f"- {dependency}")
     lines.extend(["", "## Evidence Limitations", ""])
     if root["limitations"]:
         for limitation in root["limitations"]:

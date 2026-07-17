@@ -2,9 +2,11 @@ import json
 from pathlib import Path
 
 from jsonschema import validate
+from jsonschema.exceptions import ValidationError
 
 from core.architect_data_operations import (
     build_bounded_runtime_evidence,
+    discover_runtime_evidence_sources,
     generate_canonical_snapshot,
     load_bounded_evidence,
     render_architect_brief,
@@ -40,6 +42,16 @@ def _anomaly(snapshot, anomaly_type):
     return next(anomaly for anomaly in _root(snapshot)["anomalies"] if anomaly["anomaly_type"] == anomaly_type)
 
 
+def _runtime_surface_repo(tmp_path):
+    (tmp_path / ".proof_registry.json").write_text("{}", encoding="utf-8")
+    (tmp_path / ".reflex_governance_records.jsonl").write_text("", encoding="utf-8")
+    (tmp_path / "app.py").write_text("# contract surface\n", encoding="utf-8")
+    (tmp_path / "core").mkdir()
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "fixtures").mkdir()
+    return tmp_path
+
+
 def test_snapshot_schema_accepts_generated_fixture_snapshot(tmp_path):
     schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
     snapshot = _snapshot(_load_fixture("healthy_offline_observation_window"), tmp_path)
@@ -60,6 +72,7 @@ def test_unknown_used_when_evidence_missing(tmp_path):
 
     assert _root(snapshot)["service_health"]["status"]["value"] == "unknown"
     assert _root(snapshot)["service_health"]["status"]["evidence_state"] == "unknown"
+    assert _root(snapshot)["service_health"]["status"]["reason"] == "no_runtime_records_ingested"
 
 
 def test_no_rate_when_denominator_zero(tmp_path):
@@ -231,3 +244,104 @@ def test_bounded_runtime_mode_does_not_simulate_live_records(tmp_path):
     assert _root(snapshot)["data_mode"] == "unknown"
     assert _root(snapshot)["snapshot_identity"]["input_record_count"] == 0
     assert _root(snapshot)["service_health"]["requests_observed"]["value"] == 0
+
+
+def test_runtime_source_existence_does_not_imply_operating_health(tmp_path):
+    repo_root = _runtime_surface_repo(tmp_path)
+    snapshot = _snapshot(build_bounded_runtime_evidence(), repo_root)
+    root = _root(snapshot)
+
+    assert root["runtime_observation"]["status"] == "sources_discovered_no_records_ingested"
+    assert root["runtime_observation"]["records_ingested"] == 0
+    assert root["runtime_evidence"]["live_operating_health_established"] is False
+    for layer in (
+        "service_health",
+        "intake_health",
+        "context_health",
+        "proof_health",
+        "chronology_health",
+        "boundary_health",
+    ):
+        assert root[layer]["status"]["value"] == "unknown"
+        assert root[layer]["status"]["reason"] == "no_runtime_records_ingested"
+
+
+def test_repository_contract_not_counted_as_runtime_record(tmp_path):
+    repo_root = _runtime_surface_repo(tmp_path)
+    sources, _missing = discover_runtime_evidence_sources(repo_root, verified_at=GENERATED_AT)
+    application_contract = next(source for source in sources if source["name"] == "application_code_contract")
+
+    assert application_contract["source_kind"] == "repository_contract"
+    assert application_contract["availability"]["basis"] == "repository_contract"
+    assert application_contract["availability"]["records_ingested"] is False
+    assert application_contract["availability"]["record_count"] == 0
+
+
+def test_source_and_policy_dependencies_are_separated(tmp_path):
+    snapshot = _snapshot(build_bounded_runtime_evidence(), _runtime_surface_repo(tmp_path))
+    source_dependencies = set(_root(snapshot)["source_dependencies"]["missing_or_unconnected"])
+    policy_dependencies = set(_root(snapshot)["policy_dependencies"]["unresolved"])
+
+    assert source_dependencies
+    assert policy_dependencies
+    assert source_dependencies.isdisjoint(policy_dependencies)
+
+
+def test_empty_runtime_evidence_produces_unknown_health(tmp_path):
+    snapshot = _snapshot(build_bounded_runtime_evidence(), _runtime_surface_repo(tmp_path))
+    root = _root(snapshot)
+    layers = [
+        root["service_health"],
+        root["intake_health"],
+        root["context_health"],
+        root["proof_health"],
+        root["chronology_health"],
+        root["boundary_health"],
+    ]
+
+    assert all(layer["status"]["value"] == "unknown" for layer in layers)
+    assert sum(1 for layer in layers if layer["status"]["value"] == "healthy") == 0
+
+
+def test_no_record_brief_states_live_health_not_established(tmp_path):
+    snapshot = _snapshot(build_bounded_runtime_evidence(), _runtime_surface_repo(tmp_path))
+    brief = render_architect_brief(snapshot)
+
+    assert "no bounded operating records were ingested" in brief
+    assert "health therefore remain unknown" in brief
+    assert "does not establish that the operating environment is healthy" in brief
+
+
+def test_missing_runtime_observation_does_not_create_false_critical_alert(tmp_path):
+    snapshot = _snapshot(build_bounded_runtime_evidence(), _runtime_surface_repo(tmp_path))
+    root = _root(snapshot)
+
+    assert root["Architect_action"]["required"] is False
+    assert root["runtime_observation"]["limitations"]
+    assert not any(anomaly["severity"] == "critical" for anomaly in root["anomalies"])
+
+
+def test_schema_rejects_unsupported_availability_basis(tmp_path):
+    schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+    snapshot = _snapshot(build_bounded_runtime_evidence(), _runtime_surface_repo(tmp_path))
+    _root(snapshot)["evidence_sources"][0]["availability"]["basis"] = "filesystem_vibes"
+
+    try:
+        validate(instance=snapshot, schema=schema)
+    except ValidationError:
+        pass
+    else:
+        raise AssertionError("schema accepted unsupported availability basis")
+
+
+def test_schema_rejects_negative_record_count(tmp_path):
+    schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+    snapshot = _snapshot(build_bounded_runtime_evidence(), _runtime_surface_repo(tmp_path))
+    _root(snapshot)["evidence_sources"][0]["availability"]["record_count"] = -1
+
+    try:
+        validate(instance=snapshot, schema=schema)
+    except ValidationError:
+        pass
+    else:
+        raise AssertionError("schema accepted negative record count")
