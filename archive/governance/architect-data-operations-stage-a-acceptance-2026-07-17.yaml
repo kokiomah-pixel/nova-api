@@ -37,8 +37,8 @@ integrity:
   chronology_event_hash: c2e042506a4099ec8c8e31c905f4eac5afb2c451ec2f5e952b07374f46a316e2
   archive_package_hash: e1434eb184611f2c37c62265590423e94cc6844fb74572d3100c3c53365085e0
 completion:
-  status: pending_external_write
+  status: completed_and_verified
   destination: GitHub repository history
-  written_at:
-  receipt_or_reference:
-  verification: external_write_not_yet_confirmed
+  written_at: "2026-07-17T21:31:25Z"
+  receipt_or_reference: 506ab4d2d7999e46a5cf95f544933ab32c4a545f
+  verification: merge_commit_resolved_in_main
