@@ -1,0 +1,44 @@
+Architect_input:
+  status: awaiting_verified_facts
+
+  applicant_company:
+    legal_name:
+    state_of_formation:
+    formation_date:
+    principal_place_of_business:
+    website:
+    US_owned_and_operated:
+    ownership_notes:
+
+  principal_investigator:
+    full_name:
+    role:
+    employment_status:
+    planned_Phase_I_employment_commitment:
+    technical_qualifications:
+    prior_relevant_work:
+
+  team:
+    members: []
+    technical_roles: []
+    commercialization_roles: []
+    external_contractors_or_advisors: []
+
+  company_history:
+    founded_date:
+    prior_funding:
+    prior_grants:
+    current_revenue_status:
+    current_customer_status:
+
+  submission:
+    active_target:
+    Project_Pitch_previously_submitted:
+    invitation_received:
+    invitation_reference:
+    Research_gov_status:
+    portal_status:
+
+  verification:
+    Architect_confirmed: false
+    confirmed_at:

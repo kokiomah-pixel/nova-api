@@ -6,15 +6,17 @@
 
 Sharpe Nova OS is a pre-execution decision-context architecture for agentic and programmable financial workflows. The proposed innovation is not an execution, trading, authorization, compliance or monitoring product. It is a bounded review-state construction layer that asks whether heterogeneous workflow evidence can be converted into a minimal, temporally coherent, provenance-aware and reconstructable package before local authority decides what to do.
 
-Agentic financial workflows can assemble intended actions from fragmented source material, tool outputs, constraints and prior state. Existing logs often show what happened after a workflow moved, but do not reliably preserve what the review context looked like before authority was exercised. Nova's preliminary repository work demonstrates a bounded Architect Data Operations visibility contract, runtime evidence policy version 1.0, read-only Stage A proof-registry ingestion, no-evidence behavior, eligible synthetic-record ingestion, source immutability, identifier redaction, accepted-state synchronization, a governance chronology event and a completed governance archive receipt. These artifacts establish a controlled starting point, not a finished product or live operating system.
+Agentic financial workflows can assemble intended actions from fragmented source material, tool outputs, constraints and prior state. The innovation is a method for constructing a minimum sufficient, reconstructable review state from heterogeneous and asynchronously changing financial-workflow evidence before accountable local authority acts. Execution traces reconstruct what software did. Nova's proposed review-state mechanism reconstructs what context was available, admissible and unresolved before authority acted.
 
-The Phase I project will test whether a non-authority review-state layer can preserve materially necessary context while excluding raw execution payloads, sensitive identifiers and irrelevant exhaust. The technical risk is that evidence may be too asynchronous, contradictory, sparse or noisy to normalize into a useful and reproducible review state. Success would support a new class of financial workflow infrastructure: reconstructable pre-execution review context that keeps decision authority with the local institution.
+Existing logs, guardrails and policy outputs may show which software action occurred, which rule ran, or which constraint was evaluated. They do not necessarily preserve the bounded pre-action context needed to reconstruct why a proposed action appeared reviewable, what evidence was missing, or whether contradictory material remained unresolved. The central technical uncertainty is whether that context can be normalized without creating false confidence, leaking sensitive payloads, or turning a review aid into a decision authority.
+
+Preliminary work has established a controlled evidence-handling, chronology, and non-authority validation environment in which the research hypotheses can be tested. Phase I will determine whether the method can produce reproducible review-state packages under controlled heterogeneous workflow conditions while preserving the local institution's authority boundary.
 
 ### Section Validation
 
 ```yaml
 section_validation:
-  character_count: 1776
+  character_count: 1887
   within_limit: true
   unsupported_claims: []
   prohibited_terms: []
@@ -35,11 +37,13 @@ Planned scenarios include complete valid context, stale telemetry, contradictory
 
 The main technical challenges are avoiding false confidence, preserving contradictions without silently resolving them, excluding sensitive payloads, keeping outputs deterministic across source order variation and proving that context can help review without becoming a decision authority.
 
+Phase I will establish whether the mechanism can meet evidence-completeness, reconstruction and authority-boundary criteria under controlled heterogeneous workflow conditions. Failure to meet those criteria would indicate that the architecture is not technically suitable for broader integration research.
+
 ### Section Validation
 
 ```yaml
 section_validation:
-  character_count: 1786
+  character_count: 2093
   within_limit: true
   unsupported_claims: []
   prohibited_terms: []
@@ -52,17 +56,17 @@ section_validation:
 
 ### Submission Text
 
-The target problem is emerging reviewability pressure around autonomous or semi-autonomous financial workflows. Potential users include digital-asset operations teams, stablecoin workflow operators, treasury and custody workflow owners, agent-platform teams and financial risk infrastructure groups that need to understand context before local systems act.
+The target problem is emerging reviewability pressure around autonomous or semi-autonomous financial workflows. Initial users are likely to be digital-asset treasury, programmable-payment, custody-workflow, and financial-infrastructure teams introducing agent-prepared capital actions into institution-controlled processes.
 
-The commercial hypothesis is that these teams may need reconstructable pre-execution review packages as agentic workflows become faster, more modular and harder to inspect from post-hoc logs alone. This is market context, not evidence of adoption. Nova has not established buyer pull, product-market fit, pricing power, institutional dependency or live deployment.
+Their operational pain is that agent-prepared actions may draw on scattered source material, changing constraints, policy checks and stateful workflow context before a human or institution-controlled system decides what to do. Current alternatives include agent execution traces, transaction logs, policy engine results, guardrail receipts and audit or data-lineage tools. These systems may show what an agent did, what rule ran, or what transaction occurred, but they do not necessarily preserve a minimum reconstructable review state before local authority acted.
 
-Phase I will help identify which review-state fields reduce diligence friction, which context omissions are material and whether authority-boundary comprehension improves enough to justify continued commercialization work.
+The initial commercial wedge is a bounded review-state package for high-accountability financial operations that need pre-action context reconstruction without delegating execution or approval. If Phase I supports the research hypothesis, the expansion path would be from controlled treasury and custody workflow review into broader financial-infrastructure diligence settings. This is market context only: buyer pull, adoption and product-market fit are not claimed.
 
 ### Section Validation
 
 ```yaml
 section_validation:
-  character_count: 946
+  character_count: 1359
   within_limit: true
   unsupported_claims: []
   prohibited_terms: []
@@ -73,17 +77,25 @@ section_validation:
 
 ## 4. Company and Team
 
-### Submission Text
+### Submission Text — BLOCKED PENDING ARCHITECT FACTS
 
-Sharpe Nova OS is organized around non-authority pre-execution review-state construction for agentic financial workflows. The repository shows preliminary technical execution through bounded policy, validation, chronology, archive, doctrine and grant-planning artifacts. The company and team facts for the official Project Pitch still require Architect confirmation before portal submission.
+[Do not copy into portal.]
 
-The team focus for Phase I is narrow: preserve provenance, temporal order, constraint context, reconstruction evidence and local authority boundaries without turning Nova into an approval or execution system. Any final submission must add verified applicant-company status, ownership, principal investigator eligibility, employment relationship, team roles and commercialization responsibilities. Until those facts are confirmed, this section is draft-ready for content review but not portal-ready.
+### Required Architect Facts
+
+- legal company identity
+- ownership and operating status
+- PI identity and eligibility
+- PI technical qualifications
+- Phase I employment commitment
+- team roles
+- commercialization responsibility
 
 ### Section Validation
 
 ```yaml
 section_validation:
-  character_count: 891
+  character_count: 290
   within_limit: true
   unsupported_claims: []
   prohibited_terms: []

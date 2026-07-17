@@ -3,6 +3,7 @@ from pathlib import Path
 import yaml
 
 from scripts.validate_nsf_submission_readiness import (
+    ARCHITECT_INPUT,
     CLAIM_MATRIX,
     HYPOTHESIS_MATRIX,
     PROJECT_PITCH,
@@ -32,10 +33,12 @@ def test_Project_Pitch_sections_respect_character_limits():
 def test_full_proposal_requires_confirmed_invitation():
     state = yaml.safe_load(SUBMISSION_STATE.read_text(encoding="utf-8"))["submission_state"]
 
-    assert state["submission_type"]["value"] == "unknown"
-    assert state["Project_Pitch"]["invitation_received"] is False
-    assert state["full_proposal"]["submission_authorized"] is False
-    assert state["blocking_state"]["value"] == "blocks_full_proposal_submission"
+    assert state["active_target"]["value"] == "unknown"
+    assert state["Project_Pitch"]["invitation_required"] is False
+    assert state["full_Phase_I_proposal"]["invitation_required"] is True
+    assert state["full_Phase_I_proposal"]["invitation_confirmed"] is False
+    assert state["full_Phase_I_proposal"]["submission_authorized"] is False
+    assert "official_Project_Pitch_invitation_not_confirmed" in state["full_Phase_I_proposal"]["blocking_findings"]
 
 
 def test_completed_work_separated_from_proposed_research():
@@ -107,7 +110,7 @@ def test_Project_Pitch_submission_can_proceed_without_full_proposal_invitation()
     report = _report()
     sections = _extract_pitch_sections(PROJECT_PITCH.read_text(encoding="utf-8"))
 
-    assert report["overall_status"] == "blocked_by_invitation_status"
+    assert report["overall_status"] == "ready_for_Architect_Project_Pitch_review"
     assert report["structural_validation"] is True
     assert report["character_limit_validation"] is True
     assert set(sections) == {
@@ -116,3 +119,53 @@ def test_Project_Pitch_submission_can_proceed_without_full_proposal_invitation()
         "Market Opportunity",
         "Company and Team",
     }
+
+
+def test_Project_Pitch_not_blocked_by_missing_invitation():
+    report = _report()
+
+    assert report["Project_Pitch_invitation_required"] is False
+    assert "official_Project_Pitch_invitation_not_confirmed" not in report["Project_Pitch_portal_blocking_findings"]
+    assert report["Project_Pitch_structurally_prepared"] is True
+
+
+def test_full_proposal_blocked_by_missing_invitation():
+    report = _report()
+
+    assert report["full_proposal_invitation_confirmed"] is False
+    assert report["full_proposal_submission_ready"] is False
+    assert "official_Project_Pitch_invitation_not_confirmed" in report["full_proposal_blocking_findings"]
+
+
+def test_Project_Pitch_blocked_by_missing_verified_company_facts():
+    report = _report()
+    architect_input = yaml.safe_load(ARCHITECT_INPUT.read_text(encoding="utf-8"))["Architect_input"]
+
+    assert architect_input["verification"]["Architect_confirmed"] is False
+    assert report["Architect_input"]["verified_company_facts_present"] is False
+    assert report["Project_Pitch_portal_ready"] is False
+    assert "verified_company_facts_missing" in report["Project_Pitch_portal_blocking_findings"]
+
+
+def test_active_target_unknown_blocks_portal_submission():
+    report = _report()
+
+    assert report["active_target"] == "unknown"
+    assert report["Project_Pitch_portal_ready"] is False
+    assert "active_target_unknown" in report["Project_Pitch_portal_blocking_findings"]
+
+
+def test_internal_content_review_allowed_when_active_target_unknown():
+    report = _report()
+
+    assert report["active_target"] == "unknown"
+    assert report["internal_content_review_allowed"] is True
+    assert report["overall_status"] == "ready_for_Architect_Project_Pitch_review"
+
+
+def test_placeholder_company_text_not_portal_ready():
+    report = _report()
+    sections = _extract_pitch_sections(PROJECT_PITCH.read_text(encoding="utf-8"))
+
+    assert "[Do not copy into portal.]" in sections["Company and Team"]
+    assert "placeholder_company_text_not_portal_ready" in report["Project_Pitch_portal_blocking_findings"]

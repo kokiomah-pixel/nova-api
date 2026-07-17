@@ -1,28 +1,32 @@
 submission_state:
   observed_at: 2026-07-17
 
-  submission_type:
+  active_target:
     value: unknown
     allowed_values:
       - Project_Pitch
       - invited_full_Phase_I_proposal
       - unknown
+    Architect_confirmation_required: true
 
   Project_Pitch:
-    submitted: false
-    invitation_received: false
-    invitation_date:
-    invitation_reference:
-    portal_status: unverified
+    invitation_required: false
+    structurally_prepared: true
+    portal_submission_authorized: false
+    blocking_findings:
+      - verified_company_and_team_facts_missing
+      - Architect_final_content_approval_missing
+      - portal_text_not_verified
 
-  full_proposal:
-    Research_gov_proposal_created: false
-    target_deadline:
+  full_Phase_I_proposal:
+    invitation_required: true
+    invitation_confirmed: false
+    structurally_prepared: false
     submission_authorized: false
+    blocking_findings:
+      - official_Project_Pitch_invitation_not_confirmed
+      - canonical_Project_Description_not_present
+      - portal_state_unverified
 
-  evidence_source:
-    - Architect_confirmation_required
-
-  blocking_state:
-    value: blocks_full_proposal_submission
-    reason: official_Project_Pitch_invitation_not_confirmed
+  overall_status:
+    value: ready_for_Architect_Project_Pitch_review
