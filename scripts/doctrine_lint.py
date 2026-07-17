@@ -50,6 +50,16 @@ PROHIBITED_PHRASES = (
     "block execution",
 )
 
+NSF_PROHIBITED_ESTABLISHED_FORMULATIONS = (
+    "Nova is production ready",
+    "Nova is deployed across institutional workflows",
+    "Nova has demonstrated buyer demand",
+    "Nova improves financial decisions",
+    "Nova guarantees compliant execution",
+    "Nova authorizes transactions",
+    "Nova blocks unauthorized transactions",
+)
+
 CODE_LIKE_PATTERNS = (
     re.compile(r"\bif\s+decision_status\s*==\s*['\"]?ALLOW['\"]?", re.IGNORECASE),
 )
@@ -80,6 +90,12 @@ BOUNDARY_QUALIFIERS = (
     "deprecated",
     "is not ",
     "should not ",
+    "has not ",
+    "will test ",
+    "research will ",
+    "future research",
+    "not established",
+    "prohibited",
 )
 
 HIDDEN_UNICODE_NAMES = {
@@ -240,6 +256,15 @@ def _is_boundary_line(line: str, term: str) -> bool:
     return any(qualifier in prefix for qualifier in BOUNDARY_QUALIFIERS)
 
 
+def _is_nsf_allowed_context(line: str, term: str) -> bool:
+    lowered = line.lower()
+    index = lowered.find(term.lower())
+    if index < 0:
+        return False
+    window = lowered[max(0, index - 120) : index + len(term) + 120]
+    return any(qualifier in window for qualifier in BOUNDARY_QUALIFIERS)
+
+
 def _should_scan_code_like_examples(path: Path) -> bool:
     suffix = path.suffix.lower()
     return suffix in {".md", ".txt"} or "examples" in path.parts
@@ -342,6 +367,18 @@ def scan_text(path: Path, text: str, root: Path = REPO_ROOT) -> list[Finding]:
                         "error",
                         "prohibited-phrase",
                         f"replace prohibited execution-authority wording: {phrase!r}",
+                    )
+                )
+
+        for phrase in NSF_PROHIBITED_ESTABLISHED_FORMULATIONS:
+            if phrase.lower() in lowered and not _is_nsf_allowed_context(line, phrase):
+                findings.append(
+                    Finding(
+                        rel,
+                        line_number,
+                        "error",
+                        "nsf-prohibited-established-claim",
+                        f"classify as future research or unsupported, not established fact: {phrase!r}",
                     )
                 )
 

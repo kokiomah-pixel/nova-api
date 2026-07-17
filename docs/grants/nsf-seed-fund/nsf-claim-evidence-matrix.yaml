@@ -1,0 +1,58 @@
+claim_classes:
+  completed:
+    definition: directly_supported_by_repository_or_validated_artifact
+  preliminary:
+    definition: supported_by_bounded_internal_test_but_not_live_operation
+  proposed_research:
+    definition: unresolved_technical_hypothesis_for_Phase_I
+  market_context:
+    definition: external_problem_environment_only
+  prohibited:
+    definition: not_supported_and_must_not_appear_as_established_fact
+
+claims:
+  Nova_constructs_bounded_review_context:
+    class: completed
+    evidence:
+      - runtime_evidence_policy_v1
+      - Stage_A_ingestion_validation
+
+  Nova_operates_in_live_financial_workflows:
+    class: prohibited
+    reason: not_established
+
+  Nova_improves_decision_quality:
+    class: proposed_research
+    reason: external_and_comparative_testing_not_completed
+
+  Nova_preserves_authority_boundary:
+    class: preliminary
+    evidence:
+      - authority_effect_none_controls
+      - execution_effect_none_controls
+      - doctrine_tests
+
+  Nova_review_states_are_reconstructable:
+    class: proposed_research
+    reason: independent_reconstruction_testing_required
+
+  agentic_financial_workflows_create_reviewability_pressure:
+    class: market_context
+    evidence_requirement:
+      - authoritative_external_sources
+
+  Nova_has_buyer_pull:
+    class: prohibited
+    reason: direct_buyer_evidence_absent
+
+  Nova_is_production_ready:
+    class: prohibited
+    reason: explicitly_not_claimed
+
+boundary:
+  Stage_B_activated: false
+  live_operation_claimed: false
+  production_readiness_claimed: false
+  buyer_pull_claimed: false
+  local_authority_remains_responsible: true
+  Nova_does_not_execute: true

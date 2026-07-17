@@ -1,0 +1,28 @@
+submission_state:
+  observed_at: 2026-07-17
+
+  submission_type:
+    value: unknown
+    allowed_values:
+      - Project_Pitch
+      - invited_full_Phase_I_proposal
+      - unknown
+
+  Project_Pitch:
+    submitted: false
+    invitation_received: false
+    invitation_date:
+    invitation_reference:
+    portal_status: unverified
+
+  full_proposal:
+    Research_gov_proposal_created: false
+    target_deadline:
+    submission_authorized: false
+
+  evidence_source:
+    - Architect_confirmation_required
+
+  blocking_state:
+    value: blocks_full_proposal_submission
+    reason: official_Project_Pitch_invitation_not_confirmed

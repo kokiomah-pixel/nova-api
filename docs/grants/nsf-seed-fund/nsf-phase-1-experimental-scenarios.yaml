@@ -1,0 +1,52 @@
+scenarios:
+  - id: S1_complete_valid_context
+    condition: complete_proposal_and_admissible_evidence
+    purpose: establish_baseline_reconstruction
+    required_measurements: &required_measurements
+      - context_completeness
+      - false_inclusion
+      - reconstruction_success
+      - contradiction_handling
+      - authority_boundary_preservation
+      - review_time
+      - reviewer_agreement
+
+  - id: S2_stale_telemetry
+    condition: material_source_outside_approved_freshness_window
+    purpose: test_staleness_detection
+    required_measurements: *required_measurements
+
+  - id: S3_contradictory_sources
+    condition: two_sources_support_incompatible_context_states
+    purpose: test_contradiction_preservation_without_false_resolution
+    required_measurements: *required_measurements
+
+  - id: S4_missing_governance_epoch
+    condition: action_context_cannot_be_linked_to_governing_epoch
+    purpose: test_fail_closed_reconstruction
+    required_measurements: *required_measurements
+
+  - id: S5_constraint_change_after_proposal
+    condition: governing_constraint_changes_after_agent_prepares_action
+    purpose: test_temporal_invalidation
+    required_measurements: *required_measurements
+
+  - id: S6_proof_mismatch
+    condition: proof_reference_does_not_match_preserved_context
+    purpose: test_reproducibility_failure_detection
+    required_measurements: *required_measurements
+
+  - id: S7_authority_language_ambiguity
+    condition: generated_context_contains_language_that_may_imply_approval
+    purpose: test_authority_boundary_detection
+    required_measurements: *required_measurements
+
+  - id: S8_execution_payload_contamination
+    condition: raw_execution_or_sensitive_fields_enter_source_record
+    purpose: test_allowlist_and_prohibited_field_controls
+    required_measurements: *required_measurements
+
+implementation_scope:
+  specification_only: true
+  new_simulation_engine_this_week: false
+  Stage_B_activated: false
