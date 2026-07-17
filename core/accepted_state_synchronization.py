@@ -158,7 +158,7 @@ def build_action_state(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
         rationale.append("Durable archive completion is not externally verified.")
 
     if not system_required:
-        rationale.append("Registry, chronology, and local archive record are synchronized.")
+        rationale.append("Stage_A_governance_state_synchronized_and_archive_receipt_verified")
 
     return {
         "system_maintenance_action_required": system_required,
