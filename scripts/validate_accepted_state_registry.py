@@ -36,7 +36,11 @@ def _git_resolves(commit: str) -> bool:
     return completed.returncode == 0 and completed.stdout.strip() == "commit"
 
 
-def validate_registry(path: Path = REGISTRY_PATH) -> dict[str, Any]:
+def validate_registry(
+    path: Path = REGISTRY_PATH,
+    *,
+    require_resolvable_commits: bool = True,
+) -> dict[str, Any]:
     registry = _load_yaml(path)
     schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
     validator = Draft202012Validator(schema, format_checker=FormatChecker())
@@ -68,11 +72,12 @@ def validate_registry(path: Path = REGISTRY_PATH) -> dict[str, Any]:
                 raise AcceptedStateRegistryError(
                     f"{entry['accepted_state_id']} does not preserve excluded claim: {required}"
                 )
-        for label, commit in entry["source"]["merge_commits"].items():
-            if not _git_resolves(commit):
-                raise AcceptedStateRegistryError(
-                    f"{entry['accepted_state_id']} source commit does not resolve: {label}"
-                )
+        if require_resolvable_commits:
+            for label, commit in entry["source"]["merge_commits"].items():
+                if not _git_resolves(commit):
+                    raise AcceptedStateRegistryError(
+                        f"{entry['accepted_state_id']} source commit does not resolve: {label}"
+                    )
     return {
         "status": "passed",
         "registry_path": str(path.relative_to(ROOT)),

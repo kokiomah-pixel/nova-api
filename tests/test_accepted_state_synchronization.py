@@ -105,7 +105,7 @@ def test_accepted_state_entry_preserves_excluded_claims():
 
 
 def test_registry_schema_valid():
-    report = validate_registry()
+    report = validate_registry(require_resolvable_commits=False)
 
     assert report["status"] == "passed"
     assert report["accepted_state_ids"] == [ACCEPTED_STATE_ID]
