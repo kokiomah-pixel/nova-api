@@ -1,0 +1,72 @@
+schema_version: 1.0.0
+registry_id: sharpe_nova_os_accepted_state_registry
+canonical_path: agent_files/state/accepted-state-registry.yaml
+registry_status: active
+entries:
+  - accepted_state_id: architect_data_operations_stage_a_policy_2026_07_17
+    accepted_date: "2026-07-17"
+    classification:
+      state_type: governance_infrastructure
+      status: accepted
+      scope: bounded_stage_a
+      authority_effect: none
+      execution_effect: none
+    source:
+      repository: kokiomah-pixel/sharpe-nova-os
+      pull_requests:
+        - 4
+        - 5
+      merge_commits:
+        architect_data_operations_visibility: fbdb34d3a51192b3a6282a2742cab2cf6cd0e975
+        runtime_evidence_policy: afeb0fa77b873176a2269a1f7583e5f81b5c244a
+    accepted_claims:
+      - Architect Data Operations visibility contract is merged.
+      - Runtime evidence policy version 1.0 is merged.
+      - Runtime ingestion is policy-gated and read-only.
+      - Stage A no-evidence behavior is validated.
+      - Stage A eligible-record ingestion behavior is validated.
+      - Original proof-registry immutability was validated.
+      - Identifier redaction without an external salt was validated.
+      - Unknown fields are dropped under the allowlist-first policy.
+      - Proof-health claims remain bounded to observed evidence.
+      - Stage A live operation is not established.
+      - Stage B remains disabled.
+      - Production-health claims remain prohibited.
+    excluded_claims:
+      - live production visibility
+      - production readiness
+      - deployed operator dependency
+      - external comprehension
+      - buyer adoption
+      - institutional dependency
+      - product_market_fit
+      - pricing_power
+      - automatic_alerting
+      - recurring_runtime_monitoring
+      - Stage_B_activation
+    unresolved_dependencies:
+      - legitimate_live_or_controlled_Stage_A_operating_evidence
+      - external_identifier_salt_for_cross_report_continuity
+      - external_comprehension_validation
+      - deployed_operator_dependency_validation
+      - separate_approval_before_Stage_B
+    supersedes: []
+    contradiction_state: none
+    stage_state:
+      Stage_A:
+        policy_path: validated
+        no_evidence_path: validated
+        eligible_record_ingestion_path: validated
+        source_immutability: validated
+        identifier_redaction: validated
+        live_operation: not_established
+      Stage_B:
+        status: locked
+        activation_requires:
+          - separate_Architect_approval
+          - separate_CCO_approval
+      production_health_claim:
+        allowed: false
+    review_authority:
+      Architect_reviewed: true
+      CCO_reviewed: true

@@ -1,0 +1,44 @@
+schema_version: 1.0.0
+archive_record_id: architect_data_operations_stage_a_acceptance_2026_07_17
+archive_class: canonical_governance_state
+archive_date: "2026-07-17"
+archive_standard:
+  authoritative_destination: GitHub repository history
+  source: docs/continuity/model-provider-independence-protocol.md
+  local_preparation_establishes_completion: false
+included_references:
+  - reference_type: accepted_state_registry_entry
+    value: agent_files/state/accepted-state-registry.yaml#architect_data_operations_stage_a_policy_2026_07_17
+  - reference_type: canonical_chronology_event
+    value: chronology/governance/governance-events.jsonl#GOV-20260717-STAGE-A-GOVERNANCE-INFRA-ACCEPTED
+  - reference_type: PR_4_merge_commit
+    value: fbdb34d3a51192b3a6282a2742cab2cf6cd0e975
+  - reference_type: PR_5_merge_commit
+    value: afeb0fa77b873176a2269a1f7583e5f81b5c244a
+  - reference_type: runtime_evidence_policy_version_1_0
+    value: config/architect_data_operations_policy.yaml
+  - reference_type: architect_data_operations_protocol
+    value: docs/operations/architect-data-operations-protocol.md
+bounded_claims:
+  Stage_A_policy_and_ingestion_path: validated
+  Stage_A_live_operation: not_established
+  Stage_B: locked
+  production_health_claim: prohibited
+  authority_effect: none
+excluded_material:
+  - generated_runtime_snapshots
+  - generated_pilot_briefs
+  - raw_proof_registry_payloads
+  - raw_external_identifiers
+  - local_secret_salt
+  - request_or_response_bodies
+integrity:
+  accepted_state_hash: ed369e92b3c8a53405b5a3417c4599ab510c4477b5a3033ac16fda8850a91a20
+  chronology_event_hash: c2e042506a4099ec8c8e31c905f4eac5afb2c451ec2f5e952b07374f46a316e2
+  archive_package_hash: e1434eb184611f2c37c62265590423e94cc6844fb74572d3100c3c53365085e0
+completion:
+  status: pending_external_write
+  destination: GitHub repository history
+  written_at:
+  receipt_or_reference:
+  verification: external_write_not_yet_confirmed

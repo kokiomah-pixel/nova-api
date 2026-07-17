@@ -19,6 +19,7 @@
         "runtime_observation",
         "runtime_evidence",
         "source_connection",
+        "accepted_state_synchronization",
         "live_operating_health_established",
         "policy_status",
         "retention_metadata",
@@ -99,6 +100,9 @@
           "items": {
             "$ref": "#/$defs/source_connection"
           }
+        },
+        "accepted_state_synchronization": {
+          "$ref": "#/$defs/accepted_state_synchronization"
         },
         "live_operating_health_established": {
           "type": "boolean",
@@ -603,6 +607,240 @@
           "items": {
             "type": "string"
           }
+        }
+      },
+      "additionalProperties": false
+    },
+    "accepted_state_synchronization": {
+      "type": "object",
+      "required": [
+        "operating_state",
+        "evidence_coverage",
+        "contradiction_detected",
+        "action_state",
+        "repository",
+        "accepted_state_registry",
+        "chronology",
+        "durable_archive",
+        "runtime_evidence"
+      ],
+      "properties": {
+        "operating_state": {
+          "enum": [
+            "bounded_infrastructure_accepted",
+            "source_incomplete"
+          ]
+        },
+        "evidence_coverage": {
+          "enum": [
+            "source_incomplete"
+          ]
+        },
+        "contradiction_detected": {
+          "type": "boolean",
+          "const": false
+        },
+        "action_state": {
+          "$ref": "#/$defs/action_state"
+        },
+        "repository": {
+          "type": "object",
+          "required": [
+            "current_repo_movement_reviewed",
+            "current_repo_movement_accepted",
+            "accepted_remote_head",
+            "rationale"
+          ],
+          "properties": {
+            "current_repo_movement_reviewed": {
+              "type": "boolean"
+            },
+            "current_repo_movement_accepted": {
+              "type": "boolean"
+            },
+            "accepted_remote_head": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^[0-9a-f]{40}$"
+            },
+            "rationale": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "accepted_state_registry": {
+          "type": "object",
+          "required": [
+            "path",
+            "updated",
+            "accepted_entry_id",
+            "schema_valid",
+            "duplicate_entry_created"
+          ],
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "updated": {
+              "type": "boolean"
+            },
+            "accepted_entry_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "schema_valid": {
+              "type": "boolean"
+            },
+            "duplicate_entry_created": {
+              "type": "boolean",
+              "const": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "chronology": {
+          "type": "object",
+          "required": [
+            "store",
+            "canonical_event_required",
+            "canonical_event_status",
+            "event_id"
+          ],
+          "properties": {
+            "store": {
+              "type": "string"
+            },
+            "canonical_event_required": {
+              "type": "boolean"
+            },
+            "canonical_event_status": {
+              "enum": [
+                "written",
+                "pending"
+              ]
+            },
+            "event_id": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "durable_archive": {
+          "type": "object",
+          "required": [
+            "record_path",
+            "status",
+            "archive_reference",
+            "verified"
+          ],
+          "properties": {
+            "record_path": {
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "completed_and_verified",
+                "written_receipt_pending",
+                "pending_external_write",
+                "destination_unavailable",
+                "standard_unresolved"
+              ]
+            },
+            "archive_reference": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "verified": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "runtime_evidence": {
+          "type": "object",
+          "required": [
+            "Stage_A_policy_and_ingestion_path",
+            "Stage_A_live_operation",
+            "Stage_B",
+            "production_health_claim"
+          ],
+          "properties": {
+            "Stage_A_policy_and_ingestion_path": {
+              "const": "validated"
+            },
+            "Stage_A_live_operation": {
+              "const": "not_established"
+            },
+            "Stage_B": {
+              "const": "locked"
+            },
+            "production_health_claim": {
+              "const": "prohibited"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "action_state": {
+      "type": "object",
+      "required": [
+        "system_maintenance_action_required",
+        "Architect_decision_required",
+        "external_dependency_action_required",
+        "assigned_to",
+        "action_type",
+        "blocking_state",
+        "rationale"
+      ],
+      "properties": {
+        "system_maintenance_action_required": {
+          "type": "boolean"
+        },
+        "Architect_decision_required": {
+          "type": "boolean"
+        },
+        "external_dependency_action_required": {
+          "type": "boolean"
+        },
+        "assigned_to": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "action_type": {
+          "enum": [
+            "none",
+            "registry_synchronization",
+            "chronology_write",
+            "archive_write",
+            "repo_review",
+            "source_acquisition",
+            "Architect_policy_decision",
+            "contradiction_resolution",
+            "external_validation"
+          ]
+        },
+        "blocking_state": {
+          "enum": [
+            "non_blocking",
+            "blocks_state_acceptance",
+            "blocks_Architect_decision",
+            "blocks_external_claim",
+            "blocks_production_claim"
+          ]
+        },
+        "rationale": {
+          "type": "string"
         }
       },
       "additionalProperties": false

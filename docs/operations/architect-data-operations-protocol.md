@@ -740,6 +740,89 @@ Governance health means the non-authority boundary remains visible and intact.
 A green API status does not establish that governance data is complete, current,
 reproducible, or decision-ready.
 
+## Accepted-State Synchronization
+
+Repository movement must not be promoted into accepted shared state solely
+because it is merged. Promotion requires explicit evidence of Architect or CCO
+review, an accepted claim boundary, and successful accepted-state registry
+validation.
+
+Once explicit review and accepted claim boundaries exist, the Daily Coherence
+Agent must classify the remaining work as state synchronization rather than
+continuing to report the repository movement as unreviewed.
+
+Acceptance of a bounded implementation does not promote excluded claims such as
+live operation, production health, external comprehension, buyer adoption, or
+operator dependency.
+
+The action-state model must distinguish system maintenance from Architect
+decision requirements:
+
+```yaml
+action_state:
+  system_maintenance_action_required:
+  Architect_decision_required:
+  external_dependency_action_required:
+  assigned_to: []
+  action_type:
+  blocking_state:
+  rationale:
+```
+
+Allowed action types are `none`, `registry_synchronization`,
+`chronology_write`, `archive_write`, `repo_review`, `source_acquisition`,
+`Architect_policy_decision`, `contradiction_resolution`, and
+`external_validation`.
+
+Allowed blocking states are `non_blocking`, `blocks_state_acceptance`,
+`blocks_Architect_decision`, `blocks_external_claim`, and
+`blocks_production_claim`.
+
+Actor assignment rules:
+
+```yaml
+registry_delta_reviewed_but_not_written:
+  system_maintenance_action_required: true
+  Architect_decision_required: false
+  assigned_to:
+    - accepted_state_registry_writer
+
+canonical_event_required_but_not_written:
+  system_maintenance_action_required: true
+  Architect_decision_required: false
+  assigned_to:
+    - Chronology_Agent
+
+durable_archive_pending:
+  system_maintenance_action_required: true
+  Architect_decision_required: false
+  external_dependency_action_required: true_or_false_based_on_destination
+  assigned_to:
+    - archive_writer_or_Architect_when_credentials_required
+
+policy_boundary_unresolved:
+  system_maintenance_action_required: false
+  Architect_decision_required: true
+  assigned_to:
+    - Architect
+    - Jarvis_Nova_CCO
+
+source_unavailable_but_no_decision_blocked:
+  Architect_decision_required: false
+  blocking_state: non_blocking
+```
+
+A canonical chronology event is required when reviewed repository movement
+changes the accepted governance infrastructure, evidence policy, authority
+boundary, or stage activation state. The Daily Coherence Agent may recommend or
+stage a chronology event but must not write one unless the chronology writer is
+explicitly authorized.
+
+Durable archive status must distinguish local preparation from verified
+external completion. `pending_external_archive` remains active until the
+authoritative archive destination confirms the write or provides a verifiable
+archive reference.
+
 ## Decisions Required After Initial Implementation
 
 ```yaml
