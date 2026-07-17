@@ -1,0 +1,17 @@
+{
+  "data_mode": "offline_fixture",
+  "environment": "fixture",
+  "records": [
+    {
+      "record_id": "ado-fixture-chronology-failure-001",
+      "observed_at": "2026-07-16T06:05:00Z",
+      "source_class": "synthetic",
+      "data_mode": "offline_fixture",
+      "live_provenance_verified": false,
+      "provenance_complete": true,
+      "freshness_state": "within_policy",
+      "chronology_link_failed": true,
+      "authority_effect": "none"
+    }
+  ]
+}

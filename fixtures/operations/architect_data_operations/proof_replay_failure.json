@@ -1,0 +1,20 @@
+{
+  "data_mode": "offline_fixture",
+  "environment": "fixture",
+  "records": [
+    {
+      "record_id": "ado-fixture-proof-replay-001",
+      "observed_at": "2026-07-16T05:05:00Z",
+      "source_class": "synthetic",
+      "data_mode": "offline_fixture",
+      "live_provenance_verified": false,
+      "provenance_complete": true,
+      "freshness_state": "within_policy",
+      "proof_created": true,
+      "proof_verification_failed": true,
+      "replay_attempted": true,
+      "replay_failed": true,
+      "authority_effect": "none"
+    }
+  ]
+}
