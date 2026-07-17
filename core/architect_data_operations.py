@@ -11,6 +11,8 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple
 import yaml
 from jsonschema import validate as validate_json_schema
 
+from core.accepted_state_synchronization import synchronization_state
+
 
 EVIDENCE_STATES = {
     "observed_runtime",
@@ -1193,6 +1195,7 @@ def generate_canonical_snapshot(
     runtime_observation = runtime_observation_from_sources(evidence_sources)
     runtime_evidence = runtime_evidence_report(evidence_sources)
     source_connection = source_connection_report(evidence_sources)
+    accepted_state_synchronization = synchronization_state(repo_root or Path.cwd())
     anomalies = apply_notification_rules(detect_anomalies(records), repeat_threshold=repeat_threshold)
     quiet_tracking = quiet_tracking_from_anomalies(anomalies)
     action_reasons = [
@@ -1232,6 +1235,7 @@ def generate_canonical_snapshot(
             "runtime_observation": runtime_observation,
             "runtime_evidence": runtime_evidence,
             "source_connection": source_connection,
+            "accepted_state_synchronization": accepted_state_synchronization,
             "live_operating_health_established": False,
             "policy_status": evidence.get("policy_status", "not_loaded"),
             "retention_metadata": evidence.get("retention_metadata", {}),
@@ -1283,6 +1287,8 @@ def _value(item: Mapping[str, Any]) -> Any:
 def render_architect_brief(snapshot: Mapping[str, Any]) -> str:
     root = snapshot["architect_data_operations_snapshot"]
     action = root["Architect_action"]
+    sync = root.get("accepted_state_synchronization", {})
+    action_state = sync.get("action_state", {})
     runtime_observation = root["runtime_observation"]
     input_record_count = int(root["snapshot_identity"].get("input_record_count", 0))
     lines = [
@@ -1395,6 +1401,46 @@ def render_architect_brief(snapshot: Mapping[str, Any]) -> str:
             lines.append(f"    - {reason}")
     else:
         lines.append("    []")
+    lines.extend(
+        [
+            "",
+            "## Operating Action State",
+            "",
+            "Operating_action_state:",
+            f"  system_maintenance_action_required: {str(action_state.get('system_maintenance_action_required', False)).lower()}",
+            f"  Architect_decision_required: {str(action_state.get('Architect_decision_required', False)).lower()}",
+            f"  external_dependency_action_required: {str(action_state.get('external_dependency_action_required', False)).lower()}",
+            "  assigned_to:",
+        ]
+    )
+    assigned_to = action_state.get("assigned_to") or []
+    if assigned_to:
+        for actor in assigned_to:
+            lines.append(f"    - {actor}")
+    else:
+        lines.append("    []")
+    lines.extend(
+        [
+            f"  action_type: {action_state.get('action_type', 'none')}",
+            f"  blocking_state: {action_state.get('blocking_state', 'non_blocking')}",
+            f"  rationale: {action_state.get('rationale', '')}",
+            "",
+            "## Accepted-State Synchronization",
+            "",
+            f"- Operating state: {sync.get('operating_state', 'source_incomplete')}",
+            f"- Current repo movement reviewed: {str(sync.get('repository', {}).get('current_repo_movement_reviewed', False)).lower()}",
+            f"- Current repo movement accepted: {str(sync.get('repository', {}).get('current_repo_movement_accepted', False)).lower()}",
+            f"- Accepted remote head: {sync.get('repository', {}).get('accepted_remote_head') or 'unknown'}",
+            f"- Registry path: {sync.get('accepted_state_registry', {}).get('path') or 'unknown'}",
+            f"- Registry updated: {str(sync.get('accepted_state_registry', {}).get('updated', False)).lower()}",
+            f"- Registry schema valid: {str(sync.get('accepted_state_registry', {}).get('schema_valid', False)).lower()}",
+            f"- Accepted entry ID: {sync.get('accepted_state_registry', {}).get('accepted_entry_id') or 'unknown'}",
+            f"- Chronology event status: {sync.get('chronology', {}).get('canonical_event_status') or 'unknown'}",
+            f"- Chronology event ID: {sync.get('chronology', {}).get('event_id') or 'unknown'}",
+            f"- Durable archive status: {sync.get('durable_archive', {}).get('status') or 'unknown'}",
+            f"- Archive reference: {sync.get('durable_archive', {}).get('archive_reference') or 'pending_external_write'}",
+        ]
+    )
     lines.extend(["", "## Source Dependencies", ""])
     for dependency in root["source_dependencies"]["missing_or_unconnected"]:
         lines.append(f"- {dependency}")
