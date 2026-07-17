@@ -1,0 +1,603 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sharpe-nova-os.local/specs/architect_data_operations_snapshot.schema.json",
+  "title": "Architect Data Operations Snapshot",
+  "type": "object",
+  "required": [
+    "architect_data_operations_snapshot"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "architect_data_operations_snapshot": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "generated_at",
+        "observation_window",
+        "environment",
+        "data_mode",
+        "runtime_observation",
+        "runtime_evidence",
+        "live_operating_health_established",
+        "evidence_sources",
+        "service_health",
+        "intake_health",
+        "context_health",
+        "proof_health",
+        "chronology_health",
+        "boundary_health",
+        "anomalies",
+        "quiet_tracking",
+        "Architect_action",
+        "source_dependencies",
+        "policy_dependencies",
+        "candidate_source_surfaces_missing",
+        "required_operating_sources_unconnected",
+        "limitations",
+        "snapshot_identity"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string"
+        },
+        "generated_at": {
+          "type": "string"
+        },
+        "observation_window": {
+          "type": "object",
+          "required": [
+            "start",
+            "end"
+          ],
+          "properties": {
+            "start": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "end": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "additionalProperties": true
+        },
+        "environment": {
+          "type": "string"
+        },
+        "data_mode": {
+          "enum": [
+            "synthetic",
+            "offline_fixture",
+            "production_like",
+            "live",
+            "mixed",
+            "unknown"
+          ]
+        },
+        "evidence_sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidence_source"
+          }
+        },
+        "runtime_observation": {
+          "$ref": "#/$defs/runtime_observation"
+        },
+        "runtime_evidence": {
+          "$ref": "#/$defs/runtime_evidence"
+        },
+        "live_operating_health_established": {
+          "type": "boolean",
+          "const": false
+        },
+        "service_health": {
+          "$ref": "#/$defs/health_layer"
+        },
+        "intake_health": {
+          "$ref": "#/$defs/health_layer"
+        },
+        "context_health": {
+          "$ref": "#/$defs/health_layer"
+        },
+        "proof_health": {
+          "$ref": "#/$defs/health_layer"
+        },
+        "chronology_health": {
+          "$ref": "#/$defs/health_layer"
+        },
+        "boundary_health": {
+          "$ref": "#/$defs/health_layer"
+        },
+        "anomalies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/anomaly"
+          }
+        },
+        "quiet_tracking": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "tracking_type",
+              "evidence_state",
+              "explanation"
+            ],
+            "properties": {
+              "tracking_type": {
+                "type": "string"
+              },
+              "source_anomaly_id": {
+                "type": "string"
+              },
+              "evidence_state": {
+                "$ref": "#/$defs/evidence_state"
+              },
+              "explanation": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "Architect_action": {
+          "type": "object",
+          "required": [
+            "required",
+            "reasons"
+          ],
+          "properties": {
+            "required": {
+              "type": "boolean"
+            },
+            "reasons": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "source_dependencies": {
+          "type": "object",
+          "required": [
+            "missing_or_unconnected"
+          ],
+          "properties": {
+            "missing_or_unconnected": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "policy_dependencies": {
+          "type": "object",
+          "required": [
+            "unresolved"
+          ],
+          "properties": {
+            "unresolved": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "candidate_source_surfaces_missing": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "required_operating_sources_unconnected": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "snapshot_identity": {
+          "type": "object",
+          "required": [
+            "canonicalization_version",
+            "canonical_hash",
+            "input_record_count",
+            "source_window"
+          ],
+          "properties": {
+            "canonicalization_version": {
+              "type": "string"
+            },
+            "canonical_hash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "input_record_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "source_window": {
+              "type": "object"
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    }
+  },
+  "$defs": {
+    "evidence_state": {
+      "enum": [
+        "observed_runtime",
+        "repository_validated",
+        "configured",
+        "inferred",
+        "unknown",
+        "unavailable"
+      ]
+    },
+    "evidence_value": {
+      "type": "object",
+      "required": [
+        "value",
+        "evidence_state"
+      ],
+      "properties": {
+        "value": {},
+        "evidence_state": {
+          "$ref": "#/$defs/evidence_state"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "health_layer": {
+      "type": "object",
+      "required": [
+        "status"
+      ],
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/evidence_value"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/evidence_value"
+        }
+      }
+    },
+    "source_kind": {
+      "enum": [
+        "runtime_record_source",
+        "runtime_interface",
+        "configured_source",
+        "repository_contract",
+        "fixture_source"
+      ]
+    },
+    "availability_basis": {
+      "enum": [
+        "verified_path",
+        "runtime_discovery",
+        "configured",
+        "repository_contract",
+        "unavailable",
+        "unknown"
+      ]
+    },
+    "availability": {
+      "type": "object",
+      "required": [
+        "available",
+        "basis",
+        "verified_at",
+        "records_ingested",
+        "record_count"
+      ],
+      "properties": {
+        "available": {
+          "type": "boolean"
+        },
+        "basis": {
+          "$ref": "#/$defs/availability_basis"
+        },
+        "verified_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "records_ingested": {
+          "type": "boolean"
+        },
+        "record_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "records_ingested": {
+                "const": true
+              }
+            },
+            "required": [
+              "records_ingested"
+            ]
+          },
+          "then": {
+            "properties": {
+              "record_count": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "evidence_source": {
+      "type": "object",
+      "required": [
+        "name",
+        "path_or_interface",
+        "source_kind",
+        "data_mode",
+        "contains_sensitive_data",
+        "retention_policy",
+        "availability",
+        "authoritative_for",
+        "not_authoritative_for"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "path_or_interface": {
+          "type": "string"
+        },
+        "source_kind": {
+          "$ref": "#/$defs/source_kind"
+        },
+        "data_mode": {
+          "type": "string"
+        },
+        "contains_sensitive_data": {
+          "type": "boolean"
+        },
+        "retention_policy": {
+          "type": "string"
+        },
+        "availability": {
+          "$ref": "#/$defs/availability"
+        },
+        "authoritative_for": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "not_authoritative_for": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "runtime_observation": {
+      "type": "object",
+      "required": [
+        "status",
+        "evidence_state",
+        "connected_sources",
+        "discovered_sources",
+        "records_ingested",
+        "limitations"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "no_sources_connected",
+            "sources_discovered_no_records_ingested",
+            "partial_records_ingested",
+            "bounded_observation_complete",
+            "unavailable",
+            "unknown"
+          ]
+        },
+        "evidence_state": {
+          "$ref": "#/$defs/evidence_state"
+        },
+        "connected_sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "discovered_sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "records_ingested": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "runtime_evidence": {
+      "type": "object",
+      "required": [
+        "candidate_source_surfaces_discovered",
+        "source_surfaces_verified",
+        "runtime_records_ingested",
+        "live_operating_health_established"
+      ],
+      "properties": {
+        "candidate_source_surfaces_discovered": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source_surfaces_verified": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "path",
+              "available",
+              "availability_basis",
+              "records_ingested",
+              "record_count"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string"
+              },
+              "available": {
+                "type": "boolean"
+              },
+              "availability_basis": {
+                "$ref": "#/$defs/availability_basis"
+              },
+              "records_ingested": {
+                "type": "boolean"
+              },
+              "record_count": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "runtime_records_ingested": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "boolean"
+          }
+        },
+        "live_operating_health_established": {
+          "type": "boolean",
+          "const": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "anomaly": {
+      "type": "object",
+      "required": [
+        "anomaly_id",
+        "anomaly_type",
+        "first_observed",
+        "last_observed",
+        "occurrence_count",
+        "affected_record_ids",
+        "severity",
+        "evidence_state",
+        "explanation",
+        "Architect_notification"
+      ],
+      "properties": {
+        "anomaly_id": {
+          "type": "string"
+        },
+        "anomaly_type": {
+          "enum": [
+            "source_provenance_missing",
+            "source_class_conflict",
+            "stale_source",
+            "unexplained_classification_drift",
+            "governance_epoch_mismatch",
+            "proof_verification_failure",
+            "replay_failure",
+            "canonical_signature_mismatch",
+            "chronology_link_failure",
+            "authority_effect_invalid",
+            "execution_boundary_violation",
+            "evidence_source_unavailable"
+          ]
+        },
+        "first_observed": {
+          "type": "string"
+        },
+        "last_observed": {
+          "type": "string"
+        },
+        "occurrence_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "affected_record_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "severity": {
+          "enum": [
+            "informational",
+            "watch",
+            "material",
+            "critical"
+          ]
+        },
+        "evidence_state": {
+          "$ref": "#/$defs/evidence_state"
+        },
+        "explanation": {
+          "type": "string"
+        },
+        "Architect_notification": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

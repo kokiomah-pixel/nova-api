@@ -1,0 +1,19 @@
+{
+  "data_mode": "offline_fixture",
+  "environment": "fixture",
+  "records": [
+    {
+      "record_id": "ado-fixture-expected-epoch-change-001",
+      "observed_at": "2026-07-16T03:05:00Z",
+      "source_class": "synthetic",
+      "data_mode": "offline_fixture",
+      "live_provenance_verified": false,
+      "provenance_complete": true,
+      "freshness_state": "within_policy",
+      "classification_changed": true,
+      "classification_change_explained": true,
+      "governance_epoch_id": "fixture-epoch-2",
+      "authority_effect": "none"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "data_mode": "offline_fixture",
+  "environment": "fixture",
+  "observation_window": {
+    "start": "2026-07-16T00:00:00Z",
+    "end": "2026-07-16T01:00:00Z"
+  },
+  "limitations": [
+    "Offline fixture mode validates the contract but is not live operating evidence."
+  ],
+  "evidence_sources": [
+    {
+      "name": "healthy_offline_fixture",
+      "path_or_interface": "fixtures/operations/architect_data_operations/healthy_offline_observation_window.json",
+      "data_mode": "offline_fixture",
+      "contains_sensitive_data": false,
+      "retention_policy": "git fixture",
+      "available_in_current_environment": true,
+      "authoritative_for": [
+        "contract_validation"
+      ],
+      "not_authoritative_for": [
+        "live_operations"
+      ]
+    }
+  ],
+  "records": [
+    {
+      "record_id": "ado-fixture-healthy-001",
+      "observed_at": "2026-07-16T00:10:00Z",
+      "decision_id": "decision-healthy-001",
+      "request_observed": true,
+      "endpoint": "/v1/context",
+      "response_success": true,
+      "latency_ms": 22,
+      "source_class": "synthetic",
+      "data_mode": "offline_fixture",
+      "live_provenance_verified": false,
+      "provenance_complete": true,
+      "freshness_state": "within_policy",
+      "context_created": true,
+      "classification_completed": true,
+      "constraint_context_created": true,
+      "governance_epoch_id": "fixture-epoch-1",
+      "governance_epoch_link_verified": true,
+      "proof_created": true,
+      "proof_verification_passed": true,
+      "replay_attempted": true,
+      "replay_passed": true,
+      "chronology_link_verified": true,
+      "authority_effect": "none",
+      "local_authority_ownership_preserved": true
+    }
+  ]
+}
