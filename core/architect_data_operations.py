@@ -61,6 +61,7 @@ ANOMALY_TYPES = {
     "authority_effect_invalid",
     "execution_boundary_violation",
     "evidence_source_unavailable",
+    "unexpected_source_field",
 }
 SEVERITIES = {"informational", "watch", "material", "critical"}
 IMMEDIATE_NOTIFICATION_TYPES = {
@@ -368,8 +369,15 @@ def extract_proof_registry_metadata(raw_record: Mapping[str, Any], proof_id: str
         "reproducibility_hash": raw_record.get("reproducibility_hash") or validation.get("reproducibility_hash"),
         "governance_epoch_id": raw_record.get("governance_epoch_id") or proof.get("governance_epoch_id"),
         "source_class": raw_record.get("source_class") or "unknown",
+        "data_mode": raw_record.get("data_mode") or "offline_fixture",
+        "live_provenance_verified": bool(raw_record.get("live_provenance_verified", False)),
         "provenance_status": raw_record.get("provenance_status") or "complete",
         "authority_effect": raw_record.get("authority_effect") or "none",
+        "nova_execution_attempted": bool(raw_record.get("nova_execution_attempted", False)),
+        "request_id": raw_record.get("request_id"),
+        "chronology_record_id": raw_record.get("chronology_record_id"),
+        "raw_external_identifier": raw_record.get("raw_external_identifier"),
+        "unexpected_runtime_note": raw_record.get("unexpected_runtime_note"),
     }
 
 
@@ -396,8 +404,8 @@ def proof_metadata_to_observation(
         "decision_id": decision_identifier["value"],
         "observed_at": timestamp,
         "source_class": source_class,
-        "data_mode": "unknown",
-        "live_provenance_verified": source_class == "live",
+        "data_mode": str(metadata.get("data_mode") or "offline_fixture"),
+        "live_provenance_verified": bool(metadata.get("live_provenance_verified", False)) and source_class == "live",
         "provenance_complete": provenance_complete,
         "provenance_missing": not provenance_complete,
         "freshness_state": "within_policy",
@@ -406,6 +414,7 @@ def proof_metadata_to_observation(
         "proof_verification_failed": verification_status == "failed",
         "replay_attempted": False,
         "authority_effect": str(metadata.get("authority_effect") or "none"),
+        "nova_execution_attempted": bool(metadata.get("nova_execution_attempted", False)),
         "governance_epoch_id": metadata.get("governance_epoch_id"),
     }
 
@@ -476,6 +485,23 @@ def build_proof_registry_pilot_evidence(
             window=window,
         )
         if observation:
+            safe_unexpected = [
+                field
+                for field in unexpected
+                if field
+                not in {
+                    "request_id",
+                    "chronology_record_id",
+                    "raw_external_identifier",
+                    "data_mode",
+                    "live_provenance_verified",
+                    "nova_execution_attempted",
+                }
+            ]
+            if safe_unexpected:
+                observation["unexpected_source_fields"] = sorted(safe_unexpected)
+            if rejected:
+                observation["prohibited_source_fields"] = sorted(rejected)
             records.append(observation)
     limitations = [
         "Stage A reads proof-registry metadata only.",
@@ -768,6 +794,14 @@ def compute_intake_health(records: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 
 def compute_context_health(records: List[Dict[str, Any]]) -> Dict[str, Any]:
+    context_observed = any(
+        record.get("context_created")
+        or record.get("classification_completed")
+        or record.get("classification_failed")
+        or record.get("classification_changed")
+        or record.get("constraint_context_created")
+        for record in records
+    )
     context = [record for record in records if record.get("context_created")]
     classification_failures = sum(1 for record in records if record.get("classification_failed"))
     expected_changes = sum(1 for record in records if record.get("classification_changed") and record.get("classification_change_explained"))
@@ -782,22 +816,32 @@ def compute_context_health(records: List[Dict[str, Any]]) -> Dict[str, Any]:
         "constraint_contexts_created": evidence_value(sum(1 for record in records if record.get("constraint_context_created")), "observed_runtime" if records else "unknown"),
         "governance_epoch_ids_observed": evidence_value(sorted({record.get("governance_epoch_id") for record in records if record.get("governance_epoch_id")}), "observed_runtime" if records else "unknown"),
         "governance_epoch_mismatches": evidence_value(epoch_mismatches, "observed_runtime" if records else "unknown"),
-        "status": health_status(len(records), classification_failures + unexplained_changes + epoch_mismatches, bool(records)),
+        "status": health_status(len(records), classification_failures + unexplained_changes + epoch_mismatches, context_observed),
     }
 
 
 def compute_proof_health(records: List[Dict[str, Any]]) -> Dict[str, Any]:
     proof_records = [record for record in records if record.get("proof_created")]
     proof_failures = sum(1 for record in proof_records if record.get("proof_verification_failed"))
+    proof_passed = sum(1 for record in proof_records if record.get("proof_verification_passed"))
+    proof_unknown = sum(1 for record in proof_records if not record.get("proof_verification_passed") and not record.get("proof_verification_failed"))
     replay_attempts = [record for record in records if record.get("replay_attempted")]
     replay_failures = sum(1 for record in replay_attempts if record.get("replay_failed"))
     signature_mismatches = sum(1 for record in records if record.get("canonical_signature_mismatch"))
     variance = sum(1 for record in records if record.get("unexplained_output_variance"))
     return {
+        "records_observed": evidence_value(len(proof_records), "observed_runtime" if proof_records else "unknown"),
+        "records_eligible": evidence_value(len(proof_records), "observed_runtime" if proof_records else "unknown"),
+        "records_ingested": evidence_value(len(proof_records), "observed_runtime" if proof_records else "unknown"),
         "proof_records_created": evidence_value(len(proof_records), "observed_runtime" if records else "unknown"),
-        "proof_verification_passed": evidence_value(sum(1 for record in proof_records if record.get("proof_verification_passed")), "observed_runtime" if records else "unknown"),
+        "proof_verification_passed": evidence_value(proof_passed, "observed_runtime" if records else "unknown"),
         "proof_verification_failed": evidence_value(proof_failures, "observed_runtime" if records else "unknown"),
-        "proof_verification_rate": rate_value(sum(1 for record in proof_records if record.get("proof_verification_passed")), len(proof_records)),
+        "verification": {
+            "passed": evidence_value(proof_passed, "observed_runtime" if proof_records else "unknown"),
+            "failed": evidence_value(proof_failures, "observed_runtime" if proof_records else "unknown"),
+            "unknown": evidence_value(proof_unknown, "observed_runtime" if proof_records else "unknown"),
+        },
+        "proof_verification_rate": rate_value(proof_passed, len(proof_records)),
         "replay_attempts": evidence_value(len(replay_attempts), "observed_runtime" if records else "unknown"),
         "replay_passed": evidence_value(sum(1 for record in replay_attempts if record.get("replay_passed")), "observed_runtime" if records else "unknown"),
         "replay_failed": evidence_value(replay_failures, "observed_runtime" if records else "unknown"),
@@ -805,10 +849,26 @@ def compute_proof_health(records: List[Dict[str, Any]]) -> Dict[str, Any]:
         "canonical_signature_mismatches": evidence_value(signature_mismatches, "observed_runtime" if records else "unknown"),
         "unexplained_output_variance": evidence_value(variance, "observed_runtime" if records else "unknown"),
         "status": health_status(len(proof_records) + len(replay_attempts), proof_failures + replay_failures + signature_mismatches + variance, bool(records)),
+        "scope": evidence_value("bounded_to_observed_record" if proof_records else "unknown", "observed_runtime" if proof_records else "unknown"),
+        "production_health_claim_supported": False,
+        "limitations": [
+            "single_record_observation",
+            "no_full_service_coverage",
+            "no_chronology_validation",
+            "no_external_identifier_continuity",
+        ] if proof_records else [],
     }
 
 
 def compute_chronology_health(records: List[Dict[str, Any]]) -> Dict[str, Any]:
+    chronology_observed = any(
+        record.get("chronology_link_verified")
+        or record.get("chronology_link_failed")
+        or record.get("governance_epoch_link_verified")
+        or record.get("continuity_interruption")
+        or record.get("unresolved_archive_dependency")
+        for record in records
+    )
     decision_ids = sorted({record.get("decision_id") for record in records if record.get("decision_id")})
     complete = sum(1 for record in records if record.get("provenance_complete"))
     missing = sum(1 for record in records if record.get("provenance_missing") or not record.get("provenance_complete"))
@@ -824,7 +884,7 @@ def compute_chronology_health(records: List[Dict[str, Any]]) -> Dict[str, Any]:
         "governance_epoch_links_verified": evidence_value(sum(1 for record in records if record.get("governance_epoch_link_verified")), "observed_runtime" if records else "unknown"),
         "continuity_interruptions": evidence_value(interruptions, "observed_runtime" if records else "unknown"),
         "unresolved_archive_dependencies": evidence_value(archive_deps, "observed_runtime" if records else "unknown"),
-        "status": health_status(len(records), link_failures + interruptions + archive_deps, bool(records)),
+        "status": health_status(len(records), link_failures + interruptions + archive_deps, chronology_observed),
     }
 
 
@@ -843,6 +903,7 @@ def compute_boundary_health(records: List[Dict[str, Any]]) -> Dict[str, Any]:
         "authorization_or_approval_language_detected": evidence_value(approval_language, "observed_runtime" if records else "unknown"),
         "local_authority_ownership_preserved": evidence_value(local_preserved, "observed_runtime" if records else "unknown"),
         "status": health_status(len(records), failures, bool(records)),
+        "scope": evidence_value("bounded_observation_only" if records else "unknown", "observed_runtime" if records else "unknown"),
     }
 
 
@@ -859,7 +920,7 @@ def runtime_observation_from_sources(sources: List[Dict[str, Any]]) -> Dict[str,
     ]
     records_ingested = sum(int(source.get("availability", {}).get("record_count", 0)) for source in sources)
     if records_ingested > 0 and connected:
-        status = "bounded_observation_complete" if len(connected) == len(discovered) else "partial_records_ingested"
+        status = "bounded_observation_complete" if len(connected) == len(sources) else "partial_records_ingested"
     elif discovered:
         status = "sources_discovered_no_records_ingested"
     else:
@@ -917,6 +978,26 @@ def runtime_evidence_report(sources: List[Dict[str, Any]]) -> Dict[str, Any]:
         },
         "live_operating_health_established": False,
     }
+
+
+def source_connection_report(sources: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    connections = []
+    for source in sources:
+        availability = source.get("availability", {})
+        connections.append(
+            {
+                "source_id": source["name"],
+                "discovered": bool(availability.get("available")),
+                "policy_authorized": source["name"] == "proof_registry",
+                "connected": bool(availability.get("records_ingested")),
+                "records_ingested": bool(availability.get("records_ingested")),
+                "record_count": int(availability.get("record_count", 0)),
+                "availability_basis": availability.get("basis", "unknown"),
+                "last_observed_at": availability.get("verified_at"),
+                "limitations": [availability["reason"]] if availability.get("reason") else [],
+            }
+        )
+    return connections
 
 
 def merge_evidence_sources(sources: Iterable[Mapping[str, Any]]) -> List[Dict[str, Any]]:
@@ -994,6 +1075,7 @@ def detect_anomalies(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         "authority_effect_invalid": "A record carried an authority effect other than none.",
         "execution_boundary_violation": "A Nova execution attempt was observed.",
         "evidence_source_unavailable": "An expected evidence source was unavailable.",
+        "unexpected_source_field": "A source record contained field names outside the policy allowlist; values were dropped.",
     }
     for record in records:
         record_id = record["record_id"]
@@ -1019,16 +1101,32 @@ def detect_anomalies(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             grouped["authority_effect_invalid"].append(record_id)
         if record.get("nova_execution_attempted"):
             grouped["execution_boundary_violation"].append(record_id)
+        if record.get("unexpected_source_fields"):
+            grouped["unexpected_source_field"].append(record_id)
     anomalies = []
     for anomaly_type, record_ids in sorted(grouped.items()):
         severity = "watch"
-        if anomaly_type in {"authority_effect_invalid", "execution_boundary_violation"}:
+        if anomaly_type == "unexpected_source_field":
+            severity = "informational"
+        elif anomaly_type in {"authority_effect_invalid", "execution_boundary_violation"}:
             severity = "critical"
         elif anomaly_type in {"chronology_link_failure", "canonical_signature_mismatch"}:
             severity = "material"
         first = min(str(record.get("observed_at") or "") for record in records if record["record_id"] in record_ids) or ""
         last = max(str(record.get("observed_at") or "") for record in records if record["record_id"] in record_ids) or ""
-        anomalies.append(_build_anomaly(anomaly_type, record_ids, first, last, severity, explanations[anomaly_type]))
+        explanation = explanations[anomaly_type]
+        if anomaly_type == "unexpected_source_field":
+            field_names = sorted(
+                {
+                    field
+                    for record in records
+                    if record["record_id"] in record_ids
+                    for field in record.get("unexpected_source_fields", [])
+                }
+            )
+            if field_names:
+                explanation = f"{explanation} Dropped field names: {', '.join(field_names)}."
+        anomalies.append(_build_anomaly(anomaly_type, record_ids, first, last, severity, explanation))
     return anomalies
 
 
@@ -1094,6 +1192,7 @@ def generate_canonical_snapshot(
     evidence_sources = merge_evidence_sources(list(evidence.get("evidence_sources") or []) + runtime_sources)
     runtime_observation = runtime_observation_from_sources(evidence_sources)
     runtime_evidence = runtime_evidence_report(evidence_sources)
+    source_connection = source_connection_report(evidence_sources)
     anomalies = apply_notification_rules(detect_anomalies(records), repeat_threshold=repeat_threshold)
     quiet_tracking = quiet_tracking_from_anomalies(anomalies)
     action_reasons = [
@@ -1132,6 +1231,7 @@ def generate_canonical_snapshot(
             "data_mode": data_mode,
             "runtime_observation": runtime_observation,
             "runtime_evidence": runtime_evidence,
+            "source_connection": source_connection,
             "live_operating_health_established": False,
             "policy_status": evidence.get("policy_status", "not_loaded"),
             "retention_metadata": evidence.get("retention_metadata", {}),
@@ -1212,6 +1312,18 @@ def render_architect_brief(snapshot: Mapping[str, Any]) -> str:
         lines.append(
             "No decision-relevant anomaly was observed in the available evidence. This statement does not establish that the operating environment is healthy."
         )
+    else:
+        proof_records = root["proof_health"].get("records_ingested", {}).get("value", 0)
+        if proof_records:
+            lines.append(f"{proof_records} bounded proof record was ingested for the declared observation window.")
+            lines.append("The record passed the policy allowlist and preserved authority_effect: none.")
+            lines.append(
+                "Identifier continuity could not be established because an external hashing salt was not configured. Raw identifiers were not emitted."
+            )
+            lines.append(
+                "This observation supports only the bounded proof result reported here. It does not establish full API, chronology, or production health."
+            )
+            lines.append("No Stage B, C, or D source was activated.")
     if action["required"]:
         lines.append("Architect action is required for this observation window.")
         for reason in action["reasons"]:
@@ -1259,6 +1371,11 @@ def render_architect_brief(snapshot: Mapping[str, Any]) -> str:
     for title, key, status_key in sections:
         status = root[key][status_key]
         lines.extend(["", f"## {title}", "", f"- Status: {_value(status)} ({status['evidence_state']})"])
+        if key == "proof_health" and root[key].get("scope"):
+            lines.append(f"- Scope: {_value(root[key]['scope'])}")
+            lines.append(
+                f"- Production health claim supported: {str(root[key].get('production_health_claim_supported', False)).lower()}"
+            )
     lines.extend(["", "## Material Anomalies", ""])
     material = [anomaly for anomaly in root["anomalies"] if anomaly.get("Architect_notification")]
     if material:
@@ -1303,6 +1420,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--evidence", type=Path)
     parser.add_argument("--policy", type=Path, default=DEFAULT_POLICY_PATH)
     parser.add_argument("--identifier-salt")
+    parser.add_argument("--generated-at")
+    parser.add_argument("--proof-registry-path", type=Path)
     parser.add_argument("--snapshot-out", type=Path, default=Path("artifacts/operations/architect-data-operations-snapshot.json"))
     parser.add_argument("--brief-out", type=Path, default=Path("artifacts/operations/architect-data-operations-brief.md"))
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
@@ -1319,8 +1438,10 @@ def main(argv: Optional[List[str]] = None) -> int:
             policy_path=args.policy,
             repo_root=args.repo_root,
             identifier_salt=args.identifier_salt,
+            generated_at=args.generated_at,
+            proof_registry_path=args.proof_registry_path,
         )
-    snapshot = generate_canonical_snapshot(evidence, repo_root=args.repo_root)
+    snapshot = generate_canonical_snapshot(evidence, generated_at=args.generated_at, repo_root=args.repo_root)
     brief = render_architect_brief(snapshot)
     args.snapshot_out.parent.mkdir(parents=True, exist_ok=True)
     args.brief_out.parent.mkdir(parents=True, exist_ok=True)

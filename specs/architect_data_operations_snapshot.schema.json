@@ -18,6 +18,7 @@
         "data_mode",
         "runtime_observation",
         "runtime_evidence",
+        "source_connection",
         "live_operating_health_established",
         "policy_status",
         "retention_metadata",
@@ -92,6 +93,12 @@
         },
         "runtime_evidence": {
           "$ref": "#/$defs/runtime_evidence"
+        },
+        "source_connection": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/source_connection"
+          }
         },
         "live_operating_health_established": {
           "type": "boolean",
@@ -292,6 +299,15 @@
           },
           {
             "type": "object"
+          },
+          {
+            "type": "array"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "string"
           }
         ]
       },
@@ -540,6 +556,57 @@
       },
       "additionalProperties": false
     },
+    "source_connection": {
+      "type": "object",
+      "required": [
+        "source_id",
+        "discovered",
+        "policy_authorized",
+        "connected",
+        "records_ingested",
+        "record_count",
+        "availability_basis",
+        "last_observed_at",
+        "limitations"
+      ],
+      "properties": {
+        "source_id": {
+          "type": "string"
+        },
+        "discovered": {
+          "type": "boolean"
+        },
+        "policy_authorized": {
+          "type": "boolean"
+        },
+        "connected": {
+          "type": "boolean"
+        },
+        "records_ingested": {
+          "type": "boolean"
+        },
+        "record_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "availability_basis": {
+          "$ref": "#/$defs/availability_basis"
+        },
+        "last_observed_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
     "anomaly": {
       "type": "object",
       "required": [
@@ -571,7 +638,8 @@
             "chronology_link_failure",
             "authority_effect_invalid",
             "execution_boundary_violation",
-            "evidence_source_unavailable"
+            "evidence_source_unavailable",
+            "unexpected_source_field"
           ]
         },
         "first_observed": {
