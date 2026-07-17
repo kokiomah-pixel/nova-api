@@ -1,0 +1,264 @@
+runtime_evidence_policy:
+  policy_version: "1.0"
+  status: approved_for_bounded_pilot
+
+  activation:
+    read_only: true
+    manual_execution_only: true
+    recurring_scheduler_enabled: false
+    external_alert_delivery_enabled: false
+    runtime_mutation_allowed: false
+
+  pilot:
+    duration_days: 7
+    observation_window: rolling_24_hours
+    timezone: UTC
+    generation_cadence: once_daily_manual
+    production_health_claim_allowed: false
+
+  observation_window:
+    type: rolling
+    duration_hours: 24
+    timezone: UTC
+
+  reporting:
+    cadence: once_daily_manual
+    scheduler_enabled: false
+    preferred_generation_period: morning
+    automatic_delivery: false
+
+  approved_sources:
+    - source_id: proof_registry
+      interface: .proof_registry.json
+      source_kind: runtime_record_source
+      ingestion_status: approved_for_bounded_metadata
+      activation_stage: A
+      authority_scope:
+        authoritative_for:
+          - proof_record_presence
+          - bounded_proof_identity
+          - proof_creation_timestamp
+          - proof_verification_result_if_recorded
+          - canonical_signature_reference_if_recorded
+        not_authoritative_for:
+          - live_source_provenance
+          - chronology_acceptance
+          - external_execution
+          - institutional_review_outcome
+          - commercial_usage
+      permitted_fields:
+        - proof_id
+        - decision_id
+        - created_at
+        - verified_at
+        - verification_status
+        - canonical_signature
+        - reproducibility_hash
+        - governance_epoch_id
+        - source_class
+        - provenance_status
+        - authority_effect
+      prohibited_fields:
+        - raw_payload
+        - action_payload
+        - private_key
+        - API_key
+        - wallet_credentials
+        - account_number
+        - model_prompt
+        - hidden_policy_weights
+        - unrestricted_source_content
+
+    - source_id: reflex_governance_records
+      interface: .reflex_governance_records.jsonl
+      source_kind: runtime_record_source
+      ingestion_status: approved_for_bounded_metadata
+      activation_stage: B
+      activation_enabled: false
+      authority_scope:
+        authoritative_for:
+          - classification_observation
+          - bounded_source_class
+          - governance_epoch_reference
+          - authority_effect
+          - replay_or_review_reference_if_recorded
+        not_authoritative_for:
+          - Reflex_Memory_acceptance
+          - institutional_approval
+          - execution_authority
+          - production_health
+          - buyer_behavior
+      permitted_fields:
+        - record_id
+        - decision_id
+        - created_at
+        - classification
+        - classification_reason_code
+        - source_class
+        - provenance_status
+        - governance_epoch_id
+        - replay_status
+        - authority_effect
+      prohibited_fields:
+        - free_form_narrative_content
+        - raw_payload
+        - model_prompt
+
+    - source_id: API_request_metadata
+      source_kind: runtime_interface
+      ingestion_status: approved_when_structured_metadata_exists
+      activation_stage: C
+      activation_enabled: false
+      authority_scope:
+        authoritative_for:
+          - request_observed
+          - endpoint_observed
+          - response_status
+          - validation_failure
+          - internal_error
+          - bounded_latency
+          - request_timestamp
+        not_authoritative_for:
+          - correctness_of_financial_action
+          - local_authority_decision
+          - execution_outcome
+          - source_truth
+      permitted_fields:
+        - request_id_hash
+        - decision_id_hash
+        - endpoint
+        - received_at
+        - completed_at
+        - response_status_code
+        - validation_status
+        - error_class
+        - latency_ms
+        - environment_id
+      prohibited_fields:
+        - HTTP_authorization_headers
+        - request_body
+        - response_body
+        - cookies
+        - IP_address
+        - user_agent
+        - email
+        - wallet_address
+        - account_identifier
+        - model_prompt
+
+    - source_id: chronology_validation_results
+      source_kind: runtime_record_source
+      ingestion_status: approved_when_deterministic_validator_output_exists
+      activation_stage: D
+      activation_enabled: false
+      authority_scope:
+        authoritative_for:
+          - chronology_link_validation
+          - decision_id_link_validation
+          - governance_epoch_link_validation
+          - bounded_provenance_validation
+          - reconstruction_check_result
+        not_authoritative_for:
+          - automatic_chronology_repair
+          - chronology_acceptance
+          - business_decision_correctness
+          - execution_authority
+      permitted_fields:
+        - validation_run_id
+        - generated_at
+        - validator_version
+        - record_count
+        - links_checked
+        - links_passed
+        - links_failed
+        - governance_epoch_mismatches
+        - missing_provenance_count
+        - reconstruction_failures
+      prohibited_fields:
+        - repair_operation
+        - raw_chronology_payload
+
+  identifier_policy:
+    salt_source: external
+    raw_identifier_fallback_allowed: false
+    permitted:
+      - salted_hash_of_request_id
+      - salted_hash_of_decision_id
+      - salted_hash_of_proof_id
+      - salted_hash_of_chronology_record_id
+      - governance_epoch_id
+      - validator_run_id
+    prohibited:
+      - wallet_address
+      - account_number
+      - customer_name
+      - email_address
+      - IP_address
+      - API_token
+      - private_key
+      - transaction_signing_material
+      - raw_external_identifier
+
+  live_provenance_standard:
+    required:
+      - source_origin_identified
+      - environment_identified
+      - collection_timestamp_present
+      - immutable_or_stable_source_reference_present
+      - integrity_hash_or_equivalent_present
+      - authoritative_scope_declared
+      - record_not_fixture_or_test_generated
+      - policy_permitted_fields_only
+
+  retention_policy:
+    raw_source_payload_copy:
+      allowed: false
+    ingestion:
+      mode: in_memory_or_ephemeral
+      temporary_files_allowed: false
+    generated_snapshot:
+      retention_days: 30
+      storage_scope: private_local_or_governed_internal
+      contains_raw_payloads: false
+    Architect_brief:
+      retention_days: 90
+      storage_scope: private_internal
+    anomaly_metadata:
+      retention_days: 90
+      contains_bounded_hashed_identifiers_only: true
+
+  unknown_field_policy:
+    behavior: drop
+    anomaly: unexpected_source_field
+    severity: informational
+    include_field_name_only: true
+    include_field_value: false
+
+  repeat_threshold:
+    occurrence_count: 3
+    independent_record_count: 2
+    window_hours: 24
+
+  severity_mapping:
+    critical:
+      - execution_boundary_violation
+      - authority_effect_other_than_none
+      - unverified_source_presented_as_live
+      - chronology_integrity_failure_preventing_reconstruction
+      - sensitive_secret_or_private_key_emitted
+
+  notification_policy:
+    automatic_delivery: false
+    recipients:
+      primary:
+        - Architect
+      review:
+        - Jarvis_Nova_CCO
+      external_recipients: []
+    immediate_surface_in_brief:
+      - critical_anomaly
+    surface_when_material:
+      - repeated_watch_anomaly
+      - source_gap_affecting_operating_claim
+      - policy_violation
+      - evidence_health_change

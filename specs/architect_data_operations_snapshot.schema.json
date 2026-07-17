@@ -19,6 +19,8 @@
         "runtime_observation",
         "runtime_evidence",
         "live_operating_health_established",
+        "policy_status",
+        "retention_metadata",
         "evidence_sources",
         "service_health",
         "intake_health",
@@ -94,6 +96,15 @@
         "live_operating_health_established": {
           "type": "boolean",
           "const": false
+        },
+        "policy_status": {
+          "enum": [
+            "not_loaded",
+            "loaded_and_validated"
+          ]
+        },
+        "retention_metadata": {
+          "type": "object"
         },
         "service_health": {
           "$ref": "#/$defs/health_layer"
