@@ -1,6 +1,5 @@
 import copy
 import json
-import subprocess
 import sys
 from pathlib import Path
 
@@ -15,6 +14,7 @@ from core.accepted_state_synchronization import (
     REGISTRY_PATH,
     build_action_state,
     classify_repo_movement_acceptance,
+    load_archive_record,
     synchronization_state,
 )
 from scripts.validate_accepted_state_registry import validate_registry
@@ -204,17 +204,19 @@ def test_live_NSF_portal_unavailability_remains_separate():
     assert "NSF" not in action_state["rationale"]
 
 
-def test_merge_commit_receipt_resolves_on_main():
-    receipt = "506ab4d2d7999e46a5cf95f544933ab32c4a545f"
+def test_completed_archive_records_approved_merge_receipt():
+    record = load_archive_record()
 
-    assert subprocess.run(
-        ["git", "cat-file", "-e", f"{receipt}^{{commit}}"],
-        check=False,
-    ).returncode == 0
-    assert subprocess.run(
-        ["git", "merge-base", "--is-ancestor", receipt, "origin/main"],
-        check=False,
-    ).returncode == 0
+    assert record["completion"]["status"] == "completed_and_verified"
+    assert (
+        record["completion"]["receipt_or_reference"]
+        == "506ab4d2d7999e46a5cf95f544933ab32c4a545f"
+    )
+    assert record["completion"]["verification"] == "merge_commit_resolved_in_main"
+
+    report = validate_archive_record()
+    assert report["archive_verified"] is True
+    assert report["archive_package_hash_valid"] is True
 
 
 def _archive_copy(tmp_path):
