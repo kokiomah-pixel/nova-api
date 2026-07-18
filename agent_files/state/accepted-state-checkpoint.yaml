@@ -1,0 +1,22 @@
+accepted_state_checkpoint:
+  schema_version: 1.0.0
+  checkpoint_type: observation_cursor
+  storage_model:
+    committed_file_role: bootstrap_or_fixture
+    runtime_checkpoint_role: mutable_observation_cursor
+    runtime_checkpoint_authoritative: false
+  checkpoint_rules:
+    authority_effect: none
+    execution_effect: none
+    independent_governance_claims: false
+    may_acknowledge_only_ids_present_in_verified_canonical_registry: true
+    advancement_requires_successful_daily_run: true
+    advancement_occurs_after_brief_generation: true
+    failed_run_does_not_advance: true
+  canonical_registry_commit: 1a133467ffef5cd6d64f1377c5a60557fa8901c9
+  latest_acknowledged_entry_ids:
+    - architect_data_operations_stage_a_policy_2026_07_17
+  observed_at: "2026-07-18T00:00:00Z"
+  authority_effect: none
+  execution_effect: none
+  independent_governance_claims: false
