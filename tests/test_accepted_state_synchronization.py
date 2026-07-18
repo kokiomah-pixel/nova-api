@@ -13,6 +13,7 @@ from core.accepted_state_synchronization import (
     CHRONOLOGY_PATH,
     REGISTRY_CHECKPOINT_PATH,
     REGISTRY_PATH,
+    advance_accepted_state_checkpoint,
     build_action_state,
     classify_repo_movement_acceptance,
     load_archive_record,
@@ -32,6 +33,10 @@ from validate_chronology import validate_events  # noqa: E402
 def _registry_entry():
     registry = yaml.safe_load(Path(REGISTRY_PATH).read_text(encoding="utf-8"))
     return next(entry for entry in registry["entries"] if entry["accepted_state_id"] == ACCEPTED_STATE_ID)
+
+
+def _registry_payload():
+    return yaml.safe_load(Path(REGISTRY_PATH).read_text(encoding="utf-8"))
 
 
 def _chronology_event():
@@ -108,6 +113,30 @@ def _write_stale_mirror(root):
         encoding="utf-8",
     )
     return mirror
+
+
+def _verified_repository_state(commit="1111111111111111111111111111111111111111"):
+    return {
+        "checkout_commit": commit,
+        "canonical_main_commit": commit,
+        "canonical_main_verified": True,
+    }
+
+
+def _feature_branch_repository_state():
+    return {
+        "checkout_commit": "2222222222222222222222222222222222222222",
+        "canonical_main_commit": "1111111111111111111111111111111111111111",
+        "canonical_main_verified": True,
+    }
+
+
+def _unverified_repository_state():
+    return {
+        "checkout_commit": "2222222222222222222222222222222222222222",
+        "canonical_main_commit": None,
+        "canonical_main_verified": False,
+    }
 
 
 def test_reviewed_repo_movement_can_be_promoted_to_accepted_state():
@@ -215,7 +244,10 @@ def test_archive_local_preparation_not_equal_external_completion(tmp_path):
 def test_system_maintenance_action_distinct_from_Architect_decision(tmp_path):
     _copy_sync_files(tmp_path, archive_status="pending_external_write")
 
-    action_state = build_action_state(tmp_path)
+    action_state = build_action_state(
+        tmp_path,
+        repository_state_override=_verified_repository_state(),
+    )
 
     assert action_state["system_maintenance_action_required"] is True
     assert action_state["Architect_decision_required"] is False
@@ -226,7 +258,10 @@ def test_system_maintenance_action_distinct_from_Architect_decision(tmp_path):
 def test_completed_synchronization_clears_maintenance_action(tmp_path):
     _copy_sync_files(tmp_path, archive_status="completed_and_verified")
 
-    action_state = build_action_state(tmp_path)
+    action_state = build_action_state(
+        tmp_path,
+        repository_state_override=_verified_repository_state(),
+    )
 
     assert action_state["system_maintenance_action_required"] is False
     assert action_state["Architect_decision_required"] is False
@@ -243,7 +278,10 @@ def test_completed_synchronization_clears_maintenance_action(tmp_path):
 def test_unavailable_local_working_tree_does_not_block_registry_sync(tmp_path):
     _copy_sync_files(tmp_path, archive_status="completed_and_verified")
 
-    state = synchronization_state(tmp_path)
+    state = synchronization_state(
+        tmp_path,
+        repository_state_override=_verified_repository_state(),
+    )
 
     assert state["repository"]["current_repo_movement_accepted"] is True
     assert state["accepted_state_registry"]["updated"] is True
@@ -365,7 +403,11 @@ def test_canonical_registry_preferred_over_stale_local_mirror(tmp_path):
     mirror_root = tmp_path / "mirror"
     _write_stale_mirror(mirror_root)
 
-    state = resolve_registry_source(tmp_path, local_mirror_root=mirror_root)
+    state = resolve_registry_source(
+        tmp_path,
+        local_mirror_root=mirror_root,
+        repository_state_override=_verified_repository_state(),
+    )
 
     assert state["registry_state"]["canonical_source_available"] is True
     assert state["registry_state"]["selected_registry_path"] == str(tmp_path / REGISTRY_PATH)
@@ -449,7 +491,10 @@ def test_acknowledged_entry_not_repeated_as_new_delta(tmp_path):
     _copy_sync_files(tmp_path, archive_status="completed_and_verified")
     _write_checkpoint(tmp_path, acknowledged=[ACCEPTED_STATE_ID])
 
-    state = resolve_registry_source(tmp_path)
+    state = resolve_registry_source(
+        tmp_path,
+        repository_state_override=_verified_repository_state(),
+    )
 
     assert state["accepted_state_delta"]["newly_accepted"] == "none"
     assert state["accepted_state_delta"]["stable_accepted_state"] == [ACCEPTED_STATE_ID]
@@ -477,7 +522,11 @@ def test_registry_sync_action_does_not_require_Architect_decision(tmp_path):
     mirror_root = tmp_path / "mirror"
     _write_stale_mirror(mirror_root)
 
-    action_state = build_action_state(tmp_path, local_mirror_root=mirror_root)
+    action_state = build_action_state(
+        tmp_path,
+        local_mirror_root=mirror_root,
+        repository_state_override=_verified_repository_state(),
+    )
 
     assert action_state["system_maintenance_action_required"] is True
     assert action_state["Architect_decision_required"] is False
@@ -490,6 +539,180 @@ def test_registry_sync_preserves_Stage_B_locked(tmp_path):
     mirror_root = tmp_path / "mirror"
     _write_stale_mirror(mirror_root)
 
-    state = synchronization_state(tmp_path, local_mirror_root=mirror_root)
+    state = synchronization_state(
+        tmp_path,
+        local_mirror_root=mirror_root,
+        repository_state_override=_verified_repository_state(),
+    )
 
     assert state["runtime_evidence"]["Stage_B"] == "locked"
+
+
+def test_feature_branch_HEAD_not_labeled_canonical_main(tmp_path):
+    _copy_sync_files(tmp_path, archive_status="completed_and_verified")
+
+    state = resolve_registry_source(
+        tmp_path,
+        repository_state_override=_feature_branch_repository_state(),
+    )
+
+    assert state["repository_state"]["checkout_commit"] == "2222222222222222222222222222222222222222"
+    assert state["repository_state"]["canonical_main_commit"] == "1111111111111111111111111111111111111111"
+    assert state["repository_state"]["checkout_is_canonical_main"] is False
+    assert state["registry_ingestion"]["canonical_commit"] == "1111111111111111111111111111111111111111"
+
+
+def test_verified_origin_main_used_as_canonical_commit(tmp_path):
+    _copy_sync_files(tmp_path, archive_status="completed_and_verified")
+
+    state = resolve_registry_source(
+        tmp_path,
+        repository_state_override=_feature_branch_repository_state(),
+    )
+
+    assert state["registry_state"]["canonical_source_state"] == "verified_repository_main"
+    assert state["registry_state"]["canonical_commit"] == "1111111111111111111111111111111111111111"
+    assert state["registry_usage"]["current_accepted_state_claim_allowed"] is True
+
+
+def test_missing_origin_main_reports_unverified_checkout(tmp_path):
+    _copy_sync_files(tmp_path, archive_status="completed_and_verified")
+
+    state = resolve_registry_source(
+        tmp_path,
+        repository_state_override=_unverified_repository_state(),
+    )
+
+    assert state["registry_state"]["canonical_source_state"] == "unverified_repository_checkout"
+    assert state["registry_ingestion"]["canonical_main_verified"] is False
+    assert state["registry_ingestion"]["canonical_main_commit"] is None
+    assert state["registry_usage"]["allowed"] == "bounded_checkout_context"
+
+
+def test_unverified_checkout_cannot_make_current_accepted_state_claim(tmp_path):
+    _copy_sync_files(tmp_path, archive_status="completed_and_verified")
+
+    state = synchronization_state(
+        tmp_path,
+        repository_state_override=_unverified_repository_state(),
+    )
+
+    assert state["registry_usage"]["current_accepted_state_claim_allowed"] is False
+    assert state["repository"]["current_repo_movement_accepted"] is False
+    assert state["accepted_state_registry"]["updated"] is False
+
+
+def test_checkpoint_advances_only_from_verified_canonical_registry(tmp_path):
+    checkpoint = _write_checkpoint(tmp_path, acknowledged=[])
+
+    unverified = advance_accepted_state_checkpoint(
+        registry=_registry_payload(),
+        checkpoint_path=checkpoint,
+        canonical_main_commit=None,
+        canonical_main_verified=False,
+        observed_at="2026-07-18T12:00:00Z",
+        successful_daily_run=True,
+    )
+    verified = advance_accepted_state_checkpoint(
+        registry=_registry_payload(),
+        checkpoint_path=checkpoint,
+        canonical_main_commit="1111111111111111111111111111111111111111",
+        canonical_main_verified=True,
+        observed_at="2026-07-18T12:01:00Z",
+        successful_daily_run=True,
+    )
+
+    assert unverified["advanced"] is False
+    assert verified["advanced"] is True
+    assert ACCEPTED_STATE_ID in verified["acknowledged_entry_ids"]
+
+
+def test_failed_daily_run_does_not_advance_checkpoint(tmp_path):
+    checkpoint = _write_checkpoint(tmp_path, acknowledged=[])
+
+    result = advance_accepted_state_checkpoint(
+        registry=_registry_payload(),
+        checkpoint_path=checkpoint,
+        canonical_main_commit="1111111111111111111111111111111111111111",
+        canonical_main_verified=True,
+        observed_at="2026-07-18T12:00:00Z",
+        successful_daily_run=False,
+    )
+
+    stored = yaml.safe_load(checkpoint.read_text(encoding="utf-8"))["accepted_state_checkpoint"]
+    assert result["advanced"] is False
+    assert stored["latest_acknowledged_entry_ids"] == []
+
+
+def test_checkpoint_write_is_atomic(tmp_path):
+    checkpoint = _write_checkpoint(tmp_path, acknowledged=[])
+    temporary = checkpoint.with_suffix(checkpoint.suffix + ".tmp")
+
+    result = advance_accepted_state_checkpoint(
+        registry=_registry_payload(),
+        checkpoint_path=checkpoint,
+        canonical_main_commit="1111111111111111111111111111111111111111",
+        canonical_main_verified=True,
+        observed_at="2026-07-18T12:00:00Z",
+        successful_daily_run=True,
+    )
+
+    assert result["advanced"] is True
+    assert temporary.exists() is False
+    stored = yaml.safe_load(checkpoint.read_text(encoding="utf-8"))["accepted_state_checkpoint"]
+    assert stored["canonical_registry_commit"] == "1111111111111111111111111111111111111111"
+
+
+def test_checkpoint_cannot_acknowledge_unknown_entry_id(tmp_path):
+    checkpoint = _write_checkpoint(tmp_path, acknowledged=[])
+
+    with pytest.raises(ValueError, match="unknown accepted_state_id"):
+        advance_accepted_state_checkpoint(
+            registry=_registry_payload(),
+            checkpoint_path=checkpoint,
+            canonical_main_commit="1111111111111111111111111111111111111111",
+            canonical_main_verified=True,
+            observed_at="2026-07-18T12:00:00Z",
+            successful_daily_run=True,
+            acknowledge_entry_ids=["not_in_registry"],
+        )
+
+
+def test_runtime_checkpoint_does_not_create_governance_state(tmp_path):
+    checkpoint = _write_checkpoint(tmp_path, acknowledged=[])
+    advance_accepted_state_checkpoint(
+        registry=_registry_payload(),
+        checkpoint_path=checkpoint,
+        canonical_main_commit="1111111111111111111111111111111111111111",
+        canonical_main_verified=True,
+        observed_at="2026-07-18T12:00:00Z",
+        successful_daily_run=True,
+    )
+
+    stored = yaml.safe_load(checkpoint.read_text(encoding="utf-8"))["accepted_state_checkpoint"]
+    assert stored["checkpoint_type"] == "observation_cursor"
+    assert stored["storage_model"]["runtime_checkpoint_authoritative"] is False
+    assert stored["independent_governance_claims"] is False
+    assert stored["authority_effect"] == "none"
+
+
+def test_repeated_entry_not_reported_after_successful_checkpoint_advance(tmp_path):
+    _copy_sync_files(tmp_path, archive_status="completed_and_verified")
+    checkpoint = _write_checkpoint(tmp_path, acknowledged=[])
+    advance_accepted_state_checkpoint(
+        registry=_registry_payload(),
+        checkpoint_path=checkpoint,
+        canonical_main_commit="1111111111111111111111111111111111111111",
+        canonical_main_verified=True,
+        observed_at="2026-07-18T12:00:00Z",
+        successful_daily_run=True,
+    )
+
+    state = resolve_registry_source(
+        tmp_path,
+        checkpoint_path=checkpoint,
+        repository_state_override=_verified_repository_state(),
+    )
+
+    assert state["accepted_state_delta"]["newly_accepted"] == "none"
+    assert state["accepted_state_delta"]["stable_accepted_state"] == [ACCEPTED_STATE_ID]

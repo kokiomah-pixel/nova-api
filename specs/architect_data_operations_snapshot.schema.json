@@ -621,6 +621,7 @@
         "repository",
         "accepted_state_registry",
         "registry_source_resolution",
+        "repository_state",
         "registry_operating_model",
         "registry_state",
         "Registry_ingestion",
@@ -748,6 +749,36 @@
           },
           "additionalProperties": false
         },
+        "repository_state": {
+          "type": "object",
+          "required": [
+            "checkout_commit",
+            "canonical_main_commit",
+            "checkout_is_canonical_main",
+            "canonical_main_verified"
+          ],
+          "properties": {
+            "checkout_commit": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "canonical_main_commit": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "checkout_is_canonical_main": {
+              "type": "boolean"
+            },
+            "canonical_main_verified": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
         "registry_operating_model": {
           "type": "object",
           "required": [
@@ -779,6 +810,7 @@
         "registry_state": {
           "type": "object",
           "required": [
+            "canonical_source_state",
             "canonical_source_available",
             "canonical_commit",
             "canonical_registry_path",
@@ -791,6 +823,14 @@
             "registry_entry_count"
           ],
           "properties": {
+            "canonical_source_state": {
+              "enum": [
+                "verified_repository_main",
+                "unverified_repository_checkout",
+                "non_authoritative_local_mirror",
+                "source_unavailable"
+              ]
+            },
             "canonical_source_available": {
               "type": "boolean"
             },
@@ -837,14 +877,48 @@
         "Registry_ingestion": {
           "type": "object",
           "required": [
+            "canonical_source_state",
+            "checkout_commit",
+            "canonical_main_commit",
+            "checkout_is_canonical_main",
+            "canonical_main_verified",
             "canonical_registry_loaded",
             "canonical_source",
             "canonical_commit",
             "schema_valid",
+            "registry_schema_valid",
+            "current_accepted_state_claim_allowed",
             "mirror_status",
+            "checkpoint_status",
             "contradictions_detected"
           ],
           "properties": {
+            "canonical_source_state": {
+              "enum": [
+                "verified_repository_main",
+                "unverified_repository_checkout",
+                "non_authoritative_local_mirror",
+                "source_unavailable"
+              ]
+            },
+            "checkout_commit": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "canonical_main_commit": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "checkout_is_canonical_main": {
+              "type": "boolean"
+            },
+            "canonical_main_verified": {
+              "type": "boolean"
+            },
             "canonical_registry_loaded": {
               "type": "boolean"
             },
@@ -860,11 +934,23 @@
             "schema_valid": {
               "type": "boolean"
             },
+            "registry_schema_valid": {
+              "type": "boolean"
+            },
+            "current_accepted_state_claim_allowed": {
+              "type": "boolean"
+            },
             "mirror_status": {
               "enum": [
                 "not_required",
                 "in_sync",
                 "lag_detected"
+              ]
+            },
+            "checkpoint_status": {
+              "enum": [
+                "available",
+                "missing"
               ]
             },
             "contradictions_detected": {
@@ -883,6 +969,7 @@
             "allowed": {
               "enum": [
                 "current_accepted_state",
+                "bounded_checkout_context",
                 "bounded_historical_context_only",
                 "source_unavailable"
               ]

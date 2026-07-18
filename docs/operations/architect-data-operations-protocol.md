@@ -830,11 +830,15 @@ but it is non-authoritative and must not create, amend, or reconcile accepted
 state independently.
 
 When a repository registry and a local mirror both exist, the Daily Coherence
-Agent must prefer the valid canonical repository registry, record the canonical
-commit, and classify mirror lag as system maintenance rather than an Architect
-decision. If the canonical source is unavailable and only a stale mirror exists,
-the mirror may be used only for bounded historical context; it must not be
-presented as current accepted state.
+Agent must distinguish the current checkout commit from the verified canonical
+`origin/main` commit. A feature-branch checkout containing a valid registry is
+not automatically canonical. Current accepted-state claims are allowed only
+when the registry source state is `verified_repository_main`; otherwise the
+registry is bounded checkout context, bounded historical context, or
+unavailable. The agent must classify mirror lag as system maintenance rather
+than an Architect decision. If the canonical source is unavailable and only a
+stale mirror exists, the mirror may be used only for bounded historical context;
+it must not be presented as current accepted state.
 
 Mirror refresh requires schema validation before replacement, atomic write
 behavior, mirror metadata containing the canonical repository, canonical commit,
@@ -843,11 +847,38 @@ preservation of the last valid mirror when validation fails. Local and remote
 entries must not be merged heuristically.
 
 Accepted-state delta reporting must use a bounded observation checkpoint. A
-registry entry is newly accepted only when it is present in the canonical
-registry and has not already been acknowledged by the Daily Coherence Agent
-checkpoint. The checkpoint is an observation cursor, not an accepted-state
-registry, and must not contain independent governance claims. Refreshing a
-local mirror must not create a chronology event or a new accepted-state entry.
+registry entry is newly accepted only when it is present in the schema-valid,
+verified canonical-main registry and has not already been acknowledged by the
+Daily Coherence Agent checkpoint. The checkpoint is an observation cursor, not
+an accepted-state registry, and must not contain independent governance claims.
+Refreshing a local mirror must not create a chronology event or a new
+accepted-state entry.
+
+Checkpoint advancement is a runtime observation-cursor operation, not a
+governance acceptance operation:
+
+```yaml
+checkpoint_storage:
+  committed_file_role: bootstrap_or_fixture
+  runtime_checkpoint_role: mutable_observation_cursor
+  runtime_checkpoint_authoritative: false
+
+checkpoint_rules:
+  authority_effect: none
+  execution_effect: none
+  independent_governance_claims: false
+  may_acknowledge_only_ids_present_in_verified_canonical_registry: true
+  advancement_requires_successful_daily_run: true
+  advancement_occurs_after_brief_generation: true
+  failed_run_does_not_advance: true
+```
+
+The deterministic checkpoint advancement function must validate the canonical
+registry, reject unknown accepted-state IDs, record the verified canonical-main
+commit and observation timestamp, write atomically, and preserve the previous
+checkpoint when validation or writing fails. Normal daily runs should advance a
+runtime checkpoint path rather than requiring a repository commit for every
+cursor movement.
 
 ## Decisions Required After Initial Implementation
 
