@@ -823,6 +823,32 @@ external completion. `pending_external_archive` remains active until the
 authoritative archive destination confirms the write or provides a verifiable
 archive reference.
 
+Accepted-state registry ingestion must use the merged repository registry on
+`main` as the canonical source unless a governing standard explicitly
+designates another authoritative store. A local mirror may improve availability,
+but it is non-authoritative and must not create, amend, or reconcile accepted
+state independently.
+
+When a repository registry and a local mirror both exist, the Daily Coherence
+Agent must prefer the valid canonical repository registry, record the canonical
+commit, and classify mirror lag as system maintenance rather than an Architect
+decision. If the canonical source is unavailable and only a stale mirror exists,
+the mirror may be used only for bounded historical context; it must not be
+presented as current accepted state.
+
+Mirror refresh requires schema validation before replacement, atomic write
+behavior, mirror metadata containing the canonical repository, canonical commit,
+synchronization time, content hash, schema version, and sync status, and
+preservation of the last valid mirror when validation fails. Local and remote
+entries must not be merged heuristically.
+
+Accepted-state delta reporting must use a bounded observation checkpoint. A
+registry entry is newly accepted only when it is present in the canonical
+registry and has not already been acknowledged by the Daily Coherence Agent
+checkpoint. The checkpoint is an observation cursor, not an accepted-state
+registry, and must not contain independent governance claims. Refreshing a
+local mirror must not create a chronology event or a new accepted-state entry.
+
 ## Decisions Required After Initial Implementation
 
 ```yaml

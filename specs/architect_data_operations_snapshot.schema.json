@@ -620,6 +620,12 @@
         "action_state",
         "repository",
         "accepted_state_registry",
+        "registry_source_resolution",
+        "registry_operating_model",
+        "registry_state",
+        "Registry_ingestion",
+        "registry_usage",
+        "Accepted_state_delta",
         "chronology",
         "durable_archive",
         "runtime_evidence"
@@ -699,6 +705,223 @@
             "duplicate_entry_created": {
               "type": "boolean",
               "const": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "registry_source_resolution": {
+          "type": "object",
+          "required": [
+            "local_runtime_root",
+            "local_registry_absolute_path",
+            "remote_repository",
+            "remote_registry_commit",
+            "canonical_registry_standard",
+            "configured_registry_source",
+            "source_selection_logic"
+          ],
+          "properties": {
+            "local_runtime_root": {
+              "type": "string"
+            },
+            "local_registry_absolute_path": {
+              "type": "string"
+            },
+            "remote_repository": {
+              "const": "kokiomah-pixel/sharpe-nova-os"
+            },
+            "remote_registry_commit": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "canonical_registry_standard": {
+              "type": "string"
+            },
+            "configured_registry_source": {
+              "type": "string"
+            },
+            "source_selection_logic": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "registry_operating_model": {
+          "type": "object",
+          "required": [
+            "canonical_source",
+            "local_mirror_required",
+            "read_mode",
+            "fallback_behavior",
+            "local_mirror_authoritative"
+          ],
+          "properties": {
+            "canonical_source": {
+              "const": "repository_main"
+            },
+            "local_mirror_required": {
+              "type": "boolean"
+            },
+            "read_mode": {
+              "const": "read_only"
+            },
+            "fallback_behavior": {
+              "const": "source_unavailable"
+            },
+            "local_mirror_authoritative": {
+              "const": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "registry_state": {
+          "type": "object",
+          "required": [
+            "canonical_source_available",
+            "canonical_commit",
+            "canonical_registry_path",
+            "selected_registry_path",
+            "local_mirror_present",
+            "local_mirror_commit",
+            "local_mirror_in_sync",
+            "mirror_lag_detected",
+            "registry_schema_valid",
+            "registry_entry_count"
+          ],
+          "properties": {
+            "canonical_source_available": {
+              "type": "boolean"
+            },
+            "canonical_commit": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "canonical_registry_path": {
+              "type": "string"
+            },
+            "selected_registry_path": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "local_mirror_present": {
+              "type": "boolean"
+            },
+            "local_mirror_commit": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "local_mirror_in_sync": {
+              "type": "boolean"
+            },
+            "mirror_lag_detected": {
+              "type": "boolean"
+            },
+            "registry_schema_valid": {
+              "type": "boolean"
+            },
+            "registry_entry_count": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false
+        },
+        "Registry_ingestion": {
+          "type": "object",
+          "required": [
+            "canonical_registry_loaded",
+            "canonical_source",
+            "canonical_commit",
+            "schema_valid",
+            "mirror_status",
+            "contradictions_detected"
+          ],
+          "properties": {
+            "canonical_registry_loaded": {
+              "type": "boolean"
+            },
+            "canonical_source": {
+              "const": "repository_main"
+            },
+            "canonical_commit": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "schema_valid": {
+              "type": "boolean"
+            },
+            "mirror_status": {
+              "enum": [
+                "not_required",
+                "in_sync",
+                "lag_detected"
+              ]
+            },
+            "contradictions_detected": {
+              "const": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "registry_usage": {
+          "type": "object",
+          "required": [
+            "allowed",
+            "current_accepted_state_claim_allowed"
+          ],
+          "properties": {
+            "allowed": {
+              "enum": [
+                "current_accepted_state",
+                "bounded_historical_context_only",
+                "source_unavailable"
+              ]
+            },
+            "current_accepted_state_claim_allowed": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "Accepted_state_delta": {
+          "type": "object",
+          "required": [
+            "newly_accepted",
+            "stable_accepted_state",
+            "checkpoint_path"
+          ],
+          "properties": {
+            "newly_accepted": {
+              "anyOf": [
+                {
+                  "const": "none"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            "stable_accepted_state": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "checkpoint_path": {
+              "type": "string"
             }
           },
           "additionalProperties": false

@@ -1,0 +1,10 @@
+accepted_state_checkpoint:
+  schema_version: 1.0.0
+  checkpoint_type: observation_cursor
+  canonical_registry_commit: 1a133467ffef5cd6d64f1377c5a60557fa8901c9
+  latest_acknowledged_entry_ids:
+    - architect_data_operations_stage_a_policy_2026_07_17
+  observed_at: "2026-07-18T00:00:00Z"
+  authority_effect: none
+  execution_effect: none
+  independent_governance_claims: false
