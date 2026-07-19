@@ -2,35 +2,33 @@ name: CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches:
+      - main
   pull_request:
-    branches: [ main, master ]
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  validation:
-    runs-on: ubuntu-latest
+  doctrine:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Resolve chronology evidence provenance
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            reviewed_source_commit="${{ github.event.pull_request.head.sha }}"
-          else
-            reviewed_source_commit="${{ github.sha }}"
-          fi
-          ci_checkout_commit="$(git rev-parse HEAD)"
-          echo "NOVA_REVIEWED_SOURCE_COMMIT=${reviewed_source_commit}" >> "${GITHUB_ENV}"
-          echo "NOVA_CI_CHECKOUT_COMMIT=${ci_checkout_commit}" >> "${GITHUB_ENV}"
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
+          cache: pip
 
       - name: Install dependencies
         run: |
@@ -41,11 +39,87 @@ jobs:
       - name: Run doctrine lint
         run: .venv/bin/python scripts/doctrine_lint.py
 
+  scenarios:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip
+          .venv/bin/python -m pip install -r requirements.txt
+
       - name: Run decision scenario suite
         run: .venv/bin/python scripts/run_decision_scenario_suite.py
 
+  tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip
+          .venv/bin/python -m pip install -r requirements.txt
+
       - name: Run tests
         run: .venv/bin/python -m pytest
+
+  chronology:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Resolve chronology evidence provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            reviewed_source_commit="${{ github.event.pull_request.head.sha }}"
+          else
+            reviewed_source_commit="${{ github.sha }}"
+          fi
+
+          ci_checkout_commit="$(git rev-parse HEAD)"
+
+          echo "NOVA_REVIEWED_SOURCE_COMMIT=${reviewed_source_commit}" >> "${GITHUB_ENV}"
+          echo "NOVA_CI_CHECKOUT_COMMIT=${ci_checkout_commit}" >> "${GITHUB_ENV}"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip
+          .venv/bin/python -m pip install -r requirements.txt
 
       - name: Validate chronology reconciliation
         run: make chronology-verify
@@ -54,40 +128,95 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+
           .venv/bin/python - <<'PY'
           import json
           import os
           from pathlib import Path
 
           report_path = Path("reports/chronology/chronology-cleanliness.json")
+
           if not report_path.is_file():
               raise SystemExit(f"Missing chronology report: {report_path}")
 
           report = json.loads(report_path.read_text(encoding="utf-8"))
+
           expected = os.environ["NOVA_REVIEWED_SOURCE_COMMIT"]
           actual = report.get("source_commit")
           checkout = report.get("ci_checkout_commit")
+
           if actual != expected:
               raise SystemExit(
                   "Chronology artifact source commit mismatch: "
                   f"expected={expected} actual={actual}"
               )
+
           if not isinstance(checkout, str) or len(checkout) != 40:
               raise SystemExit(
                   "Chronology artifact checkout commit is missing or invalid"
               )
+
           print(
               "Chronology artifact provenance passed: "
               f"source_commit={actual} ci_checkout_commit={checkout}"
           )
           PY
 
-      - name: Check whitespace
-        run: git diff --check
-
       - name: Upload chronology cleanliness report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: chronology-cleanliness-report
           path: reports/chronology/
           if-no-files-found: warn
+
+  whitespace:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check whitespace
+        run: git diff --check
+
+  validation_summary:
+    if: always()
+    needs:
+      - doctrine
+      - scenarios
+      - tests
+      - chronology
+      - whitespace
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: Evaluate validation results
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          doctrine="${{ needs.doctrine.result }}"
+          scenarios="${{ needs.scenarios.result }}"
+          tests="${{ needs.tests.result }}"
+          chronology="${{ needs.chronology.result }}"
+          whitespace="${{ needs.whitespace.result }}"
+
+          echo "doctrine=${doctrine}"
+          echo "scenarios=${scenarios}"
+          echo "tests=${tests}"
+          echo "chronology=${chronology}"
+          echo "whitespace=${whitespace}"
+
+          if [ "${doctrine}" != "success" ] || \
+             [ "${scenarios}" != "success" ] || \
+             [ "${tests}" != "success" ] || \
+             [ "${chronology}" != "success" ] || \
+             [ "${whitespace}" != "success" ]; then
+            echo "One or more required validation controls failed."
+            exit 1
+          fi
+
+          echo "All required validation controls passed."
