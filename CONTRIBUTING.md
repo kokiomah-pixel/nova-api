@@ -16,14 +16,15 @@ Avoid adding examples, field names, docs, or tests that imply Nova grants permis
 
 ## Required Checks
 
-Before opening a pull request, run:
+Before opening a pull request, run the complete repository validation contract:
 
 ```bash
-./.venv/bin/python scripts/doctrine_lint.py
-./.venv/bin/python scripts/run_decision_scenario_suite.py
-./.venv/bin/python -m pytest
-git diff --check
+make verify
 ```
 
-Keep changes narrowly scoped and document governance-boundary changes in the relevant docs.
+Individual controls are available through `make verify-doctrine`,
+`make verify-scenarios`, `make verify-tests`, `make verify-chronology`, and
+`make verify-whitespace`. `make test` and `make verify-tests` run the full
+pytest suite; use `make test-isolated` only for diagnostic file-by-file runs.
 
+Keep changes narrowly scoped and document governance-boundary changes in the relevant docs.
