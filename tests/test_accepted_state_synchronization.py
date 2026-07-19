@@ -353,8 +353,16 @@ def test_pending_external_write_rejected_after_verified_receipt(tmp_path):
         validate_archive_record(path)
 
 
-def test_archive_receipt_closure_clears_related_maintenance_action():
-    action_state = build_action_state()
+def test_archive_receipt_closure_clears_related_maintenance_action(tmp_path):
+    _copy_sync_files(
+        tmp_path,
+        archive_status="completed_and_verified",
+    )
+
+    action_state = build_action_state(
+        tmp_path,
+        repository_state_override=_verified_repository_state(),
+    )
 
     assert action_state["system_maintenance_action_required"] is False
     assert action_state["Architect_decision_required"] is False
