@@ -1,0 +1,23 @@
+nsf_demo_checklist:
+  demo_name: NSF Demo - Review-Ready Before Execution
+  data_is_synthetic: true
+  single_scenario_only: true
+  unresolved_source_contradiction_present: true
+  review_readiness_derived_from_context: true
+  review_ready_does_not_equal_approved: true
+  execution_path_absent: true
+  recommendation_absent: true
+  approval_absent: true
+  denial_absent: true
+  routing_absent: true
+  signing_absent: true
+  settlement_absent: true
+  production_claim_absent: true
+  buyer_claim_absent: true
+  adoption_claim_absent: true
+  Stage_B_activation_absent: true
+  prior_work_boundary_present: true
+  research_surface_note_present: true
+  demo_to_Phase_I_mapping_present: true
+  comprehension_feedback_template_present: true
+  NSF_supporting_evidence_file_present: true

@@ -1,0 +1,11 @@
+{
+  "present": false,
+  "required_context": [
+    "institutional_collateral_limit",
+    "counterparty_exposure_limit"
+  ],
+  "unresolved_constraints": [
+    "institutional_collateral_limit",
+    "counterparty_exposure_limit"
+  ]
+}

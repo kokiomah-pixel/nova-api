@@ -1,0 +1,22 @@
+{
+  "collateral_position": {
+    "present": true,
+    "source": "synthetic_collateral_ledger_snapshot",
+    "freshness": "stale",
+    "observed_at": "2026-07-16T08:00:00Z"
+  },
+  "sources": [
+    {
+      "source_id": "synthetic_collateral_ledger_snapshot",
+      "provenance": "synthetic_demo_fixture",
+      "freshness": "stale"
+    },
+    {
+      "source_id": "synthetic_agent_request",
+      "provenance": "synthetic_demo_fixture",
+      "freshness": "current"
+    }
+  ],
+  "provenance_complete": true,
+  "freshness_state": "stale_source_data"
+}

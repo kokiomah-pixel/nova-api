@@ -1,0 +1,19 @@
+{
+  "present": true,
+  "contradictions": [
+    {
+      "contradiction_id": "synthetic-collateral-position-conflict-001",
+      "field": "collateral_position_status",
+      "source_a": {
+        "source_id": "synthetic_collateral_ledger_snapshot",
+        "value": "margin_buffer_below_required_threshold"
+      },
+      "source_b": {
+        "source_id": "synthetic_risk_summary",
+        "value": "margin_buffer_within_required_threshold"
+      },
+      "resolution_status": "unresolved",
+      "Nova_resolution": "none"
+    }
+  ]
+}

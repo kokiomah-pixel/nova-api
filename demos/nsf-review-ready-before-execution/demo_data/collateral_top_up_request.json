@@ -1,0 +1,17 @@
+{
+  "request_id": "synthetic-collateral-top-up-001",
+  "action_type": "collateral_top_up_request",
+  "account_reference": "SYNTHETIC-INSTITUTION-ACCOUNT-042",
+  "asset": "SYNTH-USD",
+  "proposed_amount_range": {
+    "minimum": 120000,
+    "maximum": 180000,
+    "currency": "SYNTH-USD"
+  },
+  "prepared_by": "synthetic_action_preparer",
+  "operationally_executable": true,
+  "supporting_inputs": [
+    "synthetic_collateral_position_reference",
+    "synthetic_source_context_reference"
+  ]
+}
