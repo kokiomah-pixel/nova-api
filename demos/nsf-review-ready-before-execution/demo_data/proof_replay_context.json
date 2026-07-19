@@ -1,0 +1,5 @@
+{
+  "present": true,
+  "replay_reference": "synthetic-replay-reference-001",
+  "reproducibility_hash": "to_be_generated_from_canonical_demo_inputs"
+}
