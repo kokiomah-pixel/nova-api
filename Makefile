@@ -1,6 +1,19 @@
 PYTHON ?= .venv/bin/python
 
-.PHONY: verify test require-venv chronology chronology-index chronology-report chronology-verify
+.PHONY: \
+	require-venv \
+	verify \
+	verify-doctrine \
+	verify-scenarios \
+	verify-tests \
+	verify-chronology \
+	verify-whitespace \
+	test \
+	test-isolated \
+	chronology \
+	chronology-index \
+	chronology-report \
+	chronology-verify
 
 require-venv:
 	@test -x "$(PYTHON)" || \
@@ -8,13 +21,31 @@ require-venv:
 	   echo "Run the repository bootstrap command first." >&2; \
 	   exit 1)
 
-verify: require-venv chronology-verify
+verify: \
+	verify-doctrine \
+	verify-scenarios \
+	verify-tests \
+	verify-chronology \
+	verify-whitespace
+
+verify-doctrine: require-venv
 	$(PYTHON) scripts/doctrine_lint.py
+
+verify-scenarios: require-venv
 	$(PYTHON) scripts/run_decision_scenario_suite.py
-	$(MAKE) test PYTHON=$(PYTHON)
+
+verify-tests: require-venv
+	$(PYTHON) -m pytest
+
+verify-chronology: require-venv
+	$(MAKE) chronology-verify PYTHON=$(PYTHON)
+
+verify-whitespace:
 	git diff --check
 
-test: require-venv
+test: verify-tests
+
+test-isolated: require-venv
 	@for test_file in $$(find tests -name 'test_*.py' | sort); do \
 		echo "Running $$test_file"; \
 		$(PYTHON) -m pytest -q "$$test_file" || exit 1; \
