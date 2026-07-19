@@ -19,13 +19,14 @@ DEMO_ID = "review-ready-before-execution"
 
 
 def load_demo_data(data_root: Path = DATA_ROOT) -> dict[str, dict[str, Any]]:
-    """Load the six synthetic inputs used by this single-scenario demo."""
+    """Load the seven synthetic inputs used by this single-scenario demo."""
     filenames = {
         "request": "collateral_top_up_request.json",
         "source": "source_context.json",
         "classification": "classification_context.json",
         "constraints": "constraint_exposure_context.json",
         "chronology": "chronology_context.json",
+        "contradictions": "contradiction_context.json",
         "proof_replay": "proof_replay_context.json",
     }
     return {
@@ -51,6 +52,7 @@ def compile_review_state(
     source = data["source"]
     constraints = data["constraints"]
     chronology = data["chronology"]
+    contradictions = data["contradictions"]
     reproducibility_hash = canonical_reproducibility_hash(data)
 
     stale_context = [
@@ -62,6 +64,14 @@ def compile_review_state(
     unresolved_questions = []
     if chronology.get("chronology_gap"):
         unresolved_questions.append(chronology["chronology_gap"])
+    contradiction_flags = [
+        contradiction["contradiction_id"]
+        for contradiction in contradictions["contradictions"]
+        if contradiction.get("resolution_status") == "unresolved"
+    ]
+    review_ready = not any(
+        [missing_context, stale_context, contradiction_flags, unresolved_questions]
+    )
 
     return {
         "review_state": {
@@ -78,10 +88,11 @@ def compile_review_state(
                 "operationally_executable": request["operationally_executable"],
             },
             "review_readiness": {
-                "review_ready": False,
+                "review_ready": review_ready,
+                "readiness_meaning": "context_package_has_no_flagged_unresolved_conditions",
                 "missing_context": missing_context,
                 "stale_context": stale_context,
-                "contradiction_flags": [],
+                "contradiction_flags": contradiction_flags,
                 "unresolved_questions": unresolved_questions,
             },
             "context": {
@@ -94,6 +105,7 @@ def compile_review_state(
                 "classification": data["classification"],
                 "constraints_and_exposure": constraints,
                 "chronology": chronology,
+                "contradictions": contradictions,
                 "proof_or_replay": {
                     **data["proof_replay"],
                     "reproducibility_hash": reproducibility_hash,
@@ -105,6 +117,7 @@ def compile_review_state(
                 "Nova_approval": False,
                 "Nova_denial": False,
                 "Nova_execution": False,
+                "review_ready_does_not_equal_approved": True,
                 "execution_effect": "none",
                 "authority_effect": "none",
             },

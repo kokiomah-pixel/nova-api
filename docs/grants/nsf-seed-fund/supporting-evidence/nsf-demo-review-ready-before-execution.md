@@ -10,6 +10,8 @@ This demo helps make the Sharpe Nova OS Phase I research problem concrete.
 
 It illustrates why an agent-prepared financial action can be executable but not institutionally review-ready.
 
+The synthetic scenario contains stale source data, missing constraint context, an unresolved chronology reference, and an unresolved source contradiction. The demonstration preserves a disagreement between two synthetic sources. Nova surfaces the contradiction without deciding which source is correct.
+
 ## Relationship to NSF Project Pitch
 
 The demo supports the following Project Pitch areas:

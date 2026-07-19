@@ -14,6 +14,8 @@ The unresolved Phase I questions remain:
 
 The demo is intentionally bounded and synthetic.
 
+Its single scenario contains stale source data, missing constraint context, an unresolved chronology reference, and an unresolved source contradiction. The demonstration preserves a disagreement between two synthetic sources. Nova surfaces the contradiction without deciding which source is correct.
+
 It shows why the problem matters.
 
 It does not claim the Phase I research is solved.

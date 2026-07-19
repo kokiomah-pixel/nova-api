@@ -8,6 +8,10 @@ From an operational standpoint, the action looks ready to move.
 
 But executable is not the same as review-ready.
 
+This synthetic scenario contains stale source data, missing constraint context, an unresolved chronology reference, and an unresolved source contradiction.
+
+The demonstration preserves a disagreement between two synthetic sources. Nova surfaces the contradiction without deciding which source is correct.
+
 This NSF Demo shows a bounded Nova review-state pass.
 
 Nova structures context around the prepared action:
@@ -29,6 +33,8 @@ It is not a denial.
 It is not an execution command.
 
 It is a governed review-state package for local authority.
+
+Review-ready means the bounded context package has no currently flagged context deficiency. Only local authority can decide what follows.
 
 Agent prepares the action.
 Nova structures the review context.

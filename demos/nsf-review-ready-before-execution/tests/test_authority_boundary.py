@@ -20,6 +20,7 @@ def test_authority_boundary_fields_are_false():
     assert boundary["Nova_approval"] is False
     assert boundary["Nova_denial"] is False
     assert boundary["Nova_execution"] is False
+    assert boundary["review_ready_does_not_equal_approved"] is True
 
 
 def test_execution_and_authority_effects_are_none():

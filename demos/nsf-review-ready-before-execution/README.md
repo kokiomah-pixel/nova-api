@@ -52,10 +52,14 @@ The proposed Phase I research remains focused on minimum sufficient context, tem
 ## Five-stage demo flow
 
 1. **Agent prepares action.** A synthetic request has an account reference, asset, amount range, and supporting inputs; it can look operationally executable.
-2. **Review gap.** Stale source data, missing constraint context, and an unresolved chronology reference show that executable is not review-ready.
+2. **Review gap.** The synthetic scenario contains stale source data, missing constraint context, an unresolved chronology reference, and an unresolved source contradiction; executable is not review-ready.
 3. **Nova structures context.** The compiler places position, provenance, freshness, classification, constraint, chronology, replay, and authority-boundary context in one bounded object.
 4. **Review-state object.** The generated machine-readable package preserves missing-context, stale-source, contradiction, and authority-boundary fields without resolving them as a decision.
 5. **Boundary.** Nova does not recommend, approve, deny, route, sign, settle, or execute; local authority remains external.
+
+The demonstration preserves a disagreement between two synthetic sources. Nova surfaces the contradiction without deciding which source is correct.
+
+`review_ready` means only that the bounded context package has no flagged unresolved conditions. It does not mean approved, authorized, safe to execute, compliant, recommended, or institutionally accepted.
 
 ## How to run
 

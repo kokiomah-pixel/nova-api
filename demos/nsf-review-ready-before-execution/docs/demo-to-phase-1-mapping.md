@@ -6,9 +6,11 @@
 | Review-readiness gap | Determine minimum sufficient review context | Which context is materially necessary across scenarios |
 | Stale source flag | Test temporal coherence | How reliably stale evidence is detected under asynchronous updates |
 | Missing constraint context | Test context omission detection | False negatives and false positives under heterogeneous source conditions |
-| Contradiction flag | Preserve unresolved contradictions | Whether contradictions can be preserved without false resolution |
+| Unresolved source contradiction flag | Preserve unresolved contradictions | Whether contradictions can be preserved without false resolution or source selection |
 | Review-state object | Test deterministic reconstruction | Whether independent reviewers reconstruct materially equivalent states |
 | Authority boundary fields | Test authority-boundary comprehension | Whether users understand Nova does not approve or execute |
 | Replay reference/hash | Test reproducibility | Whether replay remains stable across source order and version changes |
 
 This mapping prevents the demo from being treated as finished product evidence.
+
+The demonstration preserves a disagreement between two synthetic sources. Nova surfaces the contradiction without deciding which source is correct.
