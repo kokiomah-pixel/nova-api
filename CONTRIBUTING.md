@@ -14,6 +14,17 @@ Contributions must preserve these boundaries:
 
 Avoid adding examples, field names, docs, or tests that imply Nova grants permission, approves decisions, executes orders, or recommends trades.
 
+## Environment Setup
+
+Create the local environment with Python 3.12 and the same constrained dependency resolution used in CI:
+
+```bash
+python3.12 -m venv .venv
+.venv/bin/python -m pip install --upgrade pip
+.venv/bin/python -m pip install -r requirements.txt -c constraints.txt
+.venv/bin/python -m pip check
+```
+
 ## Required Checks
 
 Before opening a pull request, run the complete repository validation contract:
