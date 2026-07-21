@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-17T12:00:00Z",
+  "generated_at": "2026-07-20T22:16:37Z",
   "lanes": {
     "archive": {
       "event_count": 1,
@@ -8,9 +8,9 @@
       "path": "chronology/archive/archive-events.jsonl"
     },
     "governance": {
-      "event_count": 9,
-      "latest_event_id": "GOV-20260717-STAGE-A-GOVERNANCE-INFRA-ACCEPTED",
-      "latest_occurred_at": "2026-07-17T00:00:00Z",
+      "event_count": 10,
+      "latest_event_id": "GOV-20260720-REPOSITORY-INTEGRITY-CYCLE-CLOSED",
+      "latest_occurred_at": "2026-07-20T00:00:00Z",
       "path": "chronology/governance/governance-events.jsonl"
     },
     "operations": {
