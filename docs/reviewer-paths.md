@@ -49,6 +49,22 @@ You should leave this path understanding:
 
 ---
 
+## Bounded Stablecoin Treasury Integration Review
+
+Use this path to inspect one concrete, non-executable integration profile and its preserved authority boundaries.
+
+1. [Where Nova Sits](go-to-market/where-nova-sits.md)
+2. [First Use Case: Agent-Prepared Treasury Action](go-to-market/first-use-case-agent-prepared-treasury-action.md)
+3. [Agent-Prepared Stablecoin Treasury Integration Path](architecture/agent-prepared-stablecoin-treasury-integration-path.md)
+4. [Adjacent Layer Map](architecture/adjacent-layer-map.md)
+5. [Pre-Action Context Contract](architecture/pre-action-context-contract.md)
+6. [Review Completeness Standard](governance/review-completeness-standard.md)
+7. [Synthetic Stablecoin Treasury Example](../examples/pre_action_context/agent_prepared_stablecoin_treasury_action.yaml)
+
+This path is a bounded documentation and conceptual-interface review. It does not show a new endpoint, runtime temporal behavior, production integration, authorization logic, or execution capability.
+
+---
+
 ## NSF Reviewer Path
 
 Use this path to evaluate technical novelty, R&D risk, and Phase I readiness.

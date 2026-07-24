@@ -89,3 +89,18 @@ Sample conceptual payloads:
 
 - [sample_request.json](sample_request.json)
 - [sample_response.json](sample_response.json)
+
+## Synthetic Stablecoin Treasury Illustration
+
+- [agent_prepared_stablecoin_treasury_action.yaml](agent_prepared_stablecoin_treasury_action.yaml)
+
+Classification:
+
+```text
+synthetic interface illustration
+not runtime behavior
+not production integration
+not authority logic
+```
+
+The example shows different source-observation times, known pending activity, an unresolved source conflict, an institution-defined temporal condition, Nova-structured review context, and a local-authority handoff. It contains no executable transaction data.

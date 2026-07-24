@@ -1,0 +1,126 @@
+example_metadata:
+  record_source_type: synthetic
+  production_data: false
+  execution_capability: none
+  authorization_capability: none
+  wallet_address_is_real: false
+  adoption_evidence: false
+
+prepared_action:
+  action_id: SYNTH-TREASURY-001
+  action_type: stablecoin_treasury_movement
+  asset: SYNTH-USDC
+  amount_display_only: "250000 synthetic units"
+  source_account_reference: SYNTH-TREASURY-ACCOUNT
+  destination_reference: SYNTH-CUSTODY-ACCOUNT
+  prepared_by: SYNTH-AGENT-SESSION-01
+  prepared_at: "2026-07-23T14:00:00Z"
+  intended_execution_window:
+    starts_at: "2026-07-23T14:30:00Z"
+    ends_at: "2026-07-23T14:45:00Z"
+  executable_transaction_data: none
+
+source_observations:
+  - source_id: SYNTH-WALLET-SNAPSHOT-A
+    source_type: wallet_policy_snapshot
+    observed_at: "2026-07-23T13:42:00Z"
+    received_at: "2026-07-23T13:44:00Z"
+    available_position_display_only: "600000 synthetic units"
+    known_pending_activity_included: false
+    institution_designated_authoritative: unresolved
+
+  - source_id: SYNTH-CUSTODY-LEDGER-B
+    source_type: custody_ledger_snapshot
+    observed_at: "2026-07-23T13:51:00Z"
+    received_at: "2026-07-23T13:54:00Z"
+    available_position_display_only: "475000 synthetic units"
+    known_pending_activity_included: true
+    institution_designated_authoritative: unresolved
+
+known_pending_activity:
+  - activity_id: SYNTH-PENDING-OUTFLOW-01
+    activity_type: pending_outbound_position_change
+    amount_display_only: "125000 synthetic units"
+    execution_data_present: false
+    effect: changes_available_position_if_completed
+
+unresolved_source_conflict:
+  conflict_id: SYNTH-CONFLICT-AVAILABLE-POSITION-01
+  field: available_position
+  sources:
+    - SYNTH-WALLET-SNAPSHOT-A
+    - SYNTH-CUSTODY-LEDGER-B
+  reason: observations_differ_and_pending_activity_is_not_represented_equally
+  Nova_selected_winning_source: false
+  local_authority_resolution_required: true
+
+institution_defined_temporal_condition:
+  condition_id: SYNTH-EVIDENCE-AGE-20M
+  applies_to: stablecoin_treasury_movement
+  maximum_evidence_age_at_intended_execution_window: 20_minutes
+  known_pending_activity_must_be_represented: true
+  effect_defined_by_institution: request_revalidation_context_for_local_review
+  Nova_automatic_block: false
+
+review_context_output:
+  review_context_id: SYNTH-REVIEW-CONTEXT-001
+  action_reference: SYNTH-TREASURY-001
+  review_completeness:
+    state: incomplete_but_visible
+    missing_context: []
+    unresolved_questions:
+      - Which source does the institution treat as authoritative for available position?
+      - Does local authority require updated observations for the intended execution window?
+  source_state:
+    conflicting_sources:
+      - SYNTH-WALLET-SNAPSHOT-A
+      - SYNTH-CUSTODY-LEDGER-B
+    stale_sources_at_intended_execution_window:
+      - SYNTH-WALLET-SNAPSHOT-A
+      - SYNTH-CUSTODY-LEDGER-B
+    known_pending_activity:
+      - SYNTH-PENDING-OUTFLOW-01
+  temporal_context:
+    status: uncertain
+    reasons:
+      - source_observations_occur_at_materially_different_times
+      - pending_activity_changes_available_position
+      - intended_execution_window_exceeds_institution_defined_evidence_age
+    institution_defined_conditions:
+      - SYNTH-EVIDENCE-AGE-20M
+    continuous_monitoring_performed: false
+    automatic_authorization_effect: none
+  contradiction_context:
+    unresolved_contradictions:
+      - SYNTH-CONFLICT-AVAILABLE-POSITION-01
+    Nova_selected_winning_source: false
+  chronology_context:
+    prior_related_records: []
+    automatic_chronology_write: false
+  proof_and_replay:
+    source_references:
+      - SYNTH-WALLET-SNAPSHOT-A
+      - SYNTH-CUSTODY-LEDGER-B
+    schema_reference: conceptual_example_only
+    reproducibility_reference: SYNTH-REPLAY-REFERENCE-001
+
+local_authority_handoff:
+  local_authority_required: true
+  decision_owner: SYNTH-TREASURY-AUTHORITY-ROLE
+  question_presented: whether_updated_context_is_needed_before_local_decision
+  Nova_recommendation: false
+  Nova_approval: false
+  Nova_denial: false
+  Nova_authorization: false
+  Nova_execution: false
+  external_execution_systems_remain_outside_Nova: true
+
+explicit_non_outputs:
+  transaction_authorization: prohibited
+  approval_or_rejection_decision: prohibited
+  execution_instruction: prohibited
+  wallet_signature: prohibited
+  routing_instruction: prohibited
+  settlement_instruction: prohibited
+  real_wallet_address: prohibited
+  signing_payload: prohibited
