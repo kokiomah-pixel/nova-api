@@ -64,6 +64,20 @@ They define the governed review environment around a prepared action.
 
 ---
 
+## Temporal Context
+
+Temporal context identifies whether source observations, pending activity, the intended decision window, and the intended execution window remain sufficiently aligned for local review under institution-defined conditions.
+
+Temporal context is one property of the governed review context. It is not approval validity, transaction authorization, continuous monitoring, or execution control.
+
+```text
+Nova surfaces temporal conditions.
+Local authority determines the consequence.
+Execution systems remain outside Nova.
+```
+
+---
+
 ## 1. Doctrine Context
 
 Doctrine Context includes durable boundaries that should not change unless explicitly governed.
@@ -127,6 +141,10 @@ Examples:
 * wallet or account reference
 * source context
 * proof metadata
+* source observation and receipt times
+* known pending activity
+* intended decision and execution windows
+* institution-defined temporal conditions
 * constraint pressure
 * similar prior reviewed actions
 * required authority path
@@ -195,6 +213,9 @@ Nova may receive:
 * exception context
 * Reflex Memory references
 * review requirements
+* source observation times and pending state
+* intended decision and execution windows
+* institution-defined evidence-age or revalidation conditions
 
 Receipt of context does not create authority.
 
@@ -211,6 +232,7 @@ Nova structures:
 * chronology relevance
 * proof-reference visibility
 * exception visibility
+* temporal alignment and uncertainty
 * review readiness
 * Reflex Memory review posture
 * local authority boundary
@@ -233,6 +255,7 @@ The output may include:
 * Reflex Memory context
 * proof metadata
 * exception visibility
+* temporal context, including uncertainty or stale and superseded observations
 * review readiness state
 * non-authority statement
 
@@ -300,6 +323,11 @@ Examples:
 * proof references are incomplete
 * prior governance stress is not surfaced
 * stale context is reused
+* evidence was correct when observed but is stale at review time
+* two systems were observed at materially different times
+* pending settlement changes the position
+* the intended execution window moves beyond an institution-defined evidence-age condition
+* new evidence creates a contradiction after the packet was constructed
 * review completeness is assumed but not established
 * agent context is mistaken for governance context
 * available information is not structured into review context
@@ -307,6 +335,8 @@ Examples:
 The deeper failure is not always the agent, rail, custodian, or workflow.
 
 The failure may be the governed context environment around the action.
+
+Nova surfaces temporal conditions. Local authority determines the consequence. Execution systems remain outside Nova.
 
 ---
 

@@ -57,6 +57,10 @@ minimum_review_ready_conditions:
     required: true
     purpose: classify whether sources are confirmed, incomplete, conflicting, stale, unavailable, or reconciled
 
+  temporal_context:
+    required: action_or_institution_dependent
+    purpose: surface whether review-relevant evidence remains temporally coherent for the prepared action
+
   authority_path:
     required: true
     purpose: identify who must review or decide locally
@@ -115,6 +119,42 @@ Examples:
 In these cases, Nova should surface the limitation as review context.
 
 Nova should not resolve authority.
+
+## Temporal Context
+
+Temporal context is one component of review completeness.
+
+```yaml
+temporal_context_states:
+  current:
+    meaning: no institution-defined temporal limitation is presently flagged
+
+  uncertain:
+    meaning: temporal sufficiency cannot be confirmed from the supplied evidence
+
+  stale:
+    meaning: one or more review-relevant observations exceed an institution-defined condition
+
+  superseded:
+    meaning: newer material evidence has replaced the state used to construct the packet
+```
+
+Temporal context is not transaction authorization.
+
+It is not approval validity.
+
+It is not execution control.
+
+`stale` does not automatically equal `blocked_for_review_context`.
+
+```yaml
+temporal_effect:
+  institution_defined: true
+  Nova_automatic_block: false
+  visible_to_local_authority: true
+```
+
+The institution may define circumstances where stale context makes a packet unsuitable for review. Nova surfaces the applicable condition and state; it does not control the transaction.
 
 ## Review Completeness States
 

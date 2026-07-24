@@ -24,6 +24,19 @@ Builders should inspect this endpoint first. It accepts an intended action conte
 
 `/v1/proof/{decision_id}` verifies the derived coordination context after a context response creates a proof-bearing record.
 
+## Specific Integration Profile
+
+The [Agent-Prepared Stablecoin Treasury Integration Path](agent-prepared-stablecoin-treasury-integration-path.md) is one concrete profile of this existing contract.
+
+It is:
+
+- not a new endpoint;
+- not a production deployment;
+- not a replacement for `/v1/context`; and
+- not an authorization protocol.
+
+Its conceptual envelopes provide design and discovery vocabulary while preserving this contract as the canonical integration surface.
+
 ## What Pre-Action Context Means
 
 Pre-action context is governance information produced before a local operator, agent, or orchestration system decides how to proceed. It can describe constraint pressure, timing pressure, retry escalation risk, classification state, source segmentation, proof reproducibility, and continuity posture.
@@ -69,6 +82,25 @@ Current `/v1/context` inputs are query fields, not a JSON body. Common builder-f
 - `telemetry_source_scores`
 - `halt_release_authority_input`
 - `halt_release_evidence_input`
+
+### Conceptual Temporal Context Fields
+
+Conceptual input and output profiles may use the following vocabulary:
+
+```yaml
+temporal_context:
+  source_observed_at:
+  source_received_at:
+  review_context_created_at:
+  intended_execution_window:
+  maximum_evidence_age:
+  known_pending_state:
+  temporal_conflicts: []
+  context_valid_until:
+  invalidation_conditions: []
+```
+
+These fields are a design vocabulary for review-context discovery. They do not establish that the current endpoint implements automated temporal expiration, transaction blocking, or continuous monitoring.
 
 ## Output Shape
 
