@@ -1,0 +1,311 @@
+{
+  "name": "review_context_contract",
+  "version": "design-v2",
+  "interface_type": "proposed_response_contract",
+  "implementation_status": "not_implemented",
+  "authority_model": "non_authority",
+  "authority_effect": "none",
+  "execution_effect": "none",
+  "canonical_boundary": [
+    "Agent prepares action.",
+    "Nova structures review context.",
+    "Local authority decides.",
+    "External systems execute.",
+    "Nova does not execute."
+  ],
+  "request_model": {
+    "record_type": "review_context_request",
+    "semantics": {
+      "prepared_action_origin": "external_to_Nova",
+      "permission_application": false,
+      "Nova_selects_institutional_policy": false,
+      "sensitive_fields_require_scoped_handling": true
+    },
+    "required_fields": [
+      "request_id",
+      "prepared_action",
+      "evidence",
+      "institution_context",
+      "requested_context"
+    ],
+    "prepared_action_fields": [
+      "action_type",
+      "asset_or_resource",
+      "amount_or_scope",
+      "destination_or_venue",
+      "intended_time_window"
+    ],
+    "evidence_fields": [
+      "sources",
+      "observed_at",
+      "received_at"
+    ],
+    "institution_context_fields": [
+      "institution_id_or_policy_profile",
+      "relevant_constraints",
+      "prior_review_references"
+    ],
+    "requested_context_values": [
+      "source_state",
+      "contradiction_visibility",
+      "constraint_context",
+      "chronology_context",
+      "temporal_context",
+      "review_completeness"
+    ]
+  },
+  "response_model": {
+    "record_type": "review_context_response",
+    "required_fields": [
+      "schema_version",
+      "context_id",
+      "request_id",
+      "created_at",
+      "prepared_action_reference",
+      "context_state",
+      "source_state",
+      "constraint_context",
+      "temporal_context",
+      "review_completeness",
+      "chronology_context",
+      "authority_handoff",
+      "reproducibility",
+      "boundary"
+    ],
+    "context_state": {
+      "permitted_values": [
+        "current",
+        "uncertain",
+        "stale",
+        "superseded"
+      ],
+      "required_fields": [
+        "value",
+        "reasons"
+      ]
+    },
+    "source_state": {
+      "permitted_values": [
+        "complete",
+        "partial",
+        "conflicted",
+        "unavailable"
+      ],
+      "required_fields": [
+        "value",
+        "sources",
+        "unresolved_source_conflicts"
+      ]
+    },
+    "constraint_context": {
+      "required_fields": [
+        "observed_constraints",
+        "constraint_sources",
+        "unresolved_constraint_questions"
+      ]
+    },
+    "temporal_context": {
+      "required_fields": [
+        "source_observed_at",
+        "source_received_at",
+        "review_context_created_at",
+        "intended_action_window",
+        "temporal_conflicts",
+        "pending_state"
+      ]
+    },
+    "review_completeness": {
+      "permitted_values": [
+        "complete",
+        "partial",
+        "conflicted",
+        "unavailable"
+      ],
+      "required_fields": [
+        "value",
+        "missing_context",
+        "unresolved_conditions"
+      ],
+      "meaning": "selected_profile_context_is_present_or_gaps_are_explicit_for_local_review",
+      "does_not_mean": [
+        "policy_satisfied",
+        "transaction_permitted",
+        "risk_accepted",
+        "action_executable",
+        "legal_approval_obtained",
+        "compliance_approval_obtained"
+      ]
+    },
+    "chronology_context": {
+      "required_fields": [
+        "prior_review_references",
+        "accepted_memory_references",
+        "relevant_changes_since_prior_review"
+      ],
+      "automatic_chronology_acceptance": false
+    },
+    "authority_handoff": {
+      "decision_owner": "local_institutional_authority",
+      "execution_owner": "external_system",
+      "Nova_authority_effect": "none"
+    },
+    "reproducibility": {
+      "required_fields": [
+        "schema_version",
+        "source_versions",
+        "classification_version",
+        "context_hash",
+        "signature"
+      ]
+    },
+    "boundary": {
+      "approval_effect": "none",
+      "authorization_effect": "none",
+      "execution_effect": "none"
+    }
+  },
+  "prohibited_external_fields": [
+    "decision_status",
+    "decision_admission_record",
+    "permission_budget",
+    "permission_budget_class",
+    "adjusted_size",
+    "conditioned_size",
+    "execution_posture",
+    "halt_release_authority",
+    "prevented_action",
+    "intervention_type",
+    "recommended_action"
+  ],
+  "prohibited_external_values": [
+    "ALLOW",
+    "CONSTRAIN",
+    "VETO",
+    "DENY",
+    "HALT",
+    "REDUCE",
+    "RETRY_BLOCKED",
+    "RETRY_DELAYED",
+    "PRESSURE_ESCALATED",
+    "approved",
+    "authorized",
+    "executable",
+    "cleared",
+    "blocked"
+  ],
+  "authority_semantics": {
+    "permitted": [
+      "authoritative_source_identity",
+      "authoritative_schema_version",
+      "authoritative_record_hash",
+      "authoritative_Nova_observation"
+    ],
+    "prohibited": [
+      "authoritative_execution_permission",
+      "authoritative_transaction_decision",
+      "authoritative_institutional_approval",
+      "authoritative_denial"
+    ],
+    "interpretation": "Nova may authoritatively record its observation and packet construction but does not make the institutional decision."
+  },
+  "proof_semantics": {
+    "proof_type": "review_context_integrity",
+    "authority_effect": "none",
+    "verifies": [
+      "packet_integrity",
+      "schema_identity",
+      "source_reference_integrity",
+      "classification_version",
+      "context_hash",
+      "creation_time",
+      "chronology_references",
+      "reproducibility_inputs"
+    ],
+    "does_not_verify": [
+      "approval",
+      "authorization",
+      "execution_permission",
+      "institutional_acceptance",
+      "transaction_validity"
+    ]
+  },
+  "http_semantics": {
+    "valid_context_response": 200,
+    "incomplete_context": 200,
+    "conflicted_context": 200,
+    "stale_context": 200,
+    "unavailable_source_context": {
+      "status": 200,
+      "condition": "request_processed_and_unavailability_can_be_described"
+    },
+    "malformed_request": [
+      400,
+      422
+    ],
+    "authentication_failure": [
+      401,
+      403
+    ],
+    "rate_limit": 429,
+    "Nova_service_unavailable": 503,
+    "domain_state_changes_HTTP_status": false,
+    "interpretation": "HTTP status describes request handling and never the institution's action decision."
+  },
+  "internal_classification_boundary": {
+    "may_exist": true,
+    "may_be_exposed_as_external_permission": false,
+    "may_directly_determine_local_execution": false,
+    "may_be_used_to_construct_descriptive_context": "only_with_field_level_mapping_review",
+    "public_packet_may_be_derived_solely_from_legacy_status": false,
+    "required_derivation_sources": [
+      "source_condition",
+      "telemetry_integrity",
+      "constraint_evidence",
+      "chronology_state",
+      "unresolved_questions",
+      "temporal_condition"
+    ]
+  },
+  "billing_semantics": {
+    "initial_state": "disabled",
+    "outcome_dependent": false,
+    "status_dependent": false,
+    "payment_receipt_authority_effect": "none",
+    "permitted_billable_objects": [
+      "context_packet_generation",
+      "proof_generation",
+      "telemetry_access",
+      "retained_chronology_service",
+      "private_institutional_integration"
+    ],
+    "prohibited_billable_objects": [
+      "approval",
+      "authorization",
+      "admission",
+      "permission",
+      "favorable_status",
+      "execution_entitlement",
+      "transaction_clearance"
+    ]
+  },
+  "x402_boundary": {
+    "public_surface": "disabled",
+    "production_reopening": "not_authorized",
+    "v2_integration": "not_part_of_initial_implementation",
+    "payment_authority_effect": "none"
+  },
+  "local_decision_boundary": {
+    "local_authority_required": true,
+    "local_authority_selects_policy": true,
+    "local_authority_determines_action": true,
+    "Nova_determines_action": false,
+    "external_system_performs_execution": true
+  },
+  "implementation_gate": {
+    "endpoint_exists": false,
+    "approved_for_runtime_implementation": false,
+    "accepted_state_review_required": true,
+    "chronology_review_required": true,
+    "consumer_inventory_required": true
+  }
+}
