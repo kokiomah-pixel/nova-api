@@ -35,6 +35,7 @@ from core.feed_metering import (
 )
 from core.feed_pricing import pricing_for_tier
 from core.public_surface_config import (
+    public_api_documentation_enabled,
     public_service_discovery_enabled,
     public_x402_operational,
 )
@@ -99,10 +100,31 @@ def get_current_epoch() -> int:
     now = get_current_datetime()
     return int(now.timestamp() // 3600)  # hourly epoch bucket
 
+
+PUBLIC_API_DOCUMENTATION_ENABLED = public_api_documentation_enabled()
+
 app = FastAPI(
     title="Sharpe Nova OS API",
     version="1.1.0",
-    description="Non-authority pre-execution governance review infrastructure for programmable capital workflows."
+    description=(
+        "Non-authority pre-execution governance review infrastructure "
+        "for programmable capital workflows."
+    ),
+    openapi_url=(
+        "/openapi.json"
+        if PUBLIC_API_DOCUMENTATION_ENABLED
+        else None
+    ),
+    docs_url=(
+        "/docs"
+        if PUBLIC_API_DOCUMENTATION_ENABLED
+        else None
+    ),
+    redoc_url=(
+        "/redoc"
+        if PUBLIC_API_DOCUMENTATION_ENABLED
+        else None
+    ),
 )
 
 SIGNING_SECRET = os.getenv("NOVA_SIGNING_SECRET", "replace_me")

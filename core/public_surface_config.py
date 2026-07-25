@@ -4,6 +4,7 @@ import os
 
 
 PUBLIC_SERVICE_DISCOVERY_ENV = "NOVA_PUBLIC_SERVICE_DISCOVERY_ENABLED"
+PUBLIC_API_DOCUMENTATION_ENV = "NOVA_PUBLIC_API_DOCUMENTATION_ENABLED"
 PUBLIC_X402_ENV = "NOVA_PUBLIC_X402_ENABLED"
 X402_SETTLEMENT_ENV = "NOVA_X402_SETTLEMENT_ENABLED"
 
@@ -16,6 +17,10 @@ def _enabled(name: str) -> bool:
 
 def public_service_discovery_enabled() -> bool:
     return _enabled(PUBLIC_SERVICE_DISCOVERY_ENV)
+
+
+def public_api_documentation_enabled() -> bool:
+    return _enabled(PUBLIC_API_DOCUMENTATION_ENV)
 
 
 def public_x402_enabled() -> bool:
