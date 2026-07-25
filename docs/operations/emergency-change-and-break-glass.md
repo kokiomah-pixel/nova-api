@@ -25,7 +25,7 @@ Nova does not execute.
 
 ```yaml
 emergency_triggers:
-  - OpenAPI_or_docs_return_200
+  - OpenAPI_Swagger_or_ReDoc_returns_200
   - services_manifest_returns_200
   - x402_feed_returns_402
   - payment_or_wallet_metadata_reappears

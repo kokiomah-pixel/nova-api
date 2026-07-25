@@ -102,13 +102,24 @@ incident_closure_receipt:
   closure_reviewed_at_UTC:
   outcome:
 
+  accountability:
+    production_owner: Kome_Okiomah
+
   production_custody:
-    Render_owner:
+    Render_access_restored:
+    observed_Render_account_holder:
+    observed_Render_role:
+    Render_custody_attested:
     service_id:
     deployed_commit:
     expected_commit:
     commit_matches:
     effective_containment_flags:
+
+    CDP_access_restored:
+    observed_CDP_account_holder:
+    observed_CDP_role:
+    CDP_custody_attested:
 
   credentials:
     API_key_inventory_complete:
@@ -163,7 +174,7 @@ provider-account data.
 
 ```yaml
 reopen_incident_when:
-  - OpenAPI_or_docs_return_200
+  - OpenAPI_Swagger_or_ReDoc_returns_200
   - services_manifest_returns_200
   - x402_feed_returns_402
   - payment_or_wallet_metadata_reappears

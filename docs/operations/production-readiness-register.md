@@ -39,6 +39,24 @@ readiness_states:
 
 ## Current State
 
+The following state is a point-in-time governance snapshot, not live telemetry.
+It must be refreshed only from a named evidence receipt.
+
+```yaml
+state_snapshot:
+  as_of_UTC: "2026-07-25T14:17:27Z"
+  evidence_scope:
+    - GitHub_repository_governance
+    - externally_observed_public_runtime_behavior
+  excluded_from_attestation:
+    - Render_control_plane_custody
+    - deployed_commit
+    - effective_production_flags
+    - production_API_keys
+    - retained_route_activity
+    - CDP_activity
+```
+
 ```yaml
 current_state:
   GitHub:
@@ -79,6 +97,10 @@ current_state:
     implemented: false
     production_active: false
 ```
+
+A later reader must not treat this snapshot as evidence that the current
+production deployment still matches these observations. Production state
+requires a newer control-plane attestation and external verification receipt.
 
 ## Production Readiness
 

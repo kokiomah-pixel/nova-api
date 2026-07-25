@@ -32,7 +32,16 @@ Nova does not execute.
 
 ```yaml
 Render_attestation:
-  account_owner: Kome_Okiomah
+  accountable_production_owner: Kome_Okiomah
+
+  authenticated_control_plane:
+    access_restored:
+    observed_account_holder:
+    observed_workspace_role:
+    custody_matches_Architect_authority:
+    inspected_by: Kome_Okiomah
+    access_verified_at_UTC:
+
   workspace:
   service_name:
   service_id:
@@ -45,7 +54,6 @@ Render_attestation:
   deployment_id:
   deployed_at_UTC:
   auto_deploy_enabled:
-  access_verified_at_UTC:
 ```
 
 Required evidence:
@@ -192,10 +200,18 @@ limitation instead of estimating.
 
 ```yaml
 CDP_attestation:
-  account_owner: Kome_Okiomah
+  accountable_production_owner: Kome_Okiomah
+
+  authenticated_control_plane:
+    access_restored:
+    observed_account_holder:
+    observed_organization_role:
+    custody_matches_Architect_authority:
+    inspected_by: Kome_Okiomah
+    access_verified_at_UTC:
+
   organization:
   project:
-  access_verified_at_UTC:
 
   review_window:
     from_UTC:
@@ -209,6 +225,14 @@ CDP_attestation:
   successful_settlements:
   failed_settlements:
 ```
+
+`accountable_production_owner` identifies who is responsible for the production
+system. It is not evidence that the provider account, workspace, organization,
+project, credentials, or historical activity are under that person’s verified
+custody.
+
+Provider custody becomes attested only after authenticated control-plane
+inspection completes the observed-account, role, access, and custody fields.
 
 The CDP review must distinguish current credential custody from historical
 verification or settlement activity. Zero retained events must not be presented
@@ -239,17 +263,32 @@ attestation.
 
 ```yaml
 production_control_plane_attestation:
-  Render_ownership_attested:
-  deployed_commit_attested:
-  containment_flags_attested:
-  API_key_inventory_complete:
-  route_activity_review_complete:
-  CDP_ownership_attested:
-  CDP_activity_review_complete:
+  accountable_production_owner: Kome_Okiomah
+
+  Render:
+    access_restored:
+    provider_custody_attested:
+    deployed_commit_attested:
+    containment_flags_attested:
+
+  API_keys:
+    inventory_complete:
+    unknown_owner_count:
+
+  route_activity:
+    review_complete:
+    retention_window_complete:
+
+  CDP:
+    access_restored:
+    provider_custody_attested:
+    activity_review_complete:
+
   successful_unexpected_settlement:
   external_boundary_verified:
   historical_retention_complete:
   remaining_unknowns: []
+
   attested_by: Kome_Okiomah
   attested_at_UTC:
   CCO_review_status:
