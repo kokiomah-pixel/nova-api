@@ -31,6 +31,14 @@ External systems execute.
 Nova does not execute.
 ```
 
+## Legacy v1 Implemented Identity
+
+> The following section documents the identity and semantics of the implemented
+> Legacy v1 decision-admission runtime. It is retained for behavioral,
+> migration, replay, and historical traceability.
+>
+> It does not define Nova’s canonical future external product model.
+
 Sharpe Nova OS is a pre-execution decision admissibility layer.
 
 Its primary function is to define the admissible state of a proposed capital decision before execution.
