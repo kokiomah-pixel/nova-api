@@ -233,14 +233,14 @@ def test_feed_schema_keeps_marketplace_semantics_stable(sovereignty_client):
     assert feed["feed_name"] == "Nova Constraint Pressure"
     assert feed["feed_type"] == "environmental_conditioning"
     assert feed["authority_layer"] == "non_admission_telemetry"
-    assert feed["runtime_role"] == "execution_posture_conditioning"
+    assert feed["runtime_role"] == "non_authority_environmental_conditioning"
     assert feed["feed_authority"] == "non_admission_telemetry"
     assert feed["sovereign_admission_required"] is True
     assert feed["source_layer"] == "derived_environmental_state"
     assert feed["machine_consumable"] is True
-    assert feed["mcp_compatible"] is True
-    assert feed["x402_ready"] is True
-    assert feed["agentic_market_ready"] is True
+    assert feed["mcp_compatible"] is False
+    assert feed["x402_ready"] is False
+    assert feed["agentic_market_ready"] is False
     assert feed["non_substitution_rule"] == "telemetry_informs_posture_only"
     assert feed["pricing_model"] == "subscription_plus_volume"
     assert feed["cadence_tier"] == "developer"

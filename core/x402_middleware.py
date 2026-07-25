@@ -25,6 +25,11 @@ from core.cdp_auth import (
 )
 from core.feed_identity import build_feed_consumer_identity
 from core.feed_pricing import normalize_feed_tier
+from core.public_surface_config import (
+    public_x402_enabled,
+    public_x402_operational,
+    x402_settlement_enabled,
+)
 from core.x402_config import (
     X402_ASSET_ADDRESS,
     X402_FACILITATOR_NAME,
@@ -128,6 +133,16 @@ class X402PaymentGateway:
         payload: PaymentPayload | PaymentPayloadV1,
         endpoint: str,
     ) -> X402SettlementResult:
+        if not x402_settlement_enabled():
+            return X402SettlementResult(
+                authorized=False,
+                reason="x402_settlement_disabled",
+                feed_tier=self._feed_tier_from_payload(payload),
+                payer="x402_payer",
+                payment={},
+                response_headers={},
+                verification={},
+            )
         if not is_x402_protected_feed(endpoint):
             return X402SettlementResult(
                 authorized=False,
@@ -233,6 +248,8 @@ def _parse_payment_header(value: Optional[str]) -> Optional[PaymentPayload | Pay
 
 
 def build_x402_payment_required_response(*, endpoint: str, detail: str = "x402 payment required") -> JSONResponse:
+    if not public_x402_operational():
+        return build_x402_containment_response()
     gateway = get_x402_gateway()
     payment_required = gateway.payment_required(endpoint=endpoint, detail=detail)
     payload = {
@@ -256,11 +273,31 @@ def build_x402_payment_required_response(*, endpoint: str, detail: str = "x402 p
     )
 
 
+def build_x402_containment_response() -> JSONResponse:
+    status_code = 404 if not public_x402_enabled() else 503
+    detail = (
+        "Public resource not found"
+        if status_code == 404
+        else "Public payment settlement is unavailable"
+    )
+    return JSONResponse({"detail": detail}, status_code=status_code)
+
+
 def verify_x402_payment_payload(
     *,
     payload: PaymentPayload | PaymentPayloadV1,
     endpoint: str,
 ) -> Dict[str, Any]:
+    if not x402_settlement_enabled():
+        return {
+            "authorized": False,
+            "reason": "x402_settlement_disabled",
+            "feed_tier": "developer",
+            "payer": "x402_payer",
+            "payment": {},
+            "response_headers": {},
+            "verification": {},
+        }
     try:
         result = get_x402_gateway().verify_and_settle(payload=payload, endpoint=endpoint)
     except Exception as exc:
@@ -286,6 +323,19 @@ def verify_x402_payment_payload(
 
 
 def authorize_x402_request(request: Request, endpoint: str) -> Dict[str, Any]:
+    if not public_x402_operational():
+        return {
+            "authorized": False,
+            "response": build_x402_containment_response(),
+            "verification": {
+                "authorized": False,
+                "reason": (
+                    "public_x402_disabled"
+                    if not public_x402_enabled()
+                    else "x402_settlement_disabled"
+                ),
+            },
+        }
     payment_payload = _parse_payment_header(_payment_header_value(request))
     if payment_payload is None:
         return {

@@ -15,7 +15,7 @@ BANNED_POSITIONING_TERMS = {
 }
 
 
-def test_constraint_pressure_metadata_is_bazaar_compatible():
+def test_constraint_pressure_metadata_is_contained_by_default():
     metadata = constraint_pressure_service_metadata()
 
     assert metadata["service_name"] == "Nova Constraint Pressure"
@@ -25,14 +25,15 @@ def test_constraint_pressure_metadata_is_bazaar_compatible():
         "Machine-readable environmental conditioning telemetry for autonomous execution systems."
     )
     assert metadata["category"] == "Infrastructure"
-    assert metadata["runtime_role"] == "execution_posture_conditioning"
+    assert metadata["runtime_role"] == "non_authority_environmental_conditioning"
     assert metadata["authority_layer"] == "non_admission_telemetry"
     assert metadata["machine_consumable"] is True
-    assert metadata["mcp_compatible"] is True
-    assert metadata["x402_ready"] is True
-    assert metadata["agentic_market_ready"] is True
-    assert metadata["supported_networks"] == ["base"]
-    assert metadata["payment_asset"] == "USDC"
+    assert metadata["mcp_compatible"] is False
+    assert metadata["x402_ready"] is False
+    assert metadata["agentic_market_ready"] is False
+    assert "supported_networks" not in metadata
+    assert "payment_asset" not in metadata
+    assert "settlement_wallet" not in metadata
     assert metadata["semantic_stability"] == "versioned"
 
 
@@ -64,8 +65,8 @@ def test_services_manifest_generation_only_declares_constraint_pressure():
     service = manifest["services"][0]
     assert service["endpoint"] == "/v1/feeds/constraint_pressure"
     assert service["service_type"] == "environmental_conditioning"
-    assert service["x402_ready"] is True
-    assert service["agentic_market_ready"] is True
+    assert service["x402_ready"] is False
+    assert service["agentic_market_ready"] is False
     assert "/v1/context" not in str(manifest)
     assert "/v1/proof" not in str(manifest)
     assert "reflex_memory" not in str(manifest).lower()

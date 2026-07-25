@@ -6,7 +6,7 @@ import sys
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch
-from x402.http.constants import PAYMENT_REQUIRED_HEADER, PAYMENT_SIGNATURE_HEADER
+from x402.http.constants import PAYMENT_REQUIRED_HEADER
 
 
 DISCOVERY_TEST_KEY = "discovery-boundary-key"
@@ -110,34 +110,28 @@ def discovery_client():
                 pass
 
 
-def test_services_json_publicly_exposes_only_constraint_pressure(discovery_client):
+def test_services_json_is_contained_by_default(discovery_client):
     client, _, _ = discovery_client
 
     response = client.get("/services.json")
 
-    assert response.status_code == 200
+    assert response.status_code == 404
     rendered = json.dumps(response.json(), sort_keys=True)
-    assert "Nova Constraint Pressure" in rendered
-    assert "/v1/feeds/constraint_pressure" in rendered
-    assert "/v1/context" not in rendered
-    assert "/v1/proof" not in rendered
-    assert "Reflex" not in rendered
+    assert "Nova Constraint Pressure" not in rendered
+    assert "/v1/feeds/constraint_pressure" not in rendered
 
 
-def test_constraint_pressure_public_surface_returns_x402_402(discovery_client):
+def test_constraint_pressure_public_surface_is_contained_without_x402(discovery_client):
     client, _, _ = discovery_client
 
     response = client.get("/v1/feeds/constraint_pressure")
 
-    assert response.status_code == 402
-    payload = response.json()
-    assert payload["payment_required"] is True
-    assert payload["network"] == "base"
-    assert payload["asset"] == "USDC"
-    assert payload["settlement_wallet"] == "0xb29b02130138a6fF8e0f6D7812bDa8D436001BE4"
-    assert payload["authority_layer"] == "non_admission_telemetry"
-    assert PAYMENT_REQUIRED_HEADER in response.headers
-    assert response.headers["x-accept-payment"] == PAYMENT_SIGNATURE_HEADER
+    assert response.status_code == 404
+    assert PAYMENT_REQUIRED_HEADER not in response.headers
+    assert "x-accept-payment" not in response.headers
+    rendered = json.dumps(response.json(), sort_keys=True).lower()
+    assert "settlement_wallet" not in rendered
+    assert "facilitator" not in rendered
 
 
 def test_context_is_not_public_x402_discoverable(discovery_client):

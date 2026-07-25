@@ -85,12 +85,13 @@ def test_constraint_pressure_feed_is_non_admission_telemetry(environmental_clien
     assert payload["feed_type"] == "environmental_conditioning"
     assert payload["authority_layer"] == "non_admission_telemetry"
     assert payload["feed_authority"] == "non_admission_telemetry"
-    assert payload["runtime_role"] == "execution_posture_conditioning"
+    assert payload["runtime_role"] == "non_authority_environmental_conditioning"
     assert payload["source_layer"] == "derived_environmental_state"
     assert payload["sovereign_admission_required"] is True
     assert payload["machine_consumable"] is True
-    assert payload["mcp_compatible"] is True
-    assert payload["x402_ready"] is True
+    assert payload["mcp_compatible"] is False
+    assert payload["x402_ready"] is False
+    assert payload["agentic_market_ready"] is False
     assert payload["constraint_pressure"] == "QUIET"
     assert payload["environment_posture"] == "QUIET"
 
