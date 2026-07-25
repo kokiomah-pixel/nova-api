@@ -41,8 +41,8 @@ def test_explicit_feed_tier_controls_conditioning_identity():
     assert identity["authority_separation"] == "conditioning_not_decision_authority"
     assert identity["machine_consumable"] is True
     assert identity["orchestration_client"] is True
-    assert identity["agentic_market_enabled"] is True
-    assert identity["x402_ready"] is True
+    assert identity["agentic_market_enabled"] is False
+    assert identity["x402_ready"] is False
     assert "actor_id" not in identity
     assert "api_key" not in identity
     assert "reflex" not in "".join(identity.keys()).lower()

@@ -33,12 +33,14 @@ def test_services_json_is_valid_crawler_manifest():
     )
     assert service["category"] == "Infrastructure"
     assert service["pricing_model"] == "subscription_plus_volume"
-    assert service["payment_asset"] == "USDC"
-    assert service["network"] == "base"
     assert service["machine_consumable"] is True
-    assert service["mcp_compatible"] is True
-    assert service["x402_ready"] is True
-    assert service["agentic_market_ready"] is True
+    assert service["mcp_compatible"] is False
+    assert service["x402_ready"] is False
+    assert service["agentic_market_ready"] is False
+    assert service["runtime_role"] == "non_authority_environmental_conditioning"
+    assert "payment_asset" not in service
+    assert "network" not in service
+    assert "settlement_wallet" not in service
     assert service["semantic_version"] == "v1"
 
 
@@ -58,7 +60,7 @@ def test_services_json_matches_generated_manifest():
     assert _load_services_json() == build_services_manifest()
 
 
-def test_services_manifest_endpoint_is_public_and_machine_readable():
+def test_services_manifest_endpoint_is_disabled_by_default():
     os.environ.setdefault("NOVA_KEYS_JSON", "{}")
     sys.modules.pop("app", None)
     app_module = importlib.import_module("app")
@@ -66,5 +68,4 @@ def test_services_manifest_endpoint_is_public_and_machine_readable():
 
     response = client.get("/services.json")
 
-    assert response.status_code == 200
-    assert response.json() == build_services_manifest()
+    assert response.status_code == 404

@@ -34,6 +34,10 @@ from core.feed_metering import (
     record_feed_request,
 )
 from core.feed_pricing import pricing_for_tier
+from core.public_surface_config import (
+    public_service_discovery_enabled,
+    public_x402_operational,
+)
 from core.governance_identity import UNCLASSIFIED_GOVERNANCE_EVENT, normalized_canonical_request
 from core.telemetry_engine import InternalTelemetryEngine
 from core.cdp_auth import CDP_API_KEY_ID_ENV, CDP_API_KEY_SECRET_ENV
@@ -4682,6 +4686,8 @@ def health() -> dict:
 
 @app.get("/services.json")
 def services_manifest() -> dict:
+    if not public_service_discovery_enabled():
+        raise HTTPException(status_code=404, detail="Public service discovery is disabled")
     return build_services_manifest()
 
 
@@ -4796,11 +4802,6 @@ def get_constraint_pressure_feed(
         "cadence_seconds": pricing["cadence_seconds"],
         "cadence_description": pricing["cadence_description"],
         "marketplace_package": pricing["marketplace_package"],
-        "x402": x402_payment_requirement(endpoint=endpoint, feed_tier=feed_identity["feed_tier"]),
-        "x402_payment": {
-            "payment_verified": x402_payment is not None,
-            **(x402_payment or {}),
-        },
         "feed_metering": {
             "cadence_limited": metering["cadence_limited"],
             "cadence_state": metering["cadence_state"],
@@ -4810,6 +4811,17 @@ def get_constraint_pressure_feed(
             "last_request_timestamp": metering["last_request_timestamp"],
         },
     })
+    if public_x402_operational():
+        payload.update({
+            "x402": x402_payment_requirement(
+                endpoint=endpoint,
+                feed_tier=feed_identity["feed_tier"],
+            ),
+            "x402_payment": {
+                "payment_verified": x402_payment is not None,
+                **(x402_payment or {}),
+            },
+        })
     payload["signature"] = sign_payload(payload)
     return JSONResponse(payload, headers=x402_response_headers)
 

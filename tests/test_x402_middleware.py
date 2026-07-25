@@ -90,6 +90,9 @@ def x402_client():
             "NOVA_REFLEX_GOVERNANCE_RECORDS_FILE": test_files[6],
             "NOVA_REFLEX_GOVERNANCE_SIGNALS_FILE": test_files[7],
             "NOVA_REFLEX_GOVERNANCE_ESCALATIONS_FILE": test_files[8],
+            "NOVA_PUBLIC_SERVICE_DISCOVERY_ENABLED": "true",
+            "NOVA_PUBLIC_X402_ENABLED": "true",
+            "NOVA_X402_SETTLEMENT_ENABLED": "true",
         },
     ):
         for module_name in [

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Iterable, List
 
+from core.public_surface_config import public_x402_operational
 from core.telemetry_engine import ALLOW_STATUSES, CONSTRAIN_STATUSES, DENY_STATUSES
 
 
@@ -261,7 +262,7 @@ class EnvironmentalStateEngine:
             "feed_name": FEED_NAME_CONSTRAINT_PRESSURE,
             "feed_type": FEED_TYPE_ENVIRONMENTAL_CONDITIONING,
             "authority_layer": NON_ADMISSION_AUTHORITY,
-            "runtime_role": "execution_posture_conditioning",
+            "runtime_role": "non_authority_environmental_conditioning",
             "constraint_pressure": pressure["constraint_pressure"],
             "pressure_score": pressure["pressure_score"],
             "allow_rate": pressure["allow_rate"],
@@ -272,9 +273,9 @@ class EnvironmentalStateEngine:
             "sovereign_admission_required": True,
             "source_layer": SOURCE_LAYER_DERIVED_STATE,
             "machine_consumable": True,
-            "mcp_compatible": True,
-            "x402_ready": True,
-            "agentic_market_ready": True,
+            "mcp_compatible": False,
+            "x402_ready": public_x402_operational(),
+            "agentic_market_ready": False,
             "semantic_version": "1.0",
             "timestamp_utc": timestamp_utc,
             "environment_epoch": environment_epoch,

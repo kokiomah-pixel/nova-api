@@ -170,7 +170,7 @@ def test_feed_usage_endpoint_accounts_for_telemetry_without_sovereign_usage(feed
     feed_usage = client.get("/v1/feeds/usage", headers=_headers()).json()
     billing_summary = client.get("/v1/billing/summary", headers=_headers()).json()
 
-    assert first_feed["agentic_market_ready"] is True
+    assert first_feed["agentic_market_ready"] is False
     assert first_feed["pricing_model"] == "subscription_plus_volume"
     assert first_feed["cadence_tier"] == "growth"
     assert first_feed["feed_identity"]["feed_tier"] == "growth"

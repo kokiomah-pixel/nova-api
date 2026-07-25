@@ -4,6 +4,7 @@ import hashlib
 from typing import Any, Dict
 
 from core.feed_pricing import normalize_feed_tier
+from core.public_surface_config import public_x402_operational
 
 
 FEED_IDENTITY_NAMESPACE = "nova-feed-consumer"
@@ -31,6 +32,6 @@ def build_feed_consumer_identity(api_key: Any, record: Dict[str, Any]) -> Dict[s
         "authority_separation": "conditioning_not_decision_authority",
         "machine_consumable": True,
         "orchestration_client": True,
-        "agentic_market_enabled": True,
-        "x402_ready": True,
+        "agentic_market_enabled": False,
+        "x402_ready": public_x402_operational(),
     }
