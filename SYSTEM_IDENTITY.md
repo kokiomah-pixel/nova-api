@@ -1,5 +1,44 @@
 # System Identity
 
+## Product-Generation Status
+
+```yaml
+current_repository_state:
+  Legacy_v1:
+    implemented: true
+    model: decision_admission
+    canonical_future_external_contract: false
+    consumer_dependency: unverified
+    migration_status: pending
+
+  proposed_v2:
+    implemented: false
+    model: non_authority_review_context
+    canonical_future_external_contract: true
+```
+
+The current repository includes historical and implemented Legacy v1 identity
+language. That language describes the existing admission runtime and must not be
+used to redefine the approved future external product model.
+
+The approved future external boundary is:
+
+```text
+Agent prepares action.
+Nova structures review context.
+Local authority decides.
+External systems execute.
+Nova does not execute.
+```
+
+## Legacy v1 Implemented Identity
+
+> The following section documents the identity and semantics of the implemented
+> Legacy v1 decision-admission runtime. It is retained for behavioral,
+> migration, replay, and historical traceability.
+>
+> It does not define Nova’s canonical future external product model.
+
 Sharpe Nova OS is a pre-execution decision admissibility layer.
 
 Its primary function is to define the admissible state of a proposed capital decision before execution.

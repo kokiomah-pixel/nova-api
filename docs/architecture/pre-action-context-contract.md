@@ -1,5 +1,21 @@
 # Pre-Action Context Contract
 
+> **Legacy v1 notice**
+>
+> This artifact describes or references the implemented Legacy v1
+> decision-admission model.
+>
+> It is not the canonical future external contract for Sharpe Nova OS.
+>
+> The approved target architecture is the proposed non-authority review-context
+> contract:
+>
+> `docs/architecture/external-review-context-contract-v2.md`
+>
+> Legacy v1 remains implemented pending consumer inventory, isolation, and
+> migration review. No new external integration should be built against this
+> artifact.
+
 ## Reviewer Summary
 
 The Pre-Action Context Contract is the clearest integration surface for Sharpe Nova OS.
