@@ -2,6 +2,37 @@
 
 This registry is the canonical language surface for Sharpe Nova OS Month Two infrastructure consolidation. It exists to preserve environmental-governance framing, chronology continuity, and orchestration insertion discipline across repository documentation, examples, and future governance artifacts.
 
+## Product-Generation Terminology Scope
+
+```yaml
+terminology_scope:
+  canonical_future_external_terms:
+    - review_context
+    - prepared_action
+    - source_state
+    - contradiction_context
+    - constraint_context
+    - temporal_context
+    - review_completeness
+    - chronology_context
+    - authority_handoff
+    - context_integrity_proof
+
+  Legacy_v1_terms:
+    - decision_admission
+    - decision_status
+    - permission_budget
+    - ALLOW
+    - CONSTRAIN
+    - VETO
+    - DENY
+    - HALT
+```
+
+Legacy v1 terms may remain in implementation, migration, replay, and historical
+documentation. They must not be used as the canonical description of Nova’s
+future external product.
+
 ## Canonical Positioning
 
 Sharpe Nova OS is environmental chronology infrastructure that conditions the admissible timing of autonomous execution behavior through accumulated Reflex lineage and shared environmental legitimacy.

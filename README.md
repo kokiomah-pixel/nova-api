@@ -4,6 +4,32 @@ Sharpe Nova OS is a non-authority pre-execution governance review layer for agen
 
 This repository is the canonical Sharpe Nova OS system repo. It contains the Nova API, proof layer, governance runtime, canonical specs, tests, and runnable examples. The project has been reframed to emphasize environmental coordination, pacing normalization, and sovereignty-preserving boundaries.
 
+> **Architecture transition notice**
+>
+> This repository contains the implemented Legacy v1 decision-admission runtime
+> and the approved design for Nova’s future non-authority review-context
+> contract.
+>
+> Legacy v1 is not the canonical future external integration model. No new
+> external integration should be built against its authority-bearing admission
+> semantics while consumer inventory, isolation, and migration review remain
+> incomplete.
+>
+> The approved target external contract is:
+>
+> `docs/architecture/external-review-context-contract-v2.md`
+>
+> Canonical operating boundary:
+>
+> Agent prepares action. Nova structures review context. Local authority
+> decides. External systems execute. Nova does not execute.
+
+Canonical description:
+
+> Sharpe Nova OS is a pre-execution decision discipline layer that conditions
+> capital through telemetry, Reflex Memory, and constraint logic before
+> execution.
+
 ## Phase 1 status
 
 The Agent-Prepared Financial Action Review Harness has completed its Phase 1 public offline proof chain through v0.8.1.
@@ -20,6 +46,7 @@ Canonical boundary:
 Agent prepares action.
 Nova structures review context.
 Local authority decides.
+External systems execute.
 Nova does not execute.
 ```
 
