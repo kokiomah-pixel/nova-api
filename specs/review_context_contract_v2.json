@@ -26,6 +26,7 @@
       "prepared_action",
       "evidence",
       "institution_context",
+      "review_profile",
       "requested_context"
     ],
     "prepared_action_fields": [
@@ -45,6 +46,20 @@
       "relevant_constraints",
       "prior_review_references"
     ],
+    "review_profile": {
+      "required_fields": [
+        "profile_id",
+        "profile_version",
+        "profile_owner",
+        "required_context_fields",
+        "profile_hash"
+      ],
+      "defines_completeness_requirements": true,
+      "selection_authority": "institution_approved_configuration",
+      "Nova_invents_institution_requirements": false,
+      "profile_change_may_change_completeness_without_evidence_change": true,
+      "identity_and_version_preserved_for_proof_and_reproducibility": true
+    },
     "requested_context_values": [
       "source_state",
       "contradiction_visibility",
@@ -52,7 +67,10 @@
       "chronology_context",
       "temporal_context",
       "review_completeness"
-    ]
+    ],
+    "requested_context_mapping": {
+      "contradiction_visibility": "review_context_response.contradiction_context"
+    }
   },
   "response_model": {
     "record_type": "review_context_response",
@@ -62,16 +80,77 @@
       "request_id",
       "created_at",
       "prepared_action_reference",
+      "review_profile_reference",
+      "record_source_type",
       "context_state",
       "source_state",
       "constraint_context",
       "temporal_context",
+      "contradiction_context",
       "review_completeness",
       "chronology_context",
       "authority_handoff",
       "reproducibility",
       "boundary"
     ],
+    "prepared_action_reference": {
+      "required_fields": [
+        "reference_id",
+        "reference_type",
+        "payload_embedded"
+      ],
+      "reference_type": "opaque_external_reference",
+      "payload_embedded": false,
+      "semantics": {
+        "action_origin": "external_to_Nova",
+        "Nova_owns_action": false,
+        "full_action_payload_required_in_response": false,
+        "sensitive_action_data_embedded_by_default": false,
+        "reference_grants_execution_authority": false
+      },
+      "sensitive_fields_prohibited_by_default": [
+        "destination_addresses",
+        "full_transaction_payloads",
+        "policy_sensitive_details",
+        "personal_data",
+        "institution_secrets"
+      ],
+      "exception_requires_separately_approved_review_profile": true
+    },
+    "review_profile_reference": {
+      "required_fields": [
+        "profile_id",
+        "profile_version",
+        "profile_owner",
+        "profile_hash"
+      ]
+    },
+    "record_source_type": {
+      "permitted_values": [
+        "synthetic",
+        "production_like",
+        "live"
+      ],
+      "required_fields": [
+        "value",
+        "source_segmentation"
+      ],
+      "semantics": {
+        "synthetic": "generated_or_constructed_for_testing",
+        "production_like": "realistic_but_not_verified_live_institutional_evidence",
+        "live": "observed_from_an_authorized_live_source_under_declared_scope"
+      },
+      "production_like_may_be_represented_as_live": false,
+      "live_does_not_mean": [
+        "truth",
+        "correctness",
+        "approval",
+        "acceptance"
+      ],
+      "mixed_source_packet_segmentation_level": "field_or_source_reference",
+      "proof_preserves_source_segmentation": true,
+      "signature_upgrades_evidence": false
+    },
     "context_state": {
       "permitted_values": [
         "current",
@@ -114,6 +193,20 @@
         "pending_state"
       ]
     },
+    "contradiction_context": {
+      "required_fields": [
+        "source_conflicts",
+        "constraint_conflicts",
+        "temporal_conflicts",
+        "chronology_conflicts",
+        "unresolved_questions"
+      ],
+      "descriptive_only": true,
+      "Nova_selects_winning_source": false,
+      "Nova_resolves_policy_dispute": false,
+      "empty_list_meaning": "no_conflict_identified_within_declared_scope",
+      "empty_list_proves_no_external_conflict": false
+    },
     "review_completeness": {
       "permitted_values": [
         "complete",
@@ -126,9 +219,9 @@
         "missing_context",
         "unresolved_conditions"
       ],
-      "meaning": "selected_profile_context_is_present_or_gaps_are_explicit_for_local_review",
+      "meaning": "fields_required_by_identified_and_versioned_review_profile_are_present_or_explicitly_unresolved",
       "does_not_mean": [
-        "policy_satisfied",
+        "institutional_policy_satisfied",
         "transaction_permitted",
         "risk_accepted",
         "action_executable",
@@ -154,6 +247,11 @@
         "schema_version",
         "source_versions",
         "classification_version",
+        "review_profile_id",
+        "review_profile_version",
+        "review_profile_hash",
+        "record_source_type",
+        "source_segmentation",
         "context_hash",
         "signature"
       ]
@@ -219,7 +317,11 @@
       "context_hash",
       "creation_time",
       "chronology_references",
-      "reproducibility_inputs"
+      "reproducibility_inputs",
+      "review_profile_identity",
+      "review_profile_hash",
+      "record_source_type",
+      "source_segmentation"
     ],
     "does_not_verify": [
       "approval",

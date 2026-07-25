@@ -191,39 +191,57 @@ It requires its own engineering cycle, rollback design, and governance review.
 
 ## Staged Migration Sequence
 
+The following gate defines required evidence before adapter implementation; it
+does not attest that these conditions are currently complete:
+
+```yaml
+adapter_implementation_gate:
+  consumer_inventory_completed: true
+  discovery_isolation_verified: true
+  field_derivation_reviewed: true
+```
+
 ```text
 1. Approve the v2 semantic contract.
-2. Build an internal adapter behind a disabled feature flag.
-3. Run synthetic equivalence and non-authority tests.
-4. Identify any v1 consumers.
-5. Isolate v1 from public discovery.
-6. Offer a bounded migration window if consumers exist.
-7. Activate v2 privately.
-8. Validate local-authority handoff.
-9. Review accepted-state and chronology change.
-10. Consider production activation.
+2. Complete a bounded v1 consumer inventory.
+3. Complete discovery-isolation verification.
+4. Define field-level derivation rules.
+5. Build an internal adapter behind a disabled feature flag.
+6. Run synthetic non-authority and equivalence tests.
+7. Offer a bounded migration window if consumers exist.
+8. Activate v2 privately.
+9. Validate local-authority handoff.
+10. Review accepted-state and chronology change.
+11. Consider production activation.
 ```
 
 Sequence details:
 
 1. **Contract approval.** CCO and Architect review the response objects,
    exclusions, HTTP semantics, proof boundary, and local authority handoff.
-2. **Disabled adapter.** A later implementation derives descriptive fields
-   behind a default-off flag without changing v1.
-3. **Synthetic validation.** Fixtures prove that incomplete, conflicted, stale,
-   and unavailable packets remain descriptive and return successful domain
-   responses.
-4. **Consumer inventory.** Review Render logs, API-key ownership, same-owner
+2. **Consumer inventory.** Review Render logs, API-key ownership, same-owner
    documentation, public code references, and any private integration register.
-5. **Discovery isolation.** Complete Level 1 before any v2 public positioning.
-6. **Migration window.** Create one only for an observed consumer; define exit
+   The inventory may find no consumers. That result must not be converted into
+   a fabricated compatibility or migration obligation.
+3. **Discovery-isolation verification.** Complete and verify Level 1 before
+   adapter implementation or any v2 public positioning.
+4. **Field-level derivation review.** Approve the independent evidence source
+   and transformation rules for every external v2 field.
+5. **Disabled adapter.** Only after the adapter implementation gate is
+   satisfied may a later implementation derive descriptive fields behind a
+   default-off flag without changing v1.
+6. **Synthetic validation.** Fixtures prove that incomplete, conflicted, stale,
+   and unavailable packets remain descriptive, preserve source segmentation,
+   and return successful domain responses. Equivalence tests compare packet
+   construction, not v1 permission outcomes.
+7. **Migration window.** Create one only for an observed consumer; define exit
    by migration evidence.
-7. **Private activation.** Permit only named synthetic or internal callers.
-8. **Authority handoff validation.** Demonstrate that local policy determines
+8. **Private activation.** Permit only named synthetic or internal callers.
+9. **Authority handoff validation.** Demonstrate that local policy determines
    consequences independently of the packet state.
-9. **Governance review.** Reconcile accepted state and determine the required
+10. **Governance review.** Reconcile accepted state and determine the required
    chronology record.
-10. **Production decision.** Treat activation as a separate authorization.
+11. **Production decision.** Treat activation as a separate authorization.
 
 ## Test Migration
 

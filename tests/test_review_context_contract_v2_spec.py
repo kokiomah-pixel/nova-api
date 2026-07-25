@@ -73,6 +73,7 @@ def test_response_uses_descriptive_context_objects():
         "source_state",
         "constraint_context",
         "temporal_context",
+        "contradiction_context",
         "review_completeness",
         "chronology_context",
         "authority_handoff",
@@ -91,6 +92,130 @@ def test_response_uses_descriptive_context_objects():
         "conflicted",
         "unavailable",
     ]
+
+
+def test_versioned_review_profile_is_required_in_request_response_and_proof():
+    spec = _load_spec()
+    request = spec["request_model"]
+    response = spec["response_model"]
+    profile = request["review_profile"]
+
+    assert "review_profile" in request["required_fields"]
+    assert profile["required_fields"] == [
+        "profile_id",
+        "profile_version",
+        "profile_owner",
+        "required_context_fields",
+        "profile_hash",
+    ]
+    assert profile["defines_completeness_requirements"] is True
+    assert profile["selection_authority"] == "institution_approved_configuration"
+    assert profile["Nova_invents_institution_requirements"] is False
+    assert (
+        profile["profile_change_may_change_completeness_without_evidence_change"]
+        is True
+    )
+    assert "review_profile_reference" in response["required_fields"]
+    assert response["review_profile_reference"]["required_fields"] == [
+        "profile_id",
+        "profile_version",
+        "profile_owner",
+        "profile_hash",
+    ]
+    assert {
+        "review_profile_identity",
+        "review_profile_hash",
+    } <= set(spec["proof_semantics"]["verifies"])
+
+
+def test_review_completeness_is_profile_relative_not_policy_satisfaction():
+    completeness = _load_spec()["response_model"]["review_completeness"]
+
+    assert completeness["meaning"] == (
+        "fields_required_by_identified_and_versioned_review_profile_are_"
+        "present_or_explicitly_unresolved"
+    )
+    assert "institutional_policy_satisfied" in completeness["does_not_mean"]
+
+
+def test_contradiction_visibility_maps_to_required_descriptive_context():
+    spec = _load_spec()
+    request = spec["request_model"]
+    response = spec["response_model"]
+    contradiction = response["contradiction_context"]
+
+    assert "contradiction_visibility" in request["requested_context_values"]
+    assert request["requested_context_mapping"]["contradiction_visibility"] == (
+        "review_context_response.contradiction_context"
+    )
+    assert "contradiction_context" in response["required_fields"]
+    assert contradiction["required_fields"] == [
+        "source_conflicts",
+        "constraint_conflicts",
+        "temporal_conflicts",
+        "chronology_conflicts",
+        "unresolved_questions",
+    ]
+    assert contradiction["descriptive_only"] is True
+    assert contradiction["Nova_selects_winning_source"] is False
+    assert contradiction["Nova_resolves_policy_dispute"] is False
+    assert contradiction["empty_list_proves_no_external_conflict"] is False
+
+
+def test_record_source_type_is_exact_and_proof_preserves_segmentation():
+    spec = _load_spec()
+    response = spec["response_model"]
+    source_type = response["record_source_type"]
+
+    assert "record_source_type" in response["required_fields"]
+    assert source_type["permitted_values"] == [
+        "synthetic",
+        "production_like",
+        "live",
+    ]
+    assert source_type["production_like_may_be_represented_as_live"] is False
+    assert source_type["mixed_source_packet_segmentation_level"] == (
+        "field_or_source_reference"
+    )
+    assert source_type["proof_preserves_source_segmentation"] is True
+    assert source_type["signature_upgrades_evidence"] is False
+    assert {
+        "record_source_type",
+        "source_segmentation",
+    } <= set(spec["proof_semantics"]["verifies"])
+
+
+def test_prepared_action_reference_is_opaque_and_does_not_embed_payload():
+    reference = _load_spec()["response_model"]["prepared_action_reference"]
+
+    assert reference["required_fields"] == [
+        "reference_id",
+        "reference_type",
+        "payload_embedded",
+    ]
+    assert reference["reference_type"] == "opaque_external_reference"
+    assert reference["payload_embedded"] is False
+    assert reference["semantics"] == {
+        "action_origin": "external_to_Nova",
+        "Nova_owns_action": False,
+        "full_action_payload_required_in_response": False,
+        "sensitive_action_data_embedded_by_default": False,
+        "reference_grants_execution_authority": False,
+    }
+
+
+def test_reproducibility_preserves_profile_and_source_segmentation():
+    required = set(
+        _load_spec()["response_model"]["reproducibility"]["required_fields"]
+    )
+
+    assert {
+        "review_profile_id",
+        "review_profile_version",
+        "review_profile_hash",
+        "record_source_type",
+        "source_segmentation",
+    } <= required
 
 
 def test_local_authority_and_external_execution_owner_are_declared():

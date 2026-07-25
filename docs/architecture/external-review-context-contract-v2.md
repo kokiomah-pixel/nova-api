@@ -75,6 +75,13 @@ review_context_request:
     relevant_constraints: []
     prior_review_references: []
 
+  review_profile:
+    profile_id:
+    profile_version:
+    profile_owner:
+    required_context_fields: []
+    profile_hash:
+
   requested_context:
     - source_state
     - contradiction_visibility
@@ -93,6 +100,13 @@ institutional source hierarchy, or decide which external system should act.
 The request may identify institution-provided profiles and constraints so Nova
 can preserve their provenance and make unresolved relationships visible.
 
+The review profile defines the fields required for a complete review-context
+packet. It is supplied or selected under institution-approved configuration;
+Nova does not invent institutional requirements. A profile change may change
+the packet's completeness classification without changing its evidence. The
+profile identity, version, owner, and hash are therefore preserved for proof
+and reproducibility.
+
 Institution identifiers, source material, policy references, and action details
 may be sensitive. A future implementation must support scoped transmission,
 data minimization, access control, retention limits, and private deployment when
@@ -108,6 +122,23 @@ review_context_response:
   created_at:
 
   prepared_action_reference:
+    reference_id:
+    reference_type: opaque_external_reference
+    payload_embedded: false
+
+  review_profile_reference:
+    profile_id:
+    profile_version:
+    profile_owner:
+    profile_hash:
+
+  record_source_type:
+    permitted_values:
+      - synthetic
+      - production_like
+      - live
+    value:
+    source_segmentation: []
 
   context_state:
     value:
@@ -139,6 +170,13 @@ review_context_response:
     temporal_conflicts: []
     pending_state: []
 
+  contradiction_context:
+    source_conflicts: []
+    constraint_conflicts: []
+    temporal_conflicts: []
+    chronology_conflicts: []
+    unresolved_questions: []
+
   review_completeness:
     value:
       - complete
@@ -162,6 +200,11 @@ review_context_response:
     schema_version:
     source_versions: []
     classification_version:
+    review_profile_id:
+    review_profile_version:
+    review_profile_hash:
+    record_source_type:
+    source_segmentation: []
     context_hash:
     signature:
 
@@ -177,22 +220,64 @@ Each state is descriptive:
 - `source_state` describes evidence availability and disagreement.
 - `constraint_context` preserves observed institution-provided constraints and
   unresolved questions without selecting a policy result.
-- `review_completeness` describes whether the selected profile's context fields
-  are present or their gaps are visible.
+- `contradiction_context` describes conflicts visible within the declared
+  source and review scope.
+- `review_completeness` describes the presence or explicit unresolved state of
+  fields required by the identified and versioned profile.
 - `chronology_context` identifies relevant prior records and changes without
   accepting a new chronology event.
 - `authority_handoff` makes the local decision and external execution owners
   explicit.
 
+`requested_context.contradiction_visibility` maps to
+`review_context_response.contradiction_context`. This context is descriptive:
+Nova does not choose a winning source or resolve a policy dispute. An empty
+conflict list means only that no conflict was identified within the declared
+scope; it does not establish that no external conflict exists.
+
+## Prepared Action Reference Boundary
+
+The prepared action originates outside Nova. Its response reference has these
+semantics:
+
+```yaml
+prepared_action_reference_semantics:
+  action_origin: external_to_Nova
+  Nova_owns_action: false
+  full_action_payload_required_in_response: false
+  sensitive_action_data_embedded_by_default: false
+  reference_grants_execution_authority: false
+```
+
+The response must not reproduce destination addresses, full transaction
+payloads, policy-sensitive details, personal data, or institution secrets
+unless a separately approved review profile explicitly requires them.
+
+## Evidence Environment Segmentation
+
+`record_source_type` identifies the environment from which evidence originated:
+
+- `synthetic` means generated or constructed for testing.
+- `production_like` means realistic but not verified live institutional
+  evidence.
+- `live` means observed from an authorized live source under the declared
+  scope.
+
+Production-like evidence must never be represented as live. `live` describes
+the source environment; it does not establish truth, correctness, approval, or
+acceptance. Mixed-source packets must identify the record source type at the
+field or source-reference level. Proof and reproducibility preserve that source
+segmentation. A signature protects the defined signed material; it does not
+upgrade the source type or evidentiary meaning.
+
 ## Review Completeness Boundary
 
 Complete review context does not mean approved action.
 
-`complete` means only:
+Review completeness describes whether the fields required by the identified
+and versioned review profile are present or explicitly unresolved.
 
-> The context fields required by the selected review profile are present, or
-> their required resolution state is explicit enough for local authority to
-> begin its own review.
+It does not describe whether institutional policy is satisfied.
 
 It does not mean:
 
@@ -316,6 +401,10 @@ context_proof:
     - creation_time
     - chronology_references
     - reproducibility_inputs
+    - review_profile_identity
+    - review_profile_hash
+    - record_source_type
+    - source_segmentation
   does_not_verify:
     - approval
     - authorization
@@ -324,9 +413,10 @@ context_proof:
     - transaction_validity
 ```
 
-The proof verifies the identity and reproducibility of review context. It does
-not verify a Legacy v1 governed decision state, favorable outcome, or local
-institutional decision.
+The proof verifies the identity and reproducibility of review context,
+including the profile identity, version, and hash and the evidence source
+segmentation. It does not verify a Legacy v1 governed decision state, favorable
+outcome, or local institutional decision.
 
 ## Internal Classification Separation
 
