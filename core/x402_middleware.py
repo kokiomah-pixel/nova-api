@@ -45,6 +45,7 @@ from core.x402_config import (
     X402_USDC_AMOUNT_ATOMIC,
     X402_VERSION,
     is_x402_protected_feed,
+    require_x402_settlement_wallet,
     x402_payment_requirement,
 )
 
@@ -76,7 +77,7 @@ class X402PaymentGateway:
             network=X402_PROTOCOL_NETWORK,
             asset=X402_ASSET_ADDRESS,
             amount=str(X402_USDC_AMOUNT_ATOMIC),
-            payTo=X402_SETTLEMENT_WALLET,
+            payTo=require_x402_settlement_wallet(),
             maxTimeoutSeconds=X402_MAX_TIMEOUT_SECONDS,
             extra={
                 "name": "USD Coin" if X402_PAYMENT_ASSET == "USDC" else X402_PAYMENT_ASSET,
@@ -250,6 +251,15 @@ def _parse_payment_header(value: Optional[str]) -> Optional[PaymentPayload | Pay
 def build_x402_payment_required_response(*, endpoint: str, detail: str = "x402 payment required") -> JSONResponse:
     if not public_x402_operational():
         return build_x402_containment_response()
+
+    if not X402_SETTLEMENT_WALLET:
+        return JSONResponse(
+            {
+                "detail": "Public payment settlement is unavailable",
+            },
+            status_code=503,
+        )
+
     gateway = get_x402_gateway()
     payment_required = gateway.payment_required(endpoint=endpoint, detail=detail)
     payload = {

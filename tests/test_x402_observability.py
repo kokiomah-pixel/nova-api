@@ -15,6 +15,9 @@ from nova_api.telemetry.x402_observability import (
 from nova_api.utils.redaction import REDACTED, redact
 
 
+TEST_SETTLEMENT_WALLET = "0x" + ("3" * 40)
+
+
 def _payment_required_header() -> str:
     payload = {
         "x402Version": 2,
@@ -25,7 +28,7 @@ def _payment_required_header() -> str:
                 "network": "eip155:8453",
                 "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
                 "amount": "10000",
-                "payTo": "0xb29b02130138a6fF8e0f6D7812bDa8D436001BE4",
+                "payTo": TEST_SETTLEMENT_WALLET,
                 "maxTimeoutSeconds": 60,
             }
         ],
@@ -38,7 +41,7 @@ class FakeAccepted:
     network = "eip155:8453"
     asset = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
     amount = "10000"
-    pay_to = "0xb29b02130138a6fF8e0f6D7812bDa8D436001BE4"
+    pay_to = TEST_SETTLEMENT_WALLET
 
 
 class FakeResource:

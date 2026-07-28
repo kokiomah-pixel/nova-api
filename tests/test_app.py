@@ -1443,7 +1443,7 @@ def test_billing_and_balance_endpoints_surface_wallet_first_metadata():
         assert billing_payload["persistent_ledger_configured"] is False
         assert billing_payload["billable_policy"]["allow_billable"] is True
         assert billing_payload["billable_policy"]["deny_billable"] is False
-        assert billing_payload["funding_instructions"]["destination_wallet"] == "0xb29b02130138a6fF8e0f6D7812bDa8D436001BE4"
+        assert billing_payload["funding_instructions"]["destination_wallet"] is None
 
         balance = test_client.get("/v1/balance", headers={"Authorization": "Bearer wallet-key"})
         assert balance.status_code == 200
@@ -1456,7 +1456,7 @@ def test_billing_and_balance_endpoints_surface_wallet_first_metadata():
         funding = test_client.get("/v1/funding-instructions", headers={"Authorization": "Bearer wallet-key"})
         assert funding.status_code == 200
         funding_payload = funding.json()
-        assert funding_payload["destination_wallet"] == "0xb29b02130138a6fF8e0f6D7812bDa8D436001BE4"
+        assert funding_payload["destination_wallet"] is None
         assert funding_payload["asset"] == "USDC"
         assert funding_payload["network"] == "base"
         assert funding_payload["billing_mode"] == "prepaid"

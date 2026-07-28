@@ -10,10 +10,12 @@ from x402.http.constants import PAYMENT_REQUIRED_HEADER, PAYMENT_RESPONSE_HEADER
 from x402.http.utils import encode_payment_signature_header
 from x402.schemas import PaymentPayload, ResourceInfo, SettleResponse, VerifyResponse
 
-from core.x402_config import X402_SETTLEMENT_WALLET
+import core.x402_config as x402_config
+from core.x402_config import x402_payment_requirement
 
 
 X402_TEST_KEY = "x402-private-key"
+X402_TEST_SETTLEMENT_WALLET = "0x" + ("3" * 40)
 X402_TEST_KEYS = {
     X402_TEST_KEY: {
         "owner": "x402-private-user",
@@ -77,23 +79,30 @@ def x402_client():
         ".reflex_governance_signals.x402-test.json",
         ".reflex_governance_escalations.x402-test.json",
     ]
-    with patch.dict(
-        os.environ,
-        {
-            "NOVA_KEYS_JSON": keys_json,
-            "NOVA_USAGE_FILE": test_files[0],
-            "NOVA_USAGE_STATE_FILE": test_files[1],
-            "NOVA_BILLING_STATE_FILE": test_files[2],
-            "NOVA_FEED_USAGE_FILE": test_files[3],
-            "NOVA_PROOF_FILE": test_files[4],
-            "NOVA_PROOF_RETRIEVAL_AUDIT_FILE": test_files[5],
-            "NOVA_REFLEX_GOVERNANCE_RECORDS_FILE": test_files[6],
-            "NOVA_REFLEX_GOVERNANCE_SIGNALS_FILE": test_files[7],
-            "NOVA_REFLEX_GOVERNANCE_ESCALATIONS_FILE": test_files[8],
-            "NOVA_PUBLIC_SERVICE_DISCOVERY_ENABLED": "true",
-            "NOVA_PUBLIC_X402_ENABLED": "true",
-            "NOVA_X402_SETTLEMENT_ENABLED": "true",
-        },
+    with (
+        patch.dict(
+            os.environ,
+            {
+                "NOVA_KEYS_JSON": keys_json,
+                "NOVA_USAGE_FILE": test_files[0],
+                "NOVA_USAGE_STATE_FILE": test_files[1],
+                "NOVA_BILLING_STATE_FILE": test_files[2],
+                "NOVA_FEED_USAGE_FILE": test_files[3],
+                "NOVA_PROOF_FILE": test_files[4],
+                "NOVA_PROOF_RETRIEVAL_AUDIT_FILE": test_files[5],
+                "NOVA_REFLEX_GOVERNANCE_RECORDS_FILE": test_files[6],
+                "NOVA_REFLEX_GOVERNANCE_SIGNALS_FILE": test_files[7],
+                "NOVA_REFLEX_GOVERNANCE_ESCALATIONS_FILE": test_files[8],
+                "NOVA_PUBLIC_SERVICE_DISCOVERY_ENABLED": "true",
+                "NOVA_PUBLIC_X402_ENABLED": "true",
+                "NOVA_X402_SETTLEMENT_ENABLED": "true",
+            },
+        ),
+        patch.object(
+            x402_config,
+            "X402_SETTLEMENT_WALLET",
+            X402_TEST_SETTLEMENT_WALLET,
+        ),
     ):
         for module_name in [
             "app",
@@ -168,6 +177,18 @@ def _patched_gateway(x402_middleware, facilitator):
     return patch.object(x402_middleware, "get_x402_gateway", return_value=gateway)
 
 
+def test_x402_payment_requirement_fails_closed_without_wallet(monkeypatch):
+    monkeypatch.setattr(x402_config, "X402_SETTLEMENT_WALLET", None)
+
+    with pytest.raises(
+        RuntimeError,
+        match="x402 settlement wallet is not configured",
+    ):
+        x402_payment_requirement(
+            endpoint="/v1/feeds/constraint_pressure"
+        )
+
+
 def test_x402_generates_402_for_unpaid_constraint_pressure_request(x402_client):
     client, _, _, _ = x402_client
 
@@ -178,15 +199,35 @@ def test_x402_generates_402_for_unpaid_constraint_pressure_request(x402_client):
     assert payload["payment_required"] is True
     assert payload["network"] == "base"
     assert payload["asset"] == "USDC"
-    assert payload["settlement_wallet"] == X402_SETTLEMENT_WALLET
+    assert payload["settlement_wallet"] == X402_TEST_SETTLEMENT_WALLET
     assert payload["authority_layer"] == "non_admission_telemetry"
     assert payload["sovereign_admission_required"] is True
     assert payload["x402"]["payment_network"] == "base"
     assert payload["x402"]["payment_asset"] == "USDC"
-    assert payload["x402"]["settlement_wallet"] == X402_SETTLEMENT_WALLET
+    assert payload["x402"]["settlement_wallet"] == X402_TEST_SETTLEMENT_WALLET
     assert payload["x402"]["resource"] == "/v1/feeds/constraint_pressure"
     assert PAYMENT_REQUIRED_HEADER in response.headers
     assert response.headers["x-accept-payment"] == PAYMENT_SIGNATURE_HEADER
+
+
+def test_x402_enabled_without_wallet_returns_contained_503(x402_client, monkeypatch):
+    client, _, x402_middleware, _ = x402_client
+    monkeypatch.setattr(x402_config, "X402_SETTLEMENT_WALLET", None)
+    monkeypatch.setattr(x402_middleware, "X402_SETTLEMENT_WALLET", None)
+
+    response = client.get("/v1/feeds/constraint_pressure")
+
+    assert response.status_code == 503
+    assert response.json() == {
+        "detail": "Public payment settlement is unavailable",
+    }
+    assert PAYMENT_REQUIRED_HEADER not in response.headers
+    assert "x-accept-payment" not in response.headers
+    rendered = json.dumps(response.json(), sort_keys=True)
+    assert "settlement_wallet" not in rendered
+    assert "payment_destination" not in rendered
+    assert "payment_required" not in rendered
+    assert "x402" not in rendered
 
 
 def test_x402_verifies_settles_and_grants_feed_access(x402_client):
@@ -254,7 +295,7 @@ def test_x402_rejects_synthetic_local_payment_payload(x402_client):
                         "endpoint": "/v1/feeds/constraint_pressure",
                         "payment_network": "base",
                         "payment_asset": "USDC",
-                        "settlement_wallet": X402_SETTLEMENT_WALLET,
+                        "settlement_wallet": X402_TEST_SETTLEMENT_WALLET,
                         "facilitator_status": "settled",
                         "signature": "nova-x402-valid-test-payment",
                     }

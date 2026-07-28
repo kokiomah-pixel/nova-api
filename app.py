@@ -171,7 +171,7 @@ DEFAULT_BILLING_COST = float(os.getenv("NOVA_BILLING_COST", "0.01"))
 DEFAULT_PRICING_VERSION = os.getenv("NOVA_PRICING_VERSION", "v1")
 DEFAULT_BILLING_CURRENCY = os.getenv("NOVA_BILLING_CURRENCY", "USDC")
 DEFAULT_BILLING_NETWORK = os.getenv("NOVA_BILLING_NETWORK", "base")
-DEFAULT_BILLING_WALLET = os.getenv("NOVA_BILLING_WALLET", "0xb29b02130138a6fF8e0f6D7812bDa8D436001BE4")
+DEFAULT_BILLING_WALLET = USDC_PAYMENT_WALLET
 DEFAULT_PAYMENT_METHOD = "wallet"
 DEFAULT_BILLING_MODE = "prepaid"
 RUNTIME_MODE = os.getenv("NOVA_RUNTIME_MODE", "development").strip().lower() or "development"
@@ -518,11 +518,12 @@ def _billing_identity_from_record(record: Dict[str, Any]) -> Dict[str, Any]:
         or record.get("payment_method")
         or DEFAULT_PAYMENT_METHOD
     ).strip() or DEFAULT_PAYMENT_METHOD
-    wallet_address = str(
+    wallet_value = (
         configured.get("wallet_address")
         or record.get("wallet_address")
         or DEFAULT_BILLING_WALLET
-    ).strip() or DEFAULT_BILLING_WALLET
+    )
+    wallet_address = str(wallet_value).strip() if wallet_value else None
     network = str(
         configured.get("network")
         or record.get("network")
@@ -4710,6 +4711,11 @@ def health() -> dict:
 def services_manifest() -> dict:
     if not public_service_discovery_enabled():
         raise HTTPException(status_code=404, detail="Public service discovery is disabled")
+    if public_x402_operational() and not X402_SETTLEMENT_WALLET:
+        raise HTTPException(
+            status_code=503,
+            detail="Public payment settlement is unavailable",
+        )
     return build_services_manifest()
 
 
@@ -4726,7 +4732,7 @@ def runtime_config_status(
     payload = {
         "cdp_key_id_present": bool(cdp_key_id),
         "cdp_secret_present": bool(cdp_secret),
-        "x402_settlement_wallet": X402_SETTLEMENT_WALLET,
+        "x402_settlement_wallet_present": bool(X402_SETTLEMENT_WALLET),
         "nova_api_url": os.getenv("NOVA_API_URL", "").strip(),
         "cdp_key_id_suffix": cdp_key_id[-6:] if cdp_key_id else None,
         "runtime_timestamp_utc": get_current_timestamp(),
