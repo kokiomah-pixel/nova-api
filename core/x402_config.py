@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 from typing import Any, Dict
 
-from core.billing_config import USDC_PAYMENT_WALLET
 from core.feed_pricing import pricing_for_tier
 
 
@@ -32,8 +31,8 @@ X402_MAX_TIMEOUT_SECONDS = int(
 X402_SETTLEMENT_WALLET = (
     os.getenv("X402_SETTLEMENT_WALLET")
     or os.getenv("NOVA_X402_SETTLEMENT_WALLET")
-    or USDC_PAYMENT_WALLET
-)
+    or ""
+).strip() or None
 X402_FACILITATOR_URL = os.getenv("X402_FACILITATOR_URL") or os.getenv(
     "NOVA_X402_FACILITATOR_URL",
     "https://api.cdp.coinbase.com/platform/v2/x402",
@@ -43,6 +42,14 @@ X402_FACILITATOR_NAME = os.getenv("X402_FACILITATOR_NAME") or os.getenv(
     "coinbase-cdp-x402-facilitator",
 )
 X402_RESOURCE_DESCRIPTION = "Nova Constraint Pressure environmental conditioning telemetry"
+
+
+def require_x402_settlement_wallet() -> str:
+    """Return the configured x402 settlement wallet or fail closed."""
+
+    if not X402_SETTLEMENT_WALLET:
+        raise RuntimeError("x402 settlement wallet is not configured")
+    return X402_SETTLEMENT_WALLET
 
 
 def is_x402_protected_feed(path: str) -> bool:
@@ -63,7 +70,7 @@ def x402_payment_requirement(*, endpoint: str, feed_tier: Any = "developer") -> 
         "payment_asset": X402_PAYMENT_ASSET,
         "asset_address": X402_ASSET_ADDRESS,
         "amount_atomic": X402_USDC_AMOUNT_ATOMIC,
-        "settlement_wallet": X402_SETTLEMENT_WALLET,
+        "settlement_wallet": require_x402_settlement_wallet(),
         "pricing_model": pricing["pricing_model"],
         "base_subscription_usd": pricing["base_subscription_usd"],
         "included_requests": pricing["included_requests"],
@@ -85,7 +92,7 @@ def x402_settlement_metadata() -> Dict[str, Any]:
     return {
         "payment_network": X402_PAYMENT_NETWORK,
         "payment_asset": X402_PAYMENT_ASSET,
-        "settlement_wallet": X402_SETTLEMENT_WALLET,
+        "settlement_wallet": require_x402_settlement_wallet(),
         "facilitator": {
             "name": X402_FACILITATOR_NAME,
             "url": X402_FACILITATOR_URL,

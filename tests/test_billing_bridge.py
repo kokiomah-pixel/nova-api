@@ -7,10 +7,10 @@ from unittest.mock import patch
 import pytest
 from fastapi.testclient import TestClient
 
+import core.billing_config as billing_config
 from core.billing_config import (
     DEFAULT_PRICE_PER_DECISION_USD,
     FREE_CONTEXT_CALL_LIMIT,
-    USDC_PAYMENT_WALLET,
 )
 from core.identity import actor_id_from_api_key, actor_id_from_authorization
 
@@ -53,20 +53,23 @@ def billing_client(tmp_path):
     legacy_usage_file = tmp_path / ".usage.billing-bridge.json"
     legacy_billing_file = tmp_path / ".billing.prepaid-bridge.json"
 
-    with patch.dict(
-        os.environ,
-        {
-            "NOVA_KEYS_JSON": json.dumps(TEST_KEYS),
-            "NOVA_USAGE_FILE": str(legacy_usage_file),
-            "NOVA_BILLING_FILE": str(legacy_billing_file),
-            "NOVA_USAGE_STATE_FILE": str(usage_state_file),
-            "NOVA_BILLING_STATE_FILE": str(billing_state_file),
-            "NOVA_PROOF_FILE": str(proof_file),
-            "NOVA_PROOF_RETRIEVAL_AUDIT_FILE": str(proof_audit_file),
-            "NOVA_RUNTIME_MODE": "test",
-            "NOVA_ENABLE_BILLING_ENFORCEMENT": "0",
-        },
-        clear=False,
+    with (
+        patch.dict(
+            os.environ,
+            {
+                "NOVA_KEYS_JSON": json.dumps(TEST_KEYS),
+                "NOVA_USAGE_FILE": str(legacy_usage_file),
+                "NOVA_BILLING_FILE": str(legacy_billing_file),
+                "NOVA_USAGE_STATE_FILE": str(usage_state_file),
+                "NOVA_BILLING_STATE_FILE": str(billing_state_file),
+                "NOVA_PROOF_FILE": str(proof_file),
+                "NOVA_PROOF_RETRIEVAL_AUDIT_FILE": str(proof_audit_file),
+                "NOVA_RUNTIME_MODE": "test",
+                "NOVA_ENABLE_BILLING_ENFORCEMENT": "0",
+            },
+            clear=False,
+        ),
+        patch.object(billing_config, "USDC_PAYMENT_WALLET", None),
     ):
         for module_name in ["app", "core.usage_meter", "core.billing_state"]:
             sys.modules.pop(module_name, None)
@@ -201,13 +204,13 @@ def test_wallet_binding_stores_payer_wallet(billing_client):
     assert response.json() == {
         "billing_mode": "pilot",
         "payer_wallet": PAYER_WALLET,
-        "payment_destination": USDC_PAYMENT_WALLET,
+        "payment_destination": None,
     }
 
     billing_record = _read_json(billing_state_file)[actor_id_from_api_key("billing-key")]
     assert billing_record["billing_mode"] == "pilot"
     assert billing_record["usdc_wallet"] == PAYER_WALLET
-    assert billing_record["payment_destination"] == USDC_PAYMENT_WALLET
+    assert billing_record["payment_destination"] is None
 
 
 def test_billing_summary_returns_canonical_payment_destination(billing_client):
@@ -242,7 +245,7 @@ def test_billing_summary_returns_canonical_payment_destination(billing_client):
     assert payload["billable_context_calls"] == 2
     assert payload["price_per_decision_usd"] == DEFAULT_PRICE_PER_DECISION_USD
     assert payload["amount_due_usd"] == 0.04
-    assert payload["payment_destination"] == USDC_PAYMENT_WALLET
+    assert payload["payment_destination"] is None
 
 
 def test_metering_failure_does_not_break_context(billing_client):

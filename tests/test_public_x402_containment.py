@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 from x402.http.constants import PAYMENT_REQUIRED_HEADER, PAYMENT_SIGNATURE_HEADER
 
 import app as app_module
-from core import x402_middleware
+from core import x402_config, x402_middleware
 
 
 PUBLIC_SURFACE_FLAGS = (
@@ -96,13 +96,55 @@ def test_health_remains_public_when_containment_is_active(monkeypatch):
     assert response.json() == {"status": "ok"}
 
 
-def test_explicit_synthetic_test_mode_can_enable_surface(monkeypatch):
+def test_enabled_surface_without_wallet_fails_closed(monkeypatch):
     for name in PUBLIC_SURFACE_FLAGS:
         monkeypatch.setenv(name, "true")
     client = TestClient(app_module.app)
 
-    manifest = client.get("/services.json")
-    challenge = client.get("/v1/feeds/constraint_pressure")
+    with (
+        patch.object(app_module, "X402_SETTLEMENT_WALLET", None),
+        patch.object(x402_config, "X402_SETTLEMENT_WALLET", None),
+        patch.object(x402_middleware, "X402_SETTLEMENT_WALLET", None),
+    ):
+        manifest = client.get("/services.json")
+        challenge = client.get("/v1/feeds/constraint_pressure")
+
+    assert manifest.status_code == 503
+    assert challenge.status_code == 503
+    assert manifest.json() == {
+        "detail": "Public payment settlement is unavailable",
+    }
+    assert challenge.json() == {
+        "detail": "Public payment settlement is unavailable",
+    }
+    assert PAYMENT_REQUIRED_HEADER not in challenge.headers
+
+
+def test_explicit_synthetic_test_mode_can_enable_surface(monkeypatch):
+    for name in PUBLIC_SURFACE_FLAGS:
+        monkeypatch.setenv(name, "true")
+    client = TestClient(app_module.app)
+    test_settlement_wallet = "0x" + ("4" * 40)
+
+    with (
+        patch.object(
+            app_module,
+            "X402_SETTLEMENT_WALLET",
+            test_settlement_wallet,
+        ),
+        patch.object(
+            x402_config,
+            "X402_SETTLEMENT_WALLET",
+            test_settlement_wallet,
+        ),
+        patch.object(
+            x402_middleware,
+            "X402_SETTLEMENT_WALLET",
+            test_settlement_wallet,
+        ),
+    ):
+        manifest = client.get("/services.json")
+        challenge = client.get("/v1/feeds/constraint_pressure")
 
     assert manifest.status_code == 200
     assert manifest.json()["services"][0]["x402_ready"] is True

@@ -175,7 +175,8 @@ def test_runtime_config_status_returns_only_non_secret_fingerprints(discovery_cl
     payload = response.json()
     assert payload["cdp_key_id_present"] is True
     assert payload["cdp_secret_present"] is True
-    assert payload["x402_settlement_wallet"] == "0xb29b02130138a6fF8e0f6D7812bDa8D436001BE4"
+    assert payload["x402_settlement_wallet_present"] is False
+    assert "x402_settlement_wallet" not in payload
     assert payload["nova_api_url"] == "https://nova-api-ipz6.onrender.com"
     assert payload["cdp_key_id_suffix"] == "abcdef"
     rendered = json.dumps(payload, sort_keys=True)

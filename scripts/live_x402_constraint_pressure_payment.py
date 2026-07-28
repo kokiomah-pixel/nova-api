@@ -20,7 +20,7 @@ from x402.mechanisms.evm.exact import ExactEvmScheme
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from core.cdp_auth import build_cdp_auth_provider_from_env, load_cdp_credentials_from_env
-from core.x402_config import X402_FACILITATOR_URL
+from core.x402_config import X402_FACILITATOR_URL, require_x402_settlement_wallet
 from nova_api.telemetry.x402_observability import (
     challenge_metadata,
     emit_event,
@@ -33,7 +33,6 @@ from nova_api.telemetry.x402_observability import (
 TARGET_PATH = "/v1/feeds/constraint_pressure"
 EXPECTED_NETWORK = "eip155:8453"
 EXPECTED_ASSET = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
-EXPECTED_SETTLEMENT_WALLET = "0xb29b02130138a6fF8e0f6D7812bDa8D436001BE4"
 PLACEHOLDER_PREFIX = "PASTE_"
 REQUIRED_ENV_NAMES = (
     "NOVA_API_URL",
@@ -123,7 +122,8 @@ def _validate_requirements(payment_required: Any) -> None:
         raise RuntimeError("unexpected payment network")
     if str(payment_required.asset).lower() != EXPECTED_ASSET.lower():
         raise RuntimeError("unexpected payment asset")
-    if str(payment_required.pay_to).lower() != EXPECTED_SETTLEMENT_WALLET.lower():
+    expected_settlement_wallet = require_x402_settlement_wallet()
+    if str(payment_required.pay_to).lower() != expected_settlement_wallet.lower():
         raise RuntimeError("unexpected settlement wallet")
     if str(payment_required.amount) != "10000":
         raise RuntimeError("unexpected payment amount")
