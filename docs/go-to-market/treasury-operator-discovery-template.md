@@ -141,3 +141,105 @@ temporal_implementation_gate:
 ```
 
 Market commentary alone does not satisfy this gate. One operator mentioning timing is a signal, not sufficient implementation authority.
+
+## Machine-Spending Review Context Module
+
+### Research status
+
+```yaml
+research_status:
+  subject: machine_spending_review_context
+  hypothesis_status: unvalidated
+  buyer_demand_established: false
+  recurring_operator_need_established: false
+  product_requirement: false
+  runtime_implementation_authorized: false
+```
+
+Use this optional, clearly separated module when the recurring treasury action
+includes an agent discovering, requesting, or relying on a paid machine
+resource. The questions test a specification-level hypothesis derived in part
+from market signal
+[`MSE-2026-07-30-028`](../market/signals/2026/MSE-2026-07-30-028-fastly-x402-edge-payment.md).
+Fastly is an example provider, not a Nova dependency. Answers are operator
+research, not accepted product requirements.
+
+### Wallet and mandate
+
+- Who owns or controls the wallet used by the agent?
+- Is spending authority defined by agent, task, provider, resource class,
+  amount, or time period?
+- Which purchases may occur under standing authority?
+- Which purchases require local review?
+- Who may change spending limits or provider permissions?
+- Can a cryptographically valid x402 challenge be rejected for institutional
+  reasons?
+- Is Nova expected before wallet authorization, after authorization, or only
+  during later review?
+- What happens when the wallet or facilitator changes?
+
+### Provider and resource governance
+
+- May an agent purchase from any provider?
+- How are approved and prohibited providers represented?
+- Which data or resource classifications are permitted?
+- Does payment create contractual obligations?
+- Does the request disclose confidential task context?
+- Can a low-cost purchase create jurisdictional or recurring obligations?
+- Can the purchase grant the agent new capabilities or access?
+
+### Evidentiary use
+
+- May purchased information enter a financial review automatically?
+- Which sources are institutionally authoritative?
+- Must paid-resource provenance be visible to local authority?
+- Can the institution permit the expenditure but reject the output as
+  evidence?
+- How are summaries, transformations, and agent-generated claims linked back
+  to the paid source?
+- Is the purchase amount material, or is the information's later use more
+  important?
+
+### Chronology
+
+- Does the institution retain why the agent made the purchase?
+- Can a purchase be linked to the action the resulting information supported?
+- Which payment events are important enough to retain?
+- Can the institution distinguish resource access from evidentiary reliance?
+- What survives when the wallet, edge provider, facilitator, or resource
+  provider changes?
+- Can the institution reconstruct what was known before the wallet signed?
+
+### Commercial validation
+
+- Does the absence of this context delay, prevent, or weaken review?
+- Would the institution require this context before certain machine purchases?
+- Is the problem recurring within a defined action class?
+- Who owns the budget for solving it?
+- Is the value tied to transaction count, governed workflows, review
+  environments, or chronology continuity?
+- Would the institution refuse to review a machine-prepared action without
+  this context?
+
+Do not convert answers into product requirements without separate CCO and
+Architect approval. Do not commit completed interview responses or paid
+resource content to the public repository.
+
+### Machine-spending category boundary
+
+Nova is not a payment gateway, x402 facilitator, wallet-policy engine,
+spending-control product, edge-enforcement service, signing service, settlement
+service, transaction-authorization system, resource-access authority, or
+paid-data marketplace.
+
+> x402 and edge infrastructure determine whether a payment requirement was
+> satisfied and whether a resource may be served. Sharpe Nova OS structures the
+> institution-defined review context surrounding why a machine expenditure was
+> proposed and how the resulting resource should be treated if it later
+> influences a consequential capital review.
+
+```text
+Nova structures.
+Institutional authority interprets.
+External wallets and payment systems act.
+```

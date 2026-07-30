@@ -1,0 +1,91 @@
+---
+register_type: market_signal_watch
+status: monitoring_only
+runtime_authority: none
+production_authority: none
+
+category_boundary:
+  statement: >
+    x402 and edge infrastructure determine whether a payment requirement was
+    satisfied and whether a resource may be served. Sharpe Nova OS structures
+    the institution-defined review context surrounding why a machine
+    expenditure was proposed and how the resulting resource should be treated
+    if it later influences a consequential capital review.
+  Nova_role: structures_context
+  institutional_role: interprets
+  external_wallet_and_payment_role: acts
+  excluded_categories:
+    - payment_gateway
+    - x402_facilitator
+    - wallet_policy_engine
+    - spending_control_product
+    - edge_enforcement_service
+    - signing_service
+    - settlement_service
+    - transaction_authorization_system
+    - resource_access_authority
+    - paid_data_marketplace
+
+signals:
+  - evidence_id: MSE-2026-07-30-028
+    title: Fastly x402 edge-payment enforcement
+    recorded_at: 2026-07-30
+
+    primary_watch_family:
+      - agentic_financial_surface_compression
+
+    secondary_watch_families:
+      - agentic_economy_governance_layer_compression
+      - context_engineering_to_governance_context
+      - enterprise_context_sovereignty
+
+    signal_level: structurally_relevant
+    strategic_relevance: high
+    current_status: monitor_and_validate
+    evidence_scope: first_party_testnet_infrastructure_demonstration
+    inference_scope: specification_level_only
+    buyer_demand_established: false
+    product_requirement_established: false
+    provider_dependency_created: false
+
+    monitored_surfaces:
+      - edge_payment_enforcement
+      - agent_wallets
+      - x402_facilitators
+      - API_gateways
+      - MCP_gateways
+      - paid_data_services
+      - machine_service_discovery
+
+    monitored_providers:
+      - Fastly
+      - Cloudflare
+      - Akamai
+      - API_gateway_providers
+      - MCP_gateway_providers
+      - wallet_infrastructure_providers
+      - x402_facilitators
+
+    escalation_triggers:
+      - pre_signing_review_requirements_repeat
+      - provider_specific_machine_spending_mandates_repeat
+      - paid_source_provenance_becomes_an_institutional_requirement
+      - operators_cannot_reconstruct_why_agent_purchases_occurred
+      - purchased_outputs_materially_influence_capital_reviews
+      - payment_and_evidence_provenance_converge
+      - edge_or_wallet_vendors_claim_complete_agent_governance
+      - context_is_lost_when_wallet_or_facilitator_changes
+      - financial_operators_request_pre_signing_context
+
+    approved_current_actions:
+      - monitor_market
+      - include_questions_in_operator_research
+      - preserve_payment_validity_vs_permission_boundary
+      - preserve_purchase_vs_evidentiary_reliance_boundary
+      - preserve_institution_owned_context_across_providers
+
+    engineering_action: none
+    production_action: none
+    public_discovery_action: none
+    chronology_action: none
+    Reflex_Memory_action: none
