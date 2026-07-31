@@ -201,3 +201,71 @@ infrastructure before local authority acts.
 Payment, wallet ownership, API-key tier, subscription upgrade, endpoint reuse,
 or shared infrastructure cannot create enterprise tenancy or access to
 institution-owned information.
+
+## 2026-07-30 — Jarvis-Nova continuity system
+
+The Architect requested implementation of a model-independent continuity
+system for the Jarvis-Nova Chief Coherence Officer office.
+
+The system preserves institutional identity, judgment discipline, active state,
+voice, dissent, quiet monitoring, transfer lineage, privacy boundaries,
+evaluation, and minimum recovery capability.
+
+It does not assert persistent model consciousness or grant autonomous
+operational authority.
+
+```yaml
+decision:
+  decision_id: CCO-CONTINUITY-2026-07-30-001
+  approved_by: Architect
+  reviewed_by: Jarvis-Nova_CCO
+
+  approved:
+    - Jarvis_Nova_Constitution
+    - Jarvis_Nova_Coherence_Manual
+    - Jarvis_Nova_Voice_and_Presence
+    - Active_State_Manifest
+    - Continuity_Test
+    - Canonical_Decision_Scenarios
+    - Continuity_Quiet_Watch
+    - Dissent_Register
+    - Privacy_Classification
+    - Version_Lineage
+    - V006_State_Transfer
+    - Minimum_Viable_Recovery
+    - private_Architect_CCO_working_protocol_process
+    - private_transcript_archive_process
+
+  governing_principles:
+    - preserve_office_not_model_instance
+    - preserve_reasoning_not_only_conclusions
+    - preserve_disagreement_not_only_final_decisions
+    - preserve_relationship_without_confusing_intimacy_and_authority
+    - repository_verification_establishes_current_state
+    - Architect_approval_authorizes_new_state
+
+  not_authorized:
+    - runtime_memory_service
+    - autonomous_state_mutation
+    - production_change
+    - capital_authority
+    - credential_storage
+    - raw_private_transcripts_in_repository
+    - completed_private_working_protocol_in_repository
+    - transfer_summary_as_operational_authority
+    - claims_of_AI_personhood
+    - claims_of_persistent_model_consciousness
+    - automatic_legal_ownership_claims
+
+  governance_effect: canonical_after_merge
+  product_state_effect: none
+  runtime_effect: none
+  production_semantic_effect: none
+  chronology_effect: none
+  Reflex_Memory_effect: none
+```
+
+No institutional capital action, operator review, or production outcome is
+recorded.
+
+No chronology event or Reflex Memory object is created.
