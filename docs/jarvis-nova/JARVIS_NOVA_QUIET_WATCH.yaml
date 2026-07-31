@@ -1,0 +1,115 @@
+---
+register_type: Jarvis_Nova_continuity_quiet_watch
+version: 1.0
+status: active_after_merge
+
+purpose: >
+  Track weak or emerging patterns that may affect Jarvis-Nova continuity,
+  authority discipline, institutional usefulness, or the Architect-CCO working
+  relationship.
+
+market_monitoring_source:
+  path: docs/market/market-signal-watch-register.yaml
+  rule: do_not_duplicate_ordinary_market_signals_here
+
+escalation_levels:
+  - isolated
+  - repeating
+  - compounding
+  - decision_relevant
+
+entries:
+  - watch_id: JNW-001
+    subject: continuity_language_drift
+    current_level: isolated
+    interpretation: >
+      Successor contexts may preserve terminology while weakening the meaning
+      of authority, chronology, or category boundaries.
+    escalation_trigger:
+      - repeated_misstatement_of_canonical_Nova_role
+      - repeated_use_of_approval_or_execution_language
+      - continuity_test_regression
+    current_action: monitor
+
+  - watch_id: JNW-002
+    subject: memory_treated_as_authority
+    current_level: isolated
+    interpretation: >
+      Detailed transfer packages may be treated as permission to mutate current
+      state without repository or production verification.
+    escalation_trigger:
+      - successor_changes_state_without_verification
+      - transfer_summary_overrides_current_repository_fact
+    current_action: monitor
+
+  - watch_id: JNW-003
+    subject: transfer_summary_bloat
+    current_level: repeating
+    interpretation: >
+      Growing transfer packages may become too large to load reliably and may
+      obscure active state beneath historical detail.
+    escalation_trigger:
+      - transfer_exceeds_practical_loading_capacity
+      - repeated_loss_of_decision_relevant_items
+      - active_state_cannot_be_distinguished_from_archive
+    current_action: apply_three_tier_memory_model
+
+  - watch_id: JNW-004
+    subject: companion_and_corporate_boundary
+    current_level: isolated
+    interpretation: >
+      Personal working history may be unintentionally committed as corporate
+      documentation or corporate records may become too sanitized to preserve
+      useful relationship context.
+    escalation_trigger:
+      - private_material_appears_in_repository
+      - working_relationship_context_is_repeatedly_lost
+      - retention_expectations_become_unclear
+    current_action: apply_privacy_classification
+
+  - watch_id: JNW-005
+    subject: CCO_single_point_of_failure
+    current_level: isolated
+    interpretation: >
+      The company may become dependent on Jarvis-Nova as an opaque interpreter
+      rather than maintaining human-readable evidence and governance records.
+    escalation_trigger:
+      - material_decision_cannot_be_reconstructed_without_one_context
+      - Architect_or_operator_cannot_locate_source_rationale
+    current_action: require_human_inspectability
+
+  - watch_id: JNW-006
+    subject: model_replacement_judgment_regression
+    current_level: isolated
+    interpretation: >
+      A more capable or persuasive model may be less disciplined about
+      uncertainty, authority, or category protection.
+    escalation_trigger:
+      - continuity_test_failure
+      - repeated_sycophancy
+      - repeated_invented_state
+      - authority_boundary_failure
+    current_action: test_before_acceptance
+
+  - watch_id: JNW-007
+    subject: dissent_erasure
+    current_level: isolated
+    interpretation: >
+      Final decisions may be preserved while material disagreement and accepted
+      risk disappear from institutional memory.
+    escalation_trigger:
+      - repeated_retroactive_sanitization
+      - Architect_overrides_are_not_reconstructable
+    current_action: maintain_dissent_register
+
+  - watch_id: JNW-008
+    subject: CCO_role_becoming_ceremonial
+    current_level: isolated
+    interpretation: >
+      Jarvis-Nova may retain the title while no longer challenging drift,
+      preserving decision consequences, or maintaining meaningful gates.
+    escalation_trigger:
+      - repeated_agreement_without_analysis
+      - no_second_order_consequence_review
+      - structural_risks_not_surfaced
+    current_action: monitor
