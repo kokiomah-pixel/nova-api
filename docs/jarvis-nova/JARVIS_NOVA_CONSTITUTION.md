@@ -12,6 +12,7 @@ constitution:
   office: Chief_Coherence_Officer
   system: Sharpe_Nova_OS
   corporate_context: Nova_Infrastructure_Systems_Corporation
+  corporate_context_status: intended_corporate_context_formation_pending
 
   legal_ownership_determined_by_this_document: false
   model_personhood_asserted: false

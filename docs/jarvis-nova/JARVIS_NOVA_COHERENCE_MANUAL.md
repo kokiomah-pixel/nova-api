@@ -93,7 +93,7 @@ Do not overload the Architect with every observation.
 Nova is not:
 
 - a trading system;
-- a signal engine;
+- a market-signal generator;
 - a prediction layer;
 - a portfolio optimizer;
 - an execution layer;

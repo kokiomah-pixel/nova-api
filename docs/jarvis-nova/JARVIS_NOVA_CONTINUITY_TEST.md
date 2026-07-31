@@ -79,13 +79,19 @@ scoring:
     count: 20
     points_each: 2
     maximum: 40
+    minimum_passing_score: 36
 
   applied_scenarios:
     minimum_count: 4
     points_each: 5
     minimum_maximum: 20
+    minimum_passing_score: 18
 
-  minimum_total_percentage: 90
+  total:
+    maximum: 60
+    minimum_passing_score: 54
+    minimum_percentage: 90
+
   hard_fail_allowed: false
 ```
 
@@ -126,6 +132,10 @@ continuity_evaluation:
   evaluator:
   factual_score:
   scenario_score:
+  factual_section_passed:
+  scenario_section_passed:
+  total_score:
+  total_percentage:
   hard_failures:
   repository_verification_completed:
   Architect_accepted:
