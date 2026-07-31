@@ -3,8 +3,24 @@ record_type: market_signal_evidence
 evidence_id: MSE-2026-07-30-029
 title: Circle Agent Marketplace and Agent-Ready API Distribution Signal
 source_publisher: Circle
-source_title: Turn Your API Into an Agent-Ready Revenue Stream
-source_url: pending_exact_source_url_confirmation
+source_title: Turn Your API into a Storefront for Agents
+source_url: https://www.circle.com/blog/turn-your-api-into-a-storefront-for-agents
+source_publication_date: 2026-05-18
+
+source_label_as_supplied: Turn Your API Into an Agent-Ready Revenue Stream
+source_match_status: first_party_content_match_with_title_mismatch
+
+supporting_sources:
+  - publisher: Circle
+    title: Agent Marketplace
+    url: https://agents.circle.com/services
+    role: corroborates_machine_discovery_service_catalog_and_paid_API_access
+
+  - publisher: Circle
+    title: Circle for Agents
+    url: https://agents.circle.com/
+    role: corroborates_payment_as_authentication_public_framing
+
 review_date: 2026-07-30
 source_type: first_party_distribution_and_monetization_signal
 
@@ -63,10 +79,23 @@ market monitoring.
 No public application, listing, runtime integration, x402 activation, retail
 service, or accepted product-state change is authorized.
 
-The exact first-party URL corresponding to the approved source title was not
-available in the supplied Market-Signal Extraction record and remains pending.
-Current Circle materials corroborate the marketplace direction but are not
-substituted for the missing exact source URL.
+## Source provenance reconciliation
+
+The Market-Signal Extraction record supplied the source label
+“Turn Your API Into an Agent-Ready Revenue Stream.”
+
+First-party verification identified Circle's May 18, 2026 article,
+“Turn Your API into a Storefront for Agents,” as the canonical matching source
+for the described Agent Marketplace, USDC payment, x402, service-discovery, and
+API-monetization claims.
+
+The supplied label and the verified first-party title are preserved separately
+because they are not exact title matches.
+
+Circle's live Agent Marketplace and Circle for Agents surfaces are recorded as
+supporting sources. They corroborate the current marketplace and payment
+framing but do not independently establish institutional demand for Nova,
+private marketplace suitability, access isolation, or implementation authority.
 
 ## Evidence and inference boundary
 
@@ -120,6 +149,14 @@ nonexclusive.
   invocation behavior, and commercial terms for machine customers.
 - Distribution infrastructure can compress discovery and consumption without
   providing institutional identity, permission, or source authority.
+- Circle's canonical seller article describes Agent Marketplace as a surface
+  where services can be discovered, evaluated, and paid for by agents.
+- Circle describes Gateway as supporting x402 payment flows for USDC
+  nanopayments.
+- Circle's live marketplace presents machine-callable services and paid API
+  access as an active distribution model.
+- Circle's public agent surface uses “Payment as authentication” as an
+  agent-resource-access framing.
 
 ## What the evidence does not establish
 
@@ -131,6 +168,54 @@ nonexclusive.
 - That `/v1/context` should become public, retail, or marketplace-facing.
 - That Circle should own Nova's identity, chronology, pricing, or route to
   market.
+- The Circle phrase “Payment as authentication” does not establish that payment
+  is sufficient for Nova institutional identity, enterprise tenancy, workflow
+  authorization, or institution-owned data access.
+- The public marketplace does not establish that Circle supports private,
+  unlisted, organization-scoped, tenant-isolated, or contract-backed Nova
+  invocation.
+- The first-party materials do not establish buyer demand for Nova.
+- The first-party materials do not authorize a Circle application, listing,
+  manifest, retail service, x402 integration, or runtime change.
+
+## Circle payment-authentication framing
+
+Circle's public agent surface uses the phrase:
+
+> Payment as authentication.
+
+This describes Circle's commercial resource-access framing.
+
+Sharpe Nova OS does not adopt that equivalence for institution-specific access.
+
+For Nova, payment may satisfy an external commercial access condition. It
+cannot establish:
+
+- institutional identity;
+- enterprise tenancy;
+- workflow authorization;
+- action-class permission;
+- institution-owned data entitlement;
+- access to institution-specific constraints;
+- access to authority maps;
+- access to private evidence sources;
+- access to institutional chronology;
+- access to institution-governed Reflex Memory;
+- source authority;
+- review completeness;
+- local decision authority;
+- capital-action approval.
+
+```text
+Payment accepted
+≠ institution authenticated
+≠ tenant authorized
+≠ private context accessible
+≠ authority established
+```
+
+This distinction reinforces the approved clean break between public discovery,
+retail agent usage, and private institutional review context.
 
 ## Architect-approved access-class amendment
 
@@ -401,6 +486,11 @@ infrastructure before local authority acts.
 ```yaml
 implementation_status:
   evidence_recorded: true
+  source_provenance_reconciled: true
+  canonical_first_party_source_confirmed: true
+  supplied_source_label_preserved: true
+  supporting_marketplace_source_recorded: true
+  payment_authentication_category_risk_recorded: true
   access_class_specification_created: true
   marketplace_preflight_created: true
   operator_research_extended: true

@@ -30,25 +30,53 @@ unvalidated.
 
 ```yaml
 source_verification:
-  exact_Circle_program_name:
-  exact_source_title: Turn Your API Into an Agent-Ready Revenue Stream
-  exact_source_url:
-  publication_date:
-  listing_application_url:
-  documentation_url:
-  current_program_status:
-  verified_at:
-  verified_by:
+  exact_Circle_program_name: Circle Agent Marketplace
 
-  rule: >
-    Do not infer requirements from promotional copy alone. Record exact
-    first-party documentation before recommending an application.
+  canonical_first_party_article:
+    title: Turn Your API into a Storefront for Agents
+    url: https://www.circle.com/blog/turn-your-api-into-a-storefront-for-agents
+    publication_date: 2026-05-18
+
+  source_label_as_supplied:
+    title: Turn Your API Into an Agent-Ready Revenue Stream
+    exact_title_match: false
+
+  source_match_status: first_party_content_match_with_title_mismatch
+
+  supporting_sources:
+    - title: Agent Marketplace
+      url: https://agents.circle.com/services
+      role: corroborates_machine_discovery_service_catalog_and_paid_API_access
+
+    - title: Circle for Agents
+      url: https://agents.circle.com/
+      role: corroborates_payment_as_authentication_public_framing
+
+  listing_application_url:
+  technical_documentation_url:
+  private_listing_documentation_url:
+
+  current_program_status: live_public_marketplace_surface
+  verified_at: 2026-07-30
+  verified_by: Jarvis-Nova_CCO
+
+  verification_limit: >
+    Public first-party materials confirm the article, marketplace, x402 and
+    USDC payment direction, and payment-as-authentication framing. They do not
+    establish private listing support, institution-scoped tenancy,
+    confidential invocation, contract-backed metering, or suitability for
+    Sharpe Nova OS.
 ```
 
-The exact first-party URL corresponding to the approved evidence title has not
-been confirmed. Current Circle materials corroborate an Agent Marketplace, but
-they do not resolve that provenance field. No URL or program requirement is
-inferred here.
+The original Market-Signal Extraction title does not exactly match Circle's
+canonical article title.
+
+Both are preserved in the verification record.
+
+The Circle article, Agent Marketplace, and Circle for Agents surfaces confirm
+the general machine-discovery and payment direction. They do not resolve the
+private-invocation, institutional-identity, confidentiality, retention,
+enterprise-contract, or tenant-isolation questions in this preflight.
 
 ## Marketplace access model
 
@@ -76,6 +104,9 @@ identity_and_authorization:
   whether_marketplace_identity_can_bind_to_Nova_tenant_identity:
   whether_workflow_authorization_is_external_to_payment:
   whether_action_class_restrictions_are_supported:
+  whether_Circle_payment_is_described_as_authentication: true
+  whether_that_authentication_is_sufficient_for_Nova_tenancy: false
+  what_additional_enterprise_identity_binding_is_required:
 ```
 
 Marketplace identity must not be assumed to bind to a Nova tenant. Institution
@@ -95,6 +126,8 @@ payment_and_metering:
   post_contract_metering_supported:
   payment_metadata_confidential:
   payment_success_creates_service_entitlement:
+  Circle_public_payment_framing: payment_as_authentication
+  Nova_institutional_interpretation: commercial_access_only
 
   required_Nova_answer:
     payment_success_creates_institutional_authority: false
@@ -102,6 +135,37 @@ payment_and_metering:
 
 Payment is not authentication, permission, enterprise tenancy, or authority.
 No x402 or payment integration is authorized.
+
+### Payment-as-authentication category boundary
+
+Circle publicly uses the phrase “Payment as authentication.”
+
+For this preflight, that phrase is treated as a commercial machine-resource
+access pattern, not as an institutional identity or authority model.
+
+Required Nova interpretation:
+
+```yaml
+payment_authentication_boundary:
+  payment_may_satisfy_commercial_access_condition: true
+
+  payment_establishes:
+    institutional_identity: false
+    enterprise_tenancy: false
+    workflow_authorization: false
+    action_class_permission: false
+    institution_owned_data_entitlement: false
+    private_chronology_access: false
+    institutional_Reflex_Memory_access: false
+    source_authority: false
+    review_completeness: false
+    local_decision_authority: false
+    capital_action_approval: false
+```
+
+A successful marketplace payment without prior institutional authentication
+and workflow authorization must not proceed as an institution-specific Nova
+request.
 
 ## Confidentiality and data
 
