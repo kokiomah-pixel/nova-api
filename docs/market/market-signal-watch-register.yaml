@@ -25,6 +25,20 @@ category_boundary:
     - transaction_authorization_system
     - resource_access_authority
     - paid_data_marketplace
+    - generic_retail_intelligence_API
+    - marketplace_compliance_check
+    - payment_authenticated_authority_service
+    - marketplace_owned_institutional_data_layer
+
+  access_class_statement: >
+    Marketplace discovery may identify the capability. Retail usage, if
+    separately authorized, remains non-institutional. Institutional Nova
+    remains private, tenant-scoped decision-context infrastructure before
+    local authority acts.
+  Circle_dependency_created: false
+  Circle_role: example_channel
+  distribution_model: nonexclusive_required
+  exclusive_distribution_authorized: false
 
 signals:
   - evidence_id: MSE-2026-07-30-028
@@ -87,5 +101,95 @@ signals:
     engineering_action: none
     production_action: none
     public_discovery_action: none
+    chronology_action: none
+    Reflex_Memory_action: none
+
+  - evidence_id: MSE-2026-07-30-029
+    title: Circle Agent Marketplace and agent-ready API distribution
+    recorded_at: 2026-07-30
+
+    primary_watch_family:
+      - agent_service_distribution
+
+    secondary_watch_families:
+      - machine_discoverability
+      - agentic_financial_surface_compression
+      - enterprise_context_sovereignty
+      - agentic_economy_governance_layer_compression
+
+    signal_level: structurally_relevant
+    strategic_relevance: high
+    current_status: monitor_and_validate
+    evidence_scope: first_party_distribution_and_monetization_signal
+    inference_scope: specification_level_only
+
+    buyer_demand_established: false
+    product_requirement_established: false
+    public_listing_authorized: false
+    retail_service_authorized: false
+    Circle_dependency_created: false
+    exclusive_channel_authorized: false
+
+    approved_architecture:
+      - public_discovery_as_separate_access_class
+      - retail_agent_service_as_separate_future_access_class
+      - institutional_review_context_as_private_access_class
+      - retail_and_institutional_data_plane_separation
+      - payment_authentication_and_authority_separation
+      - institution_owned_chronology_separation
+
+    monitored_surfaces:
+      - Circle_Agent_Marketplace
+      - agent_API_marketplaces
+      - MCP_service_catalogs
+      - wallet_service_discovery
+      - internal_enterprise_service_catalogs
+      - private_machine_invocation
+      - institution_scoped_metering
+      - x402_distribution_channels
+
+    monitored_capabilities:
+      - private_marketplace_listings
+      - unlisted_services
+      - organization_scoped_catalogs
+      - institution_scoped_agent_identity
+      - tenant_bound_credentials
+      - confidential_paid_APIs
+      - enterprise_allowlisting
+      - contract_backed_metering
+      - provider_reputation_and_provenance
+      - transaction_purpose_metadata
+      - mandate_aware_wallet_controls
+      - governance_context_services
+      - review_or_authority_handoff_features
+
+    escalation_triggers:
+      - operators_request_public_discovery_with_private_invocation
+      - institutions_require_approved_agent_service_catalogs
+      - retail_and_institutional_isolation_becomes_repeat_requirement
+      - private_or_unlisted_marketplace_services_become_available
+      - tenant_bound_marketplace_identity_becomes_available
+      - confidential_machine_invocation_becomes_available
+      - contract_backed_usage_metering_becomes_available
+      - Circle_claims_institution_owned_decision_chronology
+      - Circle_supports_action_specific_review_context
+      - Circle_supports_authority_override_history
+      - Circle_supports_cross_provider_governance_context
+      - payment_and_institutional_authorization_are_conflated_by_market
+      - marketplace_pricing_weakens_institutional_value_perception
+
+    approved_current_actions:
+      - complete_internal_preflight
+      - include_questions_in_operator_research
+      - preserve_public_retail_and_institutional_access_classes
+      - preserve_retail_institutional_data_plane_separation
+      - preserve_payment_vs_authentication_boundary
+      - preserve_marketplace_neutrality
+      - preserve_institution_owned_chronology
+
+    engineering_action: none
+    production_action: none
+    public_listing_action: none
+    retail_service_action: none
     chronology_action: none
     Reflex_Memory_action: none

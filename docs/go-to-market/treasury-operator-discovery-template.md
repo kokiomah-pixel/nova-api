@@ -243,3 +243,139 @@ Nova structures.
 Institutional authority interprets.
 External wallets and payment systems act.
 ```
+
+## Agent Marketplace and Access-Class Separation Module
+
+### Research status
+
+```yaml
+research_status:
+  subject: agent_marketplace_distribution_and_access_separation
+  evidence_reference: MSE-2026-07-30-029
+  hypothesis_status: unvalidated
+  buyer_demand_established: false
+  recurring_operator_need_established: false
+  Circle_channel_preference_established: false
+  retail_service_requirement_established: false
+  product_requirement: false
+  public_listing_authorized: false
+  runtime_implementation_authorized: false
+```
+
+Use this module to test whether machine-service distribution and strict access
+separation are recurring institutional needs. Circle is one example channel,
+not a Nova dependency. Distribution must remain nonexclusive.
+
+### Marketplace discovery
+
+- Do your agents discover external services through marketplaces, MCP catalogs,
+  API registries, wallet directories, or internal service catalogs?
+- Is Circle Agent Marketplace an approved discovery venue?
+- Who approves machine-callable financial service providers?
+- Is marketplace discovery separate from internal service authorization?
+- Would a public capability listing help your agents or procurement process?
+- Would Nova need to be publicly discoverable but privately invocable?
+- Must the service be private, unlisted, or organization-scoped?
+- Does your institution maintain an approved agent-service catalog?
+- Must distribution remain nonexclusive across marketplaces and providers?
+
+### Identity and authorization
+
+- What establishes the agent's identity?
+- What establishes the institution's identity?
+- Is wallet ownership sufficient to establish organizational identity?
+- Who binds an agent to an institutional tenant?
+- Which workflows and action classes may invoke an external governance service?
+- Does invocation require prior local approval or a standing mandate?
+- Can a paying agent invoke an institution-specific service without an
+  enterprise agreement?
+- What must occur when payment succeeds but institutional permission is absent?
+
+The expected Nova boundary is:
+
+```text
+The institution-specific invocation does not proceed.
+```
+
+### Retail versus institutional
+
+- Does the institution require a technical separation between retail and
+  institutional services?
+- May retail users access any institution-owned source?
+- May retail requests and institutional requests share an endpoint?
+- May retail and institutional services share credentials?
+- May they share a cache, data store, vector store, source registry, or
+  chronology?
+- May retail behavior influence institutional Reflex Memory?
+- May institution-owned data improve retail responses?
+- What evidence would be required before any cross-plane data use?
+- Would a retail price create confusion about institutional value?
+
+### Data ownership
+
+- Which data is public?
+- Which data is user-owned but non-institutional?
+- Which data is institution-owned?
+- Who classifies ambiguous data?
+- What should happen when ownership cannot be determined?
+- Which source classes may enter a retail service?
+- Which source classes require tenant authentication?
+- Who owns the resulting review context?
+- Who owns the resulting chronology?
+- What survives when the marketplace or distribution channel changes?
+
+### Endpoint
+
+- Must `/v1/context` remain private?
+- Would the institution reject use of a mixed retail and institutional
+  endpoint?
+- Would a separate service identity be required for retail access?
+- Should public discovery expose only non-callable metadata?
+- Does the marketplace support private invocation after public discovery?
+- Does the institution require a separate hostname, credential domain, or
+  deployment?
+
+### Commercial
+
+- Would Circle function only as a discovery channel?
+- Would the institution accept usage metering after an enterprise agreement?
+- Would the institution accept x402 for metering but not authentication?
+- Is the commercial unit an API call, governed workflow, action class, tenant,
+  or review environment?
+- Who owns the budget?
+- Would marketplace pricing weaken procurement or institutional-value framing?
+- Is private contract pricing required?
+- Would the institution refuse anonymous pay-per-call access?
+
+### Chronology
+
+- Who owns the record explaining why an external service was used?
+- Does the marketplace retain enough information to reconstruct invocation?
+- Must Nova preserve chronology independently of Circle?
+- Can retail activity ever enter institutional chronology?
+- What formal acceptance would be required?
+- Must chronology remain portable when the marketplace changes?
+
+Answers remain research evidence.
+
+Do not convert operator answers into public-listing authority, retail-service
+authority, runtime requirements, pricing commitments, or accepted product
+state without a separate Architect and CCO decision.
+
+Do not commit completed interview responses, institution identities, private
+workflow information, or confidential marketplace terms to the public
+repository.
+
+```text
+Marketplace discovery may identify the capability.
+
+Retail usage, if separately authorized, remains non-institutional.
+
+Institutional Nova remains private, tenant-scoped decision-context
+infrastructure before local authority acts.
+```
+
+Retail access to institution-owned data, payment-based or subscription-based
+tenancy escalation, endpoint reuse, automatic cross-plane chronology, and
+cross-plane Reflex Memory are prohibited. `/v1/context` remains private and
+non-retail.

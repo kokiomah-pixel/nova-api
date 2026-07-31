@@ -266,6 +266,39 @@ Reflex Memory must never automatically:
 This specification creates no learning object and changes no Reflex Memory
 state.
 
+## Related access-class boundary
+
+Machine-spending context does not authorize a shared retail and institutional
+service surface.
+
+Public discovery, retail agent usage, and private institutional review context
+are separate access classes.
+
+Circle is one example channel, not a Nova dependency. Any distribution model
+must remain nonexclusive.
+
+See
+[`agent-access-class-separation.md`](agent-access-class-separation.md).
+
+A marketplace payment, wallet identity, API-key tier, subscription upgrade, or
+retail invocation must not create access to institution-owned evidence,
+constraints, authority maps, source registries, chronology, Reflex Memory, or
+tenant configuration.
+
+`/v1/context` must not become a combined retail and institutional marketplace
+endpoint. It remains a private authenticated Legacy v1 surface and is not
+represented here as the approved future external contract. Retail or
+marketplace access is not authorized.
+
+```text
+Marketplace discovery may identify the capability.
+
+Retail usage, if separately authorized, remains non-institutional.
+
+Institutional Nova remains private, tenant-scoped decision-context
+infrastructure before local authority acts.
+```
+
 ## Category protection
 
 Nova is not a payment gateway, x402 facilitator, wallet-policy engine,

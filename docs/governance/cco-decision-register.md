@@ -90,3 +90,114 @@ decision:
 
 No institutional action, reviewed purchase, accepted lesson, or observed Nova
 outcome is recorded. No chronology candidate or learning object is created.
+
+## 2026-07-30 — Circle Agent Marketplace and access-class separation
+
+Circle's first-party agent-ready API distribution signal is accepted as
+strategically relevant market evidence.
+
+The Architect approved the required clean break between public discovery,
+retail agent usage, and institution-owned review context.
+
+The decision remains specification-level. Buyer demand, recurring operator
+need, Circle channel preference, retail-service demand, and marketplace
+suitability are not established. Circle is an example channel, not a Nova
+dependency, and distribution must remain nonexclusive.
+
+```yaml
+decision:
+  evidence_reference: MSE-2026-07-30-029
+  approved_by: Architect
+  reviewed_by: Jarvis-Nova_CCO
+
+  disposition:
+    market_evidence_accepted: true
+    strategic_relevance: high
+    specification_refinement_approved: true
+    marketplace_preflight_approved: true
+    operator_research_extension_approved: true
+    internal_listing_draft_approved: true
+    commercial_model_research_approved: true
+    market_watch_approved: true
+
+  approved_at_specification_level:
+    - public_discovery_access_class
+    - retail_agent_access_class
+    - institutional_review_context_access_class
+    - retail_institutional_data_plane_separation
+    - request_data_classification
+    - tenant_scoped_institutional_invocation
+    - payment_authentication_and_authority_separation
+    - retail_institutional_chronology_separation
+    - retail_institutional_Reflex_Memory_separation
+    - provider_neutral_marketplace_readiness
+
+  approved_for_internal_research:
+    - Circle_marketplace_preflight
+    - boundary_safe_listing_draft
+    - private_and_unlisted_listing_research
+    - enterprise_license_plus_usage_research
+    - contract_backed_metering_research
+    - nonexclusive_distribution_research
+
+  validate_with_operators_before_build:
+    - demand_for_public_machine_discovery
+    - demand_for_private_institutional_invocation
+    - approved_agent_service_catalog_requirements
+    - retail_institutional_isolation_requirements
+    - marketplace_identity_requirements
+    - confidentiality_and_retention_requirements
+    - institution_scoped_metering
+    - chronology_portability
+    - budget_owner_and_commercial_unit
+
+  not_authorized:
+    - Circle_marketplace_submission
+    - public_Nova_listing
+    - public_service_manifest
+    - public_v1_context
+    - retail_access_to_v1_context
+    - Circle_specific_API_route
+    - retail_Nova_service
+    - anonymous_institutional_invocation
+    - x402_payment_for_Nova
+    - payment_as_authentication
+    - payment_as_institutional_permission
+    - payment_as_enterprise_tenancy
+    - shared_retail_and_institutional_endpoint
+    - shared_retail_and_institutional_credentials
+    - shared_retail_and_institutional_data_plane
+    - shared_retail_and_institutional_chronology
+    - shared_retail_and_institutional_Reflex_Memory
+    - institution_owned_data_for_retail_training
+    - automatic_cross_plane_migration
+    - exclusive_Circle_distribution
+    - runtime_engineering
+    - production_change
+
+  runtime_effect: none
+  production_effect: none
+  accepted_state_change: none
+  public_listing_effect: none
+  retail_service_effect: none
+  chronology_effect: none
+  Reflex_Memory_effect: none
+```
+
+No institutional invocation, marketplace listing, operator decision, reviewed
+purchase, accepted lesson, or observed Nova outcome is recorded.
+
+No chronology candidate or Reflex Memory learning object is created.
+
+```text
+Marketplace discovery may identify the capability.
+
+Retail usage, if separately authorized, remains non-institutional.
+
+Institutional Nova remains private, tenant-scoped decision-context
+infrastructure before local authority acts.
+```
+
+Payment, wallet ownership, API-key tier, subscription upgrade, endpoint reuse,
+or shared infrastructure cannot create enterprise tenancy or access to
+institution-owned information.
