@@ -70,6 +70,16 @@ review_context_request:
     observed_at:
     received_at:
 
+  claim_context:
+    material_claims:
+      - claim_id:
+        claim:
+        claim_genesis:
+        evidence_state:
+        assumptions: []
+        validation_records: []
+        institutional_applicability:
+
   institution_context:
     institution_id_or_policy_profile:
     relevant_constraints: []
@@ -191,6 +201,13 @@ review_context_response:
     accepted_memory_references: []
     relevant_changes_since_prior_review: []
 
+  claim_context_response:
+    claim_statuses: []
+    validation_scope: []
+    unresolved_validation_questions: []
+    applicability_statuses: []
+    result_lineage_references: []
+
   authority_handoff:
     decision_owner: local_institutional_authority
     execution_owner: external_system
@@ -226,6 +243,9 @@ Each state is descriptive:
   fields required by the identified and versioned profile.
 - `chronology_context` identifies relevant prior records and changes without
   accepting a new chronology event.
+- `claim_context_response` preserves declared claim genesis, validation scope,
+  applicability status, and result-lineage references without determining a
+  claim's truth or institutional treatment.
 - `authority_handoff` makes the local decision and external execution owners
   explicit.
 
@@ -234,6 +254,31 @@ Each state is descriptive:
 Nova does not choose a winning source or resolve a policy dispute. An empty
 conflict list means only that no conflict was identified within the declared
 scope; it does not establish that no external conflict exists.
+
+## Optional Claim Context
+
+Claim context is an optional design extension for material claims that may be
+source-derived, human-originated, model-inferred, model-originated, jointly
+originated, or produced by an external system. Its focused schema is defined
+in
+[`Model-Originated Claim and Validation Scope`](model-originated-claim-and-validation-scope.md).
+
+```yaml
+claim_context_invariants:
+  model_origin_creates_authority: false
+  validation_pass_creates_authority: false
+  formal_certificate_creates_execution_entitlement: false
+  institutional_applicability_requires_local_review: true
+```
+
+Claim context does not replace source state, contradiction context, review
+completeness, or authority handoff. A validation record describes only the
+statement, assumptions, method, conditions, and artifact within its declared
+scope. A local institution remains responsible for reviewing applicability.
+
+No current endpoint, runtime schema, application code, or deployed behavior
+supports these optional fields. Their presence in this design contract creates
+no implementation authority.
 
 ## Prepared Action Reference Boundary
 

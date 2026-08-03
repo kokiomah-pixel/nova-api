@@ -256,6 +256,58 @@ internal_listing_draft:
 This draft is internal research only. It is not public metadata and creates no
 listing authority.
 
+## Initial marketplace SKU claim-field refinement
+
+The initial marketplace SKU remains:
+
+```text
+Review Context Packet Validator
+```
+
+This is a bounded design refinement of the internal listing draft, not a public
+listing, manifest, callable marketplace service, or replacement SKU.
+
+```yaml
+marketplace_SKU_refinement:
+  SKU_name: Review Context Packet Validator
+  status: internal_schema_design_only
+  public_listing_authorized: false
+  runtime_implementation_status: not_implemented
+
+  optional_claim_fields:
+    claim_origin_type:
+    originator_reference:
+    novelty_asserted:
+    novelty_review_status:
+    validation_records: []
+    institutional_applicability_status:
+    result_lineage_reference:
+
+  service_behavior:
+    validates_field_presence: true
+    validates_declared_status_structure: true
+    identifies_missing_validation_scope: true
+    identifies_unreviewed_applicability: true
+
+    verifies_mathematical_truth: false
+    determines_actual_novelty: false
+    certifies_model_reliability: false
+    ranks_models: false
+    decides_institutional_reliance: false
+    approves_actions: false
+    executes_actions: false
+```
+
+> The service records how a claim originated, how it was validated, which
+> assumptions remain, and whether institutional applicability has been
+> reviewed. It does not determine whether a model is generally trustworthy or
+> whether the institution should rely on the claim.
+
+The SKU must not be presented as AI truth verification, hallucination
+elimination, frontier-model certification, a model trust score, a
+scientific-proof engine, guaranteed correctness, or an institutional approval
+API.
+
 ## Prohibited public metadata
 
 ```yaml

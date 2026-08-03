@@ -193,3 +193,45 @@ signals:
     retail_service_action: none
     chronology_action: none
     Reflex_Memory_action: none
+
+  - evidence_id: MSE-2026-08-02-034
+    title: Astra and model-originated knowledge
+    recorded_at: 2026-08-03
+
+    primary_watch_family:
+      - model_evidence_vs_governance_readiness
+
+    secondary_watch_families:
+      - enterprise_context_sovereignty
+      - context_engineering_to_governance_context
+      - agentic_economy_governance_layer_compression
+
+    signal_level: decision_relevant_reinforcement
+    strategic_relevance: high
+    source_scope: first_party_frontier_capability_publication
+
+    direct_financial_workflow_evidence: false
+    buyer_demand_established: false
+    product_requirement_established: false
+    runtime_requirement_established: false
+
+    monitored_conditions:
+      - models_originate_material_financial_conclusions
+      - validation_artifacts_enter_authority_review
+      - formal_correctness_and_applicability_are_conflated
+      - later_corrections_are_disconnected_from_original_review
+      - institutions_request_cross_model_reliance_continuity
+      - competitors_offer_model_originated_claim_lineage
+
+    approved_current_actions:
+      - refine_claim_genesis_specification
+      - refine_validation_scope_specification
+      - add_operator_research_questions
+      - preserve_model_neutrality
+      - monitor_financial_workflow_relevance
+
+    engineering_action: none
+    production_action: none
+    marketplace_listing_action: none
+    chronology_action: none
+    Reflex_Memory_action: none

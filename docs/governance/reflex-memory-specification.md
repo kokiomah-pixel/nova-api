@@ -238,6 +238,51 @@ The API output remains review context.
 
 It is not an approval, denial, authorization, block, route, settlement, signature, or execution command.
 
+## Validation-History Learning Boundary
+
+Reflex Memory may preserve an accepted lesson about future review requirements
+only after the underlying chronology event and candidate complete the existing
+manual review and acceptance flow.
+
+```yaml
+Reflex_Memory_prohibitions:
+  - model_prestige_as_future_trust
+  - provider_identity_as_authority
+  - prior_validation_pass_as_automatic_acceptance
+  - universal_model_reliability_ranking
+  - automatic_policy_change
+```
+
+```yaml
+validation_learning:
+  problem_or_action_class:
+  claim_origin_type:
+  validation_methods_used: []
+  assumptions_that_failed: []
+  assumptions_that_held: []
+  authority_treatment:
+  later_confirmation_or_correction:
+  outcome_relevance:
+  proposed_future_review_requirement:
+  formal_acceptance_status:
+```
+
+An accepted lesson concerns the evidence, assumptions, validation methods, and
+future review requirements relevant to a problem or action class. It must not
+be reduced to:
+
+```text
+Model X was correct before,
+therefore trust Model X next time.
+```
+
+A model or provider name remains provenance, not authority. A prior validation
+pass cannot create automatic institutional applicability, future acceptance,
+or policy change.
+
+This documentation change creates no Reflex Memory candidate, accepted entry,
+or other Reflex Memory object.
+
 ## Acceptance Flow
 
 ```text

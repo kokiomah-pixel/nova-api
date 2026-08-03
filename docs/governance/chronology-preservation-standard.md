@@ -449,6 +449,52 @@ The purpose is to preserve the context that makes future review possible.
 
 ---
 
+## Model-Originated Result and Reliance Lineage
+
+Later validation, amendment, or correction must not rewrite the review state
+that authority actually saw.
+
+For a material claim or result, governed chronology should be able to preserve
+these relationships when a separately governed chronology event exists:
+
+```yaml
+chronology_relationships:
+  - original_result_version
+  - validation_artifact_available_at_review
+  - assumptions_visible_at_review
+  - human_contextualization_available_at_review
+  - authority_reviewed_version
+  - authority_treatment
+  - later_validation
+  - later_correction
+  - amendment
+  - supersession
+```
+
+The distinction is:
+
+```text
+Audit log:
+Records that artifacts changed.
+
+Governed chronology:
+Preserves which result version,
+validation state,
+assumptions,
+and limitations authority actually reviewed.
+```
+
+Amendment, correction, and supersession are linked, append-only relationships.
+They do not silently replace the historical result or validation state.
+Changing a model provider also does not erase the institution's prior reliance
+history.
+
+This specification refinement creates no chronology event. Any future event
+requires the existing review, acceptance, source-classification, and movement
+discipline.
+
+---
+
 ## Final Principle
 
 Chronology is not yet Nova's moat.
