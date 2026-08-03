@@ -269,3 +269,31 @@ No institutional capital action, operator review, or production outcome is
 recorded.
 
 No chronology event or Reflex Memory object is created.
+
+## 2026-08-03 — Model-originated claims and validation scope
+
+The Architect authorized bounded specification and operator-research work to
+represent model-originated claims, validation scope, institutional
+applicability, human contextualization, and result lineage.
+
+The decision does not authorize runtime changes, model certification, theorem
+proving, automatic reliance, production changes, chronology writes, or Reflex
+Memory mutation.
+
+See:
+
+`docs/governance/decisions/CCO-MODEL-ORIGINATED-CLAIMS-2026-08-03-001.md`
+
+```yaml
+effects:
+  governance_effect: canonical_after_merge
+  runtime_effect: none
+  production_effect: none
+  accepted_state_registry_effect: none
+  chronology_effect: none
+  Reflex_Memory_effect: none
+```
+
+Model origin does not create institutional authority. Validation scope remains
+distinct from institutional applicability, and local authority decides whether
+and how the institution may rely on a claim.
