@@ -6,19 +6,20 @@ operating state and performance evidence.
 
 ```yaml
 content_system_state:
-  repository_status: proposed_until_merge
-  operating_status: initialized_after_merge
+  repository_status: merged
+  operating_status: initialized
   publication_status: inactive
   evidence_status: no_historical_evidence_loaded
   first_learning_cycle: not_started
+  content_intake_status: ready
 ```
 
-The repository proposal becomes the initialized operating system only after
-merge. File creation does not activate experiments, publication, or learning.
+The content system is initialized on main. Intake readiness does not activate
+experiments, publication, automated repository writing, or learning.
 
 ## Authority map
 
-| Layer | Proposed artifact | Owner |
+| Layer | Artifact | Owner |
 | --- | --- | --- |
 | Durable production rules | `content-production-os.md` | Architect or Jarvis-Nova CCO |
 | Daily operating control | `daily-coherence-content-operating-contract.md` | Daily Coherence Agent |
@@ -45,7 +46,10 @@ Daily Coherence assignment
 
 ## Artifact guide
 
-- `content-production-os.md`: proposed durable instructions; authoritative after merge.
+- `content-production-os.md`: authoritative durable content-production instructions.
+- `content-production-engine-august-intake-protocol.md`: governs Architect
+  submission of August published posts and performance evidence through a
+  structured manual repository handoff.
 - `audience-and-distribution-thesis.md`: target-audience hypotheses and stages.
 - `narrative-pillars.md`: governed topic taxonomy.
 - `content-pattern-library.md`: reusable patterns and drift controls.
@@ -65,3 +69,12 @@ Unknown and unavailable metrics are not zero. Exact published copy must be
 preserved. Performance observations remain outside the post-merge Content
 Production OS until the promotion threshold is met and the Architect or CCO
 explicitly approves the change.
+
+## Current intake mode
+
+The Content Production Engine is authorized to receive and structure August 2026
+LinkedIn posts and evidence.
+
+Repository persistence remains a bounded VS Code operation. A structured
+handoff is not a durable repository record until a commit or merged pull request
+exists.

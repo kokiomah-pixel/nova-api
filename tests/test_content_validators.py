@@ -42,13 +42,17 @@ def test_repository_content_control_artifacts_validate() -> None:
     assert operations["completed_item_count"] == 0
     assert monthly["canonical_rule_change_count"] == 0
     assert current_state["content_system_state"] == {
-        "repository_status": "proposed_until_merge",
-        "operating_status": "initialized_after_merge",
+        "repository_status": "merged",
+        "operating_status": "initialized",
         "publication_status": "inactive",
         "evidence_status": "no_historical_evidence_loaded",
         "first_learning_cycle": "not_started",
     }
     assert current_state["active_experiments"] == []
+    assert current_state["canonical_content_OS_version"] == "1.0.0"
+    assert current_state["proposed_content_OS_version"] is None
+    assert current_state["content_intake"]["status"] == "ready"
+    assert current_state["content_intake"]["automatic_repository_write"] is False
 
 
 def test_valid_assignment_and_published_record(tmp_path: Path) -> None:

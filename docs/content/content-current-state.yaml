@@ -1,11 +1,32 @@
 content_current_state:
-  updated_at: 2026-08-04T00:00:00-05:00
+  updated_at: 2026-08-04T16:19:00-05:00
   content_system_state:
-    repository_status: proposed_until_merge
-    operating_status: initialized_after_merge
+    repository_status: merged
+    operating_status: initialized
     publication_status: inactive
     evidence_status: no_historical_evidence_loaded
     first_learning_cycle: not_started
+  content_intake:
+    status: ready
+    cohort: August_2026_LinkedIn_posts
+    intake_surface: Content_Production_Engine
+    intake_mode: structured_conversation_handoff
+    persistence_mode: bounded_VS_Code_repository_update
+    automatic_repository_write: false
+    green_light_authority: Architect
+    green_light_date: 2026-08-04
+    accepted_submission_types:
+      - published_post_only
+      - post_and_performance
+      - performance_update
+      - audience_observation
+    accepted_source_types:
+      - exact_published_copy
+      - LinkedIn_post_URL
+      - LinkedIn_analytics_screenshot
+      - copied_analytics
+      - comment_or_engagement_screenshot
+      - Architect_observation
   current_month: 2026-08
   operating_plan: docs/content/monthly/2026-08-content-operating-plan.md
   approved_experiments:
@@ -30,8 +51,8 @@ content_current_state:
   open_operational_items:
     - CONTENT-OPS-001
     - CONTENT-OPS-002
-  proposed_content_OS_version: 1.0.0
-  canonical_content_OS_version: null
+  proposed_content_OS_version: null
+  canonical_content_OS_version: 1.0.0
   last_monthly_review: null
   next_monthly_review: 2026-08-31
   authority:

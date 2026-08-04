@@ -1,16 +1,18 @@
 operational_items:
   - item_id: CONTENT-OPS-001
-    title: Locate and review Architect-controlled historical post and metric evidence
+    title: Backfill pre-August historical post and metric evidence
     affected_layer: historical_backfill
     owner: Daily_Coherence_Agent
-    urgency: due
+    urgency: scheduled
     blocking: false
-    status: review_required
+    status: assigned
     created_at: 2026-08-04
-    target_date: 2026-08-07
+    activation_condition: August_2026_distribution_cycle_complete
+    not_before: 2026-09-01
+    target_date: 2026-09-05
     completion_condition: >-
-      Available recent post sources are reviewed, evidence-backed records are
-      archived, and unavailable fields remain explicitly unavailable.
+      Available posts published before August 2026 and their supported performance
+      evidence are preserved as a separately identified retrospective cohort.
     completion_evidence:
       artifact_path: null
       post_ids: []
