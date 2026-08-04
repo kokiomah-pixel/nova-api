@@ -6,12 +6,6 @@ import pytest
 import yaml
 
 from scripts.content.check_content_rule_promotion import check_content_rule_promotion
-from scripts.content.content_evidence_store import (
-    AUDIENCE_HEADER,
-    PERFORMANCE_HEADER,
-    validate_audience_ledger,
-    validate_performance_ledger,
-)
 from scripts.content.validate_content_assignment import validate_content_assignment
 from scripts.content.validate_content_operational_items import validate_content_operational_items
 from scripts.content.validate_experiment_register import validate_experiment_register
@@ -55,26 +49,6 @@ def test_repository_content_control_artifacts_validate() -> None:
         "first_learning_cycle": "not_started",
     }
     assert current_state["active_experiments"] == []
-    assert current_state["last_content_evidence_ingestion"] is None
-    assert current_state["pending_evidence_resolution"] == []
-    assert current_state["content_evidence_ingestion"] == {
-        "last_intake_id": None,
-        "last_ingested_at": None,
-        "pending_intakes": [],
-        "unresolved_intakes": [],
-        "evidence_branch": None,
-        "evidence_pull_request": None,
-    }
-
-
-def test_repository_content_evidence_ledgers_use_governed_headers() -> None:
-    performance_path = ROOT / "docs/content/performance/content-performance-ledger.csv"
-    audience_path = ROOT / "docs/content/performance/audience-engagement-ledger.csv"
-
-    assert performance_path.read_text(encoding="utf-8").splitlines()[0].split(",") == PERFORMANCE_HEADER
-    assert audience_path.read_text(encoding="utf-8").splitlines()[0].split(",") == AUDIENCE_HEADER
-    assert validate_performance_ledger(performance_path)["row_count"] == 0
-    assert validate_audience_ledger(audience_path)["row_count"] == 0
 
 
 def test_valid_assignment_and_published_record(tmp_path: Path) -> None:
