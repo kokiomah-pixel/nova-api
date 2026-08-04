@@ -1,0 +1,39 @@
+operational_items:
+  - item_id: CONTENT-OPS-001
+    title: Locate and review Architect-controlled historical post and metric evidence
+    affected_layer: historical_backfill
+    owner: Daily_Coherence_Agent
+    urgency: due
+    blocking: false
+    status: review_required
+    created_at: 2026-08-04
+    target_date: 2026-08-07
+    completion_condition: >-
+      Available recent post sources are reviewed, evidence-backed records are
+      archived, and unavailable fields remain explicitly unavailable.
+    completion_evidence:
+      artifact_path: null
+      post_ids: []
+      measurement_records: []
+      review_record: null
+      verified_at: null
+      verified_by: null
+  - item_id: CONTENT-OPS-002
+    title: Establish first controlled assignments and Architect publication decisions
+    affected_layer: August_controlled_loop
+    owner: Daily_Coherence_Agent
+    urgency: due
+    blocking: true
+    status: assigned
+    created_at: 2026-08-04
+    target_date: 2026-08-07
+    completion_condition: >-
+      Architect-reviewed assignments exist for the selected experiments; any
+      publication remains an explicit Architect or delegated-operator action.
+    completion_evidence:
+      artifact_path: null
+      post_ids: []
+      measurement_records: []
+      review_record: null
+      verified_at: null
+      verified_by: null

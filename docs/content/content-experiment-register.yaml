@@ -1,0 +1,108 @@
+experiments:
+  - experiment_id: CONTENT-EXP-001
+    status: approved
+    activation_condition: content_system_merged_to_main
+    hypothesis: >-
+      Concrete institutional scenarios will produce stronger qualified engagement
+      than abstract category definitions.
+    target_audience:
+      - institutional_treasury_operators
+      - digital_asset_operations_leaders
+    narrative_pillar: institutional_review_problems
+    variable_changed: opening_frame
+    control_pattern: definition_led_opening
+    test_pattern: scenario_led_opening
+    posts_included: []
+    measurement_windows:
+      - 24_hours
+      - 7_days
+      - 30_days
+    primary_metric: target_role_engagements
+    secondary_metrics:
+      - qualified_operator_comments
+      - profile_views
+      - saves
+    audience_quality_metric: target_role_engagements
+    narrative_accuracy_metric: correct_Nova_understanding
+    result: null
+    measurement_evidence: []
+    evidence_strength: insufficient_evidence
+    interpretation: null
+    recommended_action: run_controlled_comparable_posts
+    promotion_status: observation_only
+    approval:
+      status: approved
+      authority_role: Architect
+      approval_reference: Architect_implementation_brief_2026-08-04
+      approved_at: 2026-08-04
+  - experiment_id: CONTENT-EXP-002
+    status: approved
+    activation_condition: content_system_merged_to_main
+    hypothesis: >-
+      Posts explaining one governed distinction will produce stronger comprehension
+      and lower category confusion than posts explaining the entire Nova system.
+    target_audience:
+      - institutional_treasury_operators
+      - digital_asset_operations_leaders
+    narrative_pillar: category_definition
+    variable_changed: explanation_scope
+    control_pattern: full_OS_explanation
+    test_pattern: one_governed_distinction
+    posts_included: []
+    measurement_windows:
+      - 24_hours
+      - 7_days
+      - 30_days
+    primary_metric: correct_Nova_understanding
+    secondary_metrics:
+      - saves
+      - qualified_operator_comments
+      - category_confusion
+    audience_quality_metric: target_role_engagements
+    narrative_accuracy_metric: category_confusion
+    result: null
+    measurement_evidence: []
+    evidence_strength: insufficient_evidence
+    interpretation: null
+    recommended_action: run_controlled_comparable_posts
+    promotion_status: observation_only
+    approval:
+      status: approved
+      authority_role: Architect
+      approval_reference: Architect_implementation_brief_2026-08-04
+      approved_at: 2026-08-04
+  - experiment_id: CONTENT-EXP-003
+    status: approved
+    activation_condition: content_system_merged_to_main
+    hypothesis: >-
+      A specific operator question will generate more qualified workflow
+      conversations than a generic closing principle.
+    target_audience:
+      - institutional_treasury_operators
+      - digital_asset_operations_leaders
+    narrative_pillar: agent_prepared_financial_workflows
+    variable_changed: closing_style
+    control_pattern: declarative_close
+    test_pattern: operator_question_close
+    posts_included: []
+    measurement_windows:
+      - 24_hours
+      - 7_days
+      - 30_days
+    primary_metric: qualified_operator_responses
+    secondary_metrics:
+      - inbound_messages
+      - qualified_operator_comments
+    audience_quality_metric: qualified_inbound_conversations
+    narrative_accuracy_metric: correct_Nova_understanding
+    result: null
+    measurement_evidence: []
+    evidence_strength: insufficient_evidence
+    interpretation: null
+    recommended_action: run_controlled_comparable_posts
+    promotion_status: observation_only
+    approval:
+      status: approved
+      authority_role: Architect
+      approval_reference: Architect_implementation_brief_2026-08-04
+      approved_at: 2026-08-04
