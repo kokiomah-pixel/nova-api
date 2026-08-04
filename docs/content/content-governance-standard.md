@@ -1,0 +1,66 @@
+# Content governance standard
+
+## Scope
+
+This standard governs content assignments, drafts, publication records,
+performance evidence, experiments, reviews, and durable-rule proposals. It does
+not govern runtime execution or change corporate accepted state.
+
+## Authority
+
+- The Daily Coherence Agent controls the operating loop and may prepare work.
+- The Content Production Engine drafts and revises within assigned rules.
+- The Architect or explicitly authorized operator controls publication.
+- The Architect or Jarvis-Nova CCO controls canonical-rule mutation.
+- A monthly review is interpretation, not approval.
+
+## Evidence states
+
+Use `observed`, `reported`, `inferred`, `unavailable`, or `unverified` where an
+evidence field needs classification. Keep raw observation separate from
+interpretation. Record measurement windows, dates, and sources. Never coerce
+unknown values to zero or compare unlike windows without disclosure.
+
+## Publication records
+
+Published copy is immutable in its post record. Corrections or rewrites become
+new, linked records or clearly labeled annotations. Every published post must
+have a measurement schedule for 24 hours, 7 days, and 30 days.
+
+## Audience evidence and privacy
+
+Record only details materially useful for audience-quality evaluation. Do not
+scrape private LinkedIn data, store unnecessary personal information, automate
+DMs, use fake accounts, purchase engagement, or automate engagement
+manipulation.
+
+## Experiment integrity
+
+One experiment changes one primary variable. Record the control, test, metrics,
+audience-quality measure, and narrative-accuracy measure before interpreting a
+result. Completion requires measurement evidence. Promotion requires explicit
+approval at the canonical threshold.
+
+## Learning and change control
+
+Single posts are observations. Three comparable posts may establish a
+provisional pattern. Repetition across multiple pillars or two months may
+establish a candidate rule. Only explicit Architect or CCO approval establishes
+a canonical rule. Superseded instructions are archived.
+
+## Prohibited inferences
+
+Do not infer demand from impressions, willingness to pay from likes,
+product-market fit from follower growth, institutional dependency from
+comments, or accepted-state movement from content performance. Content evidence
+does not create chronology or Reflex Memory.
+
+## Escalation
+
+Escalate category-confusing high reach, repeated tool framing, two months of
+declining target-market engagement, recurring new operator language, material
+qualified-inbound movement, pricing or buyer language, repeated production-rule
+violations, incomplete monthly data, or production volume above measurement
+capacity. Quietly track signals that do not yet affect audience strategy,
+narrative architecture, GTM, workflow wedge, monetization, category, or
+implementation priority.

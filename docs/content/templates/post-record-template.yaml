@@ -1,0 +1,29 @@
+post_record:
+  post:
+    post_id: null
+    title_or_working_name: null
+    publication_date: null
+    post_url: null
+    intended_audience: null
+    audience_stage: null
+    narrative_pillar: null
+    governed_distinction: null
+    hook_type: null
+    content_pattern: null
+    experiment_id: null
+    status: draft
+  final_published_copy: null
+  intended_reader_understanding: null
+  prohibited_misunderstanding: null
+  measurement_schedule:
+    post_id: null
+    due:
+      - window: 24_hours
+        date: null
+      - window: 7_days
+        date: null
+      - window: 30_days
+        date: null
+  performance_references: []
+  qualitative_observations: []
+  content_production_notes: []

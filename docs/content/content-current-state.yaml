@@ -1,0 +1,40 @@
+content_current_state:
+  updated_at: 2026-08-04T00:00:00-05:00
+  content_system_state:
+    repository_status: proposed_until_merge
+    operating_status: initialized_after_merge
+    publication_status: inactive
+    evidence_status: no_historical_evidence_loaded
+    first_learning_cycle: not_started
+  current_month: 2026-08
+  operating_plan: docs/content/monthly/2026-08-content-operating-plan.md
+  approved_experiments:
+    - CONTENT-EXP-001
+    - CONTENT-EXP-002
+    - CONTENT-EXP-003
+  active_experiments: []
+  scheduled_posts: []
+  published_posts: []
+  metrics_due: []
+  target_audience_focus:
+    - institutional_treasury_operators
+    - digital_asset_operations_leaders
+  priority_narrative_pillars:
+    - institutional_review_problems
+    - category_definition
+    - agent_prepared_financial_workflows
+  weak_pillars_to_reduce: []
+  misunderstandings_to_correct:
+    - Nova_as_execution_or_approval_system
+    - Nova_as_generic_AI_or_agent_control_plane
+  open_operational_items:
+    - CONTENT-OPS-001
+    - CONTENT-OPS-002
+  proposed_content_OS_version: 1.0.0
+  canonical_content_OS_version: null
+  last_monthly_review: null
+  next_monthly_review: 2026-08-31
+  authority:
+    publication_authority: Architect_or_explicitly_authorized_operator
+    canonical_rule_change_authority: Architect_or_CCO
+    performance_interpretation_owner: Daily_Coherence_Agent
