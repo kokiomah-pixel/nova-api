@@ -11,8 +11,10 @@ content_ingestion_capability:
   repository_write_tool_available: checked_at_runtime
   repository_validation_available: checked_at_runtime
   outcomes:
-    connected:
+    remotely_verified:
       status: persisted_to_evidence_branch
+    local_transaction_only:
+      status: validated_worktree_write
     disconnected:
       status: prepared_not_persisted
 ```
@@ -39,11 +41,13 @@ LinkedIn evidence
 -> weekly and monthly interpretation
 ```
 
-The CLI defaults to dry run. An apply is permitted only on a monthly branch
-matching `ops/content-evidence-YYYY-MM`, or on the exact branch supplied through
-`--expected-branch`. Raw screenshots remain in Architect-controlled storage by
-default; the repository receives normalized values, a source reference, a
-fingerprint, and uncertainty.
+The CLI defaults to dry run. `--apply` performs only a validated local
+working-tree transaction. `--publish` requires an approved monthly branch
+matching `ops/content-evidence-YYYY-MM`, creates an exact-path focused commit,
+pushes it, verifies the remote branch commit, and creates or locates the rolling
+evidence PR. Raw screenshots remain in Architect-controlled storage by default;
+the repository receives normalized values, a source reference, a fingerprint,
+and uncertainty.
 
 ## Identity and provenance
 
@@ -83,17 +87,70 @@ post, ledger, experiment, current-state, and receipt validation, and only then
 atomically replaces repository files. A failure restores every original file
 and returns `rolled_back`; no success receipt may survive rollback.
 
-A successful local transaction records a `transaction:<sha256>` durable
-transaction reference in the receipt. Daily Coherence then creates the focused
-monthly-branch commit:
+A successful `--apply` records a `transaction:<sha256>` under
+`transaction.transaction_reference` and returns `validated_worktree_write`.
+That fingerprint identifies the validated file transaction; it is never a Git
+commit SHA and does not establish branch persistence.
+
+Governed `--publish` rejects detached HEAD, the wrong monthly branch, unrelated
+staged files, unrelated tracked modifications, stale branch initialization, and
+commit paths outside the transaction write set. It stages only the receipt's
+created and updated paths, then creates the focused monthly-branch commit:
 
 ```text
 ops(content): ingest <post-id> <measurement-window> evidence
 ```
 
-The monthly branch is committed and reviewed separately from `main`. The
-receipt continues to report `main_merge_verified: false` until the evidence PR
-is merged.
+After a successful push, the workflow resolves the remote branch and requires
+it to equal the local commit before returning `persisted_to_evidence_branch`.
+The receipt records separate `local_commit` and `remote_commit` Git SHAs and
+continues to report `main_merge_verified: false` until the evidence PR is
+merged.
+
+```text
+Conversation intake
+-> prepared_not_persisted
+
+Validated local transaction
+-> validated_worktree_write
+
+Committed locally but not remotely verified
+-> committed_locally
+
+Committed and pushed evidence with remote SHA verification
+-> persisted_to_evidence_branch
+
+Merged evidence PR
+-> merged_to_main
+```
+
+If commit fails, the validated worktree remains truthful and unstaged. If push
+or remote verification fails, the real local commit remains
+`committed_locally`. If PR management fails after a verified push, remote
+persistence remains valid and `rolling_evidence_PR` is unresolved; the remote
+commit is not rolled back.
+
+Permitted receipt states are:
+
+```yaml
+status:
+  - prepared_not_persisted
+  - needs_post_resolution
+  - duplicate_noop
+  - conflict_requires_review
+  - validated_worktree_write
+  - committed_locally
+  - persisted_to_evidence_branch
+  - correction_persisted_to_evidence_branch
+  - rolled_back
+  - merged_to_main
+```
+
+The transaction receipt archived with the exact evidence write set records the
+validated worktree state. After the focused commit and push, the command returns
+the publication receipt enriched with the real local commit, verified remote
+commit, and rolling PR reference. A transaction fingerprint is never copied
+into either Git commit field.
 
 ## Append-only evidence and corrections
 

@@ -32,18 +32,17 @@ def _rows(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
-@pytest.fixture
-def evidence_repo(tmp_path: Path) -> Path:
+def _seed_evidence_repo(root: Path) -> Path:
     _write(
-        tmp_path / "docs/content/performance/content-performance-ledger.csv",
+        root / "docs/content/performance/content-performance-ledger.csv",
         ",".join(PERFORMANCE_HEADER) + "\n",
     )
     _write(
-        tmp_path / "docs/content/performance/audience-engagement-ledger.csv",
+        root / "docs/content/performance/audience-engagement-ledger.csv",
         ",".join(AUDIENCE_HEADER) + "\n",
     )
     _write(
-        tmp_path / "docs/content/content-current-state.yaml",
+        root / "docs/content/content-current-state.yaml",
         yaml.safe_dump(
             {
                 "content_current_state": {
@@ -65,11 +64,44 @@ def evidence_repo(tmp_path: Path) -> Path:
         ),
     )
     _write(
-        tmp_path / "docs/content/content-experiment-register.yaml",
+        root / "docs/content/content-experiment-register.yaml",
         yaml.safe_dump({"experiments": []}, sort_keys=False),
     )
-    _write(tmp_path / "docs/content/content-production-os.md", "canonical sentinel\n")
-    return tmp_path
+    _write(root / "docs/content/content-production-os.md", "canonical sentinel\n")
+    return root
+
+
+def _git(repo: Path, *args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ["git", *args],
+        cwd=repo,
+        check=check,
+        capture_output=True,
+        text=True,
+    )
+
+
+@pytest.fixture
+def evidence_repo(tmp_path: Path) -> Path:
+    return _seed_evidence_repo(tmp_path)
+
+
+@pytest.fixture
+def publish_repo(tmp_path: Path) -> tuple[Path, Path]:
+    remote = tmp_path / "remote.git"
+    worktree = tmp_path / "worktree"
+    subprocess.run(["git", "init", "--bare", str(remote)], check=True, capture_output=True)
+    worktree.mkdir()
+    _git(worktree, "init", "-b", "main")
+    _git(worktree, "config", "user.name", "Content Evidence Test")
+    _git(worktree, "config", "user.email", "content-evidence@example.invalid")
+    _seed_evidence_repo(worktree)
+    _git(worktree, "add", "docs")
+    _git(worktree, "commit", "-m", "test: establish content evidence baseline")
+    _git(worktree, "remote", "add", "origin", str(remote))
+    _git(worktree, "push", "-u", "origin", "main")
+    _write(worktree / "artifacts/untouched.txt", "pre-existing untracked artifact\n")
+    return worktree, remote
 
 
 def _intake(
@@ -181,7 +213,10 @@ def test_dry_run_makes_no_changes_and_prepared_receipt_is_truthful(evidence_repo
     assert result["ingestion_preview"]["persistence_ready"] is True
     assert result["ingestion_preview"]["writes_performed"] is False
     assert receipt["status"] == "prepared_not_persisted"
-    assert receipt["repository"]["commit"] is None
+    assert receipt["missing_capabilities"] == []
+    assert receipt["transaction"]["transaction_reference"] is None
+    assert receipt["repository"]["local_commit"] is None
+    assert receipt["repository"]["remote_commit"] is None
     assert receipt["repository_state"]["persisted_to_monthly_branch"] is False
 
 
@@ -216,11 +251,14 @@ def test_valid_first_intake_creates_post_evidence_and_truthful_receipt(evidence_
     receipt = result["content_evidence_receipt"]
     rows = _rows(evidence_repo / "docs/content/performance/content-performance-ledger.csv")
 
-    assert receipt["status"] == "persisted_to_evidence_branch"
+    assert receipt["status"] == "validated_worktree_write"
     assert receipt["repository"]["branch"] == EVIDENCE_BRANCH
-    assert receipt["repository"]["commit"].startswith("transaction:")
+    assert receipt["transaction"]["transaction_reference"].startswith("transaction:")
+    assert receipt["repository"]["local_commit"] is None
+    assert receipt["repository"]["remote_commit"] is None
+    assert receipt["repository"]["remote_branch_verified"] is False
     assert receipt["repository_state"] == {
-        "persisted_to_monthly_branch": True,
+        "persisted_to_monthly_branch": False,
         "merged_to_main": False,
     }
     assert receipt["rows"] == {"performance_rows_added": 1, "audience_rows_added": 0}
@@ -267,7 +305,7 @@ def test_existing_post_appends_seven_day_row_and_preserves_24_hour_row(evidence_
     result = _apply(evidence_repo, second)
     rows = _rows(evidence_repo / "docs/content/performance/content-performance-ledger.csv")
 
-    assert result["content_evidence_receipt"]["status"] == "persisted_to_evidence_branch"
+    assert result["content_evidence_receipt"]["status"] == "validated_worktree_write"
     assert len(rows) == 2
     assert rows[0] == first_row
     assert [row["measurement_window"] for row in rows] == ["24_hours", "7_days"]
@@ -336,7 +374,7 @@ def test_correction_appends_lineage_and_preserves_previous_record(evidence_repo:
     result = _apply(evidence_repo, correction)
     rows = _rows(evidence_repo / "docs/content/performance/content-performance-ledger.csv")
 
-    assert result["content_evidence_receipt"]["status"] == "correction_appended"
+    assert result["content_evidence_receipt"]["status"] == "validated_worktree_write"
     assert len(rows) == 2
     assert rows[0] == first_row
     assert rows[1]["record_action"] == "correction"
@@ -450,25 +488,232 @@ def test_transaction_rolls_back_and_cannot_issue_success_receipt(evidence_repo: 
 
     receipt = result["content_evidence_receipt"]
     assert receipt["status"] == "rolled_back"
-    assert receipt["repository"]["commit"] is None
+    assert receipt["transaction"]["transaction_reference"] is None
+    assert receipt["repository"]["local_commit"] is None
+    assert receipt["repository"]["remote_commit"] is None
     assert receipt["repository_state"]["persisted_to_monthly_branch"] is False
     assert receipt["transaction_result"]["repository_changed"] is False
     assert before == after
 
 
-def test_persisted_receipt_without_durable_reference_is_rejected() -> None:
-    receipt = {
+def _receipt_for_validation(status: str = "persisted_to_evidence_branch") -> dict:
+    return {
         "schema_version": "1.0.0",
         "intake_id": "INTAKE-1",
         "processed_at": "2026-08-04T18:00:00Z",
-        "status": "persisted_to_evidence_branch",
-        "repository": {"branch": EVIDENCE_BRANCH, "commit": None},
+        "status": status,
+        "transaction": {
+            "transaction_reference": "transaction:" + "a" * 64,
+            "validated_at": "2026-08-04T18:00:01Z",
+        },
+        "repository": {
+            "repository": "test",
+            "branch": EVIDENCE_BRANCH,
+            "local_commit": "1" * 40,
+            "remote_commit": "1" * 40,
+            "pull_request": "local-pr://29",
+            "remote_branch_verified": True,
+            "main_merge_verified": False,
+        },
+        "repository_state": {"persisted_to_monthly_branch": True, "merged_to_main": False},
         "files": {"created": ["docs/content/intake/example.yaml"], "updated": []},
-        "validators": {"intake": "passed"},
+        "validators": {
+            "intake": "passed",
+            "post_record": "passed",
+            "performance_ledger": "passed",
+            "audience_ledger": "passed",
+            "experiment_register": "passed",
+            "current_state": "passed",
+        },
     }
 
-    with pytest.raises(ContentValidationError, match="branch and durable transaction reference"):
+
+@pytest.mark.parametrize("commit_field", ["local_commit", "remote_commit"])
+def test_transaction_hash_is_not_a_git_commit(commit_field: str) -> None:
+    receipt = _receipt_for_validation()
+    receipt["repository"][commit_field] = "transaction:" + "a" * 64
+
+    with pytest.raises(ContentValidationError, match="must be a Git commit"):
         validate_receipt_mapping(receipt)
+
+
+def test_persisted_status_requires_real_commit_sha() -> None:
+    receipt = _receipt_for_validation()
+    receipt["repository"]["remote_commit"] = None
+
+    with pytest.raises(ContentValidationError, match="real remote Git commit SHA"):
+        validate_receipt_mapping(receipt)
+
+
+def test_persisted_status_requires_remote_verification() -> None:
+    receipt = _receipt_for_validation()
+    receipt["repository"]["remote_branch_verified"] = False
+
+    with pytest.raises(ContentValidationError, match="remote branch verification"):
+        validate_receipt_mapping(receipt)
+
+
+def test_publish_rejects_dirty_tracked_worktree(publish_repo: tuple[Path, Path]) -> None:
+    repo, _ = publish_repo
+    _write(repo / "docs/content/content-production-os.md", "unrelated tracked edit\n")
+
+    with pytest.raises(ContentValidationError, match="unrelated tracked modifications"):
+        ContentEvidenceStore(repo).publish(
+            _intake(), expected_branch=EVIDENCE_BRANCH, allow_create_post=True
+        )
+
+
+def test_publish_rejects_unrelated_staged_file(publish_repo: tuple[Path, Path]) -> None:
+    repo, _ = publish_repo
+    _write(repo / "docs/content/content-production-os.md", "unrelated staged edit\n")
+    _git(repo, "add", "docs/content/content-production-os.md")
+
+    with pytest.raises(ContentValidationError, match="unrelated staged files"):
+        ContentEvidenceStore(repo).publish(
+            _intake(), expected_branch=EVIDENCE_BRANCH, allow_create_post=True
+        )
+
+
+def test_publish_rejects_detached_head(publish_repo: tuple[Path, Path]) -> None:
+    repo, _ = publish_repo
+    _git(repo, "checkout", "--detach")
+
+    with pytest.raises(ContentValidationError, match="detached HEAD"):
+        ContentEvidenceStore(repo).publish(
+            _intake(), expected_branch=EVIDENCE_BRANCH, allow_create_post=True
+        )
+
+
+def test_publish_rejects_wrong_monthly_branch(publish_repo: tuple[Path, Path]) -> None:
+    repo, _ = publish_repo
+    _git(repo, "switch", "-c", "ops/content-evidence-2026-07")
+
+    with pytest.raises(ContentValidationError, match="wrong monthly evidence branch"):
+        ContentEvidenceStore(repo).publish(
+            _intake(), expected_branch=EVIDENCE_BRANCH, allow_create_post=True
+        )
+
+
+def test_new_monthly_branch_rejects_head_behind_remote_main(
+    publish_repo: tuple[Path, Path], tmp_path: Path
+) -> None:
+    repo, remote = publish_repo
+    updater = tmp_path / "updater"
+    subprocess.run(
+        ["git", "clone", "--branch", "main", str(remote), str(updater)],
+        check=True,
+        capture_output=True,
+    )
+    _git(updater, "config", "user.name", "Remote Main Test")
+    _git(updater, "config", "user.email", "remote-main@example.invalid")
+    _write(updater / "remote-main-update.txt", "new remote main\n")
+    _git(updater, "add", "remote-main-update.txt")
+    _git(updater, "commit", "-m", "test: advance remote main")
+    _git(updater, "push", "origin", "main")
+
+    with pytest.raises(ContentValidationError, match="initialize from current remote main"):
+        ContentEvidenceStore(repo).publish(
+            _intake(), expected_branch=EVIDENCE_BRANCH, allow_create_post=True
+        )
+
+
+def test_commit_failure_keeps_validated_worktree_state(publish_repo: tuple[Path, Path]) -> None:
+    repo, remote = publish_repo
+    hook = repo / ".git/hooks/pre-commit"
+    _write(hook, "#!/bin/sh\nexit 1\n")
+    hook.chmod(0o755)
+
+    result = ContentEvidenceStore(repo).publish(
+        _intake(),
+        expected_branch=EVIDENCE_BRANCH,
+        allow_create_post=True,
+        pr_manager=lambda _repo, _branch: "local-pr://29",
+    )
+    receipt = result["content_evidence_receipt"]
+
+    assert receipt["status"] == "validated_worktree_write"
+    assert receipt["repository"]["local_commit"] is None
+    assert receipt["repository"]["remote_commit"] is None
+    assert receipt["repository_state"]["persisted_to_monthly_branch"] is False
+    assert _git(repo, "diff", "--cached", "--name-only").stdout == ""
+    assert _git(remote, "rev-parse", "--verify", f"refs/heads/{EVIDENCE_BRANCH}", check=False).returncode != 0
+
+
+def test_push_failure_returns_committed_locally(publish_repo: tuple[Path, Path]) -> None:
+    repo, remote = publish_repo
+    hook = remote / "hooks/pre-receive"
+    _write(hook, "#!/bin/sh\nexit 1\n")
+    hook.chmod(0o755)
+
+    result = ContentEvidenceStore(repo).publish(
+        _intake(),
+        expected_branch=EVIDENCE_BRANCH,
+        allow_create_post=True,
+        pr_manager=lambda _repo, _branch: "local-pr://29",
+    )
+    receipt = result["content_evidence_receipt"]
+
+    assert receipt["status"] == "committed_locally"
+    assert len(receipt["repository"]["local_commit"]) == 40
+    assert receipt["repository"]["remote_commit"] is None
+    assert receipt["repository"]["remote_branch_verified"] is False
+    assert receipt["repository_state"]["persisted_to_monthly_branch"] is False
+
+
+def test_successful_publish_pushes_verifies_scope_and_resolves_rolling_pr(
+    publish_repo: tuple[Path, Path]
+) -> None:
+    repo, remote = publish_repo
+    pr_calls: list[tuple[Path, str]] = []
+
+    def resolve_pr(repo_root: Path, branch: str) -> str:
+        pr_calls.append((repo_root, branch))
+        return "local-pr://29"
+
+    result = ContentEvidenceStore(repo).publish(
+        _intake(),
+        expected_branch=EVIDENCE_BRANCH,
+        allow_create_post=True,
+        pr_manager=resolve_pr,
+    )
+    receipt = result["content_evidence_receipt"]
+    local_commit = receipt["repository"]["local_commit"]
+    intended = set(receipt["files"]["created"] + receipt["files"]["updated"])
+    committed = set(
+        _git(repo, "diff-tree", "--no-commit-id", "--name-only", "-r", local_commit).stdout.splitlines()
+    )
+    remote_commit = _git(remote, "rev-parse", f"refs/heads/{EVIDENCE_BRANCH}").stdout.strip()
+
+    assert receipt["status"] == "persisted_to_evidence_branch"
+    assert receipt["transaction"]["transaction_reference"].startswith("transaction:")
+    assert local_commit == remote_commit == receipt["repository"]["remote_commit"]
+    assert receipt["repository"]["remote_branch_verified"] is True
+    assert receipt["repository"]["pull_request"] == "local-pr://29"
+    assert receipt["repository_state"]["persisted_to_monthly_branch"] is True
+    assert committed == intended
+    assert pr_calls == [(repo, EVIDENCE_BRANCH)]
+    assert _git(repo, "status", "--short").stdout.strip() == "?? artifacts/"
+    validate_receipt_mapping(receipt)
+
+
+def test_pr_failure_preserves_verified_remote_persistence(publish_repo: tuple[Path, Path]) -> None:
+    repo, _ = publish_repo
+
+    def fail_pr(_repo: Path, _branch: str) -> str:
+        raise RuntimeError("simulated PR connector failure")
+
+    result = ContentEvidenceStore(repo).publish(
+        _intake(),
+        expected_branch=EVIDENCE_BRANCH,
+        allow_create_post=True,
+        pr_manager=fail_pr,
+    )
+    receipt = result["content_evidence_receipt"]
+
+    assert receipt["status"] == "persisted_to_evidence_branch"
+    assert receipt["repository"]["remote_branch_verified"] is True
+    assert receipt["repository"]["pull_request"] is None
+    assert "rolling_evidence_PR" in receipt["unresolved_fields"]
 
 
 def test_raw_screenshot_and_personal_data_are_not_required_or_committed(evidence_repo: Path) -> None:

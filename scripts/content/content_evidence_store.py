@@ -12,7 +12,7 @@ import tempfile
 from copy import deepcopy
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import yaml
 
@@ -102,9 +102,33 @@ AUDIENCE_HEADER = [
     "notes",
 ]
 RECORD_ACTIONS = {"observation", "correction", "supersession"}
-SUCCESS_STATUSES = {"persisted_to_evidence_branch", "correction_appended"}
+RECEIPT_STATUSES = {
+    "prepared_not_persisted",
+    "needs_post_resolution",
+    "duplicate_noop",
+    "conflict_requires_review",
+    "validated_worktree_write",
+    "committed_locally",
+    "persisted_to_evidence_branch",
+    "correction_persisted_to_evidence_branch",
+    "rolled_back",
+    "merged_to_main",
+}
+VALIDATED_WRITE_STATUSES = {
+    "validated_worktree_write",
+    "committed_locally",
+    "persisted_to_evidence_branch",
+    "correction_persisted_to_evidence_branch",
+    "merged_to_main",
+}
+REMOTE_PERSISTED_STATUSES = {
+    "persisted_to_evidence_branch",
+    "correction_persisted_to_evidence_branch",
+}
 POST_ID_PATTERN = re.compile(r"^POST-\d{4}-\d{2}-\d{2}-[A-F0-9]{8}$")
 EVIDENCE_BRANCH_PATTERN = re.compile(r"^ops/content-evidence-\d{4}-\d{2}$")
+TRANSACTION_REFERENCE_PATTERN = re.compile(r"^transaction:[a-f0-9]{64}$")
+GIT_COMMIT_PATTERN = re.compile(r"^[a-fA-F0-9]{40}(?:[a-fA-F0-9]{24})?$")
 
 
 def _text(value: Any) -> str:
@@ -240,20 +264,73 @@ def validate_audience_ledger(path: Path, valid_intake_ids: set[str] | None = Non
 
 
 def validate_receipt_mapping(receipt: dict[str, Any]) -> dict[str, Any]:
-    required = ("schema_version", "intake_id", "processed_at", "status", "repository", "files", "validators")
+    required = (
+        "schema_version",
+        "intake_id",
+        "processed_at",
+        "status",
+        "transaction",
+        "repository",
+        "repository_state",
+        "files",
+        "validators",
+    )
     missing = [field for field in required if is_blank(receipt.get(field))]
     if missing:
         raise ContentValidationError(f"content evidence receipt missing: {', '.join(missing)}")
-    if receipt["status"] in SUCCESS_STATUSES:
-        repository = receipt["repository"]
+    status = receipt["status"]
+    if status not in RECEIPT_STATUSES:
+        raise ContentValidationError(f"unsupported content evidence receipt status: {status}")
+    transaction = receipt["transaction"]
+    repository = receipt["repository"]
+    repository_state = receipt["repository_state"]
+    for commit_field in ("local_commit", "remote_commit"):
+        commit = repository.get(commit_field)
+        if isinstance(commit, str) and commit.startswith("transaction:"):
+            raise ContentValidationError(f"repository.{commit_field} must be a Git commit, not a transaction reference")
+        if not is_blank(commit) and not GIT_COMMIT_PATTERN.fullmatch(str(commit)):
+            raise ContentValidationError(f"repository.{commit_field} must be a valid Git commit SHA")
+
+    expected_persisted = status in REMOTE_PERSISTED_STATUSES
+    if repository_state.get("persisted_to_monthly_branch") is not expected_persisted:
+        raise ContentValidationError("repository_state.persisted_to_monthly_branch contradicts receipt status")
+
+    if status in VALIDATED_WRITE_STATUSES:
+        reference = transaction.get("transaction_reference") if isinstance(transaction, dict) else None
+        validated_at = transaction.get("validated_at") if isinstance(transaction, dict) else None
+        if not isinstance(reference, str) or not TRANSACTION_REFERENCE_PATTERN.fullmatch(reference):
+            raise ContentValidationError("validated receipt requires a separate transaction:<sha256> reference")
+        if is_blank(validated_at):
+            raise ContentValidationError("validated receipt requires transaction.validated_at")
         files = receipt["files"]
-        if is_blank(repository.get("branch")) or is_blank(repository.get("commit")):
-            raise ContentValidationError("persisted receipt requires branch and durable transaction reference")
         if not files.get("created") and not files.get("updated"):
-            raise ContentValidationError("persisted receipt requires at least one repository write")
+            raise ContentValidationError("validated receipt requires at least one repository write")
         failures = [name for name, status in receipt["validators"].items() if status != "passed"]
         if failures:
-            raise ContentValidationError(f"persisted receipt has failed validators: {', '.join(failures)}")
+            raise ContentValidationError(f"validated receipt has failed validators: {', '.join(failures)}")
+
+    if status == "validated_worktree_write":
+        if not is_blank(repository.get("local_commit")) or not is_blank(repository.get("remote_commit")):
+            raise ContentValidationError("validated worktree receipt cannot claim a Git commit")
+        if repository.get("remote_branch_verified") is not False:
+            raise ContentValidationError("validated worktree receipt cannot claim remote branch verification")
+    if status == "committed_locally":
+        if is_blank(repository.get("local_commit")):
+            raise ContentValidationError("committed-local receipt requires a real local Git commit")
+        if not is_blank(repository.get("remote_commit")) or repository.get("remote_branch_verified") is not False:
+            raise ContentValidationError("committed-local receipt cannot claim remote persistence")
+    if status in REMOTE_PERSISTED_STATUSES:
+        branch = repository.get("branch")
+        if not isinstance(branch, str) or not EVIDENCE_BRANCH_PATTERN.fullmatch(branch):
+            raise ContentValidationError("persisted receipt requires an approved monthly evidence branch")
+        if is_blank(repository.get("remote_commit")):
+            raise ContentValidationError("persisted receipt requires a real remote Git commit SHA")
+        if is_blank(repository.get("local_commit")):
+            raise ContentValidationError("persisted receipt requires a real local Git commit SHA")
+        if repository.get("local_commit") != repository.get("remote_commit"):
+            raise ContentValidationError("persisted receipt local and remote commits must match")
+        if repository.get("remote_branch_verified") is not True:
+            raise ContentValidationError("persisted receipt requires remote branch verification")
     return receipt
 
 
@@ -266,6 +343,198 @@ def _current_branch(repo_root: Path) -> str:
         text=True,
     )
     return result.stdout.strip()
+
+
+class GitEvidencePublisher:
+    """Publish one validated evidence transaction with exact Git scope."""
+
+    def __init__(self, repo_root: Path, remote: str = "origin"):
+        self.repo_root = repo_root
+        self.remote = remote
+
+    def _run(self, *args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
+        result = subprocess.run(
+            ["git", *args],
+            cwd=self.repo_root,
+            capture_output=True,
+            text=True,
+        )
+        if check and result.returncode != 0:
+            detail = result.stderr.strip() or result.stdout.strip() or "Git command failed"
+            raise ContentValidationError(detail)
+        return result
+
+    def _lines(self, *args: str) -> list[str]:
+        return [line for line in self._run(*args).stdout.splitlines() if line]
+
+    def current_branch(self) -> str:
+        result = self._run("symbolic-ref", "--short", "-q", "HEAD", check=False)
+        if result.returncode != 0 or not result.stdout.strip():
+            raise ContentValidationError("publish rejects a detached HEAD")
+        return result.stdout.strip()
+
+    def assert_clean_tracked_worktree(self) -> None:
+        staged = self._lines("diff", "--cached", "--name-only")
+        if staged:
+            raise ContentValidationError(f"publish rejects unrelated staged files: {', '.join(staged)}")
+        modified = self._lines("diff", "--name-only")
+        if modified:
+            raise ContentValidationError(f"publish rejects unrelated tracked modifications: {', '.join(modified)}")
+
+    def _remote_sha(self, branch: str) -> str | None:
+        result = self._run("ls-remote", "--heads", self.remote, f"refs/heads/{branch}", check=False)
+        if result.returncode != 0:
+            detail = result.stderr.strip() or result.stdout.strip() or "remote branch lookup failed"
+            raise ContentValidationError(detail)
+        line = result.stdout.strip()
+        return line.split()[0] if line else None
+
+    def prepare_monthly_branch(self, expected_branch: str) -> None:
+        if not EVIDENCE_BRANCH_PATTERN.fullmatch(expected_branch):
+            raise ContentValidationError("publish requires an approved ops/content-evidence-YYYY-MM branch")
+        current = self.current_branch()
+        if current.startswith("ops/content-evidence-") and current != expected_branch:
+            raise ContentValidationError(
+                f"publish rejects wrong monthly evidence branch {current!r}; expected {expected_branch!r}"
+            )
+        self.assert_clean_tracked_worktree()
+        self._run("fetch", self.remote, "main")
+        remote_main = self._run("rev-parse", "FETCH_HEAD").stdout.strip()
+        remote_evidence = self._remote_sha(expected_branch)
+
+        if current == expected_branch:
+            if remote_evidence is None:
+                ancestor = self._run("merge-base", "--is-ancestor", remote_main, "HEAD", check=False)
+                if ancestor.returncode != 0:
+                    raise ContentValidationError(
+                        "monthly evidence branch initialization is behind current remote main"
+                    )
+            return
+
+        if remote_evidence:
+            local_exists = self._run(
+                "show-ref", "--verify", "--quiet", f"refs/heads/{expected_branch}", check=False
+            ).returncode == 0
+            if local_exists:
+                raise ContentValidationError(
+                    "existing local evidence branch must be checked out explicitly before publish"
+                )
+            self._run(
+                "fetch",
+                self.remote,
+                f"refs/heads/{expected_branch}:refs/remotes/{self.remote}/{expected_branch}",
+            )
+            self._run("switch", "--track", "-c", expected_branch, f"{self.remote}/{expected_branch}")
+        else:
+            local_head = self._run("rev-parse", "HEAD").stdout.strip()
+            if local_head != remote_main:
+                raise ContentValidationError(
+                    "new monthly evidence branch must initialize from current remote main"
+                )
+            self._run("switch", "-c", expected_branch, remote_main)
+        self.assert_clean_tracked_worktree()
+
+    def commit_exact_paths(self, paths: list[str], message: str) -> tuple[str | None, str | None]:
+        intended = set(paths)
+        modified = set(self._lines("diff", "--name-only"))
+        staged_before = set(self._lines("diff", "--cached", "--name-only"))
+        if staged_before:
+            raise ContentValidationError(
+                f"publish rejects unrelated staged files: {', '.join(sorted(staged_before))}"
+            )
+        outside = modified - intended
+        if outside:
+            raise ContentValidationError(
+                f"publish rejects tracked changes outside transaction scope: {', '.join(sorted(outside))}"
+            )
+        self._run("add", "--", *sorted(intended))
+        staged = set(self._lines("diff", "--cached", "--name-only"))
+        if staged != intended:
+            self._run("restore", "--staged", "--", *sorted(intended), check=False)
+            missing = intended - staged
+            outside = staged - intended
+            raise ContentValidationError(
+                "staged paths do not match transaction write set; "
+                f"missing={sorted(missing)}, outside={sorted(outside)}"
+            )
+        commit = self._run("commit", "-m", message, check=False)
+        if commit.returncode != 0:
+            self._run("restore", "--staged", "--", *sorted(intended), check=False)
+            error = commit.stderr.strip() or commit.stdout.strip() or "Git commit failed"
+            return None, error
+        commit_sha = self._run("rev-parse", "HEAD").stdout.strip()
+        committed_paths = set(
+            self._lines("diff-tree", "--no-commit-id", "--name-only", "-r", commit_sha)
+        )
+        if committed_paths != intended:
+            return commit_sha, (
+                "committed paths do not match transaction write set; "
+                f"expected={sorted(intended)}, actual={sorted(committed_paths)}"
+            )
+        return commit_sha, None
+
+    def push_and_verify(self, branch: str, commit_sha: str) -> tuple[bool, str | None]:
+        push = self._run("push", self.remote, f"HEAD:refs/heads/{branch}", check=False)
+        if push.returncode != 0:
+            return False, push.stderr.strip() or push.stdout.strip() or "Git push failed"
+        try:
+            remote_sha = self._remote_sha(branch)
+        except ContentValidationError as error:
+            return False, str(error)
+        if remote_sha != commit_sha:
+            return False, f"remote branch verification mismatch: expected {commit_sha}, got {remote_sha}"
+        return True, None
+
+
+def ensure_rolling_evidence_pr(repo_root: Path, branch: str) -> str:
+    listed = subprocess.run(
+        [
+            "gh",
+            "pr",
+            "list",
+            "--head",
+            branch,
+            "--base",
+            "main",
+            "--state",
+            "open",
+            "--json",
+            "url",
+            "--limit",
+            "1",
+        ],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+    )
+    if listed.returncode != 0:
+        raise ContentValidationError(listed.stderr.strip() or "rolling evidence PR lookup failed")
+    matches = json.loads(listed.stdout)
+    if matches:
+        return str(matches[0]["url"])
+    month = datetime.strptime(branch.rsplit("-", 2)[-2] + "-" + branch.rsplit("-", 1)[-1], "%Y-%m")
+    created = subprocess.run(
+        [
+            "gh",
+            "pr",
+            "create",
+            "--draft",
+            "--base",
+            "main",
+            "--head",
+            branch,
+            "--title",
+            f"ops: ingest {month:%B %Y} content evidence",
+            "--body",
+            "Governed monthly content-evidence intake. No interpretation or canonical-rule effect.",
+        ],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+    )
+    if created.returncode != 0:
+        raise ContentValidationError(created.stderr.strip() or "rolling evidence PR creation failed")
+    return created.stdout.strip()
 
 
 def _published_copy(path: Path) -> str:
@@ -531,16 +800,22 @@ class ContentEvidenceStore:
             "post_id": post_id,
             "measurement_window": window,
             "status": status,
+            "transaction": {
+                "transaction_reference": transaction_reference,
+                "validated_at": datetime.now(timezone.utc).isoformat() if transaction_reference else None,
+            },
             "repository": {
                 "repository": self.repo_root.name,
                 "branch": branch,
-                "commit": transaction_reference,
+                "local_commit": None,
+                "remote_commit": None,
                 "pull_request": None,
+                "remote_branch_verified": False,
                 "main_merge_verified": False,
             },
             "repository_state": {
-                "persisted_to_monthly_branch": status in SUCCESS_STATUSES,
-                "merged_to_main": False,
+                "persisted_to_monthly_branch": status in REMOTE_PERSISTED_STATUSES,
+                "merged_to_main": status == "merged_to_main",
             },
             "files": {"created": created, "updated": updated},
             "rows": {
@@ -548,6 +823,7 @@ class ContentEvidenceStore:
                 "audience_rows_added": audience_rows,
             },
             "validators": validators,
+            "missing_capabilities": [],
             "unresolved_fields": (intake.get("extraction") or {}).get("unresolved_fields") or [],
             "unavailable_metrics": intake.get("unavailable_metrics") or [],
             "effects": {
@@ -863,12 +1139,11 @@ class ContentEvidenceStore:
         )
         transaction_reference = f"transaction:{hashlib.sha256(transaction_material.encode('utf-8')).hexdigest()}"
         validators = {name: "passed" for name in validators}
-        status = "correction_appended" if action in {"correction", "supersession"} else "persisted_to_evidence_branch"
         receipt = self._receipt(
             intake,
             post_id=str(post_id),
             window=window,
-            status=status,
+            status="validated_worktree_write",
             branch=branch,
             transaction_reference=transaction_reference,
             created=sorted(created),
@@ -910,6 +1185,130 @@ class ContentEvidenceStore:
             return {"ingestion_preview": preview, "content_evidence_receipt": rollback_receipt}
         preview["writes_performed"] = True
         return {"ingestion_preview": preview, "content_evidence_receipt": receipt}
+
+    @staticmethod
+    def _publication_receipt(
+        receipt: dict[str, Any],
+        *,
+        status: str,
+        local_commit: str | None,
+        remote_commit: str | None,
+        remote_verified: bool,
+        pull_request: str | None = None,
+        unresolved: str | None = None,
+        error: str | None = None,
+    ) -> dict[str, Any]:
+        updated = deepcopy(receipt)
+        updated["status"] = status
+        updated["repository"].update(
+            {
+                "local_commit": local_commit,
+                "remote_commit": remote_commit,
+                "pull_request": pull_request,
+                "remote_branch_verified": remote_verified,
+            }
+        )
+        updated["repository_state"]["persisted_to_monthly_branch"] = status in REMOTE_PERSISTED_STATUSES
+        updated["repository_state"]["merged_to_main"] = status == "merged_to_main"
+        if unresolved and unresolved not in updated["unresolved_fields"]:
+            updated["unresolved_fields"].append(unresolved)
+        if error:
+            updated["publication_error"] = error
+        return updated
+
+    def publish(
+        self,
+        intake: dict[str, Any],
+        *,
+        expected_branch: str,
+        allow_create_post: bool = False,
+        receipt_out: Path | None = None,
+        remote: str = "origin",
+        pr_manager: Callable[[Path, str], str] | None = None,
+    ) -> dict[str, Any]:
+        publisher = GitEvidencePublisher(self.repo_root, remote=remote)
+        publisher.prepare_monthly_branch(expected_branch)
+        result = self.ingest(
+            intake,
+            apply=True,
+            allow_create_post=allow_create_post,
+            expected_branch=expected_branch,
+            current_branch=expected_branch,
+            receipt_out=receipt_out,
+        )
+        receipt = result["content_evidence_receipt"]
+        if receipt["status"] != "validated_worktree_write":
+            return result
+
+        paths = sorted(set(receipt["files"]["created"] + receipt["files"]["updated"]))
+        post_id = receipt["post_id"]
+        window_label = receipt["measurement_window"].replace("_hours", "-hour").replace("_days", "-day")
+        try:
+            commit_sha, commit_error = publisher.commit_exact_paths(
+                paths,
+                f"ops(content): ingest {post_id} {window_label} evidence",
+            )
+        except (ContentValidationError, OSError) as error:
+            commit_sha, commit_error = None, str(error)
+        if commit_sha is None:
+            result["content_evidence_receipt"] = self._publication_receipt(
+                receipt,
+                status="validated_worktree_write",
+                local_commit=None,
+                remote_commit=None,
+                remote_verified=False,
+                unresolved="local_commit",
+                error=commit_error,
+            )
+            return result
+        if commit_error:
+            result["content_evidence_receipt"] = self._publication_receipt(
+                receipt,
+                status="committed_locally",
+                local_commit=commit_sha,
+                remote_commit=None,
+                remote_verified=False,
+                unresolved="commit_scope",
+                error=commit_error,
+            )
+            return result
+
+        pushed, push_error = publisher.push_and_verify(expected_branch, commit_sha)
+        if not pushed:
+            result["content_evidence_receipt"] = self._publication_receipt(
+                receipt,
+                status="committed_locally",
+                local_commit=commit_sha,
+                remote_commit=None,
+                remote_verified=False,
+                unresolved="remote_push_or_verification",
+                error=push_error,
+            )
+            validate_receipt_mapping(result["content_evidence_receipt"])
+            return result
+
+        action = (intake.get("evidence_action") or {}).get("record_action") or "observation"
+        persisted_status = (
+            "correction_persisted_to_evidence_branch"
+            if action in {"correction", "supersession"}
+            else "persisted_to_evidence_branch"
+        )
+        published_receipt = self._publication_receipt(
+            receipt,
+            status=persisted_status,
+            local_commit=commit_sha,
+            remote_commit=commit_sha,
+            remote_verified=True,
+        )
+        manager = pr_manager or ensure_rolling_evidence_pr
+        try:
+            published_receipt["repository"]["pull_request"] = manager(self.repo_root, expected_branch)
+        except Exception as error:
+            published_receipt["unresolved_fields"].append("rolling_evidence_PR")
+            published_receipt["publication_error"] = str(error)
+        validate_receipt_mapping(published_receipt)
+        result["content_evidence_receipt"] = published_receipt
+        return result
 
     def _apply_transaction(
         self,

@@ -5,11 +5,16 @@ content_evidence_receipt:
   post_id: null
   measurement_window: null
   status: prepared_not_persisted
+  transaction:
+    transaction_reference: null
+    validated_at: null
   repository:
     repository: null
     branch: null
-    commit: null
+    local_commit: null
+    remote_commit: null
     pull_request: null
+    remote_branch_verified: false
     main_merge_verified: false
   repository_state:
     persisted_to_monthly_branch: false
@@ -27,6 +32,7 @@ content_evidence_receipt:
     audience_ledger: not_run
     experiment_register: not_run
     current_state: not_run
+  missing_capabilities: []
   unresolved_fields: []
   unavailable_metrics: []
   effects:

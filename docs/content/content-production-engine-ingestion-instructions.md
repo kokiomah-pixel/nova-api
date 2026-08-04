@@ -18,7 +18,9 @@ results, or asks to log, record, update, or add post performance.
 6. Construct `content_evidence_intake` using the repository template.
 7. Run the intake validator and a dry-run preview.
 8. Invoke apply only when repository write and validation capabilities exist.
-9. Return the governed persistence receipt.
+9. Invoke publish only when Git commit, push, remote verification, and rolling
+   PR capabilities exist.
+10. Return the governed persistence receipt.
 
 Do not ask the Architect to format YAML, CSV, or Markdown. Ask one concise post
 identity question only when the repository and current context cannot uniquely
@@ -32,20 +34,56 @@ the source was a screenshot, but do not commit the raw screenshot by default.
 
 ## Persistence honesty
 
+Check runtime capabilities before claiming any repository effect:
+
+```yaml
+runtime_capability:
+  repository_execution_available:
+  Git_commit_available:
+  Git_push_available:
+  rolling_PR_management_available:
+```
+
+When required capabilities are unavailable, return:
+
+```yaml
+status: prepared_not_persisted
+missing_capabilities: []
+```
+
+Do not imply that conversation context updated repository files.
+
 Conversation-only normalization returns:
 
 ```yaml
 status: prepared_not_persisted
 ```
 
-Only a validated durable write on an authorized evidence branch returns:
+A validated local transaction that has not been committed and remotely verified
+returns:
+
+```yaml
+status: validated_worktree_write
+```
+
+A real local commit that has not been pushed and remotely verified returns:
+
+```yaml
+status: committed_locally
+```
+
+Only a real commit pushed to an authorized monthly branch and verified as that
+remote branch's current commit returns:
 
 ```yaml
 status: persisted_to_evidence_branch
+repository:
+  remote_branch_verified: true
 ```
 
-After persistence, state: “The evidence is persisted to the monthly evidence
-branch. No performance or demand conclusion has been created.”
+Only then may the Content Production Engine state: “The evidence is logged to
+the monthly evidence branch. No performance or demand conclusion has been
+created.” Otherwise it must state the exact intermediate condition.
 
 ## Authority boundary
 

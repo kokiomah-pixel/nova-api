@@ -72,6 +72,7 @@ Production OS until the promotion threshold is met and the Architect or CCO
 explicitly approves the change.
 
 Evidence ingestion defaults to dry run. A conversation-only intake is
-`prepared_not_persisted`; only a validated durable repository transaction on
-an authorized evidence branch is `persisted_to_evidence_branch`. Ingestion does
-not interpret performance or change a canonical rule.
+`prepared_not_persisted`; `--apply` is only `validated_worktree_write`; and only
+a real commit pushed and verified on an authorized monthly evidence branch is
+`persisted_to_evidence_branch`. Ingestion does not interpret performance or
+change a canonical rule.
