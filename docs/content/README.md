@@ -24,6 +24,7 @@ merge. File creation does not activate experiments, publication, or learning.
 | Daily operating control | `daily-coherence-content-operating-contract.md` | Daily Coherence Agent |
 | Draft production | Content Production Engine | Content Production Engine |
 | Performance evidence | `performance/` | Daily Coherence Agent |
+| Evidence ingestion | `content-evidence-ingestion-protocol.md` | Daily Coherence Agent |
 | Experiments | `content-experiment-register.yaml` | Daily Coherence Agent, within approved scope |
 | Publication | External LinkedIn account | Architect or explicitly authorized operator |
 
@@ -53,6 +54,10 @@ Daily Coherence assignment
 - `content-current-state.yaml`: current operating state only.
 - `content-experiment-register.yaml`: controlled hypotheses and results.
 - `content-operational-items.yaml`: persistent work items and verification evidence.
+- `content-evidence-ingestion-protocol.md`: governed preview, persistence, and receipt workflow.
+- `content-production-engine-ingestion-instructions.md`: durable extraction and persistence-honesty instructions.
+- `intake/YYYY/MM/`: normalized Architect-supplied evidence archives.
+- `receipts/YYYY/MM/`: validation and repository-state receipts.
 - `templates/`: briefs, records, reviews, plans, and change proposals.
 - `performance/`: append-only performance and audience-quality ledgers.
 - `monthly/`: month-specific plans and reviews.
@@ -65,3 +70,8 @@ Unknown and unavailable metrics are not zero. Exact published copy must be
 preserved. Performance observations remain outside the post-merge Content
 Production OS until the promotion threshold is met and the Architect or CCO
 explicitly approves the change.
+
+Evidence ingestion defaults to dry run. A conversation-only intake is
+`prepared_not_persisted`; only a validated durable repository transaction on
+an authorized evidence branch is `persisted_to_evidence_branch`. Ingestion does
+not interpret performance or change a canonical rule.

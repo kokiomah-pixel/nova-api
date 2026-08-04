@@ -16,6 +16,15 @@ content_current_state:
   scheduled_posts: []
   published_posts: []
   metrics_due: []
+  last_content_evidence_ingestion: null
+  pending_evidence_resolution: []
+  content_evidence_ingestion:
+    last_intake_id: null
+    last_ingested_at: null
+    pending_intakes: []
+    unresolved_intakes: []
+    evidence_branch: null
+    evidence_pull_request: null
   target_audience_focus:
     - institutional_treasury_operators
     - digital_asset_operations_leaders
