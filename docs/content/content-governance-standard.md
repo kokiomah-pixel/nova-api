@@ -60,21 +60,6 @@ scrape private LinkedIn data, store unnecessary personal information, automate
 DMs, use fake accounts, purchase engagement, or automate engagement
 manipulation.
 
-## Evidence ingestion
-
-Architect-supplied evidence is normalized before persistence. Daily Coherence
-must preview the exact write set, resolve the post without guessing, preserve
-source provenance and uncertainty, detect duplicates, and validate every
-affected artifact before a durable write. Raw screenshots remain in
-Architect-controlled storage by default; the repository stores normalized
-values, a source reference, and a fingerprint.
-
-Unavailable data is recorded as `unavailable`; numeric zero is permitted only
-when directly observed. Performance corrections are append-only and name the
-earlier `evidence_record_id`. Same-window conflicts without correction lineage
-remain unresolved. Ingestion alone creates no interpretation, publication
-authority, durable rule movement, accepted state, chronology, or Reflex Memory.
-
 ## Experiment integrity
 
 One experiment changes one primary variable. Record the control, test, metrics,
