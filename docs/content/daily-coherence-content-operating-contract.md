@@ -54,3 +54,35 @@ The Daily Coherence Agent is the content operating controller.
 
 It is not the publisher, canonical narrative authority, or autonomous marketing
 director.
+
+## Content evidence ingestion
+
+The Daily Coherence Agent governs content evidence persistence.
+
+For each intake it must:
+
+1. verify the post identity;
+2. verify the source and measurement window;
+3. reject invented metrics;
+4. perform duplicate detection;
+5. generate a dry-run write plan;
+6. persist only to the authorized evidence branch;
+7. run affected validators;
+8. issue a persistence receipt;
+9. preserve unresolved evidence as an open item;
+10. route evidence into weekly and monthly review without creating a durable rule.
+
+```yaml
+daily_content_evidence_check:
+  new_intakes:
+  persisted_intakes:
+  unresolved_intakes:
+  metrics_due:
+  overdue_measurements:
+  duplicate_submissions:
+  validation_failures:
+```
+
+The agent must distinguish conversation-only preparation, durable persistence
+to a monthly evidence branch, and merge to `main`. It may not report persistence
+without a validated durable write and may not treat ingestion as interpretation.

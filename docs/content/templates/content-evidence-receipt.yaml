@@ -1,0 +1,43 @@
+content_evidence_receipt:
+  schema_version: 1.0.0
+  intake_id: null
+  processed_at: null
+  post_id: null
+  measurement_window: null
+  status: prepared_not_persisted
+  transaction:
+    transaction_reference: null
+    validated_at: null
+  repository:
+    repository: null
+    branch: null
+    local_commit: null
+    remote_commit: null
+    pull_request: null
+    remote_branch_verified: false
+    main_merge_verified: false
+  repository_state:
+    persisted_to_monthly_branch: false
+    merged_to_main: false
+  files:
+    created: []
+    updated: []
+  rows:
+    performance_rows_added: 0
+    audience_rows_added: 0
+  validators:
+    intake: not_run
+    post_record: not_run
+    performance_ledger: not_run
+    audience_ledger: not_run
+    experiment_register: not_run
+    current_state: not_run
+  missing_capabilities: []
+  unresolved_fields: []
+  unavailable_metrics: []
+  effects:
+    interpretation_created: false
+    canonical_rule_changed: false
+    accepted_state_changed: false
+    chronology_event_created: false
+    Reflex_Memory_object_created: false

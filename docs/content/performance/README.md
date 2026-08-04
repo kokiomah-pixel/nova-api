@@ -12,6 +12,13 @@ engagement observation.
 - Use `0` only when zero is directly observed.
 - Classify `evidence_status`; separate observation from inference in notes.
 - Preserve exact post IDs so ledger rows resolve to `posts/YYYY/MM/` records.
+- Preserve `source_intake_id` and `source_fingerprint` so every row resolves to
+  its normalized intake and source provenance.
+- Use only `observation`, `correction`, or `supersession` as `record_action`.
+- Append corrections and supersessions with an earlier
+  `supersedes_record_id`; never edit or delete the prior row.
+- Preserve `ad_hoc` and `historical_unknown_age` evidence, but do not count it
+  as controlled-experiment evidence.
 
 ## Audience and privacy discipline
 
@@ -20,6 +27,10 @@ private data or store unnecessary personal details. Permitted relevance values
 are `high`, `medium`, `low`, and `unknown`. Permitted understanding values are
 `correct_Nova_understanding`, `partial_understanding`, `category_confusion`, and
 `no_evidence`.
+
+Do not create an audience row merely because aggregate reactions changed. A
+row requires a materially useful observation with a relevance basis and only
+the minimum identity context needed to evaluate audience quality.
 
 ## Interpretation
 
