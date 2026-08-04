@@ -12,6 +12,7 @@ try:
         find_mapping,
         is_blank,
         run_cli,
+        validate_content_approval,
     )
 except ModuleNotFoundError:  # Direct execution from scripts/content.
     from validation_common import (  # type: ignore[no-redef]
@@ -21,12 +22,12 @@ except ModuleNotFoundError:  # Direct execution from scripts/content.
         find_mapping,
         is_blank,
         run_cli,
+        validate_content_approval,
     )
 
 
 DEFAULT_PATH = ROOT / "docs/content/templates/content-os-change-proposal.md"
 ALLOWED_PROMOTIONS = {"observation_only", "provisional_pattern", "candidate_rule", "canonical_rule"}
-APPROVED_STATUSES = {"approved", "accepted"}
 
 
 def check_content_rule_promotion(path: Path = DEFAULT_PATH) -> dict[str, Any]:
@@ -46,8 +47,7 @@ def check_content_rule_promotion(path: Path = DEFAULT_PATH) -> dict[str, Any]:
         if len(posts) < 3 or not windows or (len(pillars) < 2 and len(months) < 2):
             raise ContentValidationError("candidate rule requires repeated evidence across pillars or two months")
     if requested == "canonical_rule":
-        if proposal.get("approval_status") not in APPROVED_STATUSES or is_blank(proposal.get("approved_by")):
-            raise ContentValidationError("canonical rule requires explicit Architect or CCO approval")
+        validate_content_approval(proposal.get("approval"), "canonical rule promotion")
     return {
         "status": "passed",
         "path": display_path(path),

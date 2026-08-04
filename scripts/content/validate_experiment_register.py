@@ -11,18 +11,18 @@ try:
         ROOT,
         ContentValidationError,
         display_path,
-        is_blank,
         require_fields,
         run_cli,
+        validate_content_approval,
     )
 except ModuleNotFoundError:  # Direct execution from scripts/content.
     from validation_common import (  # type: ignore[no-redef]
         ROOT,
         ContentValidationError,
         display_path,
-        is_blank,
         require_fields,
         run_cli,
+        validate_content_approval,
     )
 
 
@@ -72,11 +72,8 @@ def validate_experiment_register(path: Path = DEFAULT_PATH) -> dict[str, Any]:
             active_count += 1
         if status == "approved":
             approved_count += 1
-            require_fields(
-                experiment,
-                ("activation_condition", "approved_by"),
-                f"approved experiment {experiment_id}",
-            )
+            require_fields(experiment, ("activation_condition",), f"approved experiment {experiment_id}")
+            validate_content_approval(experiment.get("approval"), f"approved experiment {experiment_id}")
         windows = set(experiment.get("measurement_windows") or [])
         if windows != REQUIRED_WINDOWS:
             raise ContentValidationError(f"{experiment_id} requires all standard measurement windows")
@@ -90,8 +87,7 @@ def validate_experiment_register(path: Path = DEFAULT_PATH) -> dict[str, Any]:
                 f"completed experiment {experiment_id}",
             )
         if status == "promoted" or promotion == "canonical_rule":
-            if is_blank(experiment.get("approved_by")):
-                raise ContentValidationError(f"promoted experiment {experiment_id} requires approval")
+            validate_content_approval(experiment.get("approval"), f"promoted experiment {experiment_id}")
     if active_count > 3:
         raise ContentValidationError("no more than three experiments may be active")
     return {

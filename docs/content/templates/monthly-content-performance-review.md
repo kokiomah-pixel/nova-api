@@ -41,7 +41,15 @@ monthly_review_validation:
   month:
   demand_claim_basis: none
   measurement_window_comparisons: []
-  canonical_rule_changes: []
+  canonical_rule_changes:
+    - rule:
+      supporting_posts: []
+      supporting_measurement_windows: []
+      approval:
+        status: not_requested
+        authority_role: null
+        approval_reference: null
+        approved_at: null
   findings:
     - finding_id:
       observed:
@@ -53,7 +61,9 @@ monthly_review_validation:
       supporting_measurement_windows: []
       approval:
         status: not_requested
-        approved_by: null
+        authority_role: null
+        approval_reference: null
+        approved_at: null
 ```
 
 ## What the Architect should know now

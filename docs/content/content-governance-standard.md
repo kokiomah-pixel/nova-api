@@ -11,8 +11,34 @@ not govern runtime execution or change corporate accepted state.
 - The Daily Coherence Agent controls the operating loop and may prepare work.
 - The Content Production Engine drafts and revises within assigned rules.
 - The Architect or explicitly authorized operator controls publication.
-- The Architect or Jarvis-Nova CCO controls canonical-rule mutation.
+- Only the Architect or Jarvis-Nova CCO may approve durable rule movement or
+  canonical-rule mutation.
 - A monthly review is interpretation, not approval.
+
+```text
+Daily Coherence proposes.
+Jarvis-Nova reviews.
+Architect or Jarvis-Nova CCO approves durable rule movement.
+```
+
+An approval must separately record `status`, `authority_role`,
+`approval_reference`, and `approved_at`. A nonblank name or provenance string
+does not establish authority. The Daily Coherence Agent, Content Production
+Engine, and monthly review process cannot approve durable rule movement.
+
+```yaml
+approval_schema:
+  status:
+    - not_requested
+    - approved
+    - accepted
+    - rejected
+  authority_role:
+    - Architect
+    - Jarvis-Nova_CCO
+  approval_reference:
+  approved_at:
+```
 
 ## Evidence states
 
@@ -45,8 +71,9 @@ approval at the canonical threshold.
 
 Single posts are observations. Three comparable posts may establish a
 provisional pattern. Repetition across multiple pillars or two months may
-establish a candidate rule. Only explicit Architect or CCO approval establishes
-a canonical rule. Superseded instructions are archived.
+establish a candidate rule. Only a structured approval from the Architect or
+Jarvis-Nova CCO establishes a canonical rule. Superseded instructions are
+archived.
 
 ## Prohibited inferences
 

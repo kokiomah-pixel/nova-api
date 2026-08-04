@@ -30,7 +30,11 @@ experiments:
     interpretation: null
     recommended_action: run_controlled_comparable_posts
     promotion_status: observation_only
-    approved_by: Architect_implementation_brief_2026-08-04
+    approval:
+      status: approved
+      authority_role: Architect
+      approval_reference: Architect_implementation_brief_2026-08-04
+      approved_at: 2026-08-04
   - experiment_id: CONTENT-EXP-002
     status: approved
     activation_condition: content_system_merged_to_main
@@ -62,7 +66,11 @@ experiments:
     interpretation: null
     recommended_action: run_controlled_comparable_posts
     promotion_status: observation_only
-    approved_by: Architect_implementation_brief_2026-08-04
+    approval:
+      status: approved
+      authority_role: Architect
+      approval_reference: Architect_implementation_brief_2026-08-04
+      approved_at: 2026-08-04
   - experiment_id: CONTENT-EXP-003
     status: approved
     activation_condition: content_system_merged_to_main
@@ -93,4 +101,8 @@ experiments:
     interpretation: null
     recommended_action: run_controlled_comparable_posts
     promotion_status: observation_only
-    approved_by: Architect_implementation_brief_2026-08-04
+    approval:
+      status: approved
+      authority_role: Architect
+      approval_reference: Architect_implementation_brief_2026-08-04
+      approved_at: 2026-08-04

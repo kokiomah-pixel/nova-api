@@ -13,6 +13,7 @@ try:
         is_blank,
         require_fields,
         run_cli,
+        validate_content_approval,
     )
 except ModuleNotFoundError:  # Direct execution from scripts/content.
     from validation_common import (  # type: ignore[no-redef]
@@ -23,12 +24,12 @@ except ModuleNotFoundError:  # Direct execution from scripts/content.
         is_blank,
         require_fields,
         run_cli,
+        validate_content_approval,
     )
 
 
 DEFAULT_PATH = ROOT / "docs/content/monthly/2026-08-content-performance-review.md"
 ENGAGEMENT_ONLY_BASES = {"engagement_only", "impressions_only", "likes_only", "follower_growth_only"}
-APPROVED_STATUSES = {"approved", "accepted"}
 
 
 def validate_monthly_review(path: Path = DEFAULT_PATH) -> dict[str, Any]:
@@ -51,9 +52,7 @@ def validate_monthly_review(path: Path = DEFAULT_PATH) -> dict[str, Any]:
     for change in canonical_changes:
         if not isinstance(change, dict):
             raise ContentValidationError("canonical rule change must be a mapping")
-        approval = change.get("approval") or {}
-        if approval.get("status") not in APPROVED_STATUSES or is_blank(approval.get("approved_by")):
-            raise ContentValidationError("canonical rule change requires Architect or CCO approval")
+        validate_content_approval(change.get("approval"), "canonical rule change")
         require_fields(change, ("supporting_posts", "supporting_measurement_windows"), "canonical rule change")
     findings = review.get("findings") or []
     if not isinstance(findings, list):
@@ -69,9 +68,7 @@ def validate_monthly_review(path: Path = DEFAULT_PATH) -> dict[str, Any]:
         if not is_blank(finding.get("accepted_rule")):
             if is_blank(finding.get("supporting_posts")) or is_blank(finding.get("supporting_measurement_windows")):
                 raise ContentValidationError("accepted rule requires supporting post and window evidence")
-            approval = finding.get("approval") or {}
-            if approval.get("status") not in APPROVED_STATUSES or is_blank(approval.get("approved_by")):
-                raise ContentValidationError("accepted rule requires explicit Architect or CCO approval")
+            validate_content_approval(finding.get("approval"), "accepted monthly rule")
     return {
         "status": "passed",
         "path": display_path(path),

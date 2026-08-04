@@ -11,7 +11,22 @@ from scripts.content.validate_content_operational_items import validate_content_
 from scripts.content.validate_experiment_register import validate_experiment_register
 from scripts.content.validate_monthly_review import validate_monthly_review
 from scripts.content.validate_post_record import validate_post_record
-from scripts.content.validation_common import ContentValidationError, ROOT
+from scripts.content.validation_common import ContentValidationError, ROOT, validate_content_approval
+
+
+def _approval(
+    authority_role: str = "Architect",
+    *,
+    status: str = "approved",
+    approval_reference: str | None = "AUTH-REFERENCE-001",
+    approved_at: str | None = "2026-08-04",
+) -> dict[str, str | None]:
+    return {
+        "status": status,
+        "authority_role": authority_role,
+        "approval_reference": approval_reference,
+        "approved_at": approved_at,
+    }
 
 
 def test_repository_content_control_artifacts_validate() -> None:
@@ -134,13 +149,15 @@ monthly_review_validation:
       supporting_measurement_windows: [7_days]
       approval:
         status: not_requested
-        approved_by: null
+        authority_role: null
+        approval_reference: null
+        approved_at: null
 ```
 """,
         encoding="utf-8",
     )
 
-    with pytest.raises(ContentValidationError, match="explicit Architect or CCO approval"):
+    with pytest.raises(ContentValidationError, match="approval status must be approved or accepted"):
         validate_monthly_review(path)
 
 
@@ -191,14 +208,17 @@ content_OS_change_proposal:
   supporting_measurement_windows: [7_days]
   supporting_pillars: [category_definition, institutional_review_problems]
   supporting_months: [2026-08]
-  approval_status: not_requested
-  approved_by: null
+  approval:
+    status: not_requested
+    authority_role: null
+    approval_reference: null
+    approved_at: null
 ```
 """,
         encoding="utf-8",
     )
 
-    with pytest.raises(ContentValidationError, match="explicit Architect or CCO approval"):
+    with pytest.raises(ContentValidationError, match="approval status must be approved or accepted"):
         check_content_rule_promotion(path)
 
 
@@ -214,8 +234,11 @@ content_OS_change_proposal:
   supporting_measurement_windows: [7_days]
   supporting_pillars: [institutional_review_problems]
   supporting_months: [2026-08]
-  approval_status: not_requested
-  approved_by: null
+  approval:
+    status: not_requested
+    authority_role: null
+    approval_reference: null
+    approved_at: null
 ```
 """,
         encoding="utf-8",
@@ -225,3 +248,141 @@ content_OS_change_proposal:
 
     assert result["requested_promotion_status"] == "provisional_pattern"
     assert result["supporting_post_count"] == 3
+
+
+@pytest.mark.parametrize("approval", [None, {}])
+def test_blank_approval_is_rejected(approval: object) -> None:
+    with pytest.raises(ContentValidationError, match="requires a structured approval"):
+        validate_content_approval(approval, "test rule")
+
+
+@pytest.mark.parametrize(
+    "authority_role",
+    ["Unauthorized_Actor", "Content_Production_Engine", "Daily_Coherence_Agent"],
+)
+def test_nonblank_unauthorized_authorities_are_rejected(authority_role: str) -> None:
+    with pytest.raises(ContentValidationError, match="unauthorized authority_role"):
+        validate_content_approval(_approval(authority_role), "test rule")
+
+
+@pytest.mark.parametrize(
+    ("authority_role", "status"),
+    [("Architect", "approved"), ("Jarvis-Nova_CCO", "accepted")],
+)
+def test_permitted_content_authorities_are_accepted(authority_role: str, status: str) -> None:
+    result = validate_content_approval(_approval(authority_role, status=status), "test rule")
+
+    assert result["authority_role"] == authority_role
+    assert result["status"] == status
+
+
+@pytest.mark.parametrize(
+    ("approval_reference", "approved_at", "missing_field"),
+    [(None, "2026-08-04", "approval_reference"), ("AUTH-REFERENCE-001", None, "approved_at")],
+)
+def test_approval_receipt_fields_are_required(
+    approval_reference: str | None,
+    approved_at: str | None,
+    missing_field: str,
+) -> None:
+    approval = _approval(approval_reference=approval_reference, approved_at=approved_at)
+
+    with pytest.raises(ContentValidationError, match=missing_field):
+        validate_content_approval(approval, "test rule")
+
+
+def test_experiment_register_rejects_unauthorized_approval(tmp_path: Path) -> None:
+    path = tmp_path / "experiments.yaml"
+    payload = yaml.safe_load((ROOT / "docs/content/content-experiment-register.yaml").read_text(encoding="utf-8"))
+    payload["experiments"][0]["approval"] = _approval("Content_Production_Engine")
+    path.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
+
+    with pytest.raises(ContentValidationError, match="unauthorized authority_role"):
+        validate_experiment_register(path)
+
+
+def test_monthly_review_rejects_daily_coherence_approval(tmp_path: Path) -> None:
+    path = tmp_path / "review.md"
+    path.write_text(
+        """# Review
+
+```yaml
+monthly_review_validation:
+  month: 2026-08
+  demand_claim_basis: none
+  measurement_window_comparisons: []
+  canonical_rule_changes:
+    - rule: Use scenario hooks.
+      supporting_posts: [P-1, P-2, P-3]
+      supporting_measurement_windows: [7_days]
+      approval:
+        status: approved
+        authority_role: Daily_Coherence_Agent
+        approval_reference: REVIEW-001
+        approved_at: 2026-08-31
+  findings: []
+```
+""",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ContentValidationError, match="unauthorized authority_role"):
+        validate_monthly_review(path)
+
+
+def test_canonical_promotion_rejects_content_engine_approval(tmp_path: Path) -> None:
+    path = tmp_path / "proposal.md"
+    path.write_text(
+        """# Proposal
+
+```yaml
+content_OS_change_proposal:
+  requested_promotion_status: canonical_rule
+  supporting_posts: [P-1, P-2, P-3]
+  supporting_measurement_windows: [7_days]
+  supporting_pillars: [category_definition, institutional_review_problems]
+  supporting_months: [2026-08]
+  approval:
+    status: approved
+    authority_role: Content_Production_Engine
+    approval_reference: ENGINE-001
+    approved_at: 2026-08-31
+```
+""",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ContentValidationError, match="unauthorized authority_role"):
+        check_content_rule_promotion(path)
+
+
+@pytest.mark.parametrize(
+    ("authority_role", "status"),
+    [("Architect", "approved"), ("Jarvis-Nova_CCO", "accepted")],
+)
+def test_canonical_promotion_accepts_permitted_authorities(
+    tmp_path: Path,
+    authority_role: str,
+    status: str,
+) -> None:
+    path = tmp_path / f"{authority_role}-proposal.yaml"
+    path.write_text(
+        yaml.safe_dump(
+            {
+                "content_OS_change_proposal": {
+                    "requested_promotion_status": "canonical_rule",
+                    "supporting_posts": ["P-1", "P-2", "P-3"],
+                    "supporting_measurement_windows": ["7_days"],
+                    "supporting_pillars": ["category_definition", "institutional_review_problems"],
+                    "supporting_months": ["2026-08"],
+                    "approval": _approval(authority_role, status=status),
+                }
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    result = check_content_rule_promotion(path)
+
+    assert result["requested_promotion_status"] == "canonical_rule"

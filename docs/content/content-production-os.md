@@ -186,7 +186,7 @@ learning_promotion:
     status: provisional_pattern
   repeated_across_multiple_pillars_or_2_months:
     status: candidate_production_rule
-  Architect_or_CCO_approval:
+  Architect_or_Jarvis-Nova_CCO_approval:
     status: canonical_rule
 ```
 
@@ -197,16 +197,40 @@ single high-impression post cannot become a rule.
 
 The Daily Coherence Agent drafts the review, separates observations from
 inferences, records data completeness, and proposes the next controlled tests.
-Jarvis-Nova CCO reviews structural and category implications. The Architect or
-CCO explicitly accepts or rejects durable rules. Reviews do not create accepted
-state, chronology, or Reflex Memory.
+Jarvis-Nova reviews structural and category implications. Only the Architect or
+Jarvis-Nova CCO explicitly accepts or rejects durable rules. Reviews do not
+create accepted state, chronology, or Reflex Memory.
+
+```text
+Daily Coherence proposes.
+Jarvis-Nova reviews.
+Architect or Jarvis-Nova CCO approves durable rule movement.
+```
+
+Approval must be represented by a structured object containing an approved or
+accepted status, the authorized role, an approval reference, and an approval
+date. Evidence provenance does not substitute for authority.
+
+```yaml
+approval:
+  status:
+    - not_requested
+    - approved
+    - accepted
+    - rejected
+  authority_role:
+    - Architect
+    - Jarvis-Nova_CCO
+  approval_reference:
+  approved_at:
+```
 
 ## Change-control process
 
 1. Record observations in ledgers and monthly findings.
 2. Meet the stated repetition threshold.
 3. Create a `content-os-change-proposal` with evidence and risks.
-4. Obtain explicit Architect or CCO approval.
+4. Obtain and record explicit Architect or Jarvis-Nova CCO approval.
 5. Edit this document, increment its version, and add a changelog entry.
 6. Archive superseded instructions; do not erase rejected learning.
 
