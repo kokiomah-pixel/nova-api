@@ -31,6 +31,20 @@ DEFAULT_PATH = ROOT / "docs/content/templates/post-record-template.yaml"
 ALLOWED_STATUSES = {"draft", "approved", "published", "archived"}
 REQUIRED_WINDOWS = {"24_hours", "7_days", "30_days"}
 PLACEHOLDER_COPY = {"[Exact published text]", "exact_published_text", "TODO", "TBD"}
+TEMPLATE_POST_FIELDS = {
+    "post_id",
+    "title_or_working_name",
+    "publication_date",
+    "post_url",
+    "intended_audience",
+    "audience_stage",
+    "narrative_pillar",
+    "governed_distinction",
+    "hook_type",
+    "content_pattern",
+    "experiment_id",
+    "status",
+}
 
 
 def _markdown_published_copy(path: Path) -> str | None:
@@ -45,7 +59,11 @@ def _markdown_published_copy(path: Path) -> str | None:
     return match.group(1).strip() if match else None
 
 
-def validate_post_record(path: Path = DEFAULT_PATH) -> dict[str, Any]:
+def validate_post_record(
+    path: Path = DEFAULT_PATH,
+    *,
+    allow_template_placeholders: bool = False,
+) -> dict[str, Any]:
     record = find_mapping(path, "post_record") if path.suffix.lower() != ".md" else None
     if record is None:
         post = find_mapping(path, "post")
@@ -57,6 +75,29 @@ def validate_post_record(path: Path = DEFAULT_PATH) -> dict[str, Any]:
     post = record.get("post")
     if not isinstance(post, dict):
         raise ContentValidationError("post_record.post must be a mapping")
+    is_template = allow_template_placeholders or path.resolve() == DEFAULT_PATH.resolve()
+    if is_template:
+        missing_keys = sorted(TEMPLATE_POST_FIELDS - set(post))
+        if missing_keys:
+            raise ContentValidationError(
+                f"post record template missing schema fields: {', '.join(missing_keys)}"
+            )
+        schedule = record.get("measurement_schedule")
+        due = schedule.get("due") if isinstance(schedule, dict) else None
+        if not isinstance(due, list):
+            raise ContentValidationError("post record template requires measurement_schedule.due")
+        windows = {entry.get("window") for entry in due if isinstance(entry, dict)}
+        if windows != REQUIRED_WINDOWS:
+            raise ContentValidationError(
+                "post record template measurement schedule must contain 24_hours, 7_days, and 30_days"
+            )
+        return {
+            "status": "passed",
+            "path": display_path(path),
+            "template": True,
+            "publication_status": post.get("status"),
+            "measurement_windows": sorted(windows),
+        }
     require_fields(
         post,
         (

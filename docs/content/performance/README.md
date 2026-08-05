@@ -21,6 +21,17 @@ are `high`, `medium`, `low`, and `unknown`. Permitted understanding values are
 `correct_Nova_understanding`, `partial_understanding`, `category_confusion`, and
 `no_evidence`.
 
+## Observational measurements
+
+Measurements outside the controlled 24-hour, seven-day, and 30-day windows may
+be preserved as `ad_hoc` when the measurement age is known or
+`historical_unknown_age` when it is not known.
+
+These rows are evidence-preservation records. They must not be compared as
+equivalent to controlled windows and do not independently establish an
+experiment result. Record age information in the `notes` field when an
+observational measurement is used.
+
 ## Interpretation
 
 Reach includes impressions, non-follower exposure, reposts, and profile

@@ -4,20 +4,25 @@
 
 ```yaml
 document:
-  status: proposed
+  status: authoritative
   version: 1.0.0
   proposed_date: 2026-08-04
-  repository_status: proposed_until_merge
-  effective_condition: merge_to_main
+  effective_date: 2026-08-04
+  effective_commit: c356041712cf0860c6dd88dcbfede64c2d5781df
+  repository_status: merged
   authority: Architect
   coherence_review: Jarvis-Nova_CCO
   mutation_authority: Architect_or_CCO
 ```
 
-This document is the proposed content-production instruction set and becomes
-authoritative after merge. Experiments, performance observations, and monthly
-priorities are not durable rules and belong in their respective operating
-artifacts.
+This document is the authoritative Content Production OS version 1.0.0.
+
+Its presence on main authorizes content assignment, drafting, review, post
+recording, evidence collection, and bounded learning operations. It does not
+authorize autonomous publication, repository persistence without a durable
+write, canonical-rule movement, accepted state, chronology, or Reflex Memory.
+Experiments, performance observations, and monthly priorities are not durable
+rules and belong in their respective operating artifacts.
 
 ## Canonical Nova frame
 
@@ -238,4 +243,4 @@ approval:
 
 | Version | Date | Authority | Change |
 | --- | --- | --- | --- |
-| 1.0.0 | 2026-08-04 | Architect implementation brief | Proposed the content-production rules and post-merge promotion boundary. |
+| 1.0.0 | 2026-08-04 | Architect implementation brief | Established the authoritative content-production rules and promotion boundary. |
