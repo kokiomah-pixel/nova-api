@@ -7,6 +7,30 @@ production custody, Legacy v1 dependency, v2 progression, institutional use,
 monetization, and machine discovery. Readiness is evidence-based and does not
 convert unknown production history into a favorable claim.
 
+## Public current-state authority
+
+For the compressed public system status, see:
+
+- [Current State](../../CURRENT_STATE.md)
+
+This register provides gate-level detail.
+
+It does not permit a reader to combine a `READY` subcomponent with blocked
+production controls and conclude that Sharpe Nova OS is system-wide
+production-ready.
+
+```yaml
+public_claim_summary:
+  repository_governance: ready
+  Legacy_v1_runtime: implemented
+  target_v2_contract: approved
+  target_v2_runtime: not_implemented
+  target_v2_production: not_active
+  institutional_pilot: not_started
+  production_custody_attestation: not_complete
+  system_wide_production_readiness: not_established
+```
+
 ## Canonical Boundary
 
 Sharpe Nova OS is a pre-execution decision discipline layer that conditions
@@ -233,6 +257,9 @@ work may be prepared privately only within its authorized change class; no gate
 permits public activation by implication.
 
 ## Monetization Boundary
+
+Commercial expansion follows the evidence-gated
+[Commercialization Sequence](../go-to-market/commercialization-sequence.md).
 
 Payment may purchase access, coverage, retention, evidence packaging,
 reproducibility, review-profile support, or institutional service levels.

@@ -7,6 +7,7 @@ PYTHON ?= .venv/bin/python
 	verify-scenarios \
 	verify-tests \
 	verify-chronology \
+	verify-public-surface \
 	verify-whitespace \
 	test \
 	test-isolated \
@@ -26,6 +27,7 @@ verify: \
 	verify-scenarios \
 	verify-tests \
 	verify-chronology \
+	verify-public-surface \
 	verify-whitespace
 
 verify-doctrine: require-venv
@@ -42,6 +44,9 @@ verify-chronology: require-venv
 
 verify-whitespace:
 	git diff --check
+
+verify-public-surface: require-venv
+	$(PYTHON) scripts/validate_public_surface_coherence.py
 
 test: verify-tests
 

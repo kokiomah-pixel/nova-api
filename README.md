@@ -1,331 +1,205 @@
 # Sharpe Nova OS
 
-Sharpe Nova OS is a non-authority pre-execution governance review layer for agentic financial workflows. When a workflow forms an intended action but before local execution authority is exercised, Nova emits governed pre-action context that improves reviewability, reconstruction, classification consistency, source-context clarity, and authority-scope recognition without authorizing or executing the action.
-
-This repository is the canonical Sharpe Nova OS system repo. It contains the Nova API, proof layer, governance runtime, canonical specs, tests, and runnable examples. The project has been reframed to emphasize environmental coordination, pacing normalization, and sovereignty-preserving boundaries.
-
-> **Architecture transition notice**
->
-> This repository contains the implemented Legacy v1 decision-admission runtime
-> and the approved design for Nova’s future non-authority review-context
-> contract.
->
-> Legacy v1 is not the canonical future external integration model. No new
-> external integration should be built against its authority-bearing admission
-> semantics while consumer inventory, isolation, and migration review remain
-> incomplete.
->
-> The approved target external contract is:
->
-> `docs/architecture/external-review-context-contract-v2.md`
->
-> Canonical operating boundary:
->
-> Agent prepares action. Nova structures review context. Local authority
-> decides. External systems execute. Nova does not execute.
-
-Canonical description:
-
-> Sharpe Nova OS is a pre-execution decision discipline layer that conditions
-> capital through telemetry, Reflex Memory, and constraint logic before
-> execution.
-
-## Phase 1 status
-
-The Agent-Prepared Financial Action Review Harness has completed its Phase 1 public offline proof chain through v0.8.1.
-
-The Phase 1 chain demonstrates offline pre-execution governance context formation for agent-prepared financial actions. It includes pre-action review, batch replay, governance-record export, chronology candidate packaging, manual acceptance, manual movement planning, chronology acceptance ledgering, lifecycle reporting, and a documented pytest verification path.
-
-This harness is offline, boundary-safe, reportable, and test-verifiable.
-
-It is not production readiness, market validation, buyer validation, live integration, execution infrastructure, audit reporting, compliance reporting, production audit infrastructure, automatic chronology ingestion, automatic Reflex Memory mutation, or automatic acceptance.
-
-Canonical boundary:
+Sharpe Nova OS preserves governed review context for agent-prepared financial
+actions before local authority acts.
 
 ```text
-Agent prepares action.
+Agent prepares an action.
 Nova structures review context.
 Local authority decides.
 External systems execute.
 Nova does not execute.
 ```
 
-## Start Here
+## The problem
 
-New readers should begin with:
+A transaction system can preserve what ultimately moved while the institution
+loses the exact review state that informed the decision.
 
-- [docs/start-here.md](docs/start-here.md)
-- [docs/reviewer-paths.md](docs/reviewer-paths.md)
-- [docs/phase_1_offline_proof_chain.md](docs/phase_1_offline_proof_chain.md)
-- [docs/for-agent-builders.md](docs/for-agent-builders.md)
+When a proposal changes, the institution may need to reconstruct:
 
-Sharpe Nova OS is pre-execution governance infrastructure for programmable capital systems.
+* which version local authority reviewed;
+* which sources were authoritative;
+* when each source was observed;
+* which assumptions and constraints applied;
+* what was missing, stale, conflicting, or unresolved.
 
-Nova structures review context before local authority acts.
+Nova is designed to preserve that review context before execution.
 
-Nova does not execute.
+## First bounded workflow
 
-## Quick Local Check
+The first bounded workflow is an agent-prepared stablecoin treasury action.
 
-Before reading further, run one decision through Nova to observe the environmental context it emits. Nova's role is to provide a coordination context — it does not prescribe or perform execution.
+Nova structures the review package around the proposed action. Local authority
+decides whether and how the institution proceeds. External systems remain
+responsible for execution.
 
-### 1. Start Nova Locally
+Nova does not approve, authorize, sign, settle, or move capital.
 
-```bash
-NOVA_API_KEY=mytestkey ./.venv/bin/uvicorn app:app --host 127.0.0.1 --port 8000
-```
+## Current state
 
-### 2. Submit One Context Request
+* Legacy v1 is implemented but is not the canonical future external model.
+* New external integrations against Legacy v1 admission semantics are prohibited.
+* The target v2 non-authority review-context contract is approved in design.
+* The target v2 runtime and private adapter are not yet implemented.
+* Phase 1 is an offline, repository-validated proof chain.
+* Production readiness, institutional use, buyer validation, and adoption are
+  not established.
 
-```bash
-curl -s -H "Authorization: Bearer mytestkey" \
-"http://127.0.0.1:8000/v1/context?intent=allocate&asset=ETH&size=10000"
-```
+Read the authoritative current-state summary:
 
-### 3. Read the Coordination Fields
+* [Current State](CURRENT_STATE.md)
 
-Bind orchestration behavior to the emitted environmental context rather than treating Nova as an execution authority.
+## Start here
 
-Key emitted fields (examples):
+1. [Current State](CURRENT_STATE.md)
+2. [Start Here](docs/start-here.md)
+3. [Target v2](docs/target-v2/README.md)
+4. [First Use Case](docs/go-to-market/first-use-case-agent-prepared-treasury-action.md)
+5. [Production Readiness](docs/operations/production-readiness-register.md)
 
-```text
-coordination_state         # descriptive label of environmental posture
-constraint_pressure        # summary of constraint intensity (low/medium/high)
-drift_score                # derivative telemetry metric (0.0 - 1.0)
-review_context_metadata    # structured context to inform pacing/adjustment
-```
+## Product generations
 
-Supporting fields may explain telemetry and constraint analysis. These fields are intended as conditioning inputs for upstream orchestration logic — they do not, by themselves, grant execution authority.
+* [Legacy v1](docs/legacy-v1/README.md)
+* [Target v2](docs/target-v2/README.md)
 
-### 4. Retrieve Proof
+## What Nova is not
 
-```bash
-curl -s -H "Authorization: Bearer mytestkey" \
-"http://127.0.0.1:8000/v1/proof/<decision_id>"
-```
+Nova is not a trading system, execution engine, agent framework, payment
+processor, wallet, portfolio optimizer, investment recommendation system, or
+authority layer. Local institutions remain responsible for every decision and
+external action.
 
-Proof verifies the emitted coordination context and the integrity of the derived environmental telemetry. Proof is an audit artifact, not a permission grant.
+## What is not claimed
 
-### Required Interpretation
+Repository artifacts and passing tests do not establish:
 
-Sharpe Nova OS provides environmental conditioning and coordination telemetry that upstream systems consume to adapt pacing and orchestration. Nova does not issue execution commands or permissions, and it does not generate trade signals.
+* current production custody or deployment identity;
+* target v2 runtime implementation or production activation;
+* institutional use or operator dependency;
+* buyer or market validation;
+* adoption or product-market fit;
+* pricing power or marketplace authority;
+* production payment or settlement activity.
 
-## What Lives Here
+Gate-level evidence and limitations are maintained in the
+[Production Readiness Register](docs/operations/production-readiness-register.md).
 
-- API implementation and runtime behavior (preserved)
-- proof generation and retrieval
-- governance specifications and system contracts
-- tests for integrity of emitted environmental context and proof
-- examples showing integration flows that consume coordination context
+## Architecture and governance
 
-## What Nova Is
+The deeper internal frame is that Sharpe Nova OS is a pre-execution decision
+discipline layer that conditions capital through telemetry, Reflex Memory, and
+constraint logic before execution. These concepts describe internal
+architecture and do not change Nova's non-authority boundary.
 
-Sharpe Nova OS is a non-authority pre-execution governance review layer for agentic financial workflows.
+Key references:
 
-It helps local operators, agents, and orchestration systems inspect governed pre-action context after an intended action has formed but before local execution authority is exercised.
+* [External review-context contract v2](docs/architecture/external-review-context-contract-v2.md)
+* [Pre-action context contract](docs/architecture/pre-action-context-contract.md)
+* [Governed context flow](docs/architecture/governed-context-flow.md)
+* [Review-context state and portability](docs/architecture/review-context-state-and-portability-specification.md)
+* [Review completeness standard](docs/governance/review-completeness-standard.md)
+* [Source-state taxonomy](docs/governance/source-state-taxonomy.md)
+* [Proof determinism and classification stability](docs/governance/proof-determinism-and-classification-stability.md)
+* [Institution-owned governance chronology](docs/governance/institution-owned-governance-chronology.md)
+* [Reflex Memory specification](docs/governance/reflex-memory-specification.md)
+* [Continuity protocols](docs/continuity/)
 
-## What Nova Is Not
+## Legacy v1 inspection
 
-Nova is not any of the following:
+The implemented Legacy v1 runtime is preserved for dependency inspection,
+migration analysis, historical integrity, and existing test coverage. Its
+local inspection commands are intentionally separated from the default reader
+path:
 
-- not a trading system
-- not a trading-signal system
-- not an execution engine
-- not an agent framework
-- not a payment processor
-- not a portfolio optimizer
-- not an investment recommendation system
-- not an authority layer that approves or denies execution
+* [Legacy v1 local inspection](docs/legacy-v1/quickstart.md)
+* [Legacy v1 isolation plan](docs/migrations/v1-admission-isolation-plan.md)
+* [Historical March 2026 project report](docs/legacy-v1/reports/PROJECT_REPORT-2026-03-20.md)
 
-Consumers remain responsible for all local governance and execution decisions.
+Legacy v1 implementation does not establish target v2 implementation or
+current production custody.
 
-## Ten-Minute Reviewer Path
+## Proof and inspection
 
-For the current Phase 1 inspection boundary, see `docs/inspection/phase-1-inspection-status.md`.
+Phase 1 provides an offline proof chain for pre-action review, replay,
+governance-record export, manual acceptance and movement planning, chronology
+candidate packaging, lifecycle reporting, and deterministic repository tests.
 
-For a role-based review path, see:
+It does not establish deployed integration, production readiness, market or
+buyer validation, operator dependency, institutional adoption, audit or
+compliance readiness, or automatic acceptance and memory mutation.
 
-- [docs/reviewer-paths.md](docs/reviewer-paths.md)
+Review:
 
-The shortest first-read path is:
+* [Phase 1 inspection status](docs/inspection/phase-1-inspection-status.md)
+* [Phase 1 offline proof chain](docs/phase_1_offline_proof_chain.md)
+* [Reviewer paths](docs/reviewer-paths.md)
+* [Technical evidence map](docs/validation/technical-evidence-map.md)
+* [Pre-action context example](examples/pre_action_context/)
+* [Proof replay example](examples/proof_replay/)
 
-1. [docs/start-here.md](docs/start-here.md)
-2. [docs/phase_1_offline_proof_chain.md](docs/phase_1_offline_proof_chain.md)
-3. [docs/architecture/pre-action-context-contract.md](docs/architecture/pre-action-context-contract.md)
-4. [examples/pre_action_context/](examples/pre_action_context/)
-5. [docs/governance/reflex-memory-specification.md](docs/governance/reflex-memory-specification.md)
-6. [docs/governance/reflex-memory-v0-1-fixture.md](docs/governance/reflex-memory-v0-1-fixture.md)
+## Operator and GTM research
 
-## Proof Determinism and Infrastructure Credibility
+Nova's proposed differentiation is a hypothesis about a residual
+review-context gap, not proof that existing financial controls lack comparable
+capabilities.
 
-Sharpe Nova OS treats proof determinism and classification stability as infrastructure credibility requirements.
+* [System-class comparator](docs/go-to-market/system-class-comparator.md)
+* [Where Nova sits](docs/go-to-market/where-nova-sits.md)
+* [First use case](docs/go-to-market/first-use-case-agent-prepared-treasury-action.md)
+* [Treasury operator discovery template](docs/go-to-market/treasury-operator-discovery-template.md)
+* [GTM comprehension test protocol](docs/go-to-market/gtm-comprehension-test-protocol.md)
+* [Commercialization sequence](docs/go-to-market/commercialization-sequence.md)
 
-The proof layer is designed so identical normalized governance inputs produce the same canonical signature, classification path, and reproducibility hash unless a documented governance epoch, registry version, classification version, or proof schema version intentionally changes the result.
+## Research and grants
 
-This is not a market-outcome feature.
+The NSF Seed Fund materials describe a research and commercialization case.
+They are not current production, buyer, adoption, or product-market evidence.
 
-It protects Reflex Memory chronology, institutional inspectability, governance record integrity, and environmental state reliability.
+* [NSF Seed Fund materials](docs/grants/nsf-seed-fund/)
+* [Project pitch draft](docs/grants/nsf-seed-fund/project-pitch-draft.md)
+* [Technical novelty](docs/grants/nsf-seed-fund/technical-novelty.md)
+* [Phase I validation matrix](docs/grants/nsf-seed-fund/phase-i-validation-matrix.md)
+* [Reviewer risk and response](docs/grants/nsf-seed-fund/reviewer-risk-and-response.md)
 
-Nova does not authorize execution, move capital, provide trading signals, or optimize portfolios. It conditions the environment in which autonomous systems and operators make execution decisions locally.
+## Historical Legacy v1 references
 
-## Trust Surface
+Older environmental telemetry, decision-admission, metering, and epoch
+materials describe Legacy v1 behavior. Read them through the generation
+boundary in [Legacy v1](docs/legacy-v1/README.md).
 
-Nova's trust posture is based on inspectable governance behavior, not execution performance.
-
-Key trust surfaces include:
-
-- classification stability
-- proof reproducibility
-- deterministic canonical signatures
-- source segmentation
-- governance chronology
-- doctrine linting
-- continuity under model-provider or workspace interruption
-
-These controls support reviewability before local authority acts.
-
-## Builder Entry Points
-
-- Reviewer Paths: [docs/reviewer-paths.md](docs/reviewer-paths.md) - gives NSF reviewers, developers, strategic readers, and Reflex Memory reviewers a short path through the repo.
-- Pre-Action Context Contract: [docs/architecture/pre-action-context-contract.md](docs/architecture/pre-action-context-contract.md)
-- Pre-Action Context Example: [examples/pre_action_context/](examples/pre_action_context/)
-- Proof Replay Example: [examples/proof_replay/](examples/proof_replay/)
-- NSF Fundability Materials: [docs/grants/nsf-seed-fund/](docs/grants/nsf-seed-fund/)
-- Where Nova Sits: [docs/go-to-market/where-nova-sits.md](docs/go-to-market/where-nova-sits.md) — explains Nova's placement after action preparation and before local authority decision, without making Nova an execution, approval, wallet, rail, or settlement layer.
-- First Use Case: Agent-Prepared Treasury Action: [docs/go-to-market/first-use-case-agent-prepared-treasury-action.md](docs/go-to-market/first-use-case-agent-prepared-treasury-action.md) — defines the first go-to-market scenario for governed review context around agent-prepared treasury actions before local authority acts.
-- GTM Comprehension Test Protocol: [docs/go-to-market/gtm-comprehension-test-protocol.md](docs/go-to-market/gtm-comprehension-test-protocol.md) — defines how to test whether readers understand where Nova sits, what Nova returns, and what Nova does not do.
-- Proof Determinism Note: [docs/governance/proof-determinism-and-classification-stability.md](docs/governance/proof-determinism-and-classification-stability.md)
-- Governance-Context Rot: [docs/governance/governance-context-rot.md](docs/governance/governance-context-rot.md) — defines decision-context degradation risk and explains why Nova emphasizes governed pre-action review context, chronology, source segmentation, proof reproducibility, and authority-scope recognition.
-- Institution-Owned Governance Chronology: [docs/governance/institution-owned-governance-chronology.md](docs/governance/institution-owned-governance-chronology.md) — explains why capital-governance memory should remain institution-owned and vendor-neutral before local authority acts.
-- Source Reconciliation Runbook: [docs/governance/source-reconciliation-runbook.md](docs/governance/source-reconciliation-runbook.md) — defines how Nova distinguishes stale connector artifacts, local/remote sync gaps, source-incomplete runs, and CCO-reconciled state without treating source conflicts as doctrine failures.
-- Chronology Preservation Standard: [docs/governance/chronology-preservation-standard.md](docs/governance/chronology-preservation-standard.md)
-- Chronology Review Guide: [docs/governance/chronology-review-guide.md](docs/governance/chronology-review-guide.md) — explains how reviewers should interpret chronology, source classifications, continuity gaps, and CCO-reconciled events without treating chronology as execution authority, performance history, or market validation.
-- Continuity Protocols: [docs/continuity/](docs/continuity/)
-
-## NSF Seed Fund Readiness
-
-Sharpe Nova OS is preparing an NSF Seed Fund research and commercialization packet focused on non-authority pre-execution governance review for agentic financial workflows.
-
-The grant-readiness materials describe the system's technical novelty, research risk, validation plan, commercialization pathway, societal impact, and non-authority boundary.
-
-See [docs/grants/nsf-seed-fund/](docs/grants/nsf-seed-fund/).
-
-## NSF Fundability Materials
-
-Sharpe Nova OS maintains reviewer-facing NSF Seed Fund materials that explain the system's technical novelty, research risk, Phase I validation plan, commercialization pathway, societal impact, and non-authority boundary.
-
-Key materials:
-
-- [Project Pitch Draft](docs/grants/nsf-seed-fund/project-pitch-draft.md)
-- [Non-Trading Positioning Memo](docs/grants/nsf-seed-fund/non-trading-positioning-memo.md)
-- [Economic Value and Buyer Wedge](docs/market/economic-value-and-buyer-wedge.md)
-- [Phase I Outcome Validation Plan](docs/validation/phase-i-outcome-validation-plan.md)
-- [Phase I Validation Matrix](docs/grants/nsf-seed-fund/phase-i-validation-matrix.md)
-- [Reviewer Risk and Response Memo](docs/grants/nsf-seed-fund/reviewer-risk-and-response.md)
-- [Pre-Action Context Contract](docs/architecture/pre-action-context-contract.md)
-- [Pre-Action Context Example](examples/pre_action_context/)
-
-Sharpe Nova OS conditions the environment before execution; it does not authorize execution.
-
-## Read Next
-
-1. [START_HERE.md](START_HERE.md)
-2. [docs/overview.md](docs/overview.md)
-3. [docs/integration_entry.md](docs/integration_entry.md)
-4. [docs/telemetry_reframe.md](docs/telemetry_reframe.md)
-5. [docs/canonical-terminology.md](docs/canonical-terminology.md)
-6. [docs/governance-epochs/epoch-2026-05-month-two.md](docs/governance-epochs/epoch-2026-05-month-two.md)
-7. [specs/decision_admission_contract.json](specs/decision_admission_contract.json)
+* [Legacy integration entry](docs/integration_entry.md)
+* [Telemetry reframe](docs/telemetry_reframe.md)
+* [Canonical terminology](docs/canonical-terminology.md)
+* [Decision-admission contract](specs/decision_admission_contract.json)
 
 ## Verification
 
-Create the canonical repository environment and install local development test dependencies:
+Create the canonical repository environment and install local development test
+dependencies:
 
 ```bash
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements-dev.txt
 ```
 
-Run the canonical repository verification commands:
+Run the canonical repository verification:
 
 ```bash
-make chronology-verify
 make verify
 ```
 
-Both commands use the repository `.venv` by default. Host Python is not the canonical chronology validation environment.
+The verification chain includes doctrine, scenarios, tests, chronology,
+whitespace, and public-surface coherence checks. The repository `.venv` is the
+canonical local validation environment.
 
-Run doctrine lint:
+## Developer environment and continuity
 
-```bash
-./.venv/bin/python scripts/doctrine_lint.py
-```
+Contributors should use minimal trusted tooling, keep secrets and environment
+files untracked, rotate credentials after suspicious tooling activity, and run
+the canonical verification before opening a pull request.
 
-Run the decision scenario suite:
-
-```bash
-./.venv/bin/python scripts/run_decision_scenario_suite.py
-```
-
-Run tests:
-
-```bash
-./.venv/bin/python -m pytest
-```
-
-Or, after installing the local development test dependencies:
-
-```bash
-python3 -m pytest
-```
-
-The development test dependency setup is for local verification only. It does not change harness runtime behavior.
-
-The doctrine check blocks prohibited execution-authority wording, code-like ALLOW enforcement examples, and hidden Unicode controls. Deprecated positioning terms are surfaced as warnings for review.
-
-### Deep Scenario Validation
-
-The repository includes a deterministic offline suite of multi-stage institutional decision scenarios covering:
-
-- authority-boundary pressure
-- incomplete and conflicting context
-- temporal and Reflex Memory relevance
-- operator and executive pressure
-- neutral outcomes
-- recovery and de-escalation
-
-The suite tests whether Nova preserves provenance, chronology, review posture, and local authority as evidence changes.
-
-It does not simulate live execution, validate investment decisions, establish production readiness, or prove institutional adoption.
-
-## Developer Environment Integrity
-
-Sharpe Nova OS treats developer environments as part of the infrastructure trust boundary.
-Contributors should:
-
-- use minimal, trusted editor extensions
-- keep secrets out of repositories and chats
-- keep `.env` files untracked
-- rotate credentials after suspicious extension or tooling activity
-- run doctrine/security lint before opening PRs
-
-See [docs/security/developer-environment-integrity-protocol.md](docs/security/developer-environment-integrity-protocol.md).
-
-## Model Provider Independence
-
-Sharpe Nova OS preserves governance continuity without dependence on a single model provider.
-OpenAI or other reasoning systems may support live interpretation, but the sovereign core of Nova lives in repository doctrine, telemetry schemas, scenario suites, chronology records, governance protocols, and tests.
-If model-provider access is unavailable, operators can continue in degraded governance mode using local linting, decision-intake scenarios, offline templates, and chronology records.
-
-## Workspace Continuity
-
-Sharpe Nova OS treats workspace availability as part of the operating-environment trust boundary.
-
-The canonical doctrine, chronology, governance protocols, tests, and decision-intake infrastructure are preserved in GitHub.
-
-Workspace tools may support live operations, but they are not the sovereign core of the OS.
-
-Workspace interruptions must be recorded as continuity events, reconciled into chronology, and reviewed for sovereignty, billing, access, and archive-risk implications.
-
-For developer integration doctrine, see:
-https://github.com/kokiomah-pixel/nova-developer-docs
+* [Developer environment integrity](docs/security/developer-environment-integrity-protocol.md)
+* [Workspace continuity](docs/continuity/)
+* [Public-surface coherence standard](docs/operations/public-surface-coherence-standard.md)
+* [Public file review checklist](docs/governance/public-file-review-checklist.md)
