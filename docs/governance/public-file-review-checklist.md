@@ -70,6 +70,46 @@ Does the file avoid claiming:
 - live capital control
 - automatic Reflex Memory mutation
 
+## Product Generation Checks
+
+```yaml
+product_generation_checks:
+  - Does the file identify Legacy v1 or target v2 when describing implementation?
+  - Could Legacy implementation be misread as target v2 implementation?
+  - Does the file link to CURRENT_STATE.md when making a system-status claim?
+```
+
+## Readiness Checks
+
+```yaml
+readiness_checks:
+  - Does every readiness claim name its layer?
+  - Is production evidence dated and attributable?
+  - Is repository validation distinguished from deployment validation?
+  - Is offline proof distinguished from live integration?
+  - Are historical readiness claims labeled as historical?
+```
+
+## Commercialization Checks
+
+```yaml
+commercialization_checks:
+  - Does metering code get mistaken for customer validation?
+  - Does marketplace research get mistaken for listing authority?
+  - Does pricing research get mistaken for pricing power?
+  - Is monetization sequenced after bounded workflow evidence?
+```
+
+## Comprehension Checks
+
+```yaml
+comprehension_checks:
+  - Can a new reader identify what Nova does within the first screen?
+  - Can the reader identify what exists and what is not implemented?
+  - Is the canonical boundary stated once, plainly?
+  - Are deep internal terms deferred until after the product explanation?
+```
+
 ## Visibility Check
 
 Classify the file before publishing:
