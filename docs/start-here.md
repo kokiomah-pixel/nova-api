@@ -1,108 +1,78 @@
 # Start Here
 
-Sharpe Nova OS is pre-execution governance infrastructure for programmable capital systems.
+## 1. What Nova does
 
-Nova operates before capital moves. It structures review context for agent-prepared financial actions before local authority acts.
+Sharpe Nova OS preserves governed review context for agent-prepared financial
+actions before local authority acts.
 
-## Canonical Boundary
+## 2. Where Nova sits
 
-Agent prepares action.  
-Nova structures review context.  
-Local authority decides.  
+```text
+Agent prepares an action.
+Nova structures review context.
+Local authority decides.
+External systems execute.
 Nova does not execute.
+```
 
-## What Nova Is
+## 3. One example
 
-- A pre-execution decision discipline layer
-- Decision-context infrastructure before capital moves
-- A governed pre-action context layer
-- A way to preserve reviewability, chronology, and constraint awareness before execution
+The first bounded workflow is an agent-prepared stablecoin treasury action.
 
-## What Nova Is Not
+An agent may prepare one proposal and then revise its amount, destination,
+timing, or assumptions. The institution must preserve which exact proposal
+version local authority reviewed, which evidence and sources were current, what
+assumptions and constraints applied, and what was missing, stale, conflicting,
+or unavailable at that moment.
 
-Nova is not:
+Nova structures that review context. Local authority decides, and external
+systems execute.
 
-- a trading system
-- a trading-signal system
-- a portfolio optimizer
-- a payment rail
-- a wallet
-- a signing tool
-- an approval engine
-- an execution guard
-- an audit system
-- a compliance system
-- a custody layer
-- a settlement layer
-- an agent supervisor
+## 4. What exists today
 
-## What Phase 1 Shows
+See the authoritative [Current State](../CURRENT_STATE.md).
 
-Phase 1 demonstrates a public, offline, boundary-safe proof chain for pre-execution governance context formation.
+* Legacy v1 is implemented.
+* Legacy v1 is not the canonical future external model.
+* Target v2 is approved in design.
+* Target v2 is not implemented or production-active.
+* Phase 1 is offline and repository-validated.
+* Institutional production readiness is not established.
 
-The proof chain includes:
+## 5. Choose a review path
 
-- pre-action review
-- batch replay
-- governance-record export
-- chronology candidate packaging
-- manual acceptance
-- manual movement planning
-- chronology acceptance ledgering
-- lifecycle reporting
-- pytest verification
+### Ten-minute public review
 
-## What Phase 1 Does Not Show
+1. [Current State](../CURRENT_STATE.md)
+2. [First bounded workflow](go-to-market/first-use-case-agent-prepared-treasury-action.md)
+3. [Target v2](target-v2/README.md)
+4. [Production readiness](operations/production-readiness-register.md)
 
-Phase 1 does not show:
+### Developer review
 
-- production readiness
-- market validation
-- buyer validation
-- live integration
-- execution infrastructure
-- audit readiness
-- compliance readiness
-- automatic chronology ingestion
-- automatic Reflex Memory mutation
-- automatic acceptance
-- authority over capital movement
+1. [Current State](../CURRENT_STATE.md)
+2. [Legacy v1](legacy-v1/README.md)
+3. [Target v2 contract](architecture/external-review-context-contract-v2.md)
+4. [Migration and isolation plan](migrations/v1-admission-isolation-plan.md)
+5. [Tests and examples](../tests/)
 
-## Public Repo Visibility
+### Governance review
 
-This repository is maintained as a controlled public proof surface for Sharpe Nova OS.
+1. [Current State](../CURRENT_STATE.md)
+2. [Target v2](target-v2/README.md)
+3. [Governance standards](governance/)
+4. [Chronology standards](chronology/)
+5. [Technical evidence map](validation/technical-evidence-map.md)
 
-The repo is intended to show Nova's pre-execution governance boundary, review-context architecture, and offline proof discipline.
+### Research and NSF review
 
-It is not the full operating archive of the Sharpe Nova OS living system.
+Use the [NSF reviewer path](reviewer-paths.md#nsf-reviewer-path). Research
+materials do not establish current production readiness or institutional use.
 
-See:
+## 6. Important non-claims
 
-- `docs/governance/public-repo-visibility-standard.md`
-- `docs/governance/public-file-review-checklist.md`
-
-## Reviewer Paths
-
-Different readers should use different paths through the repo.
-
-See:
-
-- `docs/inspection/phase-1-inspection-status.md`
-- `docs/reviewer-paths.md`
-
-The reviewer paths cover:
-
-- ten-minute first read
-- NSF review
-- developer inspection
-- strategic positioning
-- Reflex Memory
-- public repo visibility
-
-## Suggested Reading Path
-
-1. Read this file.
-2. Read `docs/phase_1_offline_proof_chain.md`.
-3. Read `examples/pre_execution_review/agent_prepared_financial_action_review.md`.
-4. Inspect the harness files under `nova/harnesses/`.
-5. Review public boundary language before interpreting any execution-adjacent terms.
+This repository does not establish a deployed or production-active target v2
+runtime, attested production custody, a completed Legacy v1 consumer inventory,
+a live institutional pilot, operator dependency, buyer pull, adoption,
+product-market fit, pricing power, production settlement, or authority to move,
+approve, sign, or settle capital.

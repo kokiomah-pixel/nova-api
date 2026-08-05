@@ -13,6 +13,7 @@ It is not the full operating archive of the Sharpe Nova OS living system.
 Agent prepares action.
 Nova structures review context.
 Local authority decides.
+External systems execute.
 Nova does not execute.
 
 Nova does not approve, deny, authorize, block, route, settle, sign, trade, optimize, manage wallets, supervise agents, perform compliance review, perform audit reporting, or replace local authority.
@@ -31,21 +32,25 @@ Use this document to understand what Phase 1 proves, what it does not prove, and
 
 Use this path if you are reviewing Sharpe Nova OS for the first time.
 
-1. `docs/start-here.md`
-2. `docs/phase_1_offline_proof_chain.md`
-3. `docs/architecture/pre-action-context-contract.md`
-4. `examples/pre_action_context/`
-5. `docs/governance/reflex-memory-specification.md`
-6. `docs/governance/reflex-memory-v0-1-fixture.md`
-7. `docs/validation/technical-evidence-map.md`
+1. `README.md`
+2. `CURRENT_STATE.md`
+3. `docs/go-to-market/first-use-case-agent-prepared-treasury-action.md`
+4. `docs/target-v2/README.md`
+5. `docs/operations/production-readiness-register.md`
 
-You should leave this path understanding:
+```yaml
+ten_minute_reader_should_be_able_to_answer:
+  - what_Nova_does
+  - where_Nova_sits
+  - what_Legacy_v1_is
+  - what_target_v2_is
+  - what_is_not_implemented
+  - what_readiness_is_and_is_not_established
+  - what_proposed_residual_gap_Nova_is_testing
+```
 
-- where Nova sits
-- what Nova emits
-- what Nova does not do
-- how Phase 1 is bounded
-- how Reflex Memory appears as review context only
+The path starts with the root entry surface, moves immediately to the canonical
+current state, and uses one workflow before deeper architecture or governance.
 
 ---
 
@@ -100,28 +105,20 @@ What this path does not claim:
 
 Use this path to inspect implementation behavior.
 
-1. `README.md`
-2. `docs/architecture/pre-action-context-contract.md`
-3. `docs/architecture/governed-context-flow.md`
-4. `docs/governance/review-completeness-standard.md`
-5. `docs/governance/source-state-taxonomy.md`
-6. `docs/architecture/agent-framework-adapter-contract.md`
-7. `examples/pre_action_context/`
-8. `docs/architecture/review-context-loop.md`
-9. `examples/agent_prepared_action/`
-10. `core/reflex_memory/context.py`
-11. `core/reflex_memory/replay.py`
-12. `fixtures/reflex_memory/`
-13. `schemas/reflex_memory/`
-14. `tests/test_agent_prepared_action_example.py`
-15. `tests/test_reflex_memory_v0_1.py`
-16. `tests/test_reflex_memory_loader.py`
-17. `tests/test_reflex_memory_context_endpoint.py`
-18. `tests/test_reflex_memory_legacy_semantics_cleanup.py`
-19. `tests/test_reflex_memory_multi_scenario.py`
-20. `tests/test_reflex_memory_schema_validation.py`
-21. `tests/test_reflex_memory_replay.py`
-22. `docs/validation/technical-evidence-map.md`
+1. `CURRENT_STATE.md`
+2. `docs/legacy-v1/README.md`
+3. `docs/legacy-v1/quickstart.md`
+4. `docs/architecture/external-review-context-contract-v2.md`
+5. `docs/migrations/v1-admission-isolation-plan.md`
+6. `docs/architecture/pre-action-context-contract.md`
+7. `docs/architecture/governed-context-flow.md`
+8. `examples/pre_action_context/`
+9. `core/reflex_memory/context.py`
+10. `core/reflex_memory/replay.py`
+11. `fixtures/reflex_memory/`
+12. `schemas/reflex_memory/`
+13. `tests/`
+14. `docs/validation/technical-evidence-map.md`
 
 Suggested local checks:
 
@@ -132,11 +129,14 @@ python3 -m pytest
 
 What this path shows:
 
-- `/v1/context` emits governed review context
+- `/v1/context` is implemented Legacy v1 behavior
 - Reflex Memory appears as context with `authority_effect: none`
 - Reflex Memory fixture state is validated
 - legacy decision-effect semantics are removed from active Reflex Memory paths
 - tests preserve non-authority behavior
+
+This path does not establish that Legacy v1 implements the approved target v2
+contract.
 
 ---
 

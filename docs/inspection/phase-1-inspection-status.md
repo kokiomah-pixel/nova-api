@@ -1,5 +1,22 @@
 # Phase 1 Inspection Status
 
+```yaml
+Phase_1:
+  status: offline_proof_chain_complete
+  repository_validated: true
+  target_v2_runtime_implemented: false
+  deployed_integration_validated: false
+  production_readiness_validated: false
+  external_comprehension_validated: false
+  operator_dependency_validated: false
+```
+
+Current-state references:
+
+- [Current State](../../CURRENT_STATE.md)
+- [Target v2](../target-v2/README.md)
+- [Production Readiness Register](../operations/production-readiness-register.md)
+
 ## Status
 
 Inspection boundary artifact
@@ -24,9 +41,11 @@ Phase 1 does not prove production adoption, buyer demand, paid usage, institutio
 
 ## Current Operating State
 
-For the current accepted operating posture after Phase 1 inspection closure, see:
+For the compressed public state and gate-level readiness detail, see:
 
-- `docs/operations/current-system-state.md`
+- `CURRENT_STATE.md`
+- `docs/target-v2/README.md`
+- `docs/operations/production-readiness-register.md`
 
 ## Canonical Boundary
 
