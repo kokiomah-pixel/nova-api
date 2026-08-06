@@ -360,7 +360,9 @@ Versioned references:
 - `schemas/reflex_memory/reflex_memory_retrieval_explanation_v0_1.schema.json`
 - `fixtures/reflex_memory/reflex_memory_candidate_implicit_policy_conversion.json`
 - `fixtures/reflex_memory/reflex_memory_candidate_exception_only.json`
+- `fixtures/reflex_memory/reflex_memory_candidate_governed_abstraction_accepted.json`
 - `fixtures/reflex_memory/reflex_memory_entry_governed_abstraction_v0_2.json`
+- `fixtures/reflex_memory/reflex_memory_entry_exception_only_v0_2.json`
 - `fixtures/reflex_memory/reflex_memory_retrieval_comparison_limits.json`
 
 These artifacts are synthetic specification evidence, not production-ready

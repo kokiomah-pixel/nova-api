@@ -198,8 +198,20 @@ Fixtures:
 
 - `fixtures/reflex_memory/reflex_memory_candidate_implicit_policy_conversion.json`
 - `fixtures/reflex_memory/reflex_memory_candidate_exception_only.json`
+- `fixtures/reflex_memory/reflex_memory_candidate_governed_abstraction_accepted.json`
 - `fixtures/reflex_memory/reflex_memory_entry_governed_abstraction_v0_2.json`
+- `fixtures/reflex_memory/reflex_memory_entry_exception_only_v0_2.json`
 - `fixtures/reflex_memory/reflex_memory_retrieval_comparison_limits.json`
+
+The accepted synthetic chains are:
+
+```text
+RMC-0201 → RM-0201
+RMC-0002 → RM-0202 → RMR-0001
+```
+
+They demonstrate fixture referential integrity only. They are not active Reflex
+Memory objects and create no chronology, production state, or runtime behavior.
 
 ## Replayability
 

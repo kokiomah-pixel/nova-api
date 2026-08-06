@@ -1,0 +1,54 @@
+{
+  "reflex_id": "RM-0202",
+  "version": "reflex_memory_v0_2",
+  "status": "accepted",
+  "source_candidate_id": "RMC-0002",
+  "source_chronology_event_ids": [
+    "CHR-2026-08-06-102"
+  ],
+  "created_at": "2026-08-06T15:10:00Z",
+  "reviewed_at": "2026-08-06T15:20:00Z",
+  "reviewed_by": "synthetic_local_governance_reviewer",
+  "accepted_at": "2026-08-06T15:30:00Z",
+  "accepted_by": "synthetic_local_governance_authority",
+  "source_state": {
+    "classification": "source_confirmed",
+    "limitations": [
+      "This fixture is synthetic specification evidence only.",
+      "The prior disposition was a one-time provider-incident exception."
+    ]
+  },
+  "trigger_pattern": "source_state_conflict",
+  "stress_type": "source_integrity_risk",
+  "boundary_risk": "A one-time provider incident could be generalized into future permission if its exception-only treatment is lost.",
+  "review_posture_effect": "add_chronology_reference",
+  "evidence_refs": [
+    "synthetic://provider-incident/primary-source-unavailable",
+    "synthetic://local-authority/one-time-exception-record",
+    "synthetic://candidate/RMC-0002",
+    "synthetic://acceptance/RMC-0002"
+  ],
+  "expiration_or_review_after": "2026-09-06",
+  "knowledge_class": "exception",
+  "action_class": "stablecoin_treasury_primary_source_unavailable",
+  "applicability_conditions": [
+    "documented_provider_incident_is_material_to_current_review"
+  ],
+  "material_distinctions": [
+    "the_prior_disposition_was_one_time_and_incident_specific"
+  ],
+  "known_exceptions": [
+    "one_time_provider_incident_exception"
+  ],
+  "contradictory_cases": [],
+  "unresolved_conditions": [
+    "current_provider_and_authority_path_must_be_reviewed_independently"
+  ],
+  "epistemic_status": "source_supported",
+  "authority_treatment": "exception_only",
+  "precedent_treatment": "exception_only",
+  "supersedes": [],
+  "superseded_by": null,
+  "authority_effect": "none",
+  "non_authority_statement": "This accepted exception-only memory does not approve future action or establish future permission, policy, authority, or binding precedent."
+}

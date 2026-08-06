@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -25,9 +26,38 @@ RETRIEVAL_SCHEMA = "reflex_memory_retrieval_explanation_v0_1.schema.json"
 NEW_FIXTURES = {
     "reflex_memory_candidate_implicit_policy_conversion.json": CANDIDATE_SCHEMA,
     "reflex_memory_candidate_exception_only.json": CANDIDATE_SCHEMA,
+    "reflex_memory_candidate_governed_abstraction_accepted.json": CANDIDATE_SCHEMA,
     "reflex_memory_entry_governed_abstraction_v0_2.json": ENTRY_SCHEMA,
+    "reflex_memory_entry_exception_only_v0_2.json": ENTRY_SCHEMA,
     "reflex_memory_retrieval_comparison_limits.json": RETRIEVAL_SCHEMA,
 }
+
+LINEAGE_CANDIDATE_FIXTURES = (
+    "reflex_memory_candidate_governed_abstraction_accepted.json",
+    "reflex_memory_candidate_exception_only.json",
+)
+LINEAGE_ENTRY_FIXTURES = (
+    "reflex_memory_entry_governed_abstraction_v0_2.json",
+    "reflex_memory_entry_exception_only_v0_2.json",
+)
+LINEAGE_RETRIEVAL_FIXTURES = (
+    "reflex_memory_retrieval_comparison_limits.json",
+)
+
+CANDIDATE_ENTRY_CORRESPONDENCE = (
+    ("candidate_id", "source_candidate_id"),
+    ("converted_entry_id", "reflex_id"),
+    ("source_chronology_event_ids", "source_chronology_event_ids"),
+    ("knowledge_class", "knowledge_class"),
+    ("action_class", "action_class"),
+    ("epistemic_status", "epistemic_status"),
+    ("authority_treatment", "authority_treatment"),
+    ("precedent_treatment", "precedent_treatment"),
+    ("reviewed_by", "reviewed_by"),
+    ("reviewed_at", "reviewed_at"),
+    ("accepted_by", "accepted_by"),
+    ("accepted_at", "accepted_at"),
+)
 
 V0_1_FIXTURES = {
     "chronology_event_source_state_conflict.json": "chronology_event_v0_1.schema.json",
@@ -236,6 +266,104 @@ def validate_retrieval(instance: dict[str, Any]) -> list[str]:
     return sorted(set(errors))
 
 
+def validate_candidate_to_entry(
+    candidate: dict[str, Any],
+    entry: dict[str, Any],
+) -> list[str]:
+    """Validate exact identity and acceptance correspondence across conversion."""
+    errors: list[str] = []
+    for candidate_field, entry_field in CANDIDATE_ENTRY_CORRESPONDENCE:
+        candidate_value = candidate.get(candidate_field)
+        entry_value = entry.get(entry_field)
+        if candidate_value != entry_value:
+            errors.append(
+                "candidate-to-entry lineage mismatch: "
+                f"candidate.{candidate_field}={candidate_value!r} "
+                f"entry.{entry_field}={entry_value!r}"
+            )
+    return errors
+
+
+def validate_entry_to_retrieval(
+    entry: dict[str, Any],
+    retrieval: dict[str, Any],
+) -> list[str]:
+    """Validate that a retrieval explanation describes an existing entry."""
+    errors: list[str] = []
+    correspondence = (
+        ("reflex_id", "reflex_id"),
+        ("source_chronology_event_ids", "source_chronology_event_ids"),
+        ("epistemic_status", "epistemic_status"),
+        ("authority_treatment", "authority_treatment"),
+        ("precedent_treatment", "precedent_treatment"),
+    )
+    for entry_field, retrieval_field in correspondence:
+        entry_value = entry.get(entry_field)
+        retrieval_value = retrieval.get(retrieval_field)
+        if entry_value != retrieval_value:
+            errors.append(
+                "entry-to-retrieval lineage mismatch: "
+                f"entry.{entry_field}={entry_value!r} "
+                f"retrieval.{retrieval_field}={retrieval_value!r}"
+            )
+    if retrieval.get("precedent_effect") != "none":
+        errors.append("entry-to-retrieval lineage mismatch: retrieval.precedent_effect must be 'none'")
+    if retrieval.get("authority_effect") != "none":
+        errors.append("entry-to-retrieval lineage mismatch: retrieval.authority_effect must be 'none'")
+    return errors
+
+
+def validate_lineage_registry(
+    candidates: Iterable[dict[str, Any]],
+    entries: Iterable[dict[str, Any]],
+    retrievals: Iterable[dict[str, Any]],
+) -> list[str]:
+    """Resolve every cross-object reference and validate the referenced object."""
+    candidate_list = list(candidates)
+    entry_list = list(entries)
+    retrieval_list = list(retrievals)
+    candidate_index = {item.get("candidate_id"): item for item in candidate_list}
+    entry_index = {item.get("reflex_id"): item for item in entry_list}
+    errors: list[str] = []
+
+    for entry in entry_list:
+        candidate_id = entry.get("source_candidate_id")
+        candidate = candidate_index.get(candidate_id)
+        if candidate is None:
+            errors.append(
+                "$.source_candidate_id: accepted entry references unknown candidate: "
+                f"{candidate_id!r}"
+            )
+            continue
+        errors.extend(validate_candidate_to_entry(candidate, entry))
+
+    for candidate in candidate_list:
+        if candidate.get("lifecycle_status") != "accepted":
+            continue
+        entry_id = candidate.get("converted_entry_id")
+        entry = entry_index.get(entry_id)
+        if entry is None:
+            errors.append(
+                "$.converted_entry_id: accepted candidate references unknown Reflex Memory entry: "
+                f"{entry_id!r}"
+            )
+            continue
+        errors.extend(validate_candidate_to_entry(candidate, entry))
+
+    for retrieval in retrieval_list:
+        reflex_id = retrieval.get("reflex_id")
+        entry = entry_index.get(reflex_id)
+        if entry is None:
+            errors.append(
+                "$.reflex_id: retrieval references unknown Reflex Memory entry: "
+                f"{reflex_id!r}"
+            )
+            continue
+        errors.extend(validate_entry_to_retrieval(entry, retrieval))
+
+    return sorted(set(errors))
+
+
 def validate_runtime_activation_claim(text: str) -> list[str]:
     pattern = re.compile(r"\bv0\.2\b.{0,80}\b(?:is|as)\s+(?:active|loaded|production|runtime-enabled)\b", re.I | re.S)
     return ["$: v0.2 runtime activation claim is prohibited"] if pattern.search(text) else []
@@ -253,23 +381,54 @@ def _validate_v0_1_compatibility() -> list[str]:
     return errors
 
 
-def _changed_paths() -> list[str]:
-    tracked = subprocess.run(
-        ["git", "diff", "--name-only", "origin/main"],
-        cwd=ROOT,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    untracked = subprocess.run(
-        ["git", "ls-files", "--others", "--exclude-standard"],
-        cwd=ROOT,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
+def _changed_paths(
+    review_base: str | None = None,
+    runner: Any = subprocess.run,
+) -> tuple[list[str], list[str]]:
+    base = review_base if review_base is not None else os.environ.get("NOVA_REVIEW_BASE", "origin/main")
+    if not base:
+        return [], ["repository-boundary comparison failed: base is empty"]
+
+    try:
+        tracked = runner(
+            ["git", "diff", "--name-only", f"{base}...HEAD"],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except OSError as exc:
+        return [], [
+            "repository-boundary comparison failed: "
+            f"base={base} returncode=unavailable stderr={exc}"
+        ]
+    if tracked.returncode != 0:
+        stderr = tracked.stderr.strip() or "no stderr"
+        return [], [
+            "repository-boundary comparison failed: "
+            f"base={base} returncode={tracked.returncode} stderr={stderr}"
+        ]
+
+    try:
+        untracked = runner(
+            ["git", "ls-files", "--others", "--exclude-standard"],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except OSError as exc:
+        return [], [f"repository-boundary untracked inspection failed: stderr={exc}"]
+    if untracked.returncode != 0:
+        stderr = untracked.stderr.strip() or "no stderr"
+        return [], [
+            "repository-boundary untracked inspection failed: "
+            f"returncode={untracked.returncode} stderr={stderr}"
+        ]
+
     paths = set(tracked.stdout.splitlines()) | set(untracked.stdout.splitlines())
-    return sorted(path for path in paths if path and not path.startswith("artifacts/"))
+    changed = sorted(path for path in paths if path and not path.startswith("artifacts/"))
+    return changed, []
 
 
 def _schema_boundary_errors() -> list[str]:
@@ -287,15 +446,20 @@ def _schema_boundary_errors() -> list[str]:
     return errors
 
 
-def _boundary_errors() -> list[str]:
-    errors: list[str] = []
+def _boundary_errors(
+    review_base: str | None = None,
+    runner: Any = subprocess.run,
+) -> list[str]:
+    paths, errors = _changed_paths(review_base=review_base, runner=runner)
     runtime_prefixes = ("app.py", "core/", "nova/", "services/", "routes/", "middleware/", "migrations/")
-    state_patterns = ("accepted-state", "accepted_state", "chronology/events/", "active_reflex", "production_data/")
-    for path in _changed_paths():
+    accepted_state_patterns = ("accepted-state", "accepted_state", "active_reflex", "production_data/")
+    for path in paths:
         if path == runtime_prefixes[0] or path.startswith(runtime_prefixes[1:]):
             errors.append(f"{path}: runtime change detected")
-        if any(pattern in path.lower() for pattern in state_patterns):
-            errors.append(f"{path}: accepted-state or chronology event change detected")
+        if any(pattern in path.lower() for pattern in accepted_state_patterns):
+            errors.append(f"{path}: accepted-state change detected")
+        if "chronology/events/" in path.lower():
+            errors.append(f"{path}: chronology event change detected")
     return errors
 
 
@@ -318,6 +482,12 @@ def validate_repository() -> list[str]:
         instance = load_json(FIXTURE_DIR / fixture_name)
         for error in validators[schema_name](instance):
             errors.append(f"fixtures/reflex_memory/{fixture_name} {error}")
+
+    lineage_candidates = [load_json(FIXTURE_DIR / name) for name in LINEAGE_CANDIDATE_FIXTURES]
+    lineage_entries = [load_json(FIXTURE_DIR / name) for name in LINEAGE_ENTRY_FIXTURES]
+    lineage_retrievals = [load_json(FIXTURE_DIR / name) for name in LINEAGE_RETRIEVAL_FIXTURES]
+    for error in validate_lineage_registry(lineage_candidates, lineage_entries, lineage_retrievals):
+        errors.append(f"cross_object_lineage {error}")
 
     errors += _validate_v0_1_compatibility()
     errors += _schema_boundary_errors()
@@ -350,6 +520,12 @@ def _success_output() -> str:
   retrieval_comparison_limits: passed
   supersession_lineage: passed
   non_authority_boundary: passed
+
+  cross_object_lineage:
+    governed_abstraction_candidate_to_entry: passed
+    exception_candidate_to_entry: passed
+    retrieval_to_accepted_entry: passed
+    chronology_lineage_consistency: passed
 
   existing_v0_1_compatibility: passed
   runtime_change_detected: false

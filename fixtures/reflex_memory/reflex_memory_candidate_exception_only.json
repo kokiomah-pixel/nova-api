@@ -1,7 +1,7 @@
 {
   "candidate_id": "RMC-0002",
   "version": "reflex_memory_candidate_v0_2",
-  "lifecycle_status": "reviewed",
+  "lifecycle_status": "accepted",
   "knowledge_class": "exception",
   "proposed_lesson": "A prior provider incident produced a one-time exception that may be relevant to review, but it does not establish future permission or policy.",
   "proposed_review_posture_effect": "add_chronology_reference",
@@ -33,13 +33,13 @@
   "proposed_at": "2026-08-06T15:10:00Z",
   "reviewed_by": "synthetic_local_governance_reviewer",
   "reviewed_at": "2026-08-06T15:20:00Z",
-  "accepted_by": null,
-  "accepted_at": null,
-  "valid_from": null,
+  "accepted_by": "synthetic_local_governance_authority",
+  "accepted_at": "2026-08-06T15:30:00Z",
+  "valid_from": "2026-08-06",
   "review_after": "2026-09-06",
   "supersedes": [],
   "superseded_by": null,
-  "converted_entry_id": null,
+  "converted_entry_id": "RM-0202",
   "authority_effect": "none",
   "non_authority_statement": "This exception-only candidate does not approve future actions, create authority, establish policy, or become binding precedent."
 }

@@ -182,6 +182,47 @@ jobs:
           path: reports/chronology/
           if-no-files-found: warn
 
+  reflex_abstraction:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      PYTHON: .venv/bin/python
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve review base
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            review_base="${{ github.event.pull_request.base.sha }}"
+          else
+            review_base="${{ github.event.before }}"
+          fi
+
+          echo "NOVA_REVIEW_BASE=${review_base}" >> "${GITHUB_ENV}"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip
+          .venv/bin/python -m pip install -r requirements.txt -c constraints.txt
+          .venv/bin/python -m pip check
+
+      - name: Validate governed abstraction
+        run: make verify-reflex-abstraction
+
   whitespace:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -200,6 +241,7 @@ jobs:
       - scenarios
       - tests
       - chronology
+      - reflex_abstraction
       - whitespace
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -214,18 +256,21 @@ jobs:
           scenarios="${{ needs.scenarios.result }}"
           tests="${{ needs.tests.result }}"
           chronology="${{ needs.chronology.result }}"
+          reflex_abstraction="${{ needs.reflex_abstraction.result }}"
           whitespace="${{ needs.whitespace.result }}"
 
           echo "doctrine=${doctrine}"
           echo "scenarios=${scenarios}"
           echo "tests=${tests}"
           echo "chronology=${chronology}"
+          echo "reflex_abstraction=${reflex_abstraction}"
           echo "whitespace=${whitespace}"
 
           if [ "${doctrine}" != "success" ] || \
              [ "${scenarios}" != "success" ] || \
              [ "${tests}" != "success" ] || \
              [ "${chronology}" != "success" ] || \
+             [ "${reflex_abstraction}" != "success" ] || \
              [ "${whitespace}" != "success" ]; then
             echo "One or more required validation controls failed."
             exit 1

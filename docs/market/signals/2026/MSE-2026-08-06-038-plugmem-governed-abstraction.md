@@ -26,6 +26,41 @@ market_signal:
   runtime_engineering_authorized: false
 ```
 
+## Source provenance
+
+```yaml
+source_provenance:
+  primary_publication:
+    organization: Microsoft Research
+    title: PlugMem — A Task-Agnostic Plugin Memory Module for LLM Agents
+    url: https://www.microsoft.com/en-us/research/publication/plugmem-a-task-agnostic-plugin-memory-module-for-llm-agents/
+
+  supplementary_explanation:
+    organization: Microsoft Research
+    title: PlugMem — Transforming raw agent interactions into reusable knowledge
+    url: https://www.microsoft.com/en-us/research/blog/from-raw-interaction-to-reusable-knowledge-rethinking-memory-for-ai-agents/
+
+  observed_at: 2026-08-06
+
+  admissible_claim_scope:
+    - published_research_system
+    - released_code
+    - evaluated_memory_token_efficiency
+    - task_agnostic_memory_architecture
+    - propositional_and_prescriptive_knowledge_abstraction
+
+  excluded_claim_scope:
+    - universal_production_deployment
+    - universal_100x_total_context_reduction
+    - direct_financial_workflow_validation
+    - institutional_buyer_demand
+    - adoption
+    - product_market_fit
+```
+
+Reported memory-token efficiency applies to the evaluated settings described by
+the source. It does not establish universal total-context reduction.
+
 ## Observed signal
 
 Agent-memory systems are increasingly converting interaction history into

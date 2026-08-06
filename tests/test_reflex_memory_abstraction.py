@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import json
+import subprocess
 from pathlib import Path
 from typing import Any, Callable
 
@@ -10,10 +11,15 @@ import pytest
 from scripts.validate_reflex_memory_abstraction import (
     FIXTURE_DIR,
     V0_1_FIXTURES,
+    _boundary_errors,
+    _changed_paths,
     _validate_v0_1_compatibility,
     load_json,
     validate_candidate,
+    validate_candidate_to_entry,
     validate_entry,
+    validate_entry_to_retrieval,
+    validate_lineage_registry,
     validate_retrieval,
     validate_runtime_activation_claim,
 )
@@ -36,7 +42,9 @@ def assert_fails(errors: list[str], field: str) -> None:
     [
         ("reflex_memory_candidate_implicit_policy_conversion.json", validate_candidate),
         ("reflex_memory_candidate_exception_only.json", validate_candidate),
+        ("reflex_memory_candidate_governed_abstraction_accepted.json", validate_candidate),
         ("reflex_memory_entry_governed_abstraction_v0_2.json", validate_entry),
+        ("reflex_memory_entry_exception_only_v0_2.json", validate_entry),
         ("reflex_memory_retrieval_comparison_limits.json", validate_retrieval),
     ],
 )
@@ -70,6 +78,102 @@ def test_materially_distinguishable_prior_case_passes() -> None:
     retrieval = fixture("reflex_memory_retrieval_comparison_limits.json")
     retrieval["precedent_treatment"] = "materially_distinguishable"
     assert validate_retrieval(retrieval) == []
+
+
+def test_governed_abstraction_candidate_to_entry_chain_passes() -> None:
+    candidate = fixture("reflex_memory_candidate_governed_abstraction_accepted.json")
+    entry = fixture("reflex_memory_entry_governed_abstraction_v0_2.json")
+    assert validate_candidate_to_entry(candidate, entry) == []
+
+
+def test_exception_candidate_entry_retrieval_chain_passes() -> None:
+    candidate = fixture("reflex_memory_candidate_exception_only.json")
+    entry = fixture("reflex_memory_entry_exception_only_v0_2.json")
+    retrieval = fixture("reflex_memory_retrieval_comparison_limits.json")
+    assert validate_candidate_to_entry(candidate, entry) == []
+    assert validate_entry_to_retrieval(entry, retrieval) == []
+
+
+def lineage_objects() -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+    candidates = [
+        fixture("reflex_memory_candidate_governed_abstraction_accepted.json"),
+        fixture("reflex_memory_candidate_exception_only.json"),
+    ]
+    entries = [
+        fixture("reflex_memory_entry_governed_abstraction_v0_2.json"),
+        fixture("reflex_memory_entry_exception_only_v0_2.json"),
+    ]
+    retrievals = [fixture("reflex_memory_retrieval_comparison_limits.json")]
+    return candidates, entries, retrievals
+
+
+def test_accepted_entry_with_unknown_candidate_fails() -> None:
+    candidates, entries, retrievals = lineage_objects()
+    entries[0]["source_candidate_id"] = "RMC-9999"
+    assert_fails(validate_lineage_registry(candidates, entries, retrievals), "unknown candidate")
+
+
+def test_candidate_converted_entry_id_mismatch_fails() -> None:
+    candidate = fixture("reflex_memory_candidate_governed_abstraction_accepted.json")
+    entry = fixture("reflex_memory_entry_governed_abstraction_v0_2.json")
+    candidate["converted_entry_id"] = "RM-9999"
+    assert_fails(validate_candidate_to_entry(candidate, entry), "converted_entry_id")
+
+
+def test_candidate_entry_chronology_mismatch_fails() -> None:
+    candidate = fixture("reflex_memory_candidate_governed_abstraction_accepted.json")
+    entry = fixture("reflex_memory_entry_governed_abstraction_v0_2.json")
+    candidate["source_chronology_event_ids"] = ["CHR-2026-08-06-999"]
+    assert_fails(validate_candidate_to_entry(candidate, entry), "source_chronology_event_ids")
+
+
+def test_candidate_entry_authority_treatment_mismatch_fails() -> None:
+    candidate = fixture("reflex_memory_candidate_governed_abstraction_accepted.json")
+    entry = fixture("reflex_memory_entry_governed_abstraction_v0_2.json")
+    candidate["authority_treatment"] = "reference_only"
+    assert_fails(validate_candidate_to_entry(candidate, entry), "authority_treatment")
+
+
+def test_candidate_entry_acceptance_timestamp_mismatch_fails() -> None:
+    candidate = fixture("reflex_memory_candidate_governed_abstraction_accepted.json")
+    entry = fixture("reflex_memory_entry_governed_abstraction_v0_2.json")
+    candidate["accepted_at"] = "2026-08-06T16:21:00Z"
+    assert_fails(validate_candidate_to_entry(candidate, entry), "accepted_at")
+
+
+def test_retrieval_with_unknown_reflex_id_fails() -> None:
+    candidates, entries, retrievals = lineage_objects()
+    retrievals[0]["reflex_id"] = "RM-9999"
+    assert_fails(validate_lineage_registry(candidates, entries, retrievals), "unknown Reflex Memory entry")
+
+
+def retrieval_mismatch_errors(field: str, value: Any) -> list[str]:
+    entry = fixture("reflex_memory_entry_exception_only_v0_2.json")
+    retrieval = fixture("reflex_memory_retrieval_comparison_limits.json")
+    retrieval[field] = value
+    return validate_entry_to_retrieval(entry, retrieval)
+
+
+def test_retrieval_chronology_not_in_entry_lineage_fails() -> None:
+    errors = retrieval_mismatch_errors(
+        "source_chronology_event_ids",
+        ["CHR-2026-08-06-999"],
+    )
+    assert_fails(errors, "source_chronology_event_ids")
+
+
+def test_retrieval_authority_treatment_mismatch_fails() -> None:
+    assert_fails(
+        retrieval_mismatch_errors("authority_treatment", "reference_only"),
+        "authority_treatment",
+    )
+
+
+def test_retrieval_precedent_treatment_mismatch_fails() -> None:
+    assert_fails(
+        retrieval_mismatch_errors("precedent_treatment", "none"),
+        "precedent_treatment",
+    )
 
 
 @pytest.mark.parametrize(
@@ -206,11 +310,81 @@ def test_v0_2_runtime_activation_claim_fails() -> None:
     assert_fails(errors, "runtime activation")
 
 
+def test_missing_review_base_fails() -> None:
+    _, errors = _changed_paths(review_base="refs/heads/definitely-missing-review-base")
+    assert_fails(errors, "repository-boundary comparison failed")
+
+
+def test_git_diff_command_failure_fails() -> None:
+    def runner(args: list[str], **_: Any) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess(args, 2, stdout="", stderr="synthetic git failure")
+
+    _, errors = _changed_paths(review_base="synthetic-base", runner=runner)
+    assert_fails(errors, "returncode=2")
+    assert_fails(errors, "synthetic git failure")
+
+
+def boundary_runner(path: str) -> Callable[..., subprocess.CompletedProcess[str]]:
+    def runner(args: list[str], **_: Any) -> subprocess.CompletedProcess[str]:
+        if args[1] == "diff":
+            return subprocess.CompletedProcess(args, 0, stdout=f"{path}\n", stderr="")
+        return subprocess.CompletedProcess(args, 0, stdout="", stderr="")
+
+    return runner
+
+
+def test_runtime_path_in_diff_fails() -> None:
+    errors = _boundary_errors(
+        review_base="synthetic-base",
+        runner=boundary_runner("core/reflex_memory/new_runtime.py"),
+    )
+    assert_fails(errors, "runtime change detected")
+
+
+def test_accepted_state_path_in_diff_fails() -> None:
+    errors = _boundary_errors(
+        review_base="synthetic-base",
+        runner=boundary_runner("state/accepted-state/registry.json"),
+    )
+    assert_fails(errors, "accepted-state change detected")
+
+
+def test_chronology_event_path_in_diff_fails() -> None:
+    errors = _boundary_errors(
+        review_base="synthetic-base",
+        runner=boundary_runner("chronology/events/CHR-2026-08-06-999.json"),
+    )
+    assert_fails(errors, "chronology event change detected")
+
+
+def test_empty_git_diff_with_identical_refs_is_permitted() -> None:
+    paths, errors = _changed_paths(review_base="synthetic-base", runner=boundary_runner(""))
+    assert paths == []
+    assert errors == []
+
+
+def test_ci_has_independent_reflex_abstraction_job() -> None:
+    workflow = (ROOT / ".github/workflows/doctrine-lint.yml").read_text(encoding="utf-8")
+    assert "  reflex_abstraction:\n" in workflow
+    assert "fetch-depth: 0" in workflow
+    assert "NOVA_REVIEW_BASE=${review_base}" in workflow
+    assert "run: make verify-reflex-abstraction" in workflow
+
+
+def test_ci_aggregate_gate_requires_reflex_abstraction() -> None:
+    workflow = (ROOT / ".github/workflows/doctrine-lint.yml").read_text(encoding="utf-8")
+    assert "      - reflex_abstraction\n" in workflow
+    assert 'reflex_abstraction="${{ needs.reflex_abstraction.result }}"' in workflow
+    assert '[ "${reflex_abstraction}" != "success" ]' in workflow
+
+
 def test_repository_fixtures_are_not_rewritten_by_tests() -> None:
     paths = [FIXTURE_DIR / name for name in (
         "reflex_memory_candidate_implicit_policy_conversion.json",
         "reflex_memory_candidate_exception_only.json",
+        "reflex_memory_candidate_governed_abstraction_accepted.json",
         "reflex_memory_entry_governed_abstraction_v0_2.json",
+        "reflex_memory_entry_exception_only_v0_2.json",
         "reflex_memory_retrieval_comparison_limits.json",
     )]
     before = {path: path.read_bytes() for path in paths}

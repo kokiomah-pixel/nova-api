@@ -222,9 +222,10 @@ public reader path:
 2. Governed abstraction boundary: `docs/governance/governed-abstraction-boundary.md`
 3. Agent-memory comparison: `docs/architecture/reflex-memory-vs-agent-memory.md`
 4. Synthetic candidate fixtures: `fixtures/reflex_memory/reflex_memory_candidate_*.json`
-5. v0.2 accepted-entry fixture: `fixtures/reflex_memory/reflex_memory_entry_governed_abstraction_v0_2.json`
-6. Retrieval comparison-limit fixture: `fixtures/reflex_memory/reflex_memory_retrieval_comparison_limits.json`
-7. Validator and tests: `scripts/validate_reflex_memory_abstraction.py`, `tests/test_reflex_memory_abstraction.py`
+5. Accepted governed-abstraction chain: `fixtures/reflex_memory/reflex_memory_candidate_governed_abstraction_accepted.json` → `fixtures/reflex_memory/reflex_memory_entry_governed_abstraction_v0_2.json`
+6. Exception-only chain: `fixtures/reflex_memory/reflex_memory_candidate_exception_only.json` → `fixtures/reflex_memory/reflex_memory_entry_exception_only_v0_2.json`
+7. Retrieval comparison-limit fixture: `fixtures/reflex_memory/reflex_memory_retrieval_comparison_limits.json`
+8. Validator and tests: `scripts/validate_reflex_memory_abstraction.py`, `tests/test_reflex_memory_abstraction.py`
 
 ---
 

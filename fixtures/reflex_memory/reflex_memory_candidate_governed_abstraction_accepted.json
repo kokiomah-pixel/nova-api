@@ -1,0 +1,47 @@
+{
+  "candidate_id": "RMC-0201",
+  "version": "reflex_memory_candidate_v0_2",
+  "lifecycle_status": "accepted",
+  "knowledge_class": "source_pattern",
+  "proposed_lesson": "A recurring custodian and treasury source conflict should be surfaced during future review of the same bounded action class, subject to current evidence and material distinctions.",
+  "proposed_review_posture_effect": "require_source_reconciliation_context",
+  "source_chronology_event_ids": [
+    "CHR-2026-08-06-103"
+  ],
+  "supporting_evidence_refs": [
+    "synthetic://reviewed-chronology/stablecoin-source-conflict-103",
+    "synthetic://review/RMC-0201",
+    "synthetic://acceptance/RMC-0201"
+  ],
+  "action_class": "stablecoin_treasury_source_conflict_review",
+  "applicability_conditions": [
+    "same_bounded_action_class",
+    "materially_similar_source_authority_conflict"
+  ],
+  "material_distinctions": [
+    "different_custodians_or_authority_paths_require_independent_review"
+  ],
+  "known_exceptions": [
+    "documented_provider_incidents_may_require_exception_only_treatment"
+  ],
+  "contradictory_cases": [],
+  "unresolved_conditions": [
+    "current_source_age_and_proposal_version_must_be_compared"
+  ],
+  "epistemic_status": "source_supported",
+  "authority_treatment": "accepted_for_review_use",
+  "precedent_treatment": "analogous",
+  "proposed_by": "synthetic_governance_analyst",
+  "proposed_at": "2026-08-06T16:00:00Z",
+  "reviewed_by": "synthetic_cco_review",
+  "reviewed_at": "2026-08-06T16:10:00Z",
+  "accepted_by": "synthetic_local_governance_authority",
+  "accepted_at": "2026-08-06T16:20:00Z",
+  "valid_from": "2026-08-06",
+  "review_after": "2026-11-06",
+  "supersedes": [],
+  "superseded_by": null,
+  "converted_entry_id": "RM-0201",
+  "authority_effect": "none",
+  "non_authority_statement": "This accepted candidate does not approve, deny, authorize, create authority, or establish binding precedent; conversion permits review-context use only."
+}
