@@ -295,6 +295,77 @@ chronology_event
 -> execution elsewhere
 ```
 
+## Governed Abstraction Extension
+
+The governed-abstraction extension does not change Reflex Memory v0.1 runtime
+behavior.
+
+It introduces versioned specification objects for:
+
+- proposed abstraction candidates;
+- accepted v0.2 Reflex Memory entries;
+- retrieval relevance explanations.
+
+### Governing transition
+
+```text
+reviewed chronology
+→ proposed abstraction candidate
+→ explicit governance review
+→ accepted or rejected disposition
+→ optional accepted Reflex Memory entry
+```
+
+### Required distinction
+
+```text
+Candidate is not memory.
+
+Memory is not policy.
+
+Similarity is not precedent.
+
+Accepted review context is not authority.
+```
+
+### State dimensions
+
+Lifecycle, epistemic, authority, and precedent treatment must remain separate.
+
+### Implicit policy conversion
+
+Repeated operator behavior, model summaries, prior outcomes, or semantic
+similarity must not become institutional policy without explicit local
+authority treatment.
+
+### Runtime boundary
+
+The v0.2 schemas and fixtures are specification artifacts.
+
+They do not authorize:
+
+* runtime extraction;
+* runtime candidate creation;
+* automatic acceptance;
+* production retrieval;
+* policy mutation;
+* constraint mutation;
+* authority-map mutation.
+
+Versioned references:
+
+- `docs/governance/governed-abstraction-boundary.md`
+- `schemas/reflex_memory/reflex_memory_candidate_v0_2.schema.json`
+- `schemas/reflex_memory/reflex_memory_entry_v0_2.schema.json`
+- `schemas/reflex_memory/reflex_memory_retrieval_explanation_v0_1.schema.json`
+- `fixtures/reflex_memory/reflex_memory_candidate_implicit_policy_conversion.json`
+- `fixtures/reflex_memory/reflex_memory_candidate_exception_only.json`
+- `fixtures/reflex_memory/reflex_memory_entry_governed_abstraction_v0_2.json`
+- `fixtures/reflex_memory/reflex_memory_retrieval_comparison_limits.json`
+
+These artifacts are synthetic specification evidence, not production-ready
+runtime objects.
+
 ## Failure Modes
 
 Known failure modes include:

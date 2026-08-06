@@ -172,6 +172,35 @@ This validation is fixture-backed.
 
 It does not claim production persistence, dynamic storage, autonomous memory mutation, compliance review, audit reporting, or external integration.
 
+## Governed Abstraction Extension
+
+The v0.1 fixture continues to demonstrate the existing accepted-memory lifecycle.
+
+Additional versioned fixtures demonstrate:
+
+- an unaccepted implicit-policy-conversion candidate;
+- an exception-only candidate;
+- an accepted governed-abstraction v0.2 entry;
+- a retrieval explanation with material comparison limits.
+
+These fixtures are synthetic specification evidence.
+
+They do not create accepted Reflex Memory, chronology, production state, or
+runtime behavior.
+
+Schemas:
+
+- `schemas/reflex_memory/reflex_memory_candidate_v0_2.schema.json`
+- `schemas/reflex_memory/reflex_memory_entry_v0_2.schema.json`
+- `schemas/reflex_memory/reflex_memory_retrieval_explanation_v0_1.schema.json`
+
+Fixtures:
+
+- `fixtures/reflex_memory/reflex_memory_candidate_implicit_policy_conversion.json`
+- `fixtures/reflex_memory/reflex_memory_candidate_exception_only.json`
+- `fixtures/reflex_memory/reflex_memory_entry_governed_abstraction_v0_2.json`
+- `fixtures/reflex_memory/reflex_memory_retrieval_comparison_limits.json`
+
 ## Replayability
 
 Reflex Memory v0.1 includes a fixture-backed replay artifact that reconstructs API-emitted Reflex Memory context back to accepted Reflex Memory entries and source chronology IDs.

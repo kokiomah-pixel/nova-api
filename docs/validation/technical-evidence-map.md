@@ -125,6 +125,39 @@ The Deep Scenario Validation Layer provides internal evidence that Nova's review
 
 ## Reflex Memory Current State
 
+```yaml
+governed_abstraction_evidence:
+  market_signal:
+    - docs/market/signals/2026/MSE-2026-08-06-038-plugmem-governed-abstraction.md
+
+  specification:
+    - docs/governance/governed-abstraction-boundary.md
+    - docs/governance/reflex-memory-specification.md
+    - docs/architecture/reflex-memory-vs-agent-memory.md
+
+  schemas:
+    - schemas/reflex_memory/reflex_memory_candidate_v0_2.schema.json
+    - schemas/reflex_memory/reflex_memory_entry_v0_2.schema.json
+    - schemas/reflex_memory/reflex_memory_retrieval_explanation_v0_1.schema.json
+
+  fixtures:
+    - fixtures/reflex_memory/reflex_memory_candidate_implicit_policy_conversion.json
+    - fixtures/reflex_memory/reflex_memory_candidate_exception_only.json
+    - fixtures/reflex_memory/reflex_memory_entry_governed_abstraction_v0_2.json
+    - fixtures/reflex_memory/reflex_memory_retrieval_comparison_limits.json
+
+  validation:
+    - scripts/validate_reflex_memory_abstraction.py
+    - tests/test_reflex_memory_abstraction.py
+
+  claim_boundary:
+    production_runtime: not_established
+    automatic_learning: prohibited
+    accepted_state_change: false
+    chronology_change: false
+    Reflex_Memory_object_created: false
+```
+
 Reflex Memory should be understood as:
 
 ```text
