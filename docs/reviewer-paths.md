@@ -213,6 +213,19 @@ It should not be interpreted as:
 - agent supervision
 - local authority replacement
 
+### Optional Governed-Abstraction Review
+
+This specialist path is intentionally separate from the default ten-minute
+public reader path:
+
+1. Reflex Memory specification: `docs/governance/reflex-memory-specification.md`
+2. Governed abstraction boundary: `docs/governance/governed-abstraction-boundary.md`
+3. Agent-memory comparison: `docs/architecture/reflex-memory-vs-agent-memory.md`
+4. Synthetic candidate fixtures: `fixtures/reflex_memory/reflex_memory_candidate_*.json`
+5. v0.2 accepted-entry fixture: `fixtures/reflex_memory/reflex_memory_entry_governed_abstraction_v0_2.json`
+6. Retrieval comparison-limit fixture: `fixtures/reflex_memory/reflex_memory_retrieval_comparison_limits.json`
+7. Validator and tests: `scripts/validate_reflex_memory_abstraction.py`, `tests/test_reflex_memory_abstraction.py`
+
 ---
 
 ## Internal Operating Integrity Path

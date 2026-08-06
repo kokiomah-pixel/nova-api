@@ -146,6 +146,39 @@ Episodic memory recalls prior experience.
 Reflex Memory preserves accepted governance memory.
 ```
 
+## Difference from Knowledge-Centric Agent Memory
+
+Knowledge-centric agent memory may transform interaction history into reusable
+facts, procedures, or task guidance to improve later agent performance.
+
+Sharpe Nova OS does not treat extracted knowledge as institutionally valid by
+default.
+
+```yaml
+knowledge_centric_agent_memory:
+  objective: improve_future_agent_performance
+  abstraction: may_be_automatic
+  retrieval: task_relevance
+  institutional_acceptance: not_required_by_default
+
+nova_governed_abstraction:
+  objective: preserve_reviewable_institutional_learning
+  abstraction: candidate_only_until_reviewed
+  retrieval: governance_relevance_with_comparison_limits
+  institutional_acceptance: explicit
+  policy_effect: none_by_default
+  authority_effect: none
+```
+
+Safe distinction:
+
+```text
+Agent memory extracts what may help the machine.
+
+Nova governs whether an institutional lesson may condition review,
+while preserving its origin, limits, exceptions, and authority status.
+```
+
 ## Difference from Vector Memory
 
 Vector memory retrieves semantically similar context.

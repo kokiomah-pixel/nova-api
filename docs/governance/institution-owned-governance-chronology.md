@@ -260,6 +260,35 @@ It is accepted memory that supports future pre-action governance review.
 
 ---
 
+## Chronology-to-Abstraction Boundary
+
+Institution-owned chronology may support the proposal of reusable governance
+lessons.
+
+Chronology must remain preserved even when an abstraction is accepted.
+
+```text
+The abstraction supports efficient review.
+
+The chronology preserves why the abstraction is challengeable.
+```
+
+An accepted abstraction must not replace or erase:
+
+* source evidence;
+* temporal context;
+* unresolved conditions;
+* contradictions;
+* exceptions;
+* authority treatment;
+* later correction;
+* supersession history.
+
+No abstraction may become policy merely because it was generated repeatedly or
+retrieved frequently.
+
+---
+
 ## Relationship to Governance-Context Rot
 
 Governance-context rot occurs when review context becomes too large, fragmented, stale, source-conflicted, or unstructured before authority is asked to decide.
