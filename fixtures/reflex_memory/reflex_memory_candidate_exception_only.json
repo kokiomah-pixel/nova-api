@@ -1,0 +1,45 @@
+{
+  "candidate_id": "RMC-0002",
+  "version": "reflex_memory_candidate_v0_2",
+  "lifecycle_status": "reviewed",
+  "knowledge_class": "exception",
+  "proposed_lesson": "A prior provider incident produced a one-time exception that may be relevant to review, but it does not establish future permission or policy.",
+  "proposed_review_posture_effect": "add_chronology_reference",
+  "source_chronology_event_ids": [
+    "CHR-2026-08-06-102"
+  ],
+  "supporting_evidence_refs": [
+    "synthetic://provider-incident/primary-source-unavailable",
+    "synthetic://local-authority/one-time-exception-record"
+  ],
+  "action_class": "stablecoin_treasury_primary_source_unavailable",
+  "applicability_conditions": [
+    "documented_provider_incident_is_material_to_current_review"
+  ],
+  "material_distinctions": [
+    "the_prior_disposition_was_one_time_and_incident_specific"
+  ],
+  "known_exceptions": [
+    "one_time_provider_incident_exception"
+  ],
+  "contradictory_cases": [],
+  "unresolved_conditions": [
+    "current_provider_and_authority_path_must_be_reviewed_independently"
+  ],
+  "epistemic_status": "source_supported",
+  "authority_treatment": "exception_only",
+  "precedent_treatment": "exception_only",
+  "proposed_by": "synthetic_governance_analyst",
+  "proposed_at": "2026-08-06T15:10:00Z",
+  "reviewed_by": "synthetic_local_governance_reviewer",
+  "reviewed_at": "2026-08-06T15:20:00Z",
+  "accepted_by": null,
+  "accepted_at": null,
+  "valid_from": null,
+  "review_after": "2026-09-06",
+  "supersedes": [],
+  "superseded_by": null,
+  "converted_entry_id": null,
+  "authority_effect": "none",
+  "non_authority_statement": "This exception-only candidate does not approve future actions, create authority, establish policy, or become binding precedent."
+}

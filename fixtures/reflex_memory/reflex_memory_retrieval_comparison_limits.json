@@ -1,0 +1,34 @@
+{
+  "version": "reflex_memory_retrieval_explanation_v0_1",
+  "retrieval_id": "RMR-0001",
+  "reflex_id": "RM-0202",
+  "current_action_id": "ACTION-SYNTHETIC-2026-0806-01",
+  "current_proposal_version_id": "proposal-v3",
+  "surfaced_because": [
+    "same_action_class",
+    "similar_source_conflict"
+  ],
+  "comparison_dimensions": [
+    "source_authority_conflict",
+    "proposal_revision"
+  ],
+  "comparison_limits": [
+    "different_custodian",
+    "different_authority_path",
+    "prior_case_exception_only",
+    "current_evidence_age_differs"
+  ],
+  "material_distinctions": [
+    "current_proposal_version_is_not_the_prior_proposal_version",
+    "prior_evidence_is_older_than_current_evidence"
+  ],
+  "source_chronology_event_ids": [
+    "CHR-2026-08-06-102"
+  ],
+  "epistemic_status": "source_supported",
+  "authority_treatment": "exception_only",
+  "precedent_treatment": "exception_only",
+  "precedent_effect": "none",
+  "authority_effect": "none",
+  "non_authority_statement": "This retrieval explanation does not approve, deny, grant permission, create authority, or decide applicability; it explains bounded relevance only."
+}

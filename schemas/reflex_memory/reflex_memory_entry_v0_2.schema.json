@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sharpenovaos.local/schemas/reflex_memory/reflex_memory_entry_v0_2.schema.json",
+  "title": "Reflex Memory Entry v0.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "reflex_id", "version", "status", "source_candidate_id",
+    "source_chronology_event_ids", "created_at", "reviewed_at", "reviewed_by",
+    "accepted_at", "accepted_by", "source_state", "trigger_pattern", "stress_type",
+    "boundary_risk", "review_posture_effect", "evidence_refs",
+    "expiration_or_review_after", "knowledge_class", "action_class",
+    "applicability_conditions", "material_distinctions", "known_exceptions",
+    "contradictory_cases", "unresolved_conditions", "epistemic_status",
+    "authority_treatment", "precedent_treatment", "supersedes", "superseded_by",
+    "authority_effect", "non_authority_statement"
+  ],
+  "properties": {
+    "reflex_id": {"type": "string", "pattern": "^RM-[0-9]{4}$"},
+    "version": {"const": "reflex_memory_v0_2"},
+    "status": {"const": "accepted"},
+    "source_candidate_id": {"type": "string", "pattern": "^RMC-[0-9]{4}$"},
+    "source_chronology_event_ids": {"$ref": "#/$defs/non_empty_chronology_ids"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "reviewed_at": {"type": "string", "format": "date-time"},
+    "reviewed_by": {"type": "string", "minLength": 1},
+    "accepted_at": {"type": "string", "format": "date-time"},
+    "accepted_by": {"type": "string", "minLength": 1},
+    "source_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["classification", "limitations"],
+      "properties": {
+        "classification": {"type": "string", "enum": ["source_confirmed", "source_incomplete", "cco_reconciled"]},
+        "limitations": {"$ref": "#/$defs/non_empty_strings"}
+      }
+    },
+    "trigger_pattern": {"type": "string", "enum": ["source_state_conflict", "boundary_language_drift", "proof_reference_missing"]},
+    "stress_type": {"type": "string", "enum": ["source_integrity_risk", "authority_boundary_risk", "proof_lineage_incomplete"]},
+    "boundary_risk": {"type": "string", "minLength": 1},
+    "review_posture_effect": {
+      "type": "string",
+      "enum": ["surface_prior_stress", "require_source_reconciliation_context", "flag_boundary_language_risk", "mark_context_as_source_limited", "preserve_manual_review_attention", "add_chronology_reference", "require_proof_reference", "highlight_recurring_context_pattern"]
+    },
+    "evidence_refs": {"$ref": "#/$defs/non_empty_strings"},
+    "expiration_or_review_after": {"type": "string", "format": "date"},
+    "knowledge_class": {"type": "string", "enum": ["propositional", "prescriptive", "constraint_pattern", "source_pattern", "exception", "counterexample", "boundary_risk"]},
+    "action_class": {"type": "string", "minLength": 1},
+    "applicability_conditions": {"$ref": "#/$defs/non_empty_strings"},
+    "material_distinctions": {"$ref": "#/$defs/strings"},
+    "known_exceptions": {"$ref": "#/$defs/strings"},
+    "contradictory_cases": {"$ref": "#/$defs/strings"},
+    "unresolved_conditions": {"$ref": "#/$defs/strings"},
+    "epistemic_status": {"type": "string", "enum": ["source_supported", "source_limited", "disputed", "contradicted", "unverified", "superseded"]},
+    "authority_treatment": {"type": "string", "enum": ["reference_only", "accepted_for_review_use", "exception_only", "formally_adopted_by_local_authority", "superseded"]},
+    "precedent_treatment": {"type": "string", "enum": ["none", "analogous", "materially_distinguishable", "exception_only", "contradicted", "superseded"]},
+    "supersedes": {"$ref": "#/$defs/strings"},
+    "superseded_by": {"type": ["string", "null"], "minLength": 1},
+    "authority_effect": {"const": "none"},
+    "non_authority_statement": {"type": "string", "pattern": "does not (approve|create authority)"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"epistemic_status": {"enum": ["disputed", "contradicted"]}}, "required": ["epistemic_status"]},
+      "then": {"properties": {"contradictory_cases": {"minItems": 1}, "unresolved_conditions": {"minItems": 1}}}
+    },
+    {
+      "if": {
+        "anyOf": [
+          {"properties": {"authority_treatment": {"const": "exception_only"}}, "required": ["authority_treatment"]},
+          {"properties": {"precedent_treatment": {"const": "exception_only"}}, "required": ["precedent_treatment"]}
+        ]
+      },
+      "then": {"properties": {"known_exceptions": {"minItems": 1}}}
+    },
+    {
+      "if": {
+        "anyOf": [
+          {"properties": {"epistemic_status": {"const": "superseded"}}, "required": ["epistemic_status"]},
+          {"properties": {"authority_treatment": {"const": "superseded"}}, "required": ["authority_treatment"]},
+          {"properties": {"precedent_treatment": {"const": "superseded"}}, "required": ["precedent_treatment"]}
+        ]
+      },
+      "then": {"properties": {"superseded_by": {"type": "string", "minLength": 1}}}
+    }
+  ],
+  "$defs": {
+    "strings": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "non_empty_strings": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "non_empty_chronology_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "pattern": "^CHR-[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{3}$"}}
+  }
+}

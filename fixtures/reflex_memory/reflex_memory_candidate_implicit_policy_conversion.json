@@ -1,0 +1,45 @@
+{
+  "candidate_id": "RMC-0001",
+  "version": "reflex_memory_candidate_v0_2",
+  "lifecycle_status": "candidate",
+  "knowledge_class": "prescriptive",
+  "proposed_lesson": "Repeated requests for source reconciliation in this bounded action class may justify surfacing reconciliation context for review; no evidence establishes a locally adopted rule.",
+  "proposed_review_posture_effect": "require_source_reconciliation_context",
+  "source_chronology_event_ids": [
+    "CHR-2026-08-06-101"
+  ],
+  "supporting_evidence_refs": [
+    "synthetic://reviewed-chronology/stablecoin-source-conflict-101",
+    "synthetic://observation/repeated-operator-reconciliation-requests"
+  ],
+  "action_class": "stablecoin_treasury_source_conflict_review",
+  "applicability_conditions": [
+    "custodian_and_treasury_records_conflict",
+    "current_action_matches_the_bounded_stablecoin_treasury_class"
+  ],
+  "material_distinctions": [
+    "repeated_operator_behavior_is_not_evidence_of_policy_adoption"
+  ],
+  "known_exceptions": [],
+  "contradictory_cases": [],
+  "unresolved_conditions": [
+    "which_source_conflict_types_require_additional_reconciliation",
+    "whether_local_authority_will_accept_any_reusable_review_lesson"
+  ],
+  "epistemic_status": "source_limited",
+  "authority_treatment": "reference_only",
+  "precedent_treatment": "none",
+  "proposed_by": "synthetic_model_assistant",
+  "proposed_at": "2026-08-06T15:00:00Z",
+  "reviewed_by": null,
+  "reviewed_at": null,
+  "accepted_by": null,
+  "accepted_at": null,
+  "valid_from": null,
+  "review_after": "2026-09-06",
+  "supersedes": [],
+  "superseded_by": null,
+  "converted_entry_id": null,
+  "authority_effect": "none",
+  "non_authority_statement": "This candidate does not approve, deny, authorize, create authority, change policy, or mutate constraints; it is not active Reflex Memory."
+}
