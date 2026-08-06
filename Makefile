@@ -8,6 +8,7 @@ PYTHON ?= .venv/bin/python
 	verify-tests \
 	verify-chronology \
 	verify-public-surface \
+	verify-reflex-abstraction \
 	verify-whitespace \
 	test \
 	test-isolated \
@@ -28,6 +29,7 @@ verify: \
 	verify-tests \
 	verify-chronology \
 	verify-public-surface \
+	verify-reflex-abstraction \
 	verify-whitespace
 
 verify-doctrine: require-venv
@@ -47,6 +49,9 @@ verify-whitespace:
 
 verify-public-surface: require-venv
 	$(PYTHON) scripts/validate_public_surface_coherence.py
+
+verify-reflex-abstraction: require-venv
+	$(PYTHON) scripts/validate_reflex_memory_abstraction.py
 
 test: verify-tests
 
