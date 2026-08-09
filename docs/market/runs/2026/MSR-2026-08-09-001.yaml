@@ -4,7 +4,11 @@ market_signal_report:
   contract_version: market_signal_run_v0_1
   run_mode: retrospective_reconciliation
   coverage_record_origin: post_run_governance_reconciliation
-  original_output_watch_coverage_explicit: false
+  original_governed_watch_coverage_explicit: false
+  original_run_coverage_compliant: false
+  reconciliation_completed: true
+  source_basis: specialist_output
+  independent_external_reverification: false
   observed_date: 2026-08-09
   reporting_window:
     start: unspecified_in_source_brief
@@ -14,17 +18,9 @@ market_signal_report:
     source_limits:
       - external_sources_not_independently_reverified_for_this_reconciliation
 
-  evidence_coverage: sufficient
-
-  governed_watch_coverage:
+  retrospective_watch_reconciliation:
     - signal_id: ARC_AGENTIC_FINANCE_2026
-      required_this_run: true
-      scan_attempted: true
-      scan_status: completed
-      delta_state: material_delta_observed
-      source_access:
-        material_sources_available: true
-        unavailable_sources: []
+      relationship_review_completed: true
       escalation_review:
         thesis_strengthening_triggers_checked: true
         category_compression_triggers_checked: true

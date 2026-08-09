@@ -104,6 +104,10 @@ eligible governed watch + attempted scan + unavailable material sources
 
 Broad discovery cannot satisfy or replace this gate.
 
+This gate applies to `direct_market_signal_run` artifacts. A
+`retrospective_reconciliation` can preserve and evaluate omitted historical
+context, but it cannot retroactively satisfy the direct-run coverage gate.
+
 ### Pass 2 — broad discovery
 
 After the coverage gate, perform bounded discovery for observations outside
@@ -174,19 +178,40 @@ operator urgency.
 
 The machine-readable contract is
 [`market_signal_run_v0_1.schema.json`](../../schemas/market/market_signal_run_v0_1.schema.json).
-Every report contains run bounds, aggregate evidence coverage, mandatory-watch
-coverage, broad discovery, reconciliation, aggregate state, source provenance,
-and explicit governance non-effects.
+It defines two distinct evidence objects.
 
-A retrospective reconciliation must identify itself. It may demonstrate that a
-later governance pass examined the omitted watch, but it must not rewrite the
-originating brief as if contemporaneous governed-watch coverage had existed.
+### Direct market-signal run
+
+A `direct_market_signal_run` records contemporaneous Pass 1 coverage. It must
+contain one mandatory coverage object for every eligible governed watch,
+including scan status, delta state, source availability, and escalation review.
+Its aggregate `evidence_coverage` is derived from those direct-run facts.
+
+### Retrospective reconciliation
+
+A `retrospective_reconciliation` records a later governance review of a prior
+specialist output. It preserves whether the original output made governed-watch
+coverage explicit and whether the original run complied with the direct-run
+coverage contract. It may map prior observations to active watches and evaluate
+stored escalation conditions, but it has no `governed_watch_coverage`, scan
+status, delta state, source-availability claim, or aggregate direct-run evidence
+coverage.
+
+```text
+successful retrospective reconciliation
+≠
+successful contemporaneous governed-watch scan
+```
 
 The validator
 [`validate_market_signal_scan_coverage.py`](../../scripts/validate_market_signal_scan_coverage.py)
-proves that all eligible governed watches are represented and that source
-availability, delta classification, reconciliation, escalation review, and
-non-authority fields are coherent.
+discovers every YAML artifact under `docs/market/runs/` when invoked without a
+`--run` argument. Each direct run must independently satisfy mandatory coverage;
+a valid retrospective artifact cannot cover a deficient direct run. A targeted
+`--run` remains available for focused validation. The generic validator owns
+eligibility, mode semantics, source-state consistency, reconciliation and
+escalation completeness, and non-authority invariants. Historical content
+assertions belong in narrowly scoped regression tests.
 
 The existing Arc validator remains separate:
 

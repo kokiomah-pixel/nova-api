@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate governed-watch continuity in a bounded market-signal scan."""
+"""Validate governed-watch continuity across market-signal run artifacts."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ import json
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
 import yaml
 from jsonschema import Draft202012Validator
@@ -18,48 +18,11 @@ from jsonschema import Draft202012Validator
 REPO_ROOT = Path(__file__).resolve().parents[1]
 REGISTER_PATH = Path("docs/market/market-signal-watch-register.yaml")
 SCHEMA_PATH = Path("schemas/market/market_signal_run_v0_1.schema.json")
-DEFAULT_RUN_PATH = Path("docs/market/runs/2026/MSR-2026-08-09-001.yaml")
+RUN_ARTIFACT_GLOB = "docs/market/runs/**/*.yaml"
 
 ELIGIBILITY_VERSION = "governed_watch_eligibility_v0_1"
 ELIGIBLE_REVIEW_STATE = "governed_watch"
 ELIGIBLE_LIFECYCLE_STATUSES = {"observed_watch"}
-LATEST_RECONCILIATION_ID = "MSR-2026-08-09-001"
-
-REQUIRED_LATEST_RELATIONSHIPS = {
-    "Formance_autonomous_finance": {
-        "execution_and_ledger_category_compression",
-        "agentic_finance_problem_legibility",
-    },
-    "commercetools_authorization_commentary": {
-        "authorization_language_compression",
-        "category_confusion_pressure",
-    },
-    "institutional_AI_governance_analysis": {
-        "institutional_governance_problem_legibility",
-        "temporal_governance_state_pressure",
-    },
-}
-
-REQUIRED_LATEST_NON_CLAIMS = {
-    "Arc_watch_escalation_trigger_met",
-    "Nova_buyer_pull",
-    "Nova_adoption",
-    "Nova_pricing_power",
-    "Nova_workflow_dependency",
-    "institutional_requirement_for_Nova",
-    "architecture_change",
-    "engineering_authority",
-}
-
-EXPECTED_LATEST_AGGREGATE = {
-    "environmental_pressure": "increasing",
-    "category_compression": "increasing",
-    "Nova_problem_legibility": "strengthening",
-    "direct_Nova_buyer_evidence": "none",
-    "buyer_pull": "none",
-    "adoption": "none",
-    "workflow_dependency": "none",
-}
 
 
 @dataclass(frozen=True)
@@ -91,6 +54,16 @@ def _json_compatible(value: Any) -> Any:
 
 def _path(parts: Any) -> str:
     return ".".join(str(part) for part in parts) or "$"
+
+
+def _resolve_from_repo(path: Path) -> Path:
+    return path if path.is_absolute() else REPO_ROOT / path
+
+
+def discover_market_signal_run_paths(root: Path = REPO_ROOT) -> list[Path]:
+    """Return every governed YAML artifact in the market-signal runs surface."""
+
+    return sorted(path for path in root.glob(RUN_ARTIFACT_GLOB) if path.is_file())
 
 
 def validate_eligibility_contract(register: Any) -> list[ValidationError]:
@@ -202,11 +175,73 @@ def _schema_errors(schema: dict[str, Any], document: Any) -> list[ValidationErro
     normalized = _json_compatible(document)
     return [
         ValidationError(f"schema.{_path(error.absolute_path)}", error.message)
-        for error in sorted(validator.iter_errors(normalized), key=lambda item: list(item.absolute_path))
+        for error in sorted(
+            validator.iter_errors(normalized), key=lambda item: list(item.absolute_path)
+        )
     ]
 
 
-def _validate_coverage_semantics(
+def _validate_registered_escalation_conditions(
+    register: dict[str, Any], eligible_ids: set[str]
+) -> list[ValidationError]:
+    errors: list[ValidationError] = []
+    for signal in register.get("signals", []):
+        if not isinstance(signal, dict) or signal.get("signal_id") not in eligible_ids:
+            continue
+        signal_id = signal["signal_id"]
+        for trigger_field in (
+            "thesis_strengthening_triggers",
+            "category_compression_triggers",
+        ):
+            triggers = signal.get(trigger_field)
+            if not isinstance(triggers, list) or not triggers:
+                errors.append(
+                    ValidationError(
+                        f"register.signals.{signal_id}.{trigger_field}",
+                        "eligible governed watches must preserve stored escalation conditions",
+                    )
+                )
+    return errors
+
+
+def _validate_escalation_review(review: Any, prefix: str) -> list[ValidationError]:
+    if not isinstance(review, dict):
+        return [ValidationError(prefix, "must be a mapping")]
+
+    errors: list[ValidationError] = []
+    if review.get("thesis_strengthening_triggers_checked") is not True:
+        errors.append(
+            ValidationError(
+                f"{prefix}.thesis_strengthening_triggers_checked", "must be true"
+            )
+        )
+    if review.get("category_compression_triggers_checked") is not True:
+        errors.append(
+            ValidationError(
+                f"{prefix}.category_compression_triggers_checked", "must be true"
+            )
+        )
+    stored = review.get("stored_escalation_review")
+    if not isinstance(stored, dict):
+        errors.append(ValidationError(f"{prefix}.stored_escalation_review", "must be a mapping"))
+    else:
+        required = (
+            "repeated_institutional_behavior_observed",
+            "structural_category_movement_observed",
+            "material_competitive_compression_observed",
+            "evidence_insufficient_for_trigger",
+        )
+        for field in required:
+            if not isinstance(stored.get(field), bool):
+                errors.append(
+                    ValidationError(f"{prefix}.stored_escalation_review.{field}", "must be boolean")
+                )
+    if not isinstance(review.get("escalation_condition_met"), bool):
+        errors.append(ValidationError(f"{prefix}.escalation_condition_met", "must be boolean"))
+    return errors
+
+
+def _validate_direct_coverage(
     report: dict[str, Any],
     eligible_ids: set[str],
     registered_ids: set[str],
@@ -249,32 +284,19 @@ def _validate_coverage_semantics(
         )
 
     incomplete = False
+    unattempted = False
     for signal_id in sorted(eligible_ids & set(by_id)):
         item = by_id[signal_id]
         prefix = f"market_signal_report.governed_watch_coverage.{signal_id}"
         if item.get("required_this_run") is not True:
             errors.append(ValidationError(f"{prefix}.required_this_run", "must be true"))
         if item.get("scan_attempted") is not True:
+            unattempted = True
             errors.append(ValidationError(f"{prefix}.scan_attempted", "must be true"))
         if item.get("authority_effect") != "none":
             errors.append(ValidationError(f"{prefix}.authority_effect", "must be none"))
 
-        review = item.get("escalation_review")
-        if isinstance(review, dict):
-            if review.get("thesis_strengthening_triggers_checked") is not True:
-                errors.append(
-                    ValidationError(
-                        f"{prefix}.escalation_review.thesis_strengthening_triggers_checked",
-                        "must be true",
-                    )
-                )
-            if review.get("category_compression_triggers_checked") is not True:
-                errors.append(
-                    ValidationError(
-                        f"{prefix}.escalation_review.category_compression_triggers_checked",
-                        "must be true",
-                    )
-                )
+        errors.extend(_validate_escalation_review(item.get("escalation_review"), f"{prefix}.escalation_review"))
 
         status = item.get("scan_status")
         delta = item.get("delta_state")
@@ -338,16 +360,11 @@ def _validate_coverage_semantics(
             )
 
     discovery = report.get("broad_discovery")
-    discovery_complete = (
-        discovery.get("completed_within_stated_scope")
-        if isinstance(discovery, dict)
-        else None
-    )
-    if discovery_complete is not True:
+    if not isinstance(discovery, dict) or discovery.get("completed_within_stated_scope") is not True:
         incomplete = True
 
     aggregate = report.get("evidence_coverage")
-    if missing or any(error.field.endswith("scan_attempted") for error in errors):
+    if missing or unattempted:
         if aggregate != "invalid":
             errors.append(
                 ValidationError(
@@ -375,8 +392,7 @@ def _validate_coverage_semantics(
 
 
 def _validate_reconciliation(
-    report: dict[str, Any],
-    eligible_ids: set[str],
+    report: dict[str, Any], eligible_ids: set[str]
 ) -> list[ValidationError]:
     errors: list[ValidationError] = []
     discovery = report.get("broad_discovery")
@@ -441,107 +457,106 @@ def _validate_reconciliation(
     return errors
 
 
-def _validate_run_origin(report: dict[str, Any]) -> list[ValidationError]:
-    mode = report.get("run_mode")
-    origin = report.get("coverage_record_origin")
-    original_explicit = report.get("original_output_watch_coverage_explicit")
-    if mode == "retrospective_reconciliation":
-        if origin != "post_run_governance_reconciliation" or original_explicit is not False:
-            return [
-                ValidationError(
-                    "market_signal_report.run_mode",
-                    "retrospective reconciliation must preserve that original watch coverage was absent",
-                )
-            ]
-    elif mode == "direct_market_signal_run":
-        if origin != "contemporaneous_scan" or original_explicit is not True:
-            return [
-                ValidationError(
-                    "market_signal_report.run_mode",
-                    "direct runs require contemporaneous explicit governed-watch coverage",
-                )
-            ]
-    return []
-
-
-def _validate_latest_reconciliation(report: dict[str, Any]) -> list[ValidationError]:
-    if report.get("report_id") != LATEST_RECONCILIATION_ID:
-        return []
-
+def _validate_retrospective_reconciliation(
+    report: dict[str, Any], eligible_ids: set[str]
+) -> list[ValidationError]:
     errors: list[ValidationError] = []
-    provenance = report.get("source_provenance")
-    expected_provenance = {
-        "source": "Market_Signal_Agent_brief",
-        "status": "specialist_output",
-        "independent_repository_verification": False,
+    expected = {
+        "coverage_record_origin": "post_run_governance_reconciliation",
+        "original_governed_watch_coverage_explicit": False,
+        "original_run_coverage_compliant": False,
+        "reconciliation_completed": True,
+        "independent_external_reverification": False,
     }
-    if provenance != expected_provenance:
-        errors.append(
-            ValidationError(
-                "market_signal_report.source_provenance",
-                "latest brief must remain unverified specialist output",
-            )
-        )
-
-    reconciliation = report.get("reconciliation", {})
-    actual: dict[str, set[str]] = {}
-    for item in reconciliation.get("related_to_existing_watch", []):
-        if not isinstance(item, dict):
-            continue
-        observation_id = item.get("observation_id")
-        if isinstance(observation_id, str):
-            actual[observation_id] = set(item.get("relationship", []))
-        if item.get("provenance") != expected_provenance:
+    for field, value in expected.items():
+        if report.get(field) != value:
             errors.append(
                 ValidationError(
-                    f"market_signal_report.reconciliation.{observation_id}.provenance",
-                    "related context must preserve specialist-output provenance",
+                    f"market_signal_report.{field}",
+                    f"retrospective reconciliation requires {value!r}",
                 )
             )
-    if actual != REQUIRED_LATEST_RELATIONSHIPS:
-        errors.append(
+
+    provenance = report.get("source_provenance")
+    if isinstance(provenance, dict):
+        if report.get("source_basis") != provenance.get("status"):
+            errors.append(
+                ValidationError(
+                    "market_signal_report.source_basis",
+                    "must match the preserved source-provenance status",
+                )
+            )
+        if provenance.get("independent_repository_verification") is not False:
+            errors.append(
+                ValidationError(
+                    "market_signal_report.source_provenance.independent_repository_verification",
+                    "retrospective specialist output must not claim repository verification",
+                )
+            )
+
+    related = report.get("reconciliation", {}).get("related_to_existing_watch", [])
+    related_watch_ids = {
+        item.get("watch_signal_id") for item in related if isinstance(item, dict)
+    }
+    reviews = report.get("retrospective_watch_reconciliation")
+    if not isinstance(reviews, list):
+        return errors + [
             ValidationError(
-                "market_signal_report.reconciliation.related_to_existing_watch",
-                "latest brief relationship map is incomplete or changed",
+                "market_signal_report.retrospective_watch_reconciliation", "must be a list"
+            )
+        ]
+
+    by_id: dict[str, dict[str, Any]] = {}
+    for index, item in enumerate(reviews):
+        if not isinstance(item, dict):
+            continue
+        signal_id = item.get("signal_id")
+        if not isinstance(signal_id, str):
+            continue
+        if signal_id in by_id:
+            errors.append(
+                ValidationError(
+                    f"market_signal_report.retrospective_watch_reconciliation.{index}.signal_id",
+                    f"duplicate retrospective review for {signal_id}",
+                )
+            )
+        by_id[signal_id] = item
+        if signal_id not in eligible_ids:
+            errors.append(
+                ValidationError(
+                    f"market_signal_report.retrospective_watch_reconciliation.{index}.signal_id",
+                    f"retrospective review must reference an active governed watch: {signal_id!r}",
+                )
+            )
+        if item.get("relationship_review_completed") is not True:
+            errors.append(
+                ValidationError(
+                    f"market_signal_report.retrospective_watch_reconciliation.{signal_id}.relationship_review_completed",
+                    "must be true",
+                )
+            )
+        if item.get("authority_effect") != "none":
+            errors.append(
+                ValidationError(
+                    f"market_signal_report.retrospective_watch_reconciliation.{signal_id}.authority_effect",
+                    "must be none",
+                )
+            )
+        errors.extend(
+            _validate_escalation_review(
+                item.get("escalation_review"),
+                f"market_signal_report.retrospective_watch_reconciliation.{signal_id}.escalation_review",
             )
         )
 
-    if report.get("aggregate_state") != EXPECTED_LATEST_AGGREGATE:
+    missing_reviews = related_watch_ids - set(by_id)
+    if missing_reviews:
         errors.append(
             ValidationError(
-                "market_signal_report.aggregate_state",
-                "latest brief aggregate interpretation is incomplete or changed",
+                "market_signal_report.retrospective_watch_reconciliation",
+                f"missing reconciliation review for related watches: {sorted(missing_reviews)}",
             )
         )
-
-    not_established = set(report.get("not_established", []))
-    missing_non_claims = REQUIRED_LATEST_NON_CLAIMS - not_established
-    if missing_non_claims:
-        errors.append(
-            ValidationError(
-                "market_signal_report.not_established",
-                f"missing required non-claims: {sorted(missing_non_claims)}",
-            )
-        )
-
-    coverage = report.get("governed_watch_coverage", [])
-    arc = next(
-        (
-            item
-            for item in coverage
-            if isinstance(item, dict) and item.get("signal_id") == "ARC_AGENTIC_FINANCE_2026"
-        ),
-        None,
-    )
-    review = arc.get("escalation_review") if isinstance(arc, dict) else None
-    if not isinstance(review, dict) or review.get("escalation_condition_met") is not False:
-        errors.append(
-            ValidationError(
-                "market_signal_report.governed_watch_coverage.ARC_AGENTIC_FINANCE_2026.escalation_condition_met",
-                "latest brief does not establish an Arc escalation trigger",
-            )
-        )
-
     return errors
 
 
@@ -550,7 +565,7 @@ def validate_market_signal_run(
     schema: dict[str, Any],
     document: Any,
 ) -> list[ValidationError]:
-    """Validate schema, watch coverage, reconciliation, and non-authority."""
+    """Validate one direct run or retrospective reconciliation artifact."""
 
     errors = validate_eligibility_contract(register)
     errors.extend(_schema_errors(schema, document))
@@ -575,57 +590,90 @@ def validate_market_signal_run(
         for signal in register.get("signals", [])
         if isinstance(signal, dict) and isinstance(signal.get("signal_id"), str)
     }
-    for signal in register.get("signals", []):
-        if not isinstance(signal, dict) or signal.get("signal_id") not in eligible_ids:
-            continue
-        signal_id = signal["signal_id"]
-        for trigger_field in (
-            "thesis_strengthening_triggers",
-            "category_compression_triggers",
-        ):
-            triggers = signal.get(trigger_field)
-            if not isinstance(triggers, list) or not triggers:
-                errors.append(
-                    ValidationError(
-                        f"register.signals.{signal_id}.{trigger_field}",
-                        "eligible governed watches must preserve stored escalation conditions",
-                    )
-                )
-    errors.extend(_validate_coverage_semantics(report, eligible_ids, registered_ids))
-    errors.extend(_validate_run_origin(report))
+    errors.extend(_validate_registered_escalation_conditions(register, eligible_ids))
     errors.extend(_validate_reconciliation(report, eligible_ids))
-    errors.extend(_validate_latest_reconciliation(report))
+
+    mode = report.get("run_mode")
+    if mode == "direct_market_signal_run":
+        errors.extend(_validate_direct_coverage(report, eligible_ids, registered_ids))
+    elif mode == "retrospective_reconciliation":
+        errors.extend(_validate_retrospective_reconciliation(report, eligible_ids))
+    return errors
+
+
+def validate_market_signal_run_artifacts(
+    register: Any,
+    schema: dict[str, Any],
+    run_paths: Iterable[Path],
+) -> list[ValidationError]:
+    """Validate every supplied artifact independently and prefix errors by path."""
+
+    paths = list(run_paths)
+    if not paths:
+        return [
+            ValidationError(
+                "market_signal_run_artifacts",
+                f"no artifacts found for {RUN_ARTIFACT_GLOB}",
+            )
+        ]
+
+    errors: list[ValidationError] = []
+    for path in paths:
+        try:
+            document = _load_yaml(path)
+        except (OSError, UnicodeError, yaml.YAMLError) as exc:
+            errors.append(ValidationError(path.as_posix(), f"input error: {exc}"))
+            continue
+        for error in validate_market_signal_run(register, schema, document):
+            errors.append(
+                ValidationError(f"{path.as_posix()}::{error.field}", error.message)
+            )
     return errors
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Validate mandatory governed-watch coverage in a market-signal run."
+        description=(
+            "Validate all governed market-signal run artifacts, or one artifact with --run."
+        )
     )
     parser.add_argument("--register", type=Path, default=REGISTER_PATH)
     parser.add_argument("--schema", type=Path, default=SCHEMA_PATH)
-    parser.add_argument("--run", type=Path, default=DEFAULT_RUN_PATH)
+    parser.add_argument(
+        "--run",
+        type=Path,
+        help="validate one run artifact instead of discovering the canonical run surface",
+    )
     args = parser.parse_args(argv)
 
     try:
-        register = _load_yaml(REPO_ROOT / args.register)
-        schema = _load_json(REPO_ROOT / args.schema)
-        document = _load_yaml(REPO_ROOT / args.run)
+        register = _load_yaml(_resolve_from_repo(args.register))
+        schema = _load_json(_resolve_from_repo(args.schema))
     except (OSError, UnicodeError, json.JSONDecodeError, yaml.YAMLError) as exc:
         print(f"market-signal scan input error: {exc}", file=sys.stderr)
         return 2
 
-    errors = validate_market_signal_run(register, schema, document)
+    run_paths = (
+        [_resolve_from_repo(args.run)]
+        if args.run is not None
+        else discover_market_signal_run_paths()
+    )
+    errors = validate_market_signal_run_artifacts(register, schema, run_paths)
     if errors:
         for error in errors:
             print(error.format(), file=sys.stderr)
         return 1
 
-    report = document["market_signal_report"]
     active = sorted(eligible_governed_watch_ids(register))
-    print("Governed-watch scan coverage validation passed.")
+    print("Governed-watch scan artifact validation passed.")
     print(f"active_watches: {','.join(active)}")
-    print(f"evidence_coverage: {report['evidence_coverage']}")
+    print(f"artifacts_validated: {len(run_paths)}")
+    for path in run_paths:
+        try:
+            display = path.relative_to(REPO_ROOT).as_posix()
+        except ValueError:
+            display = path.as_posix()
+        print(f"validated: {display}")
     return 0
 
 
