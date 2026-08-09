@@ -42,6 +42,32 @@ jobs:
       - name: Run doctrine lint
         run: make verify-doctrine
 
+  market_signals:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      PYTHON: .venv/bin/python
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip
+          .venv/bin/python -m pip install -r requirements.txt -c constraints.txt
+          .venv/bin/python -m pip check
+
+      - name: Validate market-signal separation
+        run: make verify-market-signals
+
   scenarios:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -197,6 +223,7 @@ jobs:
     if: always()
     needs:
       - doctrine
+      - market_signals
       - scenarios
       - tests
       - chronology
@@ -211,18 +238,21 @@ jobs:
           set -euo pipefail
 
           doctrine="${{ needs.doctrine.result }}"
+          market_signals="${{ needs.market_signals.result }}"
           scenarios="${{ needs.scenarios.result }}"
           tests="${{ needs.tests.result }}"
           chronology="${{ needs.chronology.result }}"
           whitespace="${{ needs.whitespace.result }}"
 
           echo "doctrine=${doctrine}"
+          echo "market_signals=${market_signals}"
           echo "scenarios=${scenarios}"
           echo "tests=${tests}"
           echo "chronology=${chronology}"
           echo "whitespace=${whitespace}"
 
           if [ "${doctrine}" != "success" ] || \
+             [ "${market_signals}" != "success" ] || \
              [ "${scenarios}" != "success" ] || \
              [ "${tests}" != "success" ] || \
              [ "${chronology}" != "success" ] || \

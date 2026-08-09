@@ -41,6 +41,135 @@ category_boundary:
   exclusive_distribution_authorized: false
 
 signals:
+  - evidence_id: MSE-2026-08-08-035
+    signal_id: ARC_AGENTIC_FINANCE_2026
+    title: Circle Arc and agentic-finance market architecture
+    recorded_at: 2026-08-08
+    record_path: docs/market/signals/2026/MSE-2026-08-08-035-circle-arc-agentic-finance.md
+    boundary_memo_path: docs/architecture/arc-circle-compatibility-boundary.md
+
+    signal_class: market_architecture_signal
+    priority: high
+    lifecycle_status: observed_watch
+    epistemic_status: externally_observed
+    review_state: governed_watch
+
+    authority_effect: none
+    execution_effect: none
+    production_effect: none
+    accepted_state_effect: none
+    chronology_effect: none
+    Reflex_Memory_effect: none
+    constraint_effect: none
+    policy_effect: none
+    product_requirement_effect: none
+    roadmap_effect: none
+
+    accepted_state_change: false
+    chronology_change: false
+    Reflex_Memory_change: false
+    runtime_change: false
+    production_change: false
+    external_integration: false
+    authority_change: false
+    roadmap_change: false
+    implementation_authority_created: false
+    production_authority_created: false
+    buyer_demand_established: false
+    customer_adoption_established: false
+    pricing_power_established: false
+    product_market_fit_established: false
+    product_requirement_established: false
+    institutional_dependency_established: false
+    Circle_or_Arc_partnership_established: false
+    Arc_integration_requirement_established: false
+
+    working_thesis: >
+      Faster autonomous financial execution may increase institutional need
+      for a distinct pre-execution decision-context layer.
+
+    external_sources:
+      - publisher: Arc
+        source_type: official_Arc_source
+        url: https://www.arc.io/
+      - publisher: Arc
+        source_type: official_Arc_source
+        url: https://www.arc.io/blog/arc-mainnet-goes-live-on-september-16-2026
+      - publisher: Circle
+        source_type: official_Circle_developer_source
+        url: https://developers.circle.com/agent-stack
+
+    observed:
+      - programmable_agent_finance_infrastructure_expanding
+      - stablecoin_treasury_workflows_expanding
+      - agent_wallet_capabilities_expanding
+      - settlement_latency_compressing
+      - Arc_public_mainnet_announced_for_2026_09_16
+
+    not_established:
+      - Nova_buyer_demand
+      - Nova_customer_adoption
+      - Nova_pricing_power
+      - Nova_product_market_fit
+      - Nova_has_pricing_power
+      - Nova_has_product_market_fit
+      - institutional_dependency_on_Nova
+      - Circle_or_Arc_partnership
+      - Arc_integration_requirement
+      - implementation_authority
+      - production_authority
+      - roadmap_change
+      - Arc_creates_demand_for_Nova
+      - Arc_validates_Nova
+      - Circle_requires_Nova
+      - institutions_require_Nova
+      - Nova_should_integrate_with_Arc_now
+      - Nova_should_build_for_Arc
+      - Arc_is_a_customer
+      - Circle_is_a_partner
+
+    thesis_strengthening_triggers:
+      - institutions_insert_contextual_review_between_agent_and_wallet
+      - repeated_pre_execution_evidence_assembly_appears
+      - recurring_manual_exception_handling_appears
+      - decision_reconstruction_problems_repeat
+      - cross_transaction_decision_lineage_becomes_required
+      - institutional_memory_is_required_for_agentic_financial_actions
+      - third_parties_independently_build_Nova_like_decision_context_layers
+
+    category_compression_triggers:
+      - Circle_moves_beyond_wallet_policy_into_decision_context
+      - Circle_builds_institutional_decision_chronology
+      - Circle_builds_governed_exception_memory
+      - Circle_builds_pre_execution_context_reconstruction
+      - Arc_ecosystem_standardizes_a_competing_upstream_review_layer
+
+    escalation_rule:
+      interesting_event_is_escalation: false
+      repeated_behavior_requires_Architect_attention: true
+      structural_category_movement_requires_Architect_attention: true
+      material_competitive_compression_requires_Architect_attention: true
+
+    boundary_assertions:
+      Nova_executes: false
+      Nova_signs: false
+      Nova_controls_wallet: false
+      local_authority_decides: true
+      external_system_executes: true
+
+    current_actions:
+      - maintain_governed_watch
+      - reassess_only_when_escalation_rule_is_met
+
+    engineering_action: none
+    production_action: none
+    integration_action: none
+    chronology_action: none
+    Reflex_Memory_action: none
+    constraint_action: none
+    policy_action: none
+    roadmap_action: none
+
   - evidence_id: MSE-2026-07-30-028
     title: Fastly x402 edge-payment enforcement
     recorded_at: 2026-07-30
