@@ -4,6 +4,7 @@ PYTHON ?= .venv/bin/python
 	require-venv \
 	verify \
 	verify-doctrine \
+	verify-arc-market-signal-watch \
 	verify-scenarios \
 	verify-tests \
 	verify-chronology \
@@ -24,6 +25,7 @@ require-venv:
 
 verify: \
 	verify-doctrine \
+	verify-arc-market-signal-watch \
 	verify-scenarios \
 	verify-tests \
 	verify-chronology \
@@ -32,6 +34,9 @@ verify: \
 
 verify-doctrine: require-venv
 	$(PYTHON) scripts/doctrine_lint.py
+
+verify-arc-market-signal-watch: require-venv
+	$(PYTHON) scripts/validate_arc_market_signal_watch.py
 
 verify-scenarios: require-venv
 	$(PYTHON) scripts/run_decision_scenario_suite.py
