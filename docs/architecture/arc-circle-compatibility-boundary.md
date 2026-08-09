@@ -72,7 +72,7 @@ Nova_role:
   - temporal_context
   - constraint_context
   - decision_lineage
-  - chronology
+  - governed_chronology_preservation
   - governed_Reflex_Memory_process
 
 prohibited_Nova_roles:
@@ -97,8 +97,8 @@ process and never mutates from market or settlement evidence automatically.
 
 ## Institutional decision-object principle
 
-> Nova should govern institutional decision objects, not blockchain
-> transaction objects.
+> Nova should structure review context around institutional decision objects,
+> not blockchain transaction objects.
 
 For example:
 

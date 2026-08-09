@@ -4,13 +4,13 @@ from copy import deepcopy
 
 import yaml
 
-from scripts.validate_market_signal_watch import (
+from scripts.validate_arc_market_signal_watch import (
     ARC_EVIDENCE_ID,
     ARC_SIGNAL_ID,
     PROHIBITED_REFERENCE_PATHS,
     REPO_ROOT,
     validate_arc_entry,
-    validate_repository,
+    validate_arc_watch_repository,
 )
 
 
@@ -23,7 +23,7 @@ def _arc_entry() -> dict:
 
 
 def test_arc_market_signal_repository_contract_passes():
-    assert validate_repository() == []
+    assert validate_arc_watch_repository() == []
 
 
 def test_arc_market_signal_is_non_authoritative():

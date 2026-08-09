@@ -42,7 +42,7 @@ jobs:
       - name: Run doctrine lint
         run: make verify-doctrine
 
-  market_signals:
+  arc_market_signal:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     env:
@@ -65,8 +65,8 @@ jobs:
           .venv/bin/python -m pip install -r requirements.txt -c constraints.txt
           .venv/bin/python -m pip check
 
-      - name: Validate market-signal separation
-        run: make verify-market-signals
+      - name: Validate Arc market-signal separation
+        run: make verify-arc-market-signal-watch
 
   scenarios:
     runs-on: ubuntu-24.04
@@ -223,7 +223,7 @@ jobs:
     if: always()
     needs:
       - doctrine
-      - market_signals
+      - arc_market_signal
       - scenarios
       - tests
       - chronology
@@ -238,21 +238,21 @@ jobs:
           set -euo pipefail
 
           doctrine="${{ needs.doctrine.result }}"
-          market_signals="${{ needs.market_signals.result }}"
+          arc_market_signal="${{ needs.arc_market_signal.result }}"
           scenarios="${{ needs.scenarios.result }}"
           tests="${{ needs.tests.result }}"
           chronology="${{ needs.chronology.result }}"
           whitespace="${{ needs.whitespace.result }}"
 
           echo "doctrine=${doctrine}"
-          echo "market_signals=${market_signals}"
+          echo "arc_market_signal=${arc_market_signal}"
           echo "scenarios=${scenarios}"
           echo "tests=${tests}"
           echo "chronology=${chronology}"
           echo "whitespace=${whitespace}"
 
           if [ "${doctrine}" != "success" ] || \
-             [ "${market_signals}" != "success" ] || \
+             [ "${arc_market_signal}" != "success" ] || \
              [ "${scenarios}" != "success" ] || \
              [ "${tests}" != "success" ] || \
              [ "${chronology}" != "success" ] || \

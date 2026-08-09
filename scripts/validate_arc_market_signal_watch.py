@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail-closed validation for non-authoritative market-signal watches."""
+"""Fail-closed separation validation for the Arc/Circle governed watch."""
 
 from __future__ import annotations
 
@@ -310,8 +310,8 @@ def validate_arc_entry(entry: dict[str, Any]) -> list[ValidationError]:
     return errors
 
 
-def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
-    """Validate the canonical watch and separation from authoritative namespaces."""
+def validate_arc_watch_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
+    """Validate the Arc watch and its separation from authoritative namespaces."""
 
     root = root.resolve()
     errors: list[ValidationError] = []
@@ -399,7 +399,7 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
             errors.append(ValidationError("Arc_boundary_memo.boundary", f"missing line: {line}"))
 
     for required_text in (
-        "Nova should govern institutional decision objects, not blockchain",
+        "Nova should structure review context around institutional decision objects,",
         "Nova_executes: false",
         "Nova_signs: false",
         "Nova_controls_wallet: false",
@@ -440,13 +440,13 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
 
 
 def main() -> int:
-    errors = validate_repository()
+    errors = validate_arc_watch_repository()
     if errors:
         for error in errors:
             print(error.format(), file=sys.stderr)
         return 1
     print(
-        "Market-signal watch validation passed: "
+        "Arc market-signal watch validation passed: "
         "ARC_AGENTIC_FINANCE_2026 remains monitoring-only and non-authoritative."
     )
     return 0
