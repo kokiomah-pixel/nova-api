@@ -5,6 +5,7 @@ PYTHON ?= .venv/bin/python
 	verify \
 	verify-doctrine \
 	verify-arc-market-signal-watch \
+	verify-market-signal-scan \
 	verify-scenarios \
 	verify-tests \
 	verify-chronology \
@@ -26,6 +27,7 @@ require-venv:
 verify: \
 	verify-doctrine \
 	verify-arc-market-signal-watch \
+	verify-market-signal-scan \
 	verify-scenarios \
 	verify-tests \
 	verify-chronology \
@@ -37,6 +39,9 @@ verify-doctrine: require-venv
 
 verify-arc-market-signal-watch: require-venv
 	$(PYTHON) scripts/validate_arc_market_signal_watch.py
+
+verify-market-signal-scan: require-venv
+	$(PYTHON) scripts/validate_market_signal_scan_coverage.py
 
 verify-scenarios: require-venv
 	$(PYTHON) scripts/run_decision_scenario_suite.py

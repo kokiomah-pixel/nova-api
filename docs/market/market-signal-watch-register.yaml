@@ -4,6 +4,19 @@ status: monitoring_only
 runtime_authority: none
 production_authority: none
 
+governed_watch_eligibility:
+  contract_version: governed_watch_eligibility_v0_1
+  source_path: docs/market/market-signal-watch-register.yaml
+  eligible_when_all:
+    review_state: governed_watch
+    lifecycle_status:
+      - observed_watch
+  lifecycle_boundary:
+    implicit_expiration_allowed: false
+    exclusion_requires_explicit_governed_lifecycle_state: true
+    inactive_lifecycle_values_defined_by_this_contract: []
+  scan_requirement: mandatory_for_every_applicable_market_signal_run
+
 category_boundary:
   statement: >
     x402 and edge infrastructure determine whether a payment requirement was
