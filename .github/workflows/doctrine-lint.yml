@@ -68,6 +68,32 @@ jobs:
       - name: Validate Arc market-signal separation
         run: make verify-arc-market-signal-watch
 
+  market_signal_scan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      PYTHON: .venv/bin/python
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip
+          .venv/bin/python -m pip install -r requirements.txt -c constraints.txt
+          .venv/bin/python -m pip check
+
+      - name: Validate governed-watch scan coverage
+        run: make verify-market-signal-scan
+
   scenarios:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -224,6 +250,7 @@ jobs:
     needs:
       - doctrine
       - arc_market_signal
+      - market_signal_scan
       - scenarios
       - tests
       - chronology
@@ -239,6 +266,7 @@ jobs:
 
           doctrine="${{ needs.doctrine.result }}"
           arc_market_signal="${{ needs.arc_market_signal.result }}"
+          market_signal_scan="${{ needs.market_signal_scan.result }}"
           scenarios="${{ needs.scenarios.result }}"
           tests="${{ needs.tests.result }}"
           chronology="${{ needs.chronology.result }}"
@@ -246,6 +274,7 @@ jobs:
 
           echo "doctrine=${doctrine}"
           echo "arc_market_signal=${arc_market_signal}"
+          echo "market_signal_scan=${market_signal_scan}"
           echo "scenarios=${scenarios}"
           echo "tests=${tests}"
           echo "chronology=${chronology}"
@@ -253,6 +282,7 @@ jobs:
 
           if [ "${doctrine}" != "success" ] || \
              [ "${arc_market_signal}" != "success" ] || \
+             [ "${market_signal_scan}" != "success" ] || \
              [ "${scenarios}" != "success" ] || \
              [ "${tests}" != "success" ] || \
              [ "${chronology}" != "success" ] || \
