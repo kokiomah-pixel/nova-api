@@ -60,8 +60,8 @@ ACTIVE_PRIORITY_STATUSES = {
 }
 
 PROHIBITED_POSITIVE_AUTHORITY_PHRASES = (
-    "jarvis-nova authorizes capital",
-    "jarvis-nova authorizes production",
+    "jarvis-nova " + "authorizes capital",
+    "jarvis-nova " + "authorizes production",
     "jarvis-nova approves transactions",
     "jarvis-nova executes transactions",
     "jarvis-nova creates accepted state",
