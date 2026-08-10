@@ -1,0 +1,179 @@
+cco_system_need_assessment:
+  assessment_id: CCO-ASSESSMENT-2026-08-10-001
+  schema_version: cco_system_need_assessment_v0_1
+  record_source_type: synthetic_fixture
+  operational_evidence_eligible: false
+  created_at: "2026-08-10T15:04:00Z"
+  repository_verified_at: "2026-08-10T15:02:00Z"
+  open_prs_verified_at: "2026-08-10T15:03:00Z"
+
+  repository_verification:
+    status: verified
+    verified_at: "2026-08-10T15:02:00Z"
+    remote_main_sha: 19cfeb341e8d10d223979f40b88d598da5ae1770
+    limitation:
+
+  open_pr_verification:
+    status: verified
+    verified_at: "2026-08-10T15:03:00Z"
+    material_prs:
+      - number: 33
+        state: open
+        head_sha: e625d8d17341df22131c67154f90c05f8035fa1f
+        material_scope: pending_Reflex_Memory_abstraction_governance
+      - number: 8
+        state: open
+        head_sha: 5318d76561e788f063b50700348766daaa5d1090
+        material_scope: pending_NSF_submission_package
+    limitation:
+
+  source_scope:
+    available:
+      - repository_remote_main
+      - material_open_prs
+      - current_product_state
+      - production_readiness
+      - target_v2_contract
+      - cco_priority_register
+    unavailable:
+      - live_production_evidence
+    stale: []
+    not_checked:
+      - specialist_agent_outputs
+
+  source_limitations:
+    - source_id: live_production_evidence
+      limitation: No current independent production attestation was available.
+    - source_id: specialist_agent_outputs
+      limitation: Specialist outputs were outside this synthetic assessment scope.
+
+  source_conclusions:
+    - source_id: repository_remote_main
+      availability: available
+      conclusion: unknown
+    - source_id: material_open_prs
+      availability: available
+      conclusion: unknown
+    - source_id: live_production_evidence
+      availability: unavailable
+      conclusion: unknown
+
+  comparison_baseline:
+    baseline_type: explicit_initial_baseline
+    baseline_reference: synthetic_fixture_initial_baseline
+    baseline_observed_at: "2026-08-10T15:02:00Z"
+
+  material_delta:
+    status: unknown
+    summary: Synthetic initial baseline establishes no prior state for a change comparison.
+    affected_layers:
+      - production_readiness
+      - target_v2_progression
+    evidence_basis: limited_sources
+
+  binding_uncertainty:
+    uncertainty_id: CCO-UNCERTAINTY-PRODUCTION-CUSTODY
+    question: Is production custody sufficiently attested for Gate 1 progression?
+    why_binding: It conditions target-v2 design, adapter, pilot, and production decisions.
+    epistemic_state:
+      value: observed
+    downstream_decisions_conditioned:
+      - architecture
+      - pilot_design
+      - production_readiness
+      - institutional_framing
+    supporting_sources:
+      - docs/operations/production-readiness-register.md
+    contradictory_sources: []
+    falsification_conditions:
+      - current_control_plane_attestation_satisfies_Gate_1
+
+  work_state:
+    recommendation_status: recommended
+    assignment_status: recommended_not_assigned
+    implementation_status: not_started
+    completion_status: not_complete
+    verification_status: unverified
+
+  system_need:
+    action_class: reconcile
+    objective: Obtain and reconcile current custody evidence without inferring it from repository state.
+    why_now: Gate 1 conditions multiple downstream decisions.
+    explicitly_not_needed:
+      - Nova_runtime_change
+      - target_v2_field_derivation
+      - production_activation
+
+  attention_routing:
+    level: action_required
+    material_trigger: decision_blocking_evidence_gap
+    recommended_owner: Architect_or_verified_control_plane_owner
+    blocking: true
+    authority_required: true
+    authority_owner: Architect
+    authority_status: required_not_granted
+    authority_evidence_reference:
+    authority_evidence_source:
+
+  completion:
+    completion_condition: A current control-plane attestation satisfies Gate 1 evidence fields.
+    required_evidence:
+      - environment_identifier
+      - observed_at
+      - observer_or_system
+      - evidence_method
+      - deployed_commit
+      - control_plane_owner_or_custody
+      - attestation_evidence_reference
+    next_decision_gate: Reassess Legacy-v1 dependency inventory and Gate 2.
+
+  api_observability:
+    repository_implementation:
+      status: available
+      evidence_references:
+        - app.py
+      limitation: Establishes repository implementation only.
+      treated_as_deployed_runtime: false
+    externally_observed_runtime:
+      status: not_checked
+      evidence_references: []
+      limitation: Runtime was outside this assessment scope.
+    control_plane_attestation:
+      status: unavailable
+      evidence_references: []
+      limitation: No current attestation was available.
+
+  product_generation:
+    target_v2_contract_present: true
+    target_v2_contract_treated_as_runtime: false
+
+  observed_state_delta:
+    repository_governance_surface_changed: false
+    canonical_corporate_state_changed: false
+    cross_agent_current_use_set_changed: false
+    accepted_state_change: false
+    chronology_change: false
+    Reflex_Memory_change: false
+    runtime_change: false
+    production_change: false
+    external_integration: false
+    buyer_demand_established: false
+
+  state_change_evidence:
+    canonical_corporate_state: []
+    production: []
+    chronology: []
+
+  record_effect:
+    corporate_state_effect: none
+    production_evidence_effect: none
+    chronology_effect: none
+
+  assessment_artifact_effect:
+    creates_corporate_accepted_state: false
+    creates_chronology: false
+    creates_Reflex_Memory: false
+    creates_implementation_authority: false
+    creates_production_authority: false
+    creates_capital_authority: false
+    creates_pricing_authority: false
