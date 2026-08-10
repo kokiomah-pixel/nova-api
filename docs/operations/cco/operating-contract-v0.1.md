@@ -46,11 +46,23 @@ the assessment when the source is available. An unavailable source is a stated
 limitation, not a negative fact. A source that was not checked is not evidence
 of no change.
 
+Every `operational_assessment` must place each of these sources in exactly one
+availability bucket: `repository_remote_main`, `material_open_prs`,
+`current_product_state`, `production_readiness`, `target_v2_contract`, and
+`cco_priority_register`. Omission and duplication are invalid. A mandatory
+source may be unavailable, stale, or not checked only when its limitation is
+explicit. Synthetic fixtures do not claim that this live evidence rule was
+satisfied.
+
 An assessment records whether it is an `operational_assessment` or a
 `synthetic_fixture`. Synthetic fixture timestamps, SHAs, and conclusions are
 test data and are never current operating evidence. A conclusion of
-`observed_change` or `no_material_delta` requires a named comparison baseline;
-`unknown` does not manufacture a comparison claim.
+`observed_change` or `no_material_delta` requires a distinct prior verified
+assessment or verified repository snapshot. An `explicit_initial_baseline`
+establishes the first record only; its material-delta status is `unknown` and
+it cannot support either a change or no-change claim. Material delta is always
+represented as exactly one of `observed_change`, `no_material_delta`, or
+`unknown`; unknown evidence must never collapse to boolean false.
 
 ## Binding uncertainty
 
@@ -156,6 +168,14 @@ persisted through normal repository governance. The repository is not a chat
 transcript archive, and chronology is not exhaustive logging.
 
 ## Control-plane boundary
+
+The production attestation contract and its evidence are separate references.
+`docs/operations/production-control-plane-attestation.md` defines the contract;
+it is not proof that an attestation exists. A production-change claim requires
+an independent evidence reference plus environment, observation time,
+observer or system, evidence method, control-plane owner or custody, and
+deployed commit. The current CCO assessment cannot attest to its own production
+claim, and this contract creates no production attestation.
 
 Jarvis-Nova recommends. Architect authorizes where authority is required.
 Specialists perform bounded work. Nova structures review context. External

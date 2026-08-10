@@ -28,6 +28,14 @@ def _fields(issues) -> set[str]:
     return {issue.field for issue in issues}
 
 
+def _operational_assessment() -> dict:
+    document = _assessment()
+    assessment = document["cco_system_need_assessment"]
+    assessment["record_source_type"] = "operational_assessment"
+    assessment["operational_evidence_eligible"] = True
+    return document
+
+
 def test_valid_minimal_system_need_assessment_passes():
     assert validate_assessment_document(_assessment()) == []
 
@@ -237,10 +245,13 @@ def _available_control_plane(document: dict) -> dict:
     attestation.update(
         {
             "status": "available",
+            "attestation_contract_reference": "docs/operations/production-control-plane-attestation.md",
+            "attestation_evidence_reference": "synthetic://independent-control-plane-attestation",
             "environment_identifier": "production-example",
             "observed_at": "2026-08-10T15:03:00Z",
+            "observer_or_system": "synthetic-control-plane-observer",
             "evidence_method": "authenticated_control_plane_inspection",
-            "custody_or_owner_evidence": "owner-evidence-001",
+            "control_plane_owner_or_custody": "owner-evidence-001",
             "deployed_commit": "19cfeb341e8d10d223979f40b88d598da5ae1770",
             "evidence_references": ["attestation-record-001"],
             "limitation": None,
@@ -284,10 +295,17 @@ def test_control_plane_available_without_observed_at_fails():
     assert any("control_plane_attestation" in field for field in _fields(validate_assessment_document(document)))
 
 
-def test_control_plane_available_without_custody_evidence_fails():
+def test_control_plane_available_without_owner_or_custody_fails():
     document = _assessment()
     attestation = _available_control_plane(document)
-    del attestation["custody_or_owner_evidence"]
+    del attestation["control_plane_owner_or_custody"]
+    assert any("control_plane_attestation" in field for field in _fields(validate_assessment_document(document)))
+
+
+def test_control_plane_available_without_observer_fails():
+    document = _assessment()
+    attestation = _available_control_plane(document)
+    del attestation["observer_or_system"]
     assert any("control_plane_attestation" in field for field in _fields(validate_assessment_document(document)))
 
 
@@ -438,22 +456,75 @@ def test_real_accepted_state_registry_entry_can_support_corporate_change():
     assert validate_assessment_document(document) == []
 
 
-def test_typed_production_attestation_can_support_production_change():
+def test_synthetic_independent_attestation_structure_passes_without_claiming_current_change():
+    document = _assessment()
+    assessment = document["cco_system_need_assessment"]
+    assert assessment["observed_state_delta"]["production_change"] is False
+    assessment["state_change_evidence"]["production"] = [
+        {
+            "source_class": "production_control_plane_attestation",
+            "attestation_contract_reference": "docs/operations/production-control-plane-attestation.md",
+            "attestation_evidence_reference": "synthetic://independent-production-attestation-record",
+            "environment_identifier": "production-example",
+            "observed_at": "2026-08-10T15:03:00Z",
+            "observer_or_system": "synthetic-control-plane-observer",
+            "evidence_method": "authenticated_control_plane_inspection",
+            "control_plane_owner_or_custody": "owner-evidence-001",
+            "deployed_commit": "19cfeb341e8d10d223979f40b88d598da5ae1770",
+        }
+    ]
+    assert validate_assessment_document(document) == []
+
+
+def test_production_change_with_template_only_fails():
     document = _assessment()
     assessment = document["cco_system_need_assessment"]
     assessment["observed_state_delta"]["production_change"] = True
     assessment["state_change_evidence"]["production"] = [
         {
             "source_class": "production_control_plane_attestation",
-            "source_reference": "docs/operations/production-control-plane-attestation.md",
+            "attestation_contract_reference": "docs/operations/production-control-plane-attestation.md",
+        }
+    ]
+    assert any("state_change_evidence.production" in field for field in _fields(validate_assessment_document(document)))
+
+
+def test_production_change_without_observer_fails():
+    document = _assessment()
+    assessment = document["cco_system_need_assessment"]
+    assessment["observed_state_delta"]["production_change"] = True
+    evidence = {
+        "source_class": "production_control_plane_attestation",
+        "attestation_contract_reference": "docs/operations/production-control-plane-attestation.md",
+        "attestation_evidence_reference": "synthetic://independent-production-attestation-record",
+        "environment_identifier": "production-example",
+        "observed_at": "2026-08-10T15:03:00Z",
+        "evidence_method": "authenticated_control_plane_inspection",
+        "control_plane_owner_or_custody": "owner-evidence-001",
+        "deployed_commit": "19cfeb341e8d10d223979f40b88d598da5ae1770",
+    }
+    assessment["state_change_evidence"]["production"] = [evidence]
+    assert any("state_change_evidence.production" in field for field in _fields(validate_assessment_document(document)))
+
+
+def test_production_change_with_cco_assessment_self_reference_fails():
+    document = _assessment()
+    assessment = document["cco_system_need_assessment"]
+    assessment["observed_state_delta"]["production_change"] = True
+    assessment["state_change_evidence"]["production"] = [
+        {
+            "source_class": "production_control_plane_attestation",
+            "attestation_contract_reference": "docs/operations/production-control-plane-attestation.md",
+            "attestation_evidence_reference": assessment["assessment_id"],
             "environment_identifier": "production-example",
             "observed_at": "2026-08-10T15:03:00Z",
+            "observer_or_system": "synthetic-control-plane-observer",
             "evidence_method": "authenticated_control_plane_inspection",
-            "custody_or_owner_evidence": "owner-evidence-001",
+            "control_plane_owner_or_custody": "owner-evidence-001",
             "deployed_commit": "19cfeb341e8d10d223979f40b88d598da5ae1770",
         }
     ]
-    assert validate_assessment_document(document) == []
+    assert any("attestation_evidence_reference" in field for field in _fields(validate_assessment_document(document)))
 
 
 def test_governed_chronology_event_can_support_chronology_change():
@@ -506,10 +577,11 @@ def test_terminal_priority_with_complete_evidence_passes():
 
 
 def test_operational_no_delta_without_baseline_fails():
-    document = _assessment()
+    document = _operational_assessment()
     assessment = document["cco_system_need_assessment"]
-    assessment["record_source_type"] = "operational_assessment"
-    assessment["operational_evidence_eligible"] = True
+    for conclusion in assessment["source_conclusions"]:
+        conclusion["conclusion"] = "no_material_delta"
+    assessment["material_delta"]["status"] = "no_material_delta"
     assessment["comparison_baseline"] = None
     assert "comparison_baseline" in _fields(validate_assessment_document(document))
 
@@ -518,6 +590,7 @@ def test_observed_change_without_baseline_fails():
     document = _assessment()
     assessment = document["cco_system_need_assessment"]
     assessment["source_conclusions"][0]["conclusion"] = "observed_change"
+    assessment["material_delta"]["status"] = "observed_change"
     assessment["comparison_baseline"] = None
     assert "comparison_baseline" in _fields(validate_assessment_document(document))
 
@@ -528,7 +601,125 @@ def test_unknown_source_without_baseline_passes():
     for conclusion in assessment["source_conclusions"]:
         conclusion["conclusion"] = "unknown"
     assessment["comparison_baseline"] = None
+    assessment["material_delta"]["status"] = "unknown"
     assessment["material_delta"]["summary"] = "Material delta is unknown under stated source limits."
+    assert validate_assessment_document(document) == []
+
+
+def test_all_unknown_sources_with_boolean_false_material_delta_fails():
+    document = _assessment()
+    assessment = document["cco_system_need_assessment"]
+    for conclusion in assessment["source_conclusions"]:
+        conclusion["conclusion"] = "unknown"
+    assessment["material_delta"]["changed"] = False
+    assert "assessment.cco_system_need_assessment.material_delta" in _fields(
+        validate_assessment_document(document)
+    )
+
+
+def test_all_unknown_sources_with_unknown_material_delta_passes():
+    document = _assessment()
+    assessment = document["cco_system_need_assessment"]
+    assert {item["conclusion"] for item in assessment["source_conclusions"]} == {"unknown"}
+    assert assessment["material_delta"]["status"] == "unknown"
+    assert validate_assessment_document(document) == []
+
+
+def test_explicit_initial_baseline_with_no_delta_fails():
+    document = _assessment()
+    assessment = document["cco_system_need_assessment"]
+    assessment["source_conclusions"][0]["conclusion"] = "no_material_delta"
+    assessment["material_delta"]["status"] = "no_material_delta"
+    assert "comparison_baseline.baseline_type" in _fields(
+        validate_assessment_document(document)
+    )
+
+
+def test_explicit_initial_baseline_with_observed_change_fails():
+    document = _assessment()
+    assessment = document["cco_system_need_assessment"]
+    assessment["source_conclusions"][0]["conclusion"] = "observed_change"
+    assessment["material_delta"]["status"] = "observed_change"
+    assert "comparison_baseline.baseline_type" in _fields(
+        validate_assessment_document(document)
+    )
+
+
+def test_prior_verified_assessment_with_no_delta_passes():
+    document = _assessment()
+    assessment = document["cco_system_need_assessment"]
+    assessment["source_conclusions"][0]["conclusion"] = "no_material_delta"
+    assessment["source_conclusions"][1]["conclusion"] = "no_material_delta"
+    assessment["material_delta"]["status"] = "no_material_delta"
+    assessment["comparison_baseline"] = {
+        "baseline_type": "prior_verified_assessment",
+        "baseline_reference": "synthetic://prior-verified-assessment",
+        "baseline_observed_at": "2026-08-09T15:00:00Z",
+    }
+    assert validate_assessment_document(document) == []
+
+
+def test_verified_repository_snapshot_with_observed_change_passes():
+    document = _assessment()
+    assessment = document["cco_system_need_assessment"]
+    assessment["source_conclusions"][0]["conclusion"] = "observed_change"
+    assessment["material_delta"]["status"] = "observed_change"
+    assessment["comparison_baseline"] = {
+        "baseline_type": "verified_repository_snapshot",
+        "baseline_reference": "synthetic://verified-repository-snapshot",
+        "baseline_observed_at": "2026-08-09T15:00:00Z",
+    }
+    assert validate_assessment_document(document) == []
+
+
+def test_operational_assessment_missing_remote_main_source_fails():
+    document = _operational_assessment()
+    document["cco_system_need_assessment"]["source_scope"]["available"].remove(
+        "repository_remote_main"
+    )
+    assert "source_scope" in _fields(validate_assessment_document(document))
+
+
+def test_operational_assessment_missing_cco_priority_register_fails():
+    document = _operational_assessment()
+    document["cco_system_need_assessment"]["source_scope"]["available"].remove(
+        "cco_priority_register"
+    )
+    assert "source_scope" in _fields(validate_assessment_document(document))
+
+
+def test_operational_assessment_duplicate_mandatory_source_fails():
+    document = _operational_assessment()
+    assessment = document["cco_system_need_assessment"]
+    assessment["source_scope"]["unavailable"].append("production_readiness")
+    assessment["source_limitations"].append(
+        {
+            "source_id": "production_readiness",
+            "limitation": "Synthetic duplicate used to prove rejection.",
+        }
+    )
+    assert "source_scope" in _fields(validate_assessment_document(document))
+
+
+def test_operational_assessment_unavailable_source_with_limitation_passes():
+    document = _operational_assessment()
+    assessment = document["cco_system_need_assessment"]
+    assessment["source_scope"]["available"].remove("cco_priority_register")
+    assessment["source_scope"]["unavailable"].append("cco_priority_register")
+    assessment["source_limitations"].append(
+        {
+            "source_id": "cco_priority_register",
+            "limitation": "Synthetic source-unavailable condition.",
+        }
+    )
+    assert validate_assessment_document(document) == []
+
+
+def test_synthetic_fixture_does_not_require_live_mandatory_source_set():
+    document = _assessment()
+    document["cco_system_need_assessment"]["source_scope"]["available"].remove(
+        "cco_priority_register"
+    )
     assert validate_assessment_document(document) == []
 
 

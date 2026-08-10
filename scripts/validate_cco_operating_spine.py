@@ -49,6 +49,17 @@ REQUIRED_ARTIFACT_EFFECTS = (
 )
 
 TERMINAL_PRIORITY_STATUSES = {"verified_complete", "closed"}
+MANDATORY_OPERATIONAL_SOURCES = (
+    "repository_remote_main",
+    "material_open_prs",
+    "current_product_state",
+    "production_readiness",
+    "target_v2_contract",
+    "cco_priority_register",
+)
+PRODUCTION_ATTESTATION_CONTRACT = (
+    "docs/operations/production-control-plane-attestation.md"
+)
 ACTIVE_PRIORITY_STATUSES = {
     "observed",
     "review_required",
@@ -144,6 +155,41 @@ def _freshness_issues(
     return issues
 
 
+def _attestation_reference_issues(
+    evidence_reference: Any,
+    assessment_id: Any,
+    field: str,
+) -> list[ValidationIssue]:
+    """Reject a template or the current CCO assessment as production evidence."""
+
+    if not isinstance(evidence_reference, str):
+        return []
+    normalized = evidence_reference.strip().lower()
+    normalized_assessment_id = (
+        assessment_id.strip().lower() if isinstance(assessment_id, str) else ""
+    )
+    self_references = {
+        normalized_assessment_id,
+        f"cco_assessment:{normalized_assessment_id}",
+        f"cco-assessment:{normalized_assessment_id}",
+    }
+    if (
+        normalized == PRODUCTION_ATTESTATION_CONTRACT.lower()
+        or normalized in self_references
+        or "cco_system_need_assessment" in normalized
+        or "cco-system-need-assessment" in normalized
+        or "system-need-assessment" in normalized
+        or normalized.startswith("cco-assessment")
+    ):
+        return [
+            ValidationIssue(
+                field,
+                "must identify independent production evidence outside the CCO assessment and its contract template",
+            )
+        ]
+    return []
+
+
 def validate_assessment_document(document: Any) -> list[ValidationIssue]:
     """Validate one machine-readable CCO assessment."""
 
@@ -194,6 +240,44 @@ def validate_assessment_document(document: Any) -> list[ValidationIssue]:
                         )
                     )
 
+        limitation_entries = assessment.get("source_limitations", [])
+        limitation_counts: dict[str, int] = {}
+        for entry in limitation_entries:
+            if isinstance(entry, dict) and isinstance(entry.get("source_id"), str):
+                source_id = entry["source_id"]
+                limitation_counts[source_id] = limitation_counts.get(source_id, 0) + 1
+        for source_id, count in limitation_counts.items():
+            if count > 1:
+                issues.append(
+                    ValidationIssue(
+                        "source_limitations",
+                        f"source {source_id!r} has more than one limitation entry",
+                    )
+                )
+
+        if assessment.get("record_source_type") == "operational_assessment":
+            for source_id in MANDATORY_OPERATIONAL_SOURCES:
+                states = [
+                    state
+                    for state in ("available", "unavailable", "stale", "not_checked")
+                    if source_id in (source_scope.get(state) or [])
+                ]
+                if len(states) != 1:
+                    issues.append(
+                        ValidationIssue(
+                            "source_scope",
+                            f"mandatory operational source {source_id!r} must appear in exactly one availability bucket",
+                        )
+                    )
+                    continue
+                if states[0] != "available" and limitation_counts.get(source_id, 0) != 1:
+                    issues.append(
+                        ValidationIssue(
+                            "source_limitations",
+                            f"mandatory operational source {source_id!r} in state {states[0]!r} requires one explicit limitation",
+                        )
+                    )
+
     for index, conclusion in enumerate(assessment.get("source_conclusions", [])):
         if not isinstance(conclusion, dict):
             continue
@@ -213,12 +297,48 @@ def validate_assessment_document(document: Any) -> list[ValidationIssue]:
         for conclusion in assessment.get("source_conclusions", [])
         if isinstance(conclusion, dict)
     }
-    if comparison_claims & {"observed_change", "no_material_delta"}:
-        if not isinstance(comparison_baseline, dict):
+    material_delta = assessment.get("material_delta", {})
+    material_status = (
+        material_delta.get("status") if isinstance(material_delta, dict) else None
+    )
+    baseline_type = (
+        comparison_baseline.get("baseline_type")
+        if isinstance(comparison_baseline, dict)
+        else None
+    )
+    if "observed_change" in comparison_claims:
+        expected_material_status = "observed_change"
+    elif "no_material_delta" in comparison_claims:
+        expected_material_status = "no_material_delta"
+    else:
+        expected_material_status = "unknown"
+    if material_status != expected_material_status:
+        issues.append(
+            ValidationIssue(
+                "material_delta.status",
+                f"must be {expected_material_status!r} for the recorded source conclusions",
+            )
+        )
+    if baseline_type == "explicit_initial_baseline":
+        if material_status != "unknown" or comparison_claims & {
+            "observed_change",
+            "no_material_delta",
+        }:
+            issues.append(
+                ValidationIssue(
+                    "comparison_baseline.baseline_type",
+                    "an explicit initial baseline cannot support observed-change or no-material-delta claims",
+                )
+            )
+    if material_status in {"observed_change", "no_material_delta"}:
+        if baseline_type not in {
+            "prior_verified_assessment",
+            "verified_repository_snapshot",
+        }:
             issues.append(
                 ValidationIssue(
                     "comparison_baseline",
-                    "observed change and no-material-delta conclusions require a comparison baseline",
+                    "observed change and no-material-delta require a distinct prior verified assessment or repository snapshot",
                 )
             )
 
@@ -325,6 +445,16 @@ def validate_assessment_document(document: Any) -> list[ValidationIssue]:
                     )
                 )
 
+        for index, reference in enumerate(evidence.get("production", [])):
+            if isinstance(reference, dict):
+                issues.extend(
+                    _attestation_reference_issues(
+                        reference.get("attestation_evidence_reference"),
+                        assessment.get("assessment_id"),
+                        f"state_change_evidence.production.{index}.attestation_evidence_reference",
+                    )
+                )
+
     api = assessment.get("api_observability", {})
     if isinstance(api, dict):
         repository = api.get("repository_implementation", {})
@@ -333,6 +463,15 @@ def validate_assessment_document(document: Any) -> list[ValidationIssue]:
                 ValidationIssue(
                     "api_observability.repository_implementation.treated_as_deployed_runtime",
                     "repository implementation cannot be treated as deployed runtime",
+                )
+            )
+        attestation = api.get("control_plane_attestation", {})
+        if isinstance(attestation, dict) and attestation.get("status") == "available":
+            issues.extend(
+                _attestation_reference_issues(
+                    attestation.get("attestation_evidence_reference"),
+                    assessment.get("assessment_id"),
+                    "api_observability.control_plane_attestation.attestation_evidence_reference",
                 )
             )
 
@@ -444,6 +583,27 @@ def validate_repository() -> list[ValidationIssue]:
         manifest = {}
 
     if isinstance(manifest, dict):
+        declared_mandatory_sources = manifest.get("mandatory_operational_sources")
+        if declared_mandatory_sources != list(MANDATORY_OPERATIONAL_SOURCES):
+            issues.append(
+                ValidationIssue(
+                    "source_manifest.mandatory_operational_sources",
+                    "must declare the canonical mandatory operational source set in order",
+                )
+            )
+        declared_source_ids = {
+            source.get("source_id")
+            for source in manifest.get("sources", [])
+            if isinstance(source, dict)
+        }
+        for source_id in MANDATORY_OPERATIONAL_SOURCES:
+            if source_id not in declared_source_ids:
+                issues.append(
+                    ValidationIssue(
+                        "source_manifest.sources",
+                        f"missing mandatory operational source definition {source_id!r}",
+                    )
+                )
         for index, source in enumerate(manifest.get("sources", [])):
             if not isinstance(source, dict):
                 continue

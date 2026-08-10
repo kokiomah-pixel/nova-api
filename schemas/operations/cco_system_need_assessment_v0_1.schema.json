@@ -19,6 +19,7 @@
         "repository_verification",
         "open_pr_verification",
         "source_scope",
+        "source_limitations",
         "source_conclusions",
         "comparison_baseline",
         "material_delta",
@@ -46,6 +47,10 @@
         "repository_verification": {"$ref": "#/$defs/repositoryVerification"},
         "open_pr_verification": {"$ref": "#/$defs/openPrVerification"},
         "source_scope": {"$ref": "#/$defs/sourceScope"},
+        "source_limitations": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/sourceLimitation"}
+        },
         "source_conclusions": {
           "type": "array",
           "items": {"$ref": "#/$defs/sourceConclusion"}
@@ -176,6 +181,15 @@
         "conclusion": {"enum": ["observed_change", "no_material_delta", "unknown"]}
       }
     },
+    "sourceLimitation": {
+      "type": "object",
+      "required": ["source_id", "limitation"],
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {"type": "string", "minLength": 1},
+        "limitation": {"type": "string", "minLength": 1}
+      }
+    },
     "comparisonBaseline": {
       "type": "object",
       "required": ["baseline_type", "baseline_reference", "baseline_observed_at"],
@@ -188,10 +202,10 @@
     },
     "materialDelta": {
       "type": "object",
-      "required": ["changed", "summary", "affected_layers", "evidence_basis"],
+      "required": ["status", "summary", "affected_layers", "evidence_basis"],
       "additionalProperties": false,
       "properties": {
-        "changed": {"type": "boolean"},
+        "status": {"enum": ["observed_change", "no_material_delta", "unknown"]},
         "summary": {"type": "string", "minLength": 1},
         "affected_layers": {"$ref": "#/$defs/nonEmptyStringArray"},
         "evidence_basis": {"enum": ["verified_sources", "limited_sources"]}
@@ -346,10 +360,13 @@
       "additionalProperties": false,
       "properties": {
         "status": {"enum": ["available", "unavailable", "not_checked", "stale"]},
+        "attestation_contract_reference": {"oneOf": [{"const": "docs/operations/production-control-plane-attestation.md"}, {"type": "null"}]},
+        "attestation_evidence_reference": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "null"}]},
         "environment_identifier": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "null"}]},
         "observed_at": {"oneOf": [{"$ref": "#/$defs/timestamp"}, {"type": "null"}]},
+        "observer_or_system": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "null"}]},
         "evidence_method": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "null"}]},
-        "custody_or_owner_evidence": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "null"}]},
+        "control_plane_owner_or_custody": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "null"}]},
         "deployed_commit": {"oneOf": [{"type": "string", "pattern": "^[0-9a-f]{40}$"}, {"type": "null"}]},
         "evidence_references": {"$ref": "#/$defs/nonEmptyStringArray"},
         "limitation": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "null"}]}
@@ -358,12 +375,15 @@
         {
           "if": {"properties": {"status": {"const": "available"}}},
           "then": {
-            "required": ["environment_identifier", "observed_at", "evidence_method", "custody_or_owner_evidence", "deployed_commit"],
+            "required": ["attestation_contract_reference", "attestation_evidence_reference", "environment_identifier", "observed_at", "observer_or_system", "evidence_method", "control_plane_owner_or_custody", "deployed_commit"],
             "properties": {
+              "attestation_contract_reference": {"const": "docs/operations/production-control-plane-attestation.md"},
+              "attestation_evidence_reference": {"type": "string", "minLength": 1},
               "environment_identifier": {"type": "string", "minLength": 1},
               "observed_at": {"$ref": "#/$defs/timestamp"},
+              "observer_or_system": {"type": "string", "minLength": 1},
               "evidence_method": {"type": "string", "minLength": 1},
-              "custody_or_owner_evidence": {"type": "string", "minLength": 1},
+              "control_plane_owner_or_custody": {"type": "string", "minLength": 1},
               "deployed_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
             }
           },
@@ -454,15 +474,17 @@
     },
     "productionStateEvidence": {
       "type": "object",
-      "required": ["source_class", "source_reference", "environment_identifier", "observed_at", "evidence_method", "custody_or_owner_evidence", "deployed_commit"],
+      "required": ["source_class", "attestation_contract_reference", "attestation_evidence_reference", "environment_identifier", "observed_at", "observer_or_system", "evidence_method", "control_plane_owner_or_custody", "deployed_commit"],
       "additionalProperties": false,
       "properties": {
         "source_class": {"const": "production_control_plane_attestation"},
-        "source_reference": {"const": "docs/operations/production-control-plane-attestation.md"},
+        "attestation_contract_reference": {"const": "docs/operations/production-control-plane-attestation.md"},
+        "attestation_evidence_reference": {"type": "string", "minLength": 1},
         "environment_identifier": {"type": "string", "minLength": 1},
         "observed_at": {"$ref": "#/$defs/timestamp"},
+        "observer_or_system": {"type": "string", "minLength": 1},
         "evidence_method": {"type": "string", "minLength": 1},
-        "custody_or_owner_evidence": {"type": "string", "minLength": 1},
+        "control_plane_owner_or_custody": {"type": "string", "minLength": 1},
         "deployed_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
       }
     },

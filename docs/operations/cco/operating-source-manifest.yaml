@@ -8,6 +8,14 @@ availability_states:
   - not_checked
   - stale
 
+mandatory_operational_sources:
+  - repository_remote_main
+  - material_open_prs
+  - current_product_state
+  - production_readiness
+  - target_v2_contract
+  - cco_priority_register
+
 sources:
   - source_id: repository_remote_main
     source_type: dynamic_repository_source
@@ -76,6 +84,19 @@ sources:
       - current_live_production_state
       - system_wide_readiness_from_one_READY_subcomponent
 
+  - source_id: cco_priority_register
+    source_type: cco_operating_coordination_source
+    repository_path: docs/operations/cco/current-priority-register.yaml
+    authoritative_for:
+      - current_CCO_operating_questions
+      - current_priority_sequence
+      - unresolved_CCO_items
+    not_authoritative_for:
+      - corporate_accepted_state
+      - product_implementation_authority
+      - production_state
+      - buyer_demand
+
   - source_id: target_v2_contract
     source_type: canonical_repository_source
     repository_path: docs/target-v2/README.md
@@ -120,6 +141,8 @@ sources:
     not_authoritative_for:
       - state_outside_attestation_scope_or_window
     required_attestation_fields:
+      - attestation_contract_reference
+      - attestation_evidence_reference
       - environment_identifier
       - observed_at
       - observer_or_system

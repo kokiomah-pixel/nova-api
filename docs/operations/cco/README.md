@@ -93,8 +93,17 @@ Observed
 The machine contract represents epistemic state, recommendation, authority,
 assignment, implementation, completion, and verification as separate
 dimensions. Synthetic fixtures are explicitly marked and cannot be treated as
-operational evidence. Change and no-change conclusions name their comparison
-baseline.
+operational evidence. Material delta is tri-state: `observed_change`,
+`no_material_delta`, or `unknown`. Change and no-change conclusions require a
+distinct prior verified baseline; an explicit initial baseline remains
+unknown.
+
+Operational assessments account for all six mandatory operating sources in
+exactly one availability bucket, including the CCO priority register. A source
+limitation is valid evidence of unavailability, never evidence of no change.
+Production claims require an independent control-plane attestation evidence
+reference; the attestation contract template and the CCO assessment itself are
+not production evidence.
 
 Market signals may support research or a watch. They do not establish buyer
 demand, adoption, product requirements, or implementation authority.

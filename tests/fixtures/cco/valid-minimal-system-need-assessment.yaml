@@ -34,19 +34,26 @@ cco_system_need_assessment:
       - current_product_state
       - production_readiness
       - target_v2_contract
+      - cco_priority_register
     unavailable:
       - live_production_evidence
     stale: []
     not_checked:
       - specialist_agent_outputs
 
+  source_limitations:
+    - source_id: live_production_evidence
+      limitation: No current independent production attestation was available.
+    - source_id: specialist_agent_outputs
+      limitation: Specialist outputs were outside this synthetic assessment scope.
+
   source_conclusions:
     - source_id: repository_remote_main
       availability: available
-      conclusion: no_material_delta
+      conclusion: unknown
     - source_id: material_open_prs
       availability: available
-      conclusion: no_material_delta
+      conclusion: unknown
     - source_id: live_production_evidence
       availability: unavailable
       conclusion: unknown
@@ -57,8 +64,8 @@ cco_system_need_assessment:
     baseline_observed_at: "2026-08-10T15:02:00Z"
 
   material_delta:
-    changed: false
-    summary: No material repository delta; readiness gaps remain unresolved.
+    status: unknown
+    summary: Synthetic initial baseline establishes no prior state for a change comparison.
     affected_layers:
       - production_readiness
       - target_v2_progression
@@ -113,9 +120,11 @@ cco_system_need_assessment:
     required_evidence:
       - environment_identifier
       - observed_at
+      - observer_or_system
       - evidence_method
       - deployed_commit
-      - custody_or_owner_evidence
+      - control_plane_owner_or_custody
+      - attestation_evidence_reference
     next_decision_gate: Reassess Legacy-v1 dependency inventory and Gate 2.
 
   api_observability:

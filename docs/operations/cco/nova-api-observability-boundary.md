@@ -45,10 +45,13 @@ API_control_plane_attestation:
   establishes:
     - point_in_time_control_plane_state
   requires:
+    - attestation_contract_reference
+    - attestation_evidence_reference
     - environment_identifier
     - observed_at
+    - observer_or_system
     - evidence_method
-    - custody_or_owner_evidence
+    - control_plane_owner_or_custody
     - deployed_commit
     - evidence_references
 ```
@@ -56,15 +59,22 @@ API_control_plane_attestation:
 An available external-runtime observation is invalid without its observation
 time, endpoint or bounded surface, and method. An available control-plane
 attestation is invalid without its environment identifier, observation time,
-method, custody or owner evidence, and deployed commit. For `unavailable`,
+observer or system, method, control-plane owner or custody, deployed commit,
+and an independent evidence reference. The canonical contract reference
+`docs/operations/production-control-plane-attestation.md` is a template, not
+attestation evidence. The evidence reference must resolve outside the CCO
+assessment; a CCO assessment cannot self-attest. For `unavailable`,
 `not_checked`, or `stale`, missing evidence fields remain absent or null and an
-explicit limitation is required. Do not fabricate missing values.
+explicit limitation is required. Do not fabricate missing values or create an
+attestation merely to satisfy an assessment.
 
 ## Required separations
 
 ```text
 repository code != deployed runtime
 health response != deployed commit attestation
+attestation contract template != attestation evidence
+CCO assessment != independent production evidence
 externally observed behavior != control-plane custody
 Legacy v1 implementation != target v2 implementation
 target v2 contract approval != target v2 runtime
