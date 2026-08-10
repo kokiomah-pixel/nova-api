@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sharpe-nova-os.local/schemas/operations/cco_priority_register_v0_1.schema.json",
+  "title": "CCO Priority Register v0.1",
+  "type": "object",
+  "required": [
+    "record_type", "schema_version", "authority_effect", "accepted_state_effect",
+    "chronology_effect", "Reflex_Memory_effect", "product_runtime_effect",
+    "strategic_priority_mutation", "items"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "record_type": {"const": "cco_priority_register"},
+    "schema_version": {"const": "cco_priority_register_v0_1"},
+    "authority_effect": {"const": "none"},
+    "accepted_state_effect": {"const": "none"},
+    "chronology_effect": {"const": "none"},
+    "Reflex_Memory_effect": {"const": "none"},
+    "product_runtime_effect": {"const": "none"},
+    "strategic_priority_mutation": {"const": "Architect_review_required_where_authority_is_required"},
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/priorityItem"}
+    }
+  },
+  "$defs": {
+    "nullableString": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "null"}]},
+    "stringArray": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "provenance": {
+      "type": "object",
+      "required": ["path", "claim_scope"],
+      "additionalProperties": false,
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "claim_scope": {"type": "string", "minLength": 1}
+      }
+    },
+    "completionEvidence": {
+      "type": "object",
+      "required": [
+        "artifact_or_registry_path", "resulting_commit_or_record_id", "completed_at",
+        "writer_authority", "historical_entries_preserved", "provenance_preserved",
+        "silent_overwrite_detected", "independently_verified_at"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "artifact_or_registry_path": {"$ref": "#/$defs/nullableString"},
+        "resulting_commit_or_record_id": {"$ref": "#/$defs/nullableString"},
+        "completed_at": {"oneOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+        "writer_authority": {"$ref": "#/$defs/nullableString"},
+        "historical_entries_preserved": {"oneOf": [{"type": "boolean"}, {"type": "null"}]},
+        "provenance_preserved": {"oneOf": [{"type": "boolean"}, {"type": "null"}]},
+        "silent_overwrite_detected": {"oneOf": [{"type": "boolean"}, {"type": "null"}]},
+        "independently_verified_at": {"oneOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]}
+      }
+    },
+    "priorityItem": {
+      "type": "object",
+      "required": [
+        "item_id", "title", "question", "affected_layers", "status", "attention_level",
+        "material_trigger", "blocking", "priority_rank", "source_provenance",
+        "current_evidence_state", "hypothesis", "falsification_conditions",
+        "next_action_class", "implementation_in_this_PR", "recommended_owner", "assignment_status",
+        "authority_required", "authority_basis", "completion_condition",
+        "completion_evidence", "reopen_or_escalation_conditions", "notes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "item_id": {"type": "string", "minLength": 1},
+        "title": {"type": "string", "minLength": 1},
+        "question": {"type": "string", "minLength": 1},
+        "affected_layers": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "status": {"enum": ["observed", "review_required", "due", "assigned", "in_progress", "evidence_submitted", "blocked", "superseded", "verified_complete", "closed"]},
+        "attention_level": {"enum": ["aligned", "watch", "reconciliation_due", "review_required", "action_required"]},
+        "material_trigger": {
+          "oneOf": [
+            {"enum": ["accepted_state_contradiction", "authority_drift", "decision_blocking_evidence_gap", "production_boundary_violation", "chronology_integrity_failure", "unauthorized_capability", "material_product_GTM_monetization_contradiction"]},
+            {"type": "null"}
+          ]
+        },
+        "blocking": {"type": "boolean"},
+        "priority_rank": {"type": "integer", "minimum": 1},
+        "source_provenance": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/provenance"}},
+        "current_evidence_state": {"type": "string", "minLength": 1},
+        "hypothesis": {"type": "string", "minLength": 1},
+        "falsification_conditions": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "next_action_class": {"enum": ["build", "test", "research", "reconcile", "wait", "stop"]},
+        "implementation_in_this_PR": {"const": false},
+        "recommended_owner": {"type": "string", "minLength": 1},
+        "assignment_status": {"enum": ["recommended_not_assigned", "externally_assigned", "not_applicable"]},
+        "authority_required": {"type": "boolean"},
+        "authority_basis": {"type": "string", "minLength": 1},
+        "completion_condition": {"type": "string", "minLength": 1},
+        "completion_evidence": {"$ref": "#/$defs/completionEvidence"},
+        "reopen_or_escalation_conditions": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "notes": {"type": "string", "minLength": 1}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"attention_level": {"const": "action_required"}}},
+          "then": {"properties": {"material_trigger": {"type": "string"}}}
+        }
+      ]
+    }
+  }
+}

@@ -4,6 +4,7 @@ PYTHON ?= .venv/bin/python
 	require-venv \
 	verify \
 	verify-doctrine \
+	verify-cco-operating-spine \
 	verify-arc-market-signal-watch \
 	verify-market-signal-scan \
 	verify-scenarios \
@@ -26,6 +27,7 @@ require-venv:
 
 verify: \
 	verify-doctrine \
+	verify-cco-operating-spine \
 	verify-arc-market-signal-watch \
 	verify-market-signal-scan \
 	verify-scenarios \
@@ -36,6 +38,9 @@ verify: \
 
 verify-doctrine: require-venv
 	$(PYTHON) scripts/doctrine_lint.py
+
+verify-cco-operating-spine: require-venv
+	$(PYTHON) scripts/validate_cco_operating_spine.py
 
 verify-arc-market-signal-watch: require-venv
 	$(PYTHON) scripts/validate_arc_market_signal_watch.py

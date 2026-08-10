@@ -1,0 +1,127 @@
+---
+record_type: cco_operating_source_manifest
+schema_version: cco_operating_source_manifest_v0_1
+authority_effect: none
+availability_states:
+  - available
+  - unavailable
+  - not_checked
+  - stale
+
+sources:
+  - source_id: repository_remote_main
+    source_type: dynamic_repository_source
+    repository_path:
+    authoritative_for:
+      - merged_repository_state
+      - canonical_file_presence
+      - current_remote_head
+    not_authoritative_for:
+      - local_working_tree
+      - deployed_runtime
+      - production_posture
+      - live_control_plane
+
+  - source_id: material_open_prs
+    source_type: dynamic_repository_source
+    repository_path:
+    authoritative_for:
+      - pending_change_visibility
+      - PR_state
+      - pending_diff_context
+    not_authoritative_for:
+      - corporate_accepted_state
+      - implementation_authority
+      - production_state
+
+  - source_id: current_product_state
+    source_type: canonical_repository_source
+    repository_path: CURRENT_STATE.md
+    authority_owner: Architect
+    authoritative_for:
+      - compressed_current_product_state
+      - canonical_product_direction
+    not_authoritative_for:
+      - deployed_runtime
+      - live_control_plane
+
+  - source_id: production_readiness
+    source_type: canonical_repository_source
+    repository_path: docs/operations/production-readiness-register.md
+    authoritative_for:
+      - gate_level_readiness_state
+      - readiness_evidence_requirements
+    not_authoritative_for:
+      - current_live_production_state
+      - system_wide_readiness_from_one_READY_subcomponent
+
+  - source_id: target_v2_contract
+    source_type: canonical_repository_source
+    repository_path: docs/target-v2/README.md
+    authoritative_for:
+      - canonical_future_external_model
+      - target_v2_contract_state
+      - target_v2_progression_sequence
+    not_authoritative_for:
+      - target_v2_runtime_existence
+      - target_v2_production_activity
+
+  - source_id: governed_market_watches
+    source_type: governed_repository_watch
+    repository_path: docs/market/market-signal-watch-register.yaml
+    authoritative_for:
+      - governed_watch_presence
+      - governed_watch_boundaries
+      - watch_escalation_conditions
+    not_authoritative_for:
+      - buyer_demand
+      - product_requirement
+      - implementation_authority
+      - production_authority
+
+  - source_id: nova_api_repository_implementation
+    source_type: repository_implementation_source
+    repository_path: app.py
+    authoritative_for:
+      - repository_API_implementation
+    not_authoritative_for:
+      - deployed_commit
+      - production_runtime
+      - active_production_configuration
+      - live_route_behavior
+      - production_custody
+
+  - source_id: live_production_evidence
+    source_type: dynamic_production_evidence
+    repository_path:
+    authoritative_for:
+      - bounded_attested_production_state
+    not_authoritative_for:
+      - state_outside_attestation_scope_or_window
+    required_attestation_fields:
+      - environment_identifier
+      - observed_at
+      - observer_or_system
+      - evidence_method
+      - deployed_commit
+      - control_plane_owner_or_custody
+
+  - source_id: specialist_agent_outputs
+    source_type: dynamic_specialist_output
+    repository_path:
+    authoritative_for:
+      - claims_within_reviewed_usable_scope
+    not_authoritative_for:
+      - corporate_accepted_state
+      - authority_not_separately_evidenced
+    required_fields:
+      - provenance
+      - review_status
+      - usable_claim_scope
+      - excluded_claim_scope
+      - freshness_or_expiration
+
+source_state_rule:
+  unavailable_is_false: false
+  not_checked_is_no_change: false
+  stale_is_current: false

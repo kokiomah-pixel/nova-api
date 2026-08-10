@@ -1,0 +1,241 @@
+---
+record_type: cco_priority_register
+schema_version: cco_priority_register_v0_1
+authority_effect: none
+accepted_state_effect: none
+chronology_effect: none
+Reflex_Memory_effect: none
+product_runtime_effect: none
+strategic_priority_mutation: Architect_review_required_where_authority_is_required
+items:
+  - item_id: CCO-PRIORITY-001
+    title: Production custody evidence
+    question: >
+      Is production custody sufficiently attested to permit progression beyond
+      the current readiness gate?
+    affected_layers:
+      - production_readiness
+      - target_v2_progression
+    status: due
+    attention_level: action_required
+    material_trigger: decision_blocking_evidence_gap
+    blocking: true
+    priority_rank: 1
+    source_provenance:
+      - path: docs/operations/production-readiness-register.md
+        claim_scope: production_custody_and_gate_1_state
+      - path: docs/operations/production-control-plane-attestation.md
+        claim_scope: required_attestation_evidence
+    current_evidence_state: >
+      Gate 1 is blocked; Render, CDP, deployed commit, and credential custody
+      are not currently attested by the readiness register.
+    hypothesis: Gate 1 cannot close without authenticated control-plane evidence.
+    falsification_conditions:
+      - a_current_complete_attestation_satisfies_all_Gate_1_requirements
+    next_action_class: reconcile
+    implementation_in_this_PR: false
+    recommended_owner: Architect_or_verified_control_plane_owner
+    assignment_status: recommended_not_assigned
+    authority_required: true
+    authority_basis: authenticated_control_plane_access_and_custody_attestation
+    completion_condition: >
+      A current production attestation identifies environment, observation
+      time, evidence method, deployed commit, and control-plane custody.
+    completion_evidence:
+      artifact_or_registry_path:
+      resulting_commit_or_record_id:
+      completed_at:
+      writer_authority:
+      historical_entries_preserved:
+      provenance_preserved:
+      silent_overwrite_detected:
+      independently_verified_at:
+    reopen_or_escalation_conditions:
+      - attestation_expires_or_material_control_plane_state_changes
+    notes: Do not infer Render or CDP state from repository code or public health.
+
+  - item_id: CCO-PRIORITY-002
+    title: Legacy v1 dependency inventory
+    question: >
+      Is there verified evidence showing who or what still depends on Legacy v1
+      before isolation or target-v2 progression?
+    affected_layers:
+      - Legacy_v1
+      - target_v2_progression
+      - external_integration
+    status: due
+    attention_level: action_required
+    material_trigger: decision_blocking_evidence_gap
+    blocking: true
+    priority_rank: 2
+    source_provenance:
+      - path: docs/operations/production-readiness-register.md
+        claim_scope: Legacy_v1_dependency_and_Gate_2_state
+      - path: CURRENT_STATE.md
+        claim_scope: Legacy_v1_consumer_dependency
+    current_evidence_state: Legacy v1 consumer dependency is unverified and Gate 2 is blocked.
+    hypothesis: Existing keys, logs, or consumers may require classification before isolation.
+    falsification_conditions:
+      - inventory_evidence_classifies_keys_logs_and_consumers
+    next_action_class: research
+    implementation_in_this_PR: false
+    recommended_owner: Architect_or_authorized_repository_operator
+    assignment_status: recommended_not_assigned
+    authority_required: true
+    authority_basis: access_to_dependency_and_usage_evidence
+    completion_condition: >
+      A provenance-bearing inventory classifies relevant keys, logs, and
+      consumers without converting absence of evidence into no dependency.
+    completion_evidence:
+      artifact_or_registry_path:
+      resulting_commit_or_record_id:
+      completed_at:
+      writer_authority:
+      historical_entries_preserved:
+      provenance_preserved:
+      silent_overwrite_detected:
+      independently_verified_at:
+    reopen_or_escalation_conditions:
+      - a_new_Legacy_v1_consumer_or_credential_is_observed
+    notes: Recommendation is not an assignment or isolation authorization.
+
+  - item_id: CCO-PRIORITY-003
+    title: Target-v2 field derivation sequencing
+    question: >
+      Are Gate 1 and Gate 2 complete so target-v2 field-derivation work may be
+      considered under separate authority?
+    affected_layers:
+      - target_v2
+      - product_architecture
+    status: blocked
+    attention_level: watch
+    material_trigger:
+    blocking: true
+    priority_rank: 3
+    source_provenance:
+      - path: docs/target-v2/README.md
+        claim_scope: target_v2_progression_gates
+      - path: docs/operations/production-readiness-register.md
+        claim_scope: Gate_3_dependencies
+    current_evidence_state: Gate 3 remains downstream of incomplete Gate 1 and Gate 2.
+    hypothesis: Field-derivation implementation should not advance before upstream evidence closes.
+    falsification_conditions:
+      - Gate_1_and_Gate_2_are_evidenced_complete
+    next_action_class: wait
+    implementation_in_this_PR: false
+    recommended_owner: Jarvis_Nova_CCO
+    assignment_status: recommended_not_assigned
+    authority_required: false
+    authority_basis: none_for_watch;_separate_Architect_authority_required_for_implementation
+    completion_condition: Gate 1 and Gate 2 are independently verified complete.
+    completion_evidence:
+      artifact_or_registry_path:
+      resulting_commit_or_record_id:
+      completed_at:
+      writer_authority:
+      historical_entries_preserved:
+      provenance_preserved:
+      silent_overwrite_detected:
+      independently_verified_at:
+    reopen_or_escalation_conditions:
+      - Gate_1_and_Gate_2_become_verified_complete
+    notes: This item preserves sequence and creates no field-derivation authority.
+
+  - item_id: CCO-WATCH-001
+    title: Standing delegated capital and agentic liquidity
+    question: >
+      Does continuous machine-managed capital create repeated institutional need
+      to preserve the decision basis surrounding delegated authority through time?
+    affected_layers:
+      - market_sensing
+      - institutional_framing
+      - operator_research
+    status: observed
+    attention_level: watch
+    material_trigger:
+    blocking: false
+    priority_rank: 4
+    source_provenance:
+      - path: docs/market/market-signal-watch-register.yaml
+        claim_scope: ARC_AGENTIC_FINANCE_2026_governed_watch
+      - path: docs/architecture/machine-spending-review-context.md
+        claim_scope: standing_mandate_specification_hypothesis
+    current_evidence_state: Market architecture and specification signals exist; operator need is unvalidated.
+    hypothesis: Repeated delegated-capital activity may increase need for persistent decision-basis context.
+    falsification_conditions:
+      - operator_evidence_shows_no_recurring_context_or_reconstruction_need
+      - delegated_authority_remains_irrelevant_to_review_context
+    next_action_class: research
+    implementation_in_this_PR: false
+    recommended_owner: Market_Signal_Agent
+    assignment_status: recommended_not_assigned
+    authority_required: false
+    authority_basis: none_for_bounded_research_recommendation
+    completion_condition: >
+      Bounded operator evidence supports, narrows, or falsifies the hypothesis
+      without becoming a product requirement by implication.
+    completion_evidence:
+      artifact_or_registry_path:
+      resulting_commit_or_record_id:
+      completed_at:
+      writer_authority:
+      historical_entries_preserved:
+      provenance_preserved:
+      silent_overwrite_detected:
+      independently_verified_at:
+    reopen_or_escalation_conditions:
+      - repeated_operator_behavior_meets_the_governed_watch_escalation_rule
+    notes: Market signal is not buyer demand, adoption, or implementation authority.
+
+  - item_id: CCO-COHERENCE-001
+    title: Legacy integration generation drift
+    question: >
+      Does current external integration guidance require reconciliation because
+      it retains Legacy-v1 decision-status semantics while target v2 is the
+      canonical future model?
+    affected_layers:
+      - documentation_coherence
+      - external_integration_guidance
+      - product_generation_separation
+    status: observed
+    attention_level: review_required
+    material_trigger:
+    blocking: false
+    priority_rank: 5
+    source_provenance:
+      - path: docs/openai_workspace_agents.md
+        claim_scope: Legacy_v1_agent_integration_language
+      - path: docs/mcp_tool_integration.md
+        claim_scope: Legacy_v1_MCP_integration_language
+      - path: docs/integration_entry.md
+        claim_scope: Legacy_v1_general_integration_language
+      - path: docs/target-v2/README.md
+        claim_scope: canonical_future_external_model
+    current_evidence_state: >
+      Legacy-v1 decision-status language and target-v2 canonical-future status
+      coexist; this register does not determine that the guidance is incorrect.
+    hypothesis: A later governed review may need generation labels or reconciliation.
+    falsification_conditions:
+      - canonical_review_confirms_current_guidance_is_intentionally_generation_scoped
+    next_action_class: reconcile
+    implementation_in_this_PR: false
+    recommended_owner: Jarvis_Nova_CCO
+    assignment_status: recommended_not_assigned
+    authority_required: false
+    authority_basis: none_for_review_recommendation
+    completion_condition: >
+      A governed review resolves whether integration guidance remains valid,
+      needs generation labels, or needs a separately authorized update.
+    completion_evidence:
+      artifact_or_registry_path:
+      resulting_commit_or_record_id:
+      completed_at:
+      writer_authority:
+      historical_entries_preserved:
+      provenance_preserved:
+      silent_overwrite_detected:
+      independently_verified_at:
+    reopen_or_escalation_conditions:
+      - integration_guidance_is_used_for_a_new_external_integration
+      - target_v2_runtime_or_adapter_work_becomes_authorized
+    notes: Referenced integration documents remain unchanged.
