@@ -90,6 +90,12 @@ Observed
 != independently verified
 ```
 
+The machine contract represents epistemic state, recommendation, authority,
+assignment, implementation, completion, and verification as separate
+dimensions. Synthetic fixtures are explicitly marked and cannot be treated as
+operational evidence. Change and no-change conclusions name their comparison
+baseline.
+
 Market signals may support research or a watch. They do not establish buyer
 demand, adoption, product requirements, or implementation authority.
 

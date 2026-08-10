@@ -32,6 +32,48 @@ def test_valid_minimal_system_need_assessment_passes():
     assert validate_assessment_document(_assessment()) == []
 
 
+def test_observed_plus_recommended_is_representable():
+    document = _assessment()
+    assessment = document["cco_system_need_assessment"]
+    assessment["binding_uncertainty"]["epistemic_state"]["value"] = "observed"
+    assessment["work_state"]["recommendation_status"] = "recommended"
+    assert validate_assessment_document(document) == []
+
+
+def test_authorized_but_not_implemented_is_representable():
+    document = _assessment()
+    assessment = document["cco_system_need_assessment"]
+    routing = assessment["attention_routing"]
+    routing["authority_status"] = "externally_granted"
+    routing["authority_evidence_reference"] = "governance-record-001"
+    routing["authority_evidence_source"] = "external_authority_record"
+    assessment["work_state"]["implementation_status"] = "not_started"
+    assert validate_assessment_document(document) == []
+
+
+def test_implemented_but_not_verified_is_representable():
+    document = _assessment()
+    work_state = document["cco_system_need_assessment"]["work_state"]
+    work_state["implementation_status"] = "implemented"
+    work_state["verification_status"] = "unverified"
+    assert validate_assessment_document(document) == []
+
+
+def test_completed_but_not_independently_verified_is_representable():
+    document = _assessment()
+    work_state = document["cco_system_need_assessment"]["work_state"]
+    work_state["completion_status"] = "completed"
+    work_state["verification_status"] = "unverified"
+    assert validate_assessment_document(document) == []
+
+
+def test_collapsed_current_evidence_state_is_rejected():
+    document = _assessment()
+    document["cco_system_need_assessment"]["binding_uncertainty"]["current_evidence_state"] = "observed"
+    issues = validate_assessment_document(document)
+    assert any("current_evidence_state" in issue.message for issue in issues)
+
+
 def test_valid_priority_register_passes():
     assert validate_priority_register_document(_register()) == []
 
@@ -175,6 +217,101 @@ def test_repository_api_treated_as_deployed_runtime_fails():
     assert any("treated_as_deployed_runtime" in field for field in _fields(validate_assessment_document(document)))
 
 
+def _available_external_runtime(document: dict) -> dict:
+    observation = document["cco_system_need_assessment"]["api_observability"]["externally_observed_runtime"]
+    observation.update(
+        {
+            "status": "available",
+            "observed_at": "2026-08-10T15:03:00Z",
+            "endpoint_or_surface": "/health",
+            "observation_method": "bounded_HTTP_observation",
+            "evidence_references": ["external-observation-001"],
+            "limitation": "Does not establish deployed commit or custody.",
+        }
+    )
+    return observation
+
+
+def _available_control_plane(document: dict) -> dict:
+    attestation = document["cco_system_need_assessment"]["api_observability"]["control_plane_attestation"]
+    attestation.update(
+        {
+            "status": "available",
+            "environment_identifier": "production-example",
+            "observed_at": "2026-08-10T15:03:00Z",
+            "evidence_method": "authenticated_control_plane_inspection",
+            "custody_or_owner_evidence": "owner-evidence-001",
+            "deployed_commit": "19cfeb341e8d10d223979f40b88d598da5ae1770",
+            "evidence_references": ["attestation-record-001"],
+            "limitation": None,
+        }
+    )
+    return attestation
+
+
+def test_external_runtime_available_without_observed_at_fails():
+    document = _assessment()
+    observation = _available_external_runtime(document)
+    del observation["observed_at"]
+    assert any("externally_observed_runtime" in field for field in _fields(validate_assessment_document(document)))
+
+
+def test_external_runtime_available_without_method_fails():
+    document = _assessment()
+    observation = _available_external_runtime(document)
+    del observation["observation_method"]
+    assert any("externally_observed_runtime" in field for field in _fields(validate_assessment_document(document)))
+
+
+def test_external_runtime_available_without_endpoint_or_surface_fails():
+    document = _assessment()
+    observation = _available_external_runtime(document)
+    del observation["endpoint_or_surface"]
+    assert any("externally_observed_runtime" in field for field in _fields(validate_assessment_document(document)))
+
+
+def test_control_plane_available_without_environment_fails():
+    document = _assessment()
+    attestation = _available_control_plane(document)
+    del attestation["environment_identifier"]
+    assert any("control_plane_attestation" in field for field in _fields(validate_assessment_document(document)))
+
+
+def test_control_plane_available_without_observed_at_fails():
+    document = _assessment()
+    attestation = _available_control_plane(document)
+    del attestation["observed_at"]
+    assert any("control_plane_attestation" in field for field in _fields(validate_assessment_document(document)))
+
+
+def test_control_plane_available_without_custody_evidence_fails():
+    document = _assessment()
+    attestation = _available_control_plane(document)
+    del attestation["custody_or_owner_evidence"]
+    assert any("control_plane_attestation" in field for field in _fields(validate_assessment_document(document)))
+
+
+def test_control_plane_available_without_evidence_method_fails():
+    document = _assessment()
+    attestation = _available_control_plane(document)
+    del attestation["evidence_method"]
+    assert any("control_plane_attestation" in field for field in _fields(validate_assessment_document(document)))
+
+
+def test_control_plane_available_without_deployed_commit_fails():
+    document = _assessment()
+    attestation = _available_control_plane(document)
+    del attestation["deployed_commit"]
+    assert any("control_plane_attestation" in field for field in _fields(validate_assessment_document(document)))
+
+
+def test_repository_api_evidence_only_passes_without_runtime_inference():
+    document = _assessment()
+    repository = document["cco_system_need_assessment"]["api_observability"]["repository_implementation"]
+    assert repository["treated_as_deployed_runtime"] is False
+    assert validate_assessment_document(document) == []
+
+
 def test_target_v2_contract_treated_as_runtime_fails():
     document = _assessment()
     document["cco_system_need_assessment"]["product_generation"]["target_v2_contract_treated_as_runtime"] = True
@@ -226,6 +363,113 @@ def test_observed_production_change_requires_attestation_evidence():
     assert any("state_change_evidence.production" in field for field in _fields(validate_assessment_document(document)))
 
 
+def test_production_change_with_arbitrary_string_fails():
+    document = _assessment()
+    assessment = document["cco_system_need_assessment"]
+    assessment["observed_state_delta"]["production_change"] = True
+    assessment["state_change_evidence"]["production"] = ["some_string"]
+    assert any("state_change_evidence.production" in field for field in _fields(validate_assessment_document(document)))
+
+
+def test_production_change_with_repository_code_only_fails():
+    document = _assessment()
+    assessment = document["cco_system_need_assessment"]
+    assessment["observed_state_delta"]["production_change"] = True
+    assessment["state_change_evidence"]["production"] = [
+        {
+            "source_class": "repository_implementation",
+            "source_reference": "app.py",
+        }
+    ]
+    assert any("state_change_evidence.production" in field for field in _fields(validate_assessment_document(document)))
+
+
+def test_corporate_state_change_with_cco_priority_register_fails():
+    document = _assessment()
+    assessment = document["cco_system_need_assessment"]
+    assessment["observed_state_delta"]["canonical_corporate_state_changed"] = True
+    assessment["state_change_evidence"]["canonical_corporate_state"] = [
+        {
+            "source_class": "cco_priority_register",
+            "source_reference": "docs/operations/cco/current-priority-register.yaml",
+        }
+    ]
+    assert any("state_change_evidence.canonical_corporate_state" in field for field in _fields(validate_assessment_document(document)))
+
+
+def test_corporate_state_change_with_market_signal_fails():
+    document = _assessment()
+    assessment = document["cco_system_need_assessment"]
+    assessment["observed_state_delta"]["canonical_corporate_state_changed"] = True
+    assessment["state_change_evidence"]["canonical_corporate_state"] = [
+        {
+            "source_class": "market_signal",
+            "source_reference": "docs/market/market-signal-watch-register.yaml",
+        }
+    ]
+    assert any("state_change_evidence.canonical_corporate_state" in field for field in _fields(validate_assessment_document(document)))
+
+
+def test_chronology_change_with_cco_recommendation_fails():
+    document = _assessment()
+    assessment = document["cco_system_need_assessment"]
+    assessment["observed_state_delta"]["chronology_change"] = True
+    assessment["state_change_evidence"]["chronology"] = [
+        {
+            "source_class": "cco_recommendation",
+            "source_reference": "recommendation-001",
+        }
+    ]
+    assert any("state_change_evidence.chronology" in field for field in _fields(validate_assessment_document(document)))
+
+
+def test_real_accepted_state_registry_entry_can_support_corporate_change():
+    document = _assessment()
+    assessment = document["cco_system_need_assessment"]
+    assessment["observed_state_delta"]["canonical_corporate_state_changed"] = True
+    assessment["state_change_evidence"]["canonical_corporate_state"] = [
+        {
+            "source_class": "accepted_state_registry_entry",
+            "source_reference": "agent_files/state/accepted-state-registry.yaml",
+            "accepted_state_id": "architect_data_operations_stage_a_policy_2026_07_17",
+            "observed_or_effective_at": "2026-08-10T15:03:00Z",
+        }
+    ]
+    assert validate_assessment_document(document) == []
+
+
+def test_typed_production_attestation_can_support_production_change():
+    document = _assessment()
+    assessment = document["cco_system_need_assessment"]
+    assessment["observed_state_delta"]["production_change"] = True
+    assessment["state_change_evidence"]["production"] = [
+        {
+            "source_class": "production_control_plane_attestation",
+            "source_reference": "docs/operations/production-control-plane-attestation.md",
+            "environment_identifier": "production-example",
+            "observed_at": "2026-08-10T15:03:00Z",
+            "evidence_method": "authenticated_control_plane_inspection",
+            "custody_or_owner_evidence": "owner-evidence-001",
+            "deployed_commit": "19cfeb341e8d10d223979f40b88d598da5ae1770",
+        }
+    ]
+    assert validate_assessment_document(document) == []
+
+
+def test_governed_chronology_event_can_support_chronology_change():
+    document = _assessment()
+    assessment = document["cco_system_need_assessment"]
+    assessment["observed_state_delta"]["chronology_change"] = True
+    assessment["state_change_evidence"]["chronology"] = [
+        {
+            "source_class": "chronology_event",
+            "source_reference": "chronology/governance/governance-events.jsonl",
+            "event_or_record_id": "GOV-20260713-GATE4B-IMPLEMENTATION-ACCEPTED",
+        }
+    ]
+    assert validate_assessment_document(document) == []
+
+
 def test_observed_corporate_state_change_requires_authoritative_evidence():
     document = _assessment()
     document["cco_system_need_assessment"]["observed_state_delta"]["canonical_corporate_state_changed"] = True
@@ -259,3 +503,48 @@ def test_terminal_priority_with_complete_evidence_passes():
         "independently_verified_at": "2026-08-10T16:05:00Z",
     }
     assert validate_priority_register_document(register) == []
+
+
+def test_operational_no_delta_without_baseline_fails():
+    document = _assessment()
+    assessment = document["cco_system_need_assessment"]
+    assessment["record_source_type"] = "operational_assessment"
+    assessment["operational_evidence_eligible"] = True
+    assessment["comparison_baseline"] = None
+    assert "comparison_baseline" in _fields(validate_assessment_document(document))
+
+
+def test_observed_change_without_baseline_fails():
+    document = _assessment()
+    assessment = document["cco_system_need_assessment"]
+    assessment["source_conclusions"][0]["conclusion"] = "observed_change"
+    assessment["comparison_baseline"] = None
+    assert "comparison_baseline" in _fields(validate_assessment_document(document))
+
+
+def test_unknown_source_without_baseline_passes():
+    document = _assessment()
+    assessment = document["cco_system_need_assessment"]
+    for conclusion in assessment["source_conclusions"]:
+        conclusion["conclusion"] = "unknown"
+    assessment["comparison_baseline"] = None
+    assessment["material_delta"]["summary"] = "Material delta is unknown under stated source limits."
+    assert validate_assessment_document(document) == []
+
+
+def test_synthetic_fixture_is_marked_synthetic():
+    assessment = _assessment()["cco_system_need_assessment"]
+    assert assessment["record_source_type"] == "synthetic_fixture"
+    assert assessment["operational_evidence_eligible"] is False
+
+
+def test_synthetic_fixture_treated_as_operational_evidence_fails():
+    document = _assessment()
+    document["cco_system_need_assessment"]["operational_evidence_eligible"] = True
+    assert any("operational_evidence_eligible" in field for field in _fields(validate_assessment_document(document)))
+
+
+def test_standing_mandate_watch_routes_operator_evidence_separately():
+    register = _register()
+    item = next(entry for entry in register["items"] if entry["item_id"] == "CCO-WATCH-001")
+    assert item["recommended_owner"] == "Architect_or_authorized_operator_research_owner"

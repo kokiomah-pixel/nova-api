@@ -1,6 +1,8 @@
 cco_system_need_assessment:
   assessment_id: CCO-ASSESSMENT-2026-08-10-001
   schema_version: cco_system_need_assessment_v0_1
+  record_source_type: synthetic_fixture
+  operational_evidence_eligible: false
   created_at: "2026-08-10T15:04:00Z"
   repository_verified_at: "2026-08-10T15:02:00Z"
   open_prs_verified_at: "2026-08-10T15:03:00Z"
@@ -49,6 +51,11 @@ cco_system_need_assessment:
       availability: unavailable
       conclusion: unknown
 
+  comparison_baseline:
+    baseline_type: explicit_initial_baseline
+    baseline_reference: synthetic_fixture_initial_baseline
+    baseline_observed_at: "2026-08-10T15:02:00Z"
+
   material_delta:
     changed: false
     summary: No material repository delta; readiness gaps remain unresolved.
@@ -61,17 +68,25 @@ cco_system_need_assessment:
     uncertainty_id: CCO-UNCERTAINTY-PRODUCTION-CUSTODY
     question: Is production custody sufficiently attested for Gate 1 progression?
     why_binding: It conditions target-v2 design, adapter, pilot, and production decisions.
+    epistemic_state:
+      value: observed
     downstream_decisions_conditioned:
       - architecture
       - pilot_design
       - production_readiness
       - institutional_framing
-    current_evidence_state: observed
     supporting_sources:
       - docs/operations/production-readiness-register.md
     contradictory_sources: []
     falsification_conditions:
       - current_control_plane_attestation_satisfies_Gate_1
+
+  work_state:
+    recommendation_status: recommended
+    assignment_status: recommended_not_assigned
+    implementation_status: not_started
+    completion_status: not_complete
+    verification_status: unverified
 
   system_need:
     action_class: reconcile
@@ -139,6 +154,11 @@ cco_system_need_assessment:
     canonical_corporate_state: []
     production: []
     chronology: []
+
+  record_effect:
+    corporate_state_effect: none
+    production_evidence_effect: none
+    chronology_effect: none
 
   assessment_artifact_effect:
     creates_corporate_accepted_state: false

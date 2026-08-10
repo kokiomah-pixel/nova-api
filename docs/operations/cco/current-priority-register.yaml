@@ -167,7 +167,7 @@ items:
       - delegated_authority_remains_irrelevant_to_review_context
     next_action_class: research
     implementation_in_this_PR: false
-    recommended_owner: Market_Signal_Agent
+    recommended_owner: Architect_or_authorized_operator_research_owner
     assignment_status: recommended_not_assigned
     authority_required: false
     authority_basis: none_for_bounded_research_recommendation

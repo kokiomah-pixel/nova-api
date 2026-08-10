@@ -207,6 +207,21 @@ def validate_assessment_document(document: Any) -> list[ValidationIssue]:
                 )
             )
 
+    comparison_baseline = assessment.get("comparison_baseline")
+    comparison_claims = {
+        conclusion.get("conclusion")
+        for conclusion in assessment.get("source_conclusions", [])
+        if isinstance(conclusion, dict)
+    }
+    if comparison_claims & {"observed_change", "no_material_delta"}:
+        if not isinstance(comparison_baseline, dict):
+            issues.append(
+                ValidationIssue(
+                    "comparison_baseline",
+                    "observed change and no-material-delta conclusions require a comparison baseline",
+                )
+            )
+
     issues.extend(
         _freshness_issues(
             assessment,
@@ -274,6 +289,39 @@ def validate_assessment_document(document: Any) -> list[ValidationIssue]:
                     ValidationIssue(
                         f"state_change_evidence.{evidence_field}",
                         f"required when {change_field} is true",
+                    )
+                )
+
+        accepted_registry = yaml.safe_load(
+            (REPO_ROOT / "agent_files/state/accepted-state-registry.yaml").read_text(
+                encoding="utf-8"
+            )
+        )
+        accepted_ids = {
+            entry.get("accepted_state_id")
+            for entry in accepted_registry.get("entries", [])
+            if isinstance(entry, dict)
+        }
+        for index, reference in enumerate(evidence.get("canonical_corporate_state", [])):
+            if isinstance(reference, dict) and reference.get("accepted_state_id") not in accepted_ids:
+                issues.append(
+                    ValidationIssue(
+                        f"state_change_evidence.canonical_corporate_state.{index}.accepted_state_id",
+                        "must identify an entry in the canonical accepted-state registry",
+                    )
+                )
+
+        chronology_ids: set[str] = set()
+        for chronology_file in (REPO_ROOT / "chronology").rglob("*.jsonl"):
+            for line in chronology_file.read_text(encoding="utf-8").splitlines():
+                if line.strip():
+                    chronology_ids.add(json.loads(line).get("event_id"))
+        for index, reference in enumerate(evidence.get("chronology", [])):
+            if isinstance(reference, dict) and reference.get("event_or_record_id") not in chronology_ids:
+                issues.append(
+                    ValidationIssue(
+                        f"state_change_evidence.chronology.{index}.event_or_record_id",
+                        "must identify an existing governed chronology event",
                     )
                 )
 

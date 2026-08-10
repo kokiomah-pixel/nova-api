@@ -46,6 +46,12 @@ the assessment when the source is available. An unavailable source is a stated
 limitation, not a negative fact. A source that was not checked is not evidence
 of no change.
 
+An assessment records whether it is an `operational_assessment` or a
+`synthetic_fixture`. Synthetic fixture timestamps, SHAs, and conclusions are
+test data and are never current operating evidence. A conclusion of
+`observed_change` or `no_material_delta` requires a named comparison baseline;
+`unknown` does not manufacture a comparison claim.
+
 ## Binding uncertainty
 
 The binding uncertainty is the unresolved question whose resolution would
@@ -58,6 +64,23 @@ is not automatically the newest issue, largest code task, most interesting
 signal, strongest-sounding severity, or latest discussion.
 
 Jarvis-Nova prefers resolution of high-leverage uncertainty over activity.
+
+Epistemic state is represented separately from work state:
+
+```text
+epistemic state
+!= recommendation
+!= authority
+!= assignment
+!= implementation
+!= completion
+!= verification
+```
+
+The binding uncertainty records only `observed`, `inferred`, `mixed`, or
+`unknown` epistemic state. Recommendation, assignment, implementation,
+completion, and verification have distinct work-state fields. Authority status
+remains in attention routing and cannot be inferred from another work field.
 
 ## Action classes
 
@@ -103,6 +126,8 @@ recommended_routing:
     role: VS_Code_or_authorized_coding_agent
   market_research:
     role: Market_Signal_Agent
+  operator_research:
+    role: Architect_or_authorized_operator_research_owner
   daily_state_verification:
     role: Daily_Coherence_Agent
   CCO_review:
@@ -114,6 +139,9 @@ recommended_routing:
 ```
 
 These are recommended roles. They create neither assignments nor authority.
+Market research may supply context for operator research, but it cannot satisfy
+an operator-evidence requirement. Market evidence, operator evidence, buyer
+demand, and adoption remain separate evidence classes.
 
 ## Completion and unresolved state
 

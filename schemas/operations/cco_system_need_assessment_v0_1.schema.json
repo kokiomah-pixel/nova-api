@@ -11,6 +11,8 @@
       "required": [
         "assessment_id",
         "schema_version",
+        "record_source_type",
+        "operational_evidence_eligible",
         "created_at",
         "repository_verified_at",
         "open_prs_verified_at",
@@ -18,8 +20,10 @@
         "open_pr_verification",
         "source_scope",
         "source_conclusions",
+        "comparison_baseline",
         "material_delta",
         "binding_uncertainty",
+        "work_state",
         "system_need",
         "attention_routing",
         "completion",
@@ -27,12 +31,15 @@
         "product_generation",
         "observed_state_delta",
         "state_change_evidence",
+        "record_effect",
         "assessment_artifact_effect"
       ],
       "additionalProperties": false,
       "properties": {
         "assessment_id": {"type": "string", "minLength": 1},
         "schema_version": {"const": "cco_system_need_assessment_v0_1"},
+        "record_source_type": {"enum": ["operational_assessment", "synthetic_fixture"]},
+        "operational_evidence_eligible": {"type": "boolean"},
         "created_at": {"$ref": "#/$defs/timestamp"},
         "repository_verified_at": {"oneOf": [{"$ref": "#/$defs/timestamp"}, {"type": "null"}]},
         "open_prs_verified_at": {"oneOf": [{"$ref": "#/$defs/timestamp"}, {"type": "null"}]},
@@ -43,8 +50,12 @@
           "type": "array",
           "items": {"$ref": "#/$defs/sourceConclusion"}
         },
+        "comparison_baseline": {
+          "oneOf": [{"$ref": "#/$defs/comparisonBaseline"}, {"type": "null"}]
+        },
         "material_delta": {"$ref": "#/$defs/materialDelta"},
         "binding_uncertainty": {"$ref": "#/$defs/bindingUncertainty"},
+        "work_state": {"$ref": "#/$defs/workState"},
         "system_need": {"$ref": "#/$defs/systemNeed"},
         "attention_routing": {"$ref": "#/$defs/attentionRouting"},
         "completion": {"$ref": "#/$defs/completion"},
@@ -52,8 +63,19 @@
         "product_generation": {"$ref": "#/$defs/productGeneration"},
         "observed_state_delta": {"$ref": "#/$defs/observedStateDelta"},
         "state_change_evidence": {"$ref": "#/$defs/stateChangeEvidence"},
+        "record_effect": {"$ref": "#/$defs/recordEffect"},
         "assessment_artifact_effect": {"$ref": "#/$defs/artifactEffect"}
-      }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"record_source_type": {"const": "synthetic_fixture"}}},
+          "then": {"properties": {"operational_evidence_eligible": {"const": false}}}
+        },
+        {
+          "if": {"properties": {"record_source_type": {"const": "operational_assessment"}}},
+          "then": {"properties": {"operational_evidence_eligible": {"const": true}}}
+        }
+      ]
     }
   },
   "$defs": {
@@ -154,6 +176,16 @@
         "conclusion": {"enum": ["observed_change", "no_material_delta", "unknown"]}
       }
     },
+    "comparisonBaseline": {
+      "type": "object",
+      "required": ["baseline_type", "baseline_reference", "baseline_observed_at"],
+      "additionalProperties": false,
+      "properties": {
+        "baseline_type": {"enum": ["prior_verified_assessment", "verified_repository_snapshot", "explicit_initial_baseline"]},
+        "baseline_reference": {"type": "string", "minLength": 1},
+        "baseline_observed_at": {"$ref": "#/$defs/timestamp"}
+      }
+    },
     "materialDelta": {
       "type": "object",
       "required": ["changed", "summary", "affected_layers", "evidence_basis"],
@@ -169,7 +201,7 @@
       "type": "object",
       "required": [
         "uncertainty_id", "question", "why_binding",
-        "downstream_decisions_conditioned", "current_evidence_state",
+        "epistemic_state", "downstream_decisions_conditioned",
         "supporting_sources", "contradictory_sources", "falsification_conditions"
       ],
       "additionalProperties": false,
@@ -177,11 +209,30 @@
         "uncertainty_id": {"type": "string", "minLength": 1},
         "question": {"type": "string", "minLength": 1},
         "why_binding": {"type": "string", "minLength": 1},
+        "epistemic_state": {
+          "type": "object",
+          "required": ["value"],
+          "additionalProperties": false,
+          "properties": {
+            "value": {"enum": ["observed", "inferred", "mixed", "unknown"]}
+          }
+        },
         "downstream_decisions_conditioned": {"$ref": "#/$defs/nonEmptyStringArray"},
-        "current_evidence_state": {"enum": ["observed", "inferred", "recommended", "authorized", "assigned", "implemented", "completed", "independently_verified", "unknown"]},
         "supporting_sources": {"$ref": "#/$defs/nonEmptyStringArray"},
         "contradictory_sources": {"$ref": "#/$defs/nonEmptyStringArray"},
         "falsification_conditions": {"$ref": "#/$defs/nonEmptyStringArray"}
+      }
+    },
+    "workState": {
+      "type": "object",
+      "required": ["recommendation_status", "assignment_status", "implementation_status", "completion_status", "verification_status"],
+      "additionalProperties": false,
+      "properties": {
+        "recommendation_status": {"enum": ["none", "recommended"]},
+        "assignment_status": {"enum": ["unassigned", "recommended_not_assigned", "assigned"]},
+        "implementation_status": {"enum": ["not_started", "in_progress", "implemented"]},
+        "completion_status": {"enum": ["not_complete", "evidence_submitted", "completed"]},
+        "verification_status": {"enum": ["unverified", "independently_verified"]}
       }
     },
     "systemNeed": {
@@ -262,15 +313,63 @@
         "next_decision_gate": {"type": "string", "minLength": 1}
       }
     },
-    "evidenceSurface": {
+    "externalRuntimeObservation": {
       "type": "object",
       "required": ["status", "evidence_references", "limitation"],
       "additionalProperties": false,
       "properties": {
         "status": {"enum": ["available", "unavailable", "not_checked", "stale"]},
+        "observed_at": {"oneOf": [{"$ref": "#/$defs/timestamp"}, {"type": "null"}]},
+        "endpoint_or_surface": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "null"}]},
+        "observation_method": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "null"}]},
         "evidence_references": {"$ref": "#/$defs/nonEmptyStringArray"},
         "limitation": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "null"}]}
-      }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"const": "available"}}},
+          "then": {
+            "required": ["observed_at", "endpoint_or_surface", "observation_method"],
+            "properties": {
+              "observed_at": {"$ref": "#/$defs/timestamp"},
+              "endpoint_or_surface": {"type": "string", "minLength": 1},
+              "observation_method": {"type": "string", "minLength": 1}
+            }
+          },
+          "else": {"properties": {"limitation": {"type": "string", "minLength": 1}}}
+        }
+      ]
+    },
+    "controlPlaneAttestation": {
+      "type": "object",
+      "required": ["status", "evidence_references", "limitation"],
+      "additionalProperties": false,
+      "properties": {
+        "status": {"enum": ["available", "unavailable", "not_checked", "stale"]},
+        "environment_identifier": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "null"}]},
+        "observed_at": {"oneOf": [{"$ref": "#/$defs/timestamp"}, {"type": "null"}]},
+        "evidence_method": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "null"}]},
+        "custody_or_owner_evidence": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "null"}]},
+        "deployed_commit": {"oneOf": [{"type": "string", "pattern": "^[0-9a-f]{40}$"}, {"type": "null"}]},
+        "evidence_references": {"$ref": "#/$defs/nonEmptyStringArray"},
+        "limitation": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "null"}]}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"const": "available"}}},
+          "then": {
+            "required": ["environment_identifier", "observed_at", "evidence_method", "custody_or_owner_evidence", "deployed_commit"],
+            "properties": {
+              "environment_identifier": {"type": "string", "minLength": 1},
+              "observed_at": {"$ref": "#/$defs/timestamp"},
+              "evidence_method": {"type": "string", "minLength": 1},
+              "custody_or_owner_evidence": {"type": "string", "minLength": 1},
+              "deployed_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+            }
+          },
+          "else": {"properties": {"limitation": {"type": "string", "minLength": 1}}}
+        }
+      ]
     },
     "apiObservability": {
       "type": "object",
@@ -288,8 +387,8 @@
             "treated_as_deployed_runtime": {"const": false}
           }
         },
-        "externally_observed_runtime": {"$ref": "#/$defs/evidenceSurface"},
-        "control_plane_attestation": {"$ref": "#/$defs/evidenceSurface"}
+        "externally_observed_runtime": {"$ref": "#/$defs/externalRuntimeObservation"},
+        "control_plane_attestation": {"$ref": "#/$defs/controlPlaneAttestation"}
       }
     },
     "productGeneration": {
@@ -328,9 +427,63 @@
       "required": ["canonical_corporate_state", "production", "chronology"],
       "additionalProperties": false,
       "properties": {
-        "canonical_corporate_state": {"$ref": "#/$defs/nonEmptyStringArray"},
-        "production": {"$ref": "#/$defs/nonEmptyStringArray"},
-        "chronology": {"$ref": "#/$defs/nonEmptyStringArray"}
+        "canonical_corporate_state": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/corporateStateEvidence"}
+        },
+        "production": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/productionStateEvidence"}
+        },
+        "chronology": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/chronologyStateEvidence"}
+        }
+      }
+    },
+    "corporateStateEvidence": {
+      "type": "object",
+      "required": ["source_class", "source_reference", "accepted_state_id", "observed_or_effective_at"],
+      "additionalProperties": false,
+      "properties": {
+        "source_class": {"const": "accepted_state_registry_entry"},
+        "source_reference": {"const": "agent_files/state/accepted-state-registry.yaml"},
+        "accepted_state_id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+        "observed_or_effective_at": {"$ref": "#/$defs/timestamp"}
+      }
+    },
+    "productionStateEvidence": {
+      "type": "object",
+      "required": ["source_class", "source_reference", "environment_identifier", "observed_at", "evidence_method", "custody_or_owner_evidence", "deployed_commit"],
+      "additionalProperties": false,
+      "properties": {
+        "source_class": {"const": "production_control_plane_attestation"},
+        "source_reference": {"const": "docs/operations/production-control-plane-attestation.md"},
+        "environment_identifier": {"type": "string", "minLength": 1},
+        "observed_at": {"$ref": "#/$defs/timestamp"},
+        "evidence_method": {"type": "string", "minLength": 1},
+        "custody_or_owner_evidence": {"type": "string", "minLength": 1},
+        "deployed_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+      }
+    },
+    "chronologyStateEvidence": {
+      "type": "object",
+      "required": ["source_class", "source_reference", "event_or_record_id"],
+      "additionalProperties": false,
+      "properties": {
+        "source_class": {"const": "chronology_event"},
+        "source_reference": {"type": "string", "pattern": "^chronology/(archive|governance|operations|reflex)/.+\\.(jsonl|yaml)$"},
+        "event_or_record_id": {"type": "string", "pattern": "^(RFX|ARC|OPS|GOV)-[0-9]{8}-[A-Z0-9][A-Z0-9_-]{2,80}$"}
+      }
+    },
+    "recordEffect": {
+      "type": "object",
+      "required": ["corporate_state_effect", "production_evidence_effect", "chronology_effect"],
+      "additionalProperties": false,
+      "properties": {
+        "corporate_state_effect": {"const": "none"},
+        "production_evidence_effect": {"const": "none"},
+        "chronology_effect": {"const": "none"}
       }
     },
     "artifactEffect": {

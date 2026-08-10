@@ -29,6 +29,7 @@ API_external_runtime_observation:
     - observed_at
     - endpoint_or_surface
     - observation_method
+    - evidence_references
   does_not_establish:
     - control_plane_custody
     - deployed_commit_without_attestation
@@ -48,10 +49,16 @@ API_control_plane_attestation:
     - observed_at
     - evidence_method
     - custody_or_owner_evidence
+    - deployed_commit
+    - evidence_references
 ```
 
-Do not fabricate missing environment, owner, custody, configuration, or
-deployed-commit fields.
+An available external-runtime observation is invalid without its observation
+time, endpoint or bounded surface, and method. An available control-plane
+attestation is invalid without its environment identifier, observation time,
+method, custody or owner evidence, and deployed commit. For `unavailable`,
+`not_checked`, or `stale`, missing evidence fields remain absent or null and an
+explicit limitation is required. Do not fabricate missing values.
 
 ## Required separations
 

@@ -45,6 +45,27 @@ sources:
       - deployed_runtime
       - live_control_plane
 
+  - source_id: corporate_accepted_state_registry
+    source_type: accepted_state_registry
+    repository_path: agent_files/state/accepted-state-registry.yaml
+    authority_owner: Architect
+    authoritative_for:
+      - corporate_accepted_state_entries_within_recorded_scope
+    not_authoritative_for:
+      - claims_excluded_by_an_entry
+      - deployed_runtime
+      - production_state
+
+  - source_id: governed_chronology_records
+    source_type: governed_chronology
+    repository_path: chronology
+    authoritative_for:
+      - schema_valid_governed_chronology_events
+    not_authoritative_for:
+      - unrecorded_events
+      - automatic_Reflex_Memory
+      - authority_not_present_in_the_event_record
+
   - source_id: production_readiness
     source_type: canonical_repository_source
     repository_path: docs/operations/production-readiness-register.md
@@ -92,7 +113,7 @@ sources:
       - production_custody
 
   - source_id: live_production_evidence
-    source_type: dynamic_production_evidence
+    source_type: production_control_plane_attestation
     repository_path:
     authoritative_for:
       - bounded_attested_production_state
