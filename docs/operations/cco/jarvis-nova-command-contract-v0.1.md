@@ -47,8 +47,8 @@ commands:
 
   review_completion:
     intent: >
-      Determine whether submitted evidence satisfies the previously defined
-      completion condition.
+      Determine whether submitted evidence satisfies the structural terminal-
+      evidence contract and is eligible for separate terminal review.
     creates_authority: false
 
   compare_state:
@@ -67,18 +67,25 @@ The command validates the supplied assessment and emits a bounded summary; it
 does not invent its binding uncertainty, action class, owner, authority need,
 material delta, or completion condition.
 
-`review-completion` applies the existing priority-register and terminal
-completion-evidence rules. Submitted evidence without independent verification
-remains non-terminal. The command reports a derived review result without
-mutating the register or independently authenticating the supplied evidence.
+`review-completion` validates the structural terminal-evidence contract and
+determines whether the supplied evidence package is eligible for separate
+terminal review. It does not independently authenticate the evidence, determine
+that an arbitrary semantic completion condition is true, mutate the priority
+register, or automatically move an item into terminal state. A populated
+`independently_verified_at` field is reported only as an independent-
+verification claim in the supplied metadata; it is not external truth verified
+by this generic command.
 
-`compare-state` requires live operational assessments, a prior assessment with
-a distinct verified basis, and a current assessment that identifies the
-supplied prior assessment as its `prior_verified_assessment`. It reports
-deterministic structural differences separately from governed state-movement
-fields. An explicit initial baseline cannot be used as a prior verified
-comparison state. Missing, stale, unavailable, or unknown current evidence is
-reported and is not represented as established no-change.
+`compare-state` requires live operational assessments and a current assessment
+that identifies the supplied prior assessment as its
+`prior_verified_assessment`. A valid initial operational assessment may use
+`explicit_initial_baseline` with `material_delta: unknown`. Once validated,
+that assessment may serve as the prior assessment for a later assessment; the
+later assessment must reference its assessment ID using
+`prior_verified_assessment`. The command reports deterministic structural
+differences separately from governed state-movement fields. Missing, stale,
+unavailable, or unknown current evidence is reported and is not represented as
+established no-change.
 
 ## Non-equivalences
 
@@ -112,6 +119,12 @@ independent verification
 structural difference
 !=
 accepted-state movement
+
+terminal evidence contract satisfied
+!=
+semantic completion verified
+!=
+item closed
 ```
 
 Passing command validation means the supplied artifact satisfies the stated

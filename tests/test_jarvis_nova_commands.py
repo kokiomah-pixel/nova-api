@@ -177,7 +177,7 @@ def test_terminal_status_without_completion_evidence_fails(tmp_path, capsys):
     assert "terminal item lacks valid completion evidence" in capsys.readouterr().err
 
 
-def test_evidence_submitted_without_independent_verification_remains_nonterminal(
+def test_missing_independent_verification_metadata_is_not_terminal_review_eligible(
     tmp_path, capsys
 ):
     register = _register_with_one_item()
@@ -188,11 +188,16 @@ def test_evidence_submitted_without_independent_verification_remains_nonterminal
     assert main(["review-completion", "--items", str(path)]) == 0
     result = yaml.safe_load(capsys.readouterr().out)["jarvis_nova_command"]
     assert result["item"]["resulting_status"] == "evidence_submitted"
-    assert result["evidence"]["completion_condition_satisfied"] is True
-    assert result["evidence"]["independent_verification_present"] is False
+    review = result["evidence_review"]
+    assert review["terminal_evidence_contract_satisfied"] is False
+    assert review["independent_verification_claim_present"] is False
+    assert review["semantic_completion_condition_verified_by_this_command"] is False
+    assert review["eligible_for_terminal_review"] is False
 
 
-def test_complete_valid_evidence_passes_and_reports_verified_complete(tmp_path, capsys):
+def test_structurally_complete_evidence_does_not_claim_semantic_completion(
+    tmp_path, capsys
+):
     register = _register_with_one_item()
     item = register["items"][0]
     item["status"] = "evidence_submitted"
@@ -200,19 +205,29 @@ def test_complete_valid_evidence_passes_and_reports_verified_complete(tmp_path, 
     path = _write_yaml(tmp_path, "items.yaml", register)
     assert main(["review-completion", "--items", str(path)]) == 0
     result = yaml.safe_load(capsys.readouterr().out)["jarvis_nova_command"]
-    assert result["item"]["resulting_status"] == "verified_complete"
-    assert result["evidence"]["independent_verification_present"] is True
+    review = result["evidence_review"]
+    assert review["terminal_evidence_contract_satisfied"] is True
+    assert review["independent_verification_claim_present"] is True
+    assert review["semantic_completion_condition_verified_by_this_command"] is False
+    assert "completion_condition_satisfied" not in review
     assert result["authority_effect"] == "none"
+
+
+def test_structurally_complete_evidence_does_not_auto_close_item(tmp_path, capsys):
+    register = _register_with_one_item()
+    item = register["items"][0]
+    item["status"] = "evidence_submitted"
+    item["completion_evidence"] = _complete_evidence(independently_verified=True)
+    path = _write_yaml(tmp_path, "items.yaml", register)
+    assert main(["review-completion", "--items", str(path)]) == 0
+    result = yaml.safe_load(capsys.readouterr().out)["jarvis_nova_command"]
+    assert result["item"]["resulting_status"] == "evidence_submitted"
+    assert result["evidence_review"]["eligible_for_terminal_review"] is True
 
 
 def _comparison_documents() -> tuple[dict, dict]:
     old = _operational_assessment()
     old_assessment = old["cco_system_need_assessment"]
-    old_assessment["comparison_baseline"] = {
-        "baseline_type": "prior_verified_assessment",
-        "baseline_reference": "CCO-ASSESSMENT-PRIOR-000",
-        "baseline_observed_at": "2026-08-09T15:00:00Z",
-    }
     new = deepcopy(old)
     new_assessment = new["cco_system_need_assessment"]
     new_assessment["assessment_id"] = "CCO-ASSESSMENT-2026-08-10-002"
@@ -250,19 +265,39 @@ def test_valid_verified_state_comparison_is_deterministic(tmp_path, capsys):
     )
 
 
-def test_initial_baseline_cannot_be_prior_verified_comparison(tmp_path, capsys):
+def test_valid_initial_assessment_can_seed_first_verified_comparison(tmp_path, capsys):
     old, new = _comparison_documents()
-    old["cco_system_need_assessment"]["comparison_baseline"] = {
+    old_assessment = old["cco_system_need_assessment"]
+    assert old_assessment["comparison_baseline"]["baseline_type"] == (
+        "explicit_initial_baseline"
+    )
+    assert old_assessment["material_delta"]["status"] == "unknown"
+    old_path = _write_yaml(tmp_path, "old.yaml", old)
+    new_path = _write_yaml(tmp_path, "new.yaml", new)
+    assert main(["compare-state", "--old", str(old_path), "--new", str(new_path)]) == 0
+    assert "status: passed" in capsys.readouterr().out
+
+
+def test_current_assessment_with_wrong_prior_reference_fails(tmp_path, capsys):
+    old, new = _comparison_documents()
+    new["cco_system_need_assessment"]["comparison_baseline"][
+        "baseline_reference"
+    ] = "CCO-ASSESSMENT-WRONG"
+    old_path = _write_yaml(tmp_path, "old.yaml", old)
+    new_path = _write_yaml(tmp_path, "new.yaml", new)
+    assert main(["compare-state", "--old", str(old_path), "--new", str(new_path)]) == 1
+    assert "must equal the prior assessment_id" in capsys.readouterr().err
+
+
+def test_current_assessment_must_use_prior_verified_baseline_type(tmp_path, capsys):
+    old, new = _comparison_documents()
+    new_assessment = new["cco_system_need_assessment"]
+    new_assessment["comparison_baseline"] = {
         "baseline_type": "explicit_initial_baseline",
-        "baseline_reference": "synthetic_initial_baseline",
-        "baseline_observed_at": "2026-08-09T15:00:00Z",
+        "baseline_reference": old["cco_system_need_assessment"]["assessment_id"],
+        "baseline_observed_at": "2026-08-10T15:04:00Z",
     }
     old_path = _write_yaml(tmp_path, "old.yaml", old)
     new_path = _write_yaml(tmp_path, "new.yaml", new)
-    assert (
-        main(
-            ["compare-state", "--old", str(old_path), "--new", str(new_path)]
-        )
-        == 1
-    )
-    assert "not a prior verified comparison state" in capsys.readouterr().err
+    assert main(["compare-state", "--old", str(old_path), "--new", str(new_path)]) == 1
+    assert "must identify a prior_verified_assessment" in capsys.readouterr().err

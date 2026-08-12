@@ -14,14 +14,14 @@ import yaml
 try:
     from scripts.validate_cco_operating_spine import (
         ValidationIssue,
-        review_priority_item_completion,
+        review_priority_item_completion_evidence,
         validate_assessment_document,
         validate_priority_register_document,
     )
 except ModuleNotFoundError:  # Direct execution adds scripts/, not the repository root.
     from validate_cco_operating_spine import (  # type: ignore[no-redef]
         ValidationIssue,
-        review_priority_item_completion,
+        review_priority_item_completion_evidence,
         validate_assessment_document,
         validate_priority_register_document,
     )
@@ -160,18 +160,19 @@ def what_does_system_need(path: Path) -> int:
 
 
 def _completion_item_result(item: dict[str, Any]) -> dict[str, Any]:
-    review = review_priority_item_completion(item)
+    review = review_priority_item_completion_evidence(item)
     return {
         "item_id": item["item_id"],
         "prior_status": review["prior_status"],
         "resulting_status": review["resulting_status"],
-        "evidence": {
-            "completion_condition_satisfied": review[
-                "completion_condition_satisfied"
-            ],
-            "independent_verification_present": review[
-                "independent_verification_present"
-            ],
+        "evidence_review": {
+            key: review[key]
+            for key in (
+                "terminal_evidence_contract_satisfied",
+                "independent_verification_claim_present",
+                "semantic_completion_condition_verified_by_this_command",
+                "eligible_for_terminal_review",
+            )
         },
     }
 
@@ -204,7 +205,7 @@ def review_completion(path: Path) -> int:
             key: item_result[key]
             for key in ("item_id", "prior_status", "resulting_status")
         }
-        result["evidence"] = item_result["evidence"]
+        result["evidence_review"] = item_result["evidence_review"]
     else:
         result["items"] = reviewed_items
     return _emit_success({"jarvis_nova_command": result})
@@ -251,30 +252,6 @@ def compare_state(old_path: Path, new_path: Path) -> int:
 
     old = _assessment(old_document)
     new = _assessment(new_document)
-    old_baseline = old.get("comparison_baseline")
-    old_baseline_type = (
-        old_baseline.get("baseline_type")
-        if isinstance(old_baseline, dict)
-        else None
-    )
-    if old_baseline_type == "explicit_initial_baseline":
-        issues.append(
-            ValidationIssue(
-                "old.comparison_baseline.baseline_type",
-                "an explicit initial baseline is not a prior verified comparison state",
-            )
-        )
-    elif old and old_baseline_type not in {
-        "prior_verified_assessment",
-        "verified_repository_snapshot",
-    }:
-        issues.append(
-            ValidationIssue(
-                "old.comparison_baseline",
-                "prior comparison state must have a distinct verified baseline",
-            )
-        )
-
     new_baseline = new.get("comparison_baseline")
     if isinstance(new_baseline, dict):
         if new_baseline.get("baseline_type") != "prior_verified_assessment":

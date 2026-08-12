@@ -147,10 +147,17 @@ Bounded work then occurs elsewhere under the applicable local authority.
 When the Architect asks, "Jarvis-Nova, did this close the gap?", Jarvis:
 
 1. inspects returned evidence;
-2. runs `make jarvis-review-completion ITEMS=path/to/open-items.yaml`;
-3. preserves non-terminal state if evidence is insufficient;
-4. independently verifies where the governing completion condition requires it;
-5. reruns the system assessment.
+2. runs `make jarvis-review-completion ITEMS=path/to/open-items.yaml` to
+   validate the evidence-package structure;
+3. preserves the item's non-terminal state;
+4. uses Jarvis review or a source-specific validator to establish semantic
+   closure where the governing completion condition requires it;
+5. represents terminal state only after that separate verification;
+6. reruns the system assessment.
+
+Structural terminal evidence, even with an independent-verification claim in
+its metadata, does not prove an arbitrary semantic completion condition and
+does not cause the generic command to close an item automatically.
 
 When the Architect asks, "Jarvis-Nova, what changed?", Jarvis:
 

@@ -523,15 +523,17 @@ def validate_assessment_document(document: Any) -> list[ValidationIssue]:
     return issues
 
 
-def review_priority_item_completion(item: Any) -> dict[str, Any]:
-    """Derive a non-mutating completion review from priority-item evidence."""
+def review_priority_item_completion_evidence(item: Any) -> dict[str, Any]:
+    """Review terminal-evidence structure without deciding semantic completion."""
 
     if not isinstance(item, dict):
         return {
             "prior_status": None,
             "resulting_status": None,
-            "completion_condition_satisfied": False,
-            "independent_verification_present": False,
+            "terminal_evidence_contract_satisfied": False,
+            "independent_verification_claim_present": False,
+            "semantic_completion_condition_verified_by_this_command": False,
+            "eligible_for_terminal_review": False,
         }
 
     evidence = item.get("completion_evidence")
@@ -541,28 +543,18 @@ def review_priority_item_completion(item: Any) -> dict[str, Any]:
         field: predicate(evidence.get(field))
         for field, predicate in COMPLETION_EVIDENCE_REQUIREMENTS
     }
-    completion_condition_satisfied = all(
-        valid
-        for field, valid in requirement_results.items()
-        if field != "independently_verified_at"
-    )
-    independent_verification_present = requirement_results[
+    terminal_evidence_contract_satisfied = all(requirement_results.values())
+    independent_verification_claim_present = requirement_results[
         "independently_verified_at"
     ]
     prior_status = item.get("status")
-    if (
-        completion_condition_satisfied
-        and independent_verification_present
-        and prior_status not in {"closed", "superseded"}
-    ):
-        resulting_status = "verified_complete"
-    else:
-        resulting_status = prior_status
     return {
         "prior_status": prior_status,
-        "resulting_status": resulting_status,
-        "completion_condition_satisfied": completion_condition_satisfied,
-        "independent_verification_present": independent_verification_present,
+        "resulting_status": prior_status,
+        "terminal_evidence_contract_satisfied": terminal_evidence_contract_satisfied,
+        "independent_verification_claim_present": independent_verification_claim_present,
+        "semantic_completion_condition_verified_by_this_command": False,
+        "eligible_for_terminal_review": terminal_evidence_contract_satisfied,
     }
 
 
