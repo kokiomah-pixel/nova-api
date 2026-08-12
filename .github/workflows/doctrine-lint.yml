@@ -68,6 +68,9 @@ jobs:
       - name: Validate CCO operating spine and authority separation
         run: make verify-cco-operating-spine
 
+      - name: Validate Jarvis-Nova command surface
+        run: .venv/bin/python -m pytest tests/test_jarvis_nova_commands.py
+
   arc_market_signal:
     runs-on: ubuntu-24.04
     timeout-minutes: 10

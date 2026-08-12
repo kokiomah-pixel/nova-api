@@ -118,6 +118,48 @@ demand, adoption, product requirements, or implementation authority.
 - `schemas/operations/` defines machine-readable assessment and register
   contracts.
 - `scripts/validate_cco_operating_spine.py` validates the spine offline.
+- `jarvis-nova-command-contract-v0.1.md` defines the deterministic live command
+  boundary.
+- `scripts/jarvis_nova_commands.py` validates constructed assessments,
+  completion evidence, and verified-state comparisons without generating CCO
+  judgment.
 
 The priority register is not corporate accepted state, chronology, Reflex
 Memory, product authority, or an automatic roadmap.
+
+## Jarvis-Nova Command Surface
+
+The command surface operationalizes the existing spine without moving
+Jarvis-Nova into the Nova product plane. It validates structured CCO artifacts;
+it does not generate assessments, parse chat, execute work, or create authority.
+
+When the Architect asks, "Jarvis-Nova, what does the system need?", Jarvis:
+
+1. verifies the available operating sources;
+2. constructs an operational assessment through bounded CCO reasoning;
+3. runs `make jarvis-what-does-system-need ASSESSMENT=path/to/assessment.yaml`;
+4. distinguishes reasoning from deterministic validation;
+5. issues a bounded recommendation;
+6. defines completion evidence.
+
+Bounded work then occurs elsewhere under the applicable local authority.
+
+When the Architect asks, "Jarvis-Nova, did this close the gap?", Jarvis:
+
+1. inspects returned evidence;
+2. runs `make jarvis-review-completion ITEMS=path/to/open-items.yaml`;
+3. preserves non-terminal state if evidence is insufficient;
+4. independently verifies where the governing completion condition requires it;
+5. reruns the system assessment.
+
+When the Architect asks, "Jarvis-Nova, what changed?", Jarvis:
+
+1. identifies a prior verified baseline;
+2. constructs the current assessment;
+3. runs `make jarvis-compare-state OLD=path/to/prior.yaml NEW=path/to/current.yaml`;
+4. distinguishes structural movement from authoritative state movement.
+
+`make verify-cco-operating-spine` continues to answer whether the static
+operating framework is internally coherent. The Jarvis-Nova commands answer
+whether specific supplied artifacts satisfy that framework. Machine validation
+does not independently authenticate source truth or attest production.

@@ -5,6 +5,9 @@ PYTHON ?= .venv/bin/python
 	verify \
 	verify-doctrine \
 	verify-cco-operating-spine \
+	jarvis-what-does-system-need \
+	jarvis-review-completion \
+	jarvis-compare-state \
 	verify-arc-market-signal-watch \
 	verify-market-signal-scan \
 	verify-scenarios \
@@ -41,6 +44,19 @@ verify-doctrine: require-venv
 
 verify-cco-operating-spine: require-venv
 	$(PYTHON) scripts/validate_cco_operating_spine.py
+
+jarvis-what-does-system-need: require-venv
+	@test -n "$(ASSESSMENT)" || (echo "ASSESSMENT is required" >&2; exit 1)
+	$(PYTHON) scripts/jarvis_nova_commands.py what-does-system-need --assessment "$(ASSESSMENT)"
+
+jarvis-review-completion: require-venv
+	@test -n "$(ITEMS)" || (echo "ITEMS is required" >&2; exit 1)
+	$(PYTHON) scripts/jarvis_nova_commands.py review-completion --items "$(ITEMS)"
+
+jarvis-compare-state: require-venv
+	@test -n "$(OLD)" || (echo "OLD is required" >&2; exit 1)
+	@test -n "$(NEW)" || (echo "NEW is required" >&2; exit 1)
+	$(PYTHON) scripts/jarvis_nova_commands.py compare-state --old "$(OLD)" --new "$(NEW)"
 
 verify-arc-market-signal-watch: require-venv
 	$(PYTHON) scripts/validate_arc_market_signal_watch.py
