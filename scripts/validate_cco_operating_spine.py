@@ -29,13 +29,16 @@ ASSESSMENT_FIXTURE_DIR = Path("tests/fixtures/cco")
 REQUIRED_ARTIFACTS = (
     Path("docs/operations/cco/README.md"),
     Path("docs/operations/cco/operating-contract-v0.1.md"),
+    Path("docs/operations/cco/jarvis-nova-command-contract-v0.1.md"),
     SOURCE_MANIFEST_PATH,
     PRIORITY_REGISTER_PATH,
     Path("docs/operations/cco/nova-api-observability-boundary.md"),
     ASSESSMENT_SCHEMA_PATH,
     PRIORITY_SCHEMA_PATH,
     Path("scripts/validate_cco_operating_spine.py"),
+    Path("scripts/jarvis_nova_commands.py"),
     Path("tests/test_cco_operating_spine.py"),
+    Path("tests/test_jarvis_nova_commands.py"),
 )
 
 REQUIRED_ARTIFACT_EFFECTS = (
@@ -49,6 +52,25 @@ REQUIRED_ARTIFACT_EFFECTS = (
 )
 
 TERMINAL_PRIORITY_STATUSES = {"verified_complete", "closed"}
+COMPLETION_EVIDENCE_REQUIREMENTS = (
+    (
+        "artifact_or_registry_path",
+        lambda value: isinstance(value, str) and bool(value.strip()),
+    ),
+    (
+        "resulting_commit_or_record_id",
+        lambda value: isinstance(value, str) and bool(value.strip()),
+    ),
+    ("completed_at", lambda value: isinstance(value, str) and bool(value.strip())),
+    ("writer_authority", lambda value: isinstance(value, str) and bool(value.strip())),
+    ("historical_entries_preserved", lambda value: value is True),
+    ("provenance_preserved", lambda value: value is True),
+    ("silent_overwrite_detected", lambda value: value is False),
+    (
+        "independently_verified_at",
+        lambda value: isinstance(value, str) and bool(value.strip()),
+    ),
+)
 MANDATORY_OPERATIONAL_SOURCES = (
     "repository_remote_main",
     "material_open_prs",
@@ -383,6 +405,20 @@ def validate_assessment_document(document: Any) -> list[ValidationIssue]:
                         "a CCO recommendation cannot serve as authority evidence",
                     )
                 )
+            authority_reference = routing.get("authority_evidence_reference")
+            if isinstance(authority_reference, str) and authority_reference.strip().lower() in {
+                "jarvis-nova",
+                "jarvis_nova",
+                "jarvis-nova cco",
+                "jarvis_nova_cco",
+                "cco recommendation",
+            }:
+                issues.append(
+                    ValidationIssue(
+                        "attention_routing.authority_evidence_reference",
+                        "Jarvis-Nova and its recommendation cannot serve as authority evidence",
+                    )
+                )
 
     effects = assessment.get("assessment_artifact_effect", {})
     if isinstance(effects, dict):
@@ -487,6 +523,63 @@ def validate_assessment_document(document: Any) -> list[ValidationIssue]:
     return issues
 
 
+def review_priority_item_completion_evidence(item: Any) -> dict[str, Any]:
+    """Review terminal-evidence structure without deciding semantic completion."""
+
+    if not isinstance(item, dict):
+        return {
+            "prior_status": None,
+            "resulting_status": None,
+            "terminal_evidence_contract_satisfied": False,
+            "independent_verification_claim_present": False,
+            "semantic_completion_condition_verified_by_this_command": False,
+            "eligible_for_terminal_review": False,
+        }
+
+    evidence = item.get("completion_evidence")
+    if not isinstance(evidence, dict):
+        evidence = {}
+    requirement_results = {
+        field: predicate(evidence.get(field))
+        for field, predicate in COMPLETION_EVIDENCE_REQUIREMENTS
+    }
+    terminal_evidence_contract_satisfied = all(requirement_results.values())
+    independent_verification_claim_present = requirement_results[
+        "independently_verified_at"
+    ]
+    prior_status = item.get("status")
+    return {
+        "prior_status": prior_status,
+        "resulting_status": prior_status,
+        "terminal_evidence_contract_satisfied": terminal_evidence_contract_satisfied,
+        "independent_verification_claim_present": independent_verification_claim_present,
+        "semantic_completion_condition_verified_by_this_command": False,
+        "eligible_for_terminal_review": terminal_evidence_contract_satisfied,
+    }
+
+
+def validate_terminal_completion_evidence(
+    item: Any, prefix: str
+) -> list[ValidationIssue]:
+    """Validate the evidence required for an item that claims terminal status."""
+
+    if not isinstance(item, dict):
+        return []
+    evidence = item.get("completion_evidence")
+    if not isinstance(evidence, dict):
+        return []
+    issues: list[ValidationIssue] = []
+    for field, predicate in COMPLETION_EVIDENCE_REQUIREMENTS:
+        if not predicate(evidence.get(field)):
+            issues.append(
+                ValidationIssue(
+                    f"{prefix}.completion_evidence.{field}",
+                    "terminal item lacks valid completion evidence",
+                )
+            )
+    return issues
+
+
 def validate_priority_register_document(document: Any) -> list[ValidationIssue]:
     """Validate the CCO priority register and terminal-state integrity."""
 
@@ -524,25 +617,8 @@ def validate_priority_register_document(document: Any) -> list[ValidationIssue]:
                     )
 
         evidence = item.get("completion_evidence", {})
-        if item.get("status") in TERMINAL_PRIORITY_STATUSES and isinstance(evidence, dict):
-            terminal_values = {
-                "artifact_or_registry_path": lambda value: isinstance(value, str) and bool(value.strip()),
-                "resulting_commit_or_record_id": lambda value: isinstance(value, str) and bool(value.strip()),
-                "completed_at": lambda value: isinstance(value, str) and bool(value.strip()),
-                "writer_authority": lambda value: isinstance(value, str) and bool(value.strip()),
-                "historical_entries_preserved": lambda value: value is True,
-                "provenance_preserved": lambda value: value is True,
-                "silent_overwrite_detected": lambda value: value is False,
-                "independently_verified_at": lambda value: isinstance(value, str) and bool(value.strip()),
-            }
-            for field, predicate in terminal_values.items():
-                if not predicate(evidence.get(field)):
-                    issues.append(
-                        ValidationIssue(
-                            f"{prefix}.completion_evidence.{field}",
-                            "terminal item lacks valid completion evidence",
-                        )
-                    )
+        if item.get("status") in TERMINAL_PRIORITY_STATUSES:
+            issues.extend(validate_terminal_completion_evidence(item, prefix))
 
         if isinstance(evidence, dict) and evidence.get("silent_overwrite_detected") is True:
             issues.append(
