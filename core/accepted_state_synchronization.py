@@ -332,7 +332,7 @@ def resolve_registry_source(
         "source_resolution": {
             "local_runtime_root": str(repo_root.resolve()),
             "local_registry_absolute_path": str(checkout_registry_path.resolve()),
-            "remote_repository": "kokiomah-pixel/sharpe-nova-os",
+            "remote_repository": "nova-infrastructure-systems/sharpe-nova-os",
             "remote_registry_commit": canonical_main_commit,
             "canonical_registry_standard": "repository_main_unless_governing_standard_designates_external_store",
             "configured_registry_source": "origin/main" if canonical_available else "repository_checkout",
