@@ -15,19 +15,20 @@ For the compressed public system status, see:
 
 This register provides gate-level detail.
 
-It does not permit a reader to combine a `READY` subcomponent with blocked
-production controls and conclude that Sharpe Nova OS is system-wide
-production-ready.
+It does not permit a reader to combine a `READY` or `CONDITIONALLY_READY`
+subcomponent with blocked production controls and conclude that Sharpe Nova OS
+is system-wide production-ready.
 
 ```yaml
 public_claim_summary:
   repository_governance: ready
   Legacy_v1_runtime: implemented
+  Legacy_v1_dependency: conditionally_ready_no_external_consumers_observed
   target_v2_contract: approved
   target_v2_runtime: not_implemented
   target_v2_production: not_active
   institutional_pilot: not_started
-  production_custody_attestation: not_complete
+  production_custody_attestation: incomplete
   system_wide_production_readiness: not_established
 ```
 
@@ -52,7 +53,7 @@ readiness_states:
     meaning: evidence_complete_and_gate_satisfied
 
   CONDITIONALLY_READY:
-    meaning: safe_for_bounded_internal_use_with_known_limitations
+    meaning: bounded_progress_supported_by_evidence_with_known_limitations
 
   BLOCKED:
     meaning: a_required_dependency_or_control_is_missing
@@ -63,57 +64,79 @@ readiness_states:
 
 ## Current State
 
-The following state is a point-in-time governance snapshot, not live telemetry.
-It must be refreshed only from a named evidence receipt.
+The following state is a point-in-time governance reconciliation, not live
+telemetry. It is supported by the named evidence receipt:
+
+- [Readiness Reconciliation Evidence Receipt — 2026-08-19](readiness-reconciliation-2026-08-19.md)
 
 ```yaml
 state_snapshot:
-  as_of_UTC: "2026-07-25T14:17:27Z"
+  as_of_date: "2026-08-19"
   evidence_scope:
-    - GitHub_repository_governance
-    - externally_observed_public_runtime_behavior
-  excluded_from_attestation:
-    - Render_control_plane_custody
-    - deployed_commit
-    - effective_production_flags
-    - production_API_keys
-    - retained_route_activity
-    - CDP_activity
+    independently_verified:
+      - GitHub_repository_corporate_ownership
+      - GitHub_current_main
+      - GitHub_PR_38_identity_reconciliation_merge
+    Architect_attested:
+      - Render_authenticated_service_view
+      - Render_repository_binding
+      - Render_deployed_commit
+      - Render_service_health
+      - Render_environment_presence_and_effective_fail_closed_containment
+      - Legacy_v1_key_inventory
+      - Legacy_v1_route_history_review
+      - Legacy_v1_consumer_classification
+    unresolved:
+      - CDP_authenticated_provider_custody
+      - CDP_activity_review
+      - historical_settlement_activity
+      - historical_retention_completeness
 ```
 
 ```yaml
 current_state:
   GitHub:
+    corporate_repository: nova-infrastructure-systems/sharpe-nova-os
+    main_commit: 95ca9d5adea7658e7ece5e3ebd0a33d0ab483e41
+    repository_transfer_verified: true
+    repository_identity_reconciliation_verified: true
+    historical_provenance_preserved: true
     main_protected: true
     pull_requests_required: true
     required_CI_enabled: true
     force_pushes_blocked: true
-    branch_deletion_blocked: true
-    required_approvals: 0
     Architect_admin_bypass: true
+    independent_second_owner: false
 
   public_runtime:
     health: available
-    OpenAPI: contained
-    Swagger: contained
-    ReDoc: contained
-    services_manifest: contained
-    public_x402: contained
-    unauthenticated_v1: blocked
+    OpenAPI: contained_last_attested
+    Swagger: contained_last_attested
+    ReDoc: contained_last_attested
+    services_manifest: contained_last_attested
+    public_x402: contained_last_attested
+    unauthenticated_v1: blocked_last_verified
 
   production_control:
     primary_owner: Kome_Okiomah
-    Render_control_plane_attested: false
+    Render_control_plane_attested: Architect_attested
+    Render_repository_source: nova-infrastructure-systems/sharpe-nova-os
+    Render_deployed_commit: 95ca9d5adea7658e7ece5e3ebd0a33d0ab483e41
+    Render_deployed_commit_matches_main: true
+    Render_service_health: healthy
+    Render_git_credential: founder_linked
     CDP_control_plane_attested: false
-    deployed_commit_attested: false
-    production_keys_inventoried: false
-    route_activity_reviewed: false
+    production_keys_inventoried: Architect_attested
+    route_activity_reviewed: Architect_attested
     settlement_activity_reviewed: false
 
   Legacy_v1:
     implemented: true
     model: decision_admission
-    consumer_dependency: unverified
+    consumer_dependency: conditional_pass
+    external_consumers_observed: false
+    external_compatibility_window_required: false
+    safe_to_retire: false
     new_external_integrations: prohibited
 
   proposed_v2:
@@ -122,9 +145,10 @@ current_state:
     production_active: false
 ```
 
-A later reader must not treat this snapshot as evidence that the current
-production deployment still matches these observations. Production state
-requires a newer control-plane attestation and external verification receipt.
+Architect-attested provider observations are not independent provider-control
+verification. The Render git credential and GitHub organization remain
+founder-concentrated continuity risks. Absence of current Render CDP credentials
+does not prove absence of historical CDP activity or settlement.
 
 ## Production Readiness
 
@@ -133,6 +157,7 @@ production_readiness:
   repository_governance:
     status: READY
     evidence:
+      - corporate_repository_ownership_verified
       - main_protected
       - required_CI
       - product_generation_labeling
@@ -140,37 +165,59 @@ production_readiness:
 
   public_runtime_containment:
     status: CONDITIONALLY_READY
-    limitation: external_behavior_verified_but_control_plane_not_attested
+    limitation: last_attested_containment_is_not_independently_provider_verified_post_merge
 
   Render_custody:
-    status: BLOCKED
+    status: CONDITIONALLY_READY
+    evidence:
+      - authenticated_service_view_Architect_attested
+      - corporate_repository_binding_Architect_attested
+      - deployed_commit_Architect_attested
+      - service_health_Architect_attested
+    limitation: founder_linked_git_credential_and_no_independent_provider_verification
 
   CDP_custody:
     status: BLOCKED
+    limitation: authenticated_provider_custody_not_attested
 
   deployed_commit_attestation:
-    status: BLOCKED
+    status: CONDITIONALLY_READY
+    evidence:
+      - exact_commit_matches_verified_GitHub_main
+      - service_live_and_healthy_Architect_attested
+    limitation: Render_control_plane_not_independently_verified
 
   production_key_inventory:
-    status: BLOCKED
+    status: CONDITIONALLY_READY
+    limitation: Architect_attested_internal_test_classification_not_independently_verified
 
   route_activity_inventory:
-    status: BLOCKED
+    status: CONDITIONALLY_READY
+    limitation: Architect_attested_review_window_and_retention_not_independently_verified
 
   settlement_activity_inventory:
     status: BLOCKED
+    limitation: CDP_activity_and_historical_retention_not_reconciled
 
   incident_closure:
     status: BLOCKED
+    limitation: current_CDP_ownership_and_settlement_configuration_evidence_required
 
   Legacy_v1_dependency:
-    status: BLOCKED
+    status: CONDITIONALLY_READY
+    evidence:
+      - keys_inventoried
+      - route_history_reviewed
+      - consumers_classified
+      - no_external_consumers_observed
+    limitation: historical_retention_not_proven_complete_and_evidence_not_independently_verified
 
   v2_contract_design:
     status: READY
 
   v2_field_derivation:
     status: BLOCKED
+    limitation: Gate_1_production_custody_incomplete
 
   v2_adapter:
     status: NOT_STARTED
@@ -189,8 +236,8 @@ production_readiness:
 ```
 
 `READY` for repository governance does not mean production is fully governed.
-The Architect's administrator bypass remains a documented sole-operator
-limitation, and no independent human approval is presently required.
+The Architect's administrator bypass, sole human ownership, and founder-linked
+Render credential remain documented continuity limitations.
 
 ## Product Progression Gates
 
@@ -198,6 +245,15 @@ limitation, and no independent human approval is presently required.
 product_progression:
   Gate_1:
     name: production_custody
+    status: BLOCKED
+    satisfied:
+      - Render_access_and_service_identity_Architect_attested
+      - corporate_repository_source_aligned
+      - deployed_commit_Architect_attested_and_matches_main
+    unresolved:
+      - CDP_authenticated_custody
+      - current_settlement_configuration
+      - independent_provider_verification
     requirement:
       - Render_attested
       - CDP_attested
@@ -205,6 +261,15 @@ product_progression:
 
   Gate_2:
     name: Legacy_v1_dependency
+    status: CONDITIONAL_PASS
+    satisfied:
+      - keys_inventoried
+      - logs_reviewed
+      - consumers_classified
+      - no_external_consumers_observed
+    limitations:
+      - evidence_not_independently_verified
+      - historical_retention_not_proven_complete
     requirement:
       - keys_inventoried
       - logs_reviewed
@@ -212,6 +277,8 @@ product_progression:
 
   Gate_3:
     name: v2_field_derivation_design
+    status: BLOCKED
+    reason: Gate_1_incomplete
     requirement:
       - Gate_1_complete
       - Gate_2_complete
@@ -220,6 +287,7 @@ product_progression:
 
   Gate_4:
     name: private_v2_adapter
+    status: NOT_STARTED
     requirement:
       - design_approved
       - synthetic_only
@@ -228,6 +296,7 @@ product_progression:
 
   Gate_5:
     name: bounded_institutional_pilot
+    status: NOT_STARTED
     requirement:
       - local_authority_handoff_verified
       - non_authority_contract_preserved
@@ -237,6 +306,7 @@ product_progression:
 
   Gate_6:
     name: monetization
+    status: NOT_STARTED_FOR_PILOT
     requirement:
       - pricing_buys_context_access_not_authority
       - billing_not_conditioned_on_ALLOW_DENY_or_HALT
@@ -245,6 +315,7 @@ product_progression:
 
   Gate_7:
     name: machine_discovery
+    status: BLOCKED
     requirement:
       - v2_is_the_public_contract
       - Legacy_v1_isolated
@@ -255,6 +326,30 @@ product_progression:
 Gates are sequential unless a later gate explicitly states otherwise. Design
 work may be prepared privately only within its authorized change class; no gate
 permits public activation by implication.
+
+## Incident Posture
+
+The active production/discovery incident cannot yet be classified `CLOSED` or
+`CONTAINED_HISTORICALLY_UNATTESTED` under the
+[Incident Closure Standard](incident-closure-standard.md), because current CDP
+ownership and settlement configuration remain unresolved.
+
+```yaml
+incident_posture:
+  current_outcome: OPERATIONALLY_OPEN
+  current_exposure:
+    Render_source_alignment: contained
+    public_documentation_and_discovery: contained_last_attested
+    public_x402_and_settlement: disabled_last_attested
+  unresolved:
+    - CDP_current_ownership
+    - current_settlement_configuration
+    - CDP_activity_review
+    - historical_retention_completeness
+```
+
+`OPERATIONALLY_OPEN` here means required closure evidence is incomplete. It does
+not mean an active public exposure has been observed.
 
 ## Monetization Boundary
 
@@ -318,23 +413,27 @@ tests, a synthetic demonstration, or external route containment passes.
 GTM_claim_controls:
   may_claim:
     - repository_governance_controls_exist
-    - current_public_containment_has_been_externally_observed
+    - corporate_repository_ownership_is_verified
+    - current_Render_source_is_Architect_attested_to_corporate_repository
     - Legacy_v1_is_implemented
+    - no_external_Legacy_v1_consumers_were_observed_in_the_reviewed_evidence
     - v2_contract_design_is_approved
 
-  must_not_claim_without_evidence:
-    - production_control_plane_is_attested
-    - Legacy_v1_has_no_consumers
+  must_not_claim_without_further_evidence:
+    - full_production_control_plane_is_attested
+    - Legacy_v1_never_had_external_consumers
+    - production_settlement_history_is_clear
+    - CDP_custody_is_attested
     - v2_is_implemented_or_available
     - institutional_adoption
     - buyer_validation
     - successful_paid_usage
-    - production_settlement_history_is_clear
     - enterprise_readiness
 ```
 
 ## Review and Update
 
 Update this register only when a named evidence receipt satisfies or invalidates
-a gate. Every update must identify the evidence source, observer, UTC time, and
-remaining limitation. Do not silently promote `BLOCKED` or `NOT_STARTED` states.
+a gate. Every update must identify the evidence source, observer, date or UTC
+time when available, and remaining limitation. Do not silently promote `BLOCKED`
+or `NOT_STARTED` states.
