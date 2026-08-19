@@ -729,7 +729,7 @@
               "type": "string"
             },
             "remote_repository": {
-              "const": "kokiomah-pixel/sharpe-nova-os"
+              "const": "nova-infrastructure-systems/sharpe-nova-os"
             },
             "remote_registry_commit": {
               "type": [

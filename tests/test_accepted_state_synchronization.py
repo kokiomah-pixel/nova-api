@@ -100,7 +100,7 @@ def _write_stale_mirror(root):
         yaml.safe_dump(
             {
                 "mirror_metadata": {
-                    "canonical_repository": "kokiomah-pixel/sharpe-nova-os",
+                    "canonical_repository": "nova-infrastructure-systems/sharpe-nova-os",
                     "canonical_commit": "0000000000000000000000000000000000000000",
                     "synchronized_at": "2026-07-15T00:00:00Z",
                     "registry_content_hash": "stale",
@@ -406,6 +406,20 @@ def test_archive_receipt_closure_does_not_create_duplicate_registry_entry():
     ].count(ACCEPTED_STATE_ID) == 1
 
 
+def test_registry_source_reports_corporate_repository_identity(tmp_path):
+    _copy_sync_files(tmp_path, archive_status="completed_and_verified")
+
+    state = resolve_registry_source(
+        tmp_path,
+        repository_state_override=_verified_repository_state(),
+    )
+
+    assert (
+        state["source_resolution"]["remote_repository"]
+        == "nova-infrastructure-systems/sharpe-nova-os"
+    )
+
+
 def test_canonical_registry_preferred_over_stale_local_mirror(tmp_path):
     _copy_sync_files(tmp_path, archive_status="completed_and_verified")
     mirror_root = tmp_path / "mirror"
@@ -453,7 +467,7 @@ def test_mirror_refresh_requires_schema_validation(tmp_path):
         canonical_registry_path=invalid,
         mirror_registry_path=mirror,
         metadata_path=tmp_path / "mirror/agent_files/state/accepted-state-registry.mirror-metadata.yaml",
-        canonical_repository="kokiomah-pixel/sharpe-nova-os",
+        canonical_repository="nova-infrastructure-systems/sharpe-nova-os",
         canonical_commit="fixture",
         synchronized_at="2026-07-18T00:00:00Z",
     )
@@ -473,7 +487,7 @@ def test_failed_refresh_preserves_last_valid_mirror(tmp_path):
         canonical_registry_path=invalid,
         mirror_registry_path=mirror,
         metadata_path=mirror_root / "agent_files/state/accepted-state-registry.mirror-metadata.yaml",
-        canonical_repository="kokiomah-pixel/sharpe-nova-os",
+        canonical_repository="nova-infrastructure-systems/sharpe-nova-os",
         canonical_commit="fixture",
         synchronized_at="2026-07-18T00:00:00Z",
     )
@@ -517,7 +531,7 @@ def test_mirror_refresh_does_not_create_chronology_event(tmp_path):
         canonical_registry_path=tmp_path / REGISTRY_PATH,
         mirror_registry_path=mirror_root / REGISTRY_PATH,
         metadata_path=mirror_root / "agent_files/state/accepted-state-registry.mirror-metadata.yaml",
-        canonical_repository="kokiomah-pixel/sharpe-nova-os",
+        canonical_repository="nova-infrastructure-systems/sharpe-nova-os",
         canonical_commit="fixture",
         synchronized_at="2026-07-18T00:00:00Z",
     )
