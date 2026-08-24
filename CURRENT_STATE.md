@@ -34,7 +34,7 @@ current_product_state:
   production_custody:
     GitHub_corporate_repository: verified
     Render_source_alignment: Architect_attested
-    Render_deployed_commit_matches_main: Architect_attested
+    Render_post_merge_deployment: Architect_attested_live
     Render_service_health: Architect_attested_healthy
     CDP_custody: Architect_attested_Admin_Owner
     CDP_API_key_management: true
@@ -46,12 +46,18 @@ current_product_state:
     linked_settlement_destination_present: false
     full_gate_status: conditional_pass
 
+  readiness_baseline:
+    status: closed
+    production_incident_disposition: contained_historically_unattested
+    historical_CDP_retention_complete: false
+
   target_v2:
     contract_approved: true
     runtime_implemented: false
     private_adapter_implemented: false
     production_active: false
-    field_derivation_progression: blocked_pending_incident_disposition_and_remaining_design_requirements
+    field_derivation_progression: ready_for_design_review
+    implementation_authority: false
 
   Phase_1:
     offline_proof_chain: completed
@@ -85,8 +91,10 @@ The repository and current evidence establish:
 * production-readiness and incident-control gates;
 * a corporate GitHub repository at `nova-infrastructure-systems/sharpe-nova-os`;
 * verified repository identity reconciliation through PR #38;
+* merged readiness reconciliation through PR #39;
 * Architect-attested Render source alignment to the corporate repository;
-* Architect-attested healthy deployment matching current GitHub `main`;
+* Architect-attested post-merge live deployment of closure evidence-capture commit `f313d57a5b2b120a22ba981ba9e9d65771a401ae`;
+* Architect-attested healthy `nova-api` service;
 * Architect-attested CDP Admin/Owner access with project-setting and API-key management authority;
 * one active CDP API key classified founder/internal;
 * Architect-attested current CDP x402/facilitator disabled state;
@@ -94,6 +102,9 @@ The repository and current evidence establish:
 * Architect-attested absence of settlement configuration and linked settlement destination;
 * a current visible CDP payment/settlement summary showing zero entries, zero successful settlements, and zero failed settlements;
 * an Architect-attested Legacy v1 key and route-history review with no external consumers observed in the reviewed evidence;
+* an external public-boundary check matching the repository-defined containment contract;
+* Architect approval of the final production/discovery incident disposition as `CONTAINED_HISTORICALLY_UNATTESTED`;
+* a closed Readiness Gate Baseline;
 * an initialized content operating system.
 
 ## What does not exist today
@@ -102,11 +113,10 @@ The available evidence does not establish:
 
 * a deployed target v2 runtime;
 * a production-active target v2 endpoint;
-* independently verified full production-custody attestation;
+* independently verified full provider-side production-custody attestation;
 * independently verified Legacy v1 consumer history across all retention periods;
 * complete historical CDP activity or settlement history;
 * a provider-stated historical retention boundary for the observed x402 Payments surface;
-* final incident disposition under the production incident-closure standard;
 * a live institutional pilot;
 * demonstrated operator dependency;
 * buyer pull;
@@ -118,8 +128,8 @@ The available evidence does not establish:
 
 ## Current implementation priority
 
-The immediate readiness priority is to complete the final incident-disposition
-control before progressing target v2 field derivation.
+The Readiness Gate Baseline is closed. The immediate product progression priority
+is Gate 3 target v2 field-derivation design review.
 
 ```yaml
 current_readiness_priority:
@@ -132,25 +142,27 @@ current_readiness_priority:
 
   Gate_2_Legacy_v1_dependency:
     status: conditional_pass
-    limitation:
+    limitations:
       - evidence_Architect_attested_not_independently_verified
       - historical_retention_not_proven_complete
 
   production_incident:
-    status: operationally_open_pending_final_disposition
-    likely_supported_outcome: contained_historically_unattested
-    remaining:
-      - current_external_boundary_recheck
-      - historical_retention_gap_documented_as_unattested
-      - Architect_final_incident_disposition
+    status: contained_historically_unattested
+    active_exposure_closed: true
+    historical_retention_gap_preserved: true
+
+  Readiness_Gate_Baseline:
+    status: closed
 
   Gate_3_v2_field_derivation:
-    status: blocked_until_incident_disposition_and_remaining_design_requirements
+    status: ready_for_design_review
+    implementation_authority: false
+    production_activation_authority: false
 ```
 
 The future production candidate remains one bounded private target v2 review
-context for an agent-prepared stablecoin treasury action. When authorized to
-progress, it must preserve:
+context for an agent-prepared stablecoin treasury action. Gate 3 design review
+must preserve:
 
 * stable action identity;
 * proposal-version identity;
@@ -158,7 +170,8 @@ progress, it must preserve:
 * constraint context;
 * missing, stale, conflicting, and unavailable state;
 * the local-authority boundary;
-* reconstructable review context.
+* reconstructable review context;
+* deterministic proof canonicalization.
 
 It must not approve, authorize, sign, settle, or execute the action.
 
@@ -174,9 +187,12 @@ See:
 * [Production Readiness Register](docs/operations/production-readiness-register.md)
 * [Phase 1 Inspection Status](docs/inspection/phase-1-inspection-status.md)
 
-The dated readiness reconciliation evidence receipt is maintained under
-`docs/operations/readiness-reconciliation-2026-08-19.md` and is intentionally
-not part of the public entry-link surface.
+The readiness evidence chain is maintained under:
+
+* `docs/operations/readiness-reconciliation-2026-08-19.md`;
+* `docs/operations/incident-closure-receipt-2026-08-24.md`.
+
+These evidence receipts are intentionally not part of the public entry-link surface.
 
 ## Evidence boundary
 
@@ -189,13 +205,17 @@ disabled. The visible CDP payment summary shows zero activity, but the portal
 does not expose a review window or retention boundary sufficient to establish
 that no historical CDP verification or settlement activity ever occurred.
 
+The approved disposition `CONTAINED_HISTORICALLY_UNATTESTED` closes the active
+exposure while preserving that historical unknown. It must not be interpreted
+as proof of zero historical activity.
+
 Coinbase business verification for Nova Infrastructure Systems Corporation is
 currently pending. That is a provider-onboarding state, not evidence of Nova
 institutional adoption, buyer validation, or enterprise readiness.
 
 ## Claim rule
 
-A repository artifact, passing test suite, design approval, offline proof, or
-Architect-attested provider observation does not independently establish
-system-wide production readiness, institutional use, buyer demand, adoption,
-pricing power, or product-market fit.
+A repository artifact, passing test suite, design approval, offline proof,
+Architect-attested provider observation, closed readiness baseline, or contained
+incident does not independently establish system-wide production readiness,
+institutional use, buyer demand, adoption, pricing power, or product-market fit.
