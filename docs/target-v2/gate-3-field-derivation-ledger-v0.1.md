@@ -6,6 +6,7 @@
 gate: Gate_3_v2_field_derivation_design
 status: READY_FOR_DESIGN_REVIEW
 artifact_status: proposed_not_canonical
+semantic_completion: blocked_pending_refinement_review
 design_only: true
 target_v2_runtime_implemented: false
 private_adapter_implemented: false
@@ -202,8 +203,35 @@ closed. No production algorithm or PQC suite is selected by this design.
 Plural proof attestations may represent `primary`, `parallel_transition`, and
 `renewal`. Renewal preserves original context hash and prior attestations and
 does not mean rereview, reapproval, reauthorization, or chronology acceptance.
-Parallel digest migration binds all digests to the identical canonical semantic
-byte sequence.
+Parallel digest migration binds all algorithm-qualified digest records to the
+identical canonical semantic byte sequence. Semantic identity is not any one
+digest. Historical evidence is preserved, successor digests do not replace it,
+and different algorithms are never described as producing the same hash value.
+This continuity rule is proposed refinement `G3-Q15`.
+
+## Canonical numeric and interoperability model
+
+Proposed refinement `G3-R11` adopts RFC 8785/JCS as the I-JSON structural
+canonicalization baseline and adds a versioned application profile for exact
+financial semantics. JCS's IEEE-754 number model is not used for semantic
+financial values. Binary floats, NaN, and infinity are prohibited.
+
+- exact integers use a typed canonical base-10 string, with no exponent,
+  leading zeros, or negative zero;
+- exact decimals use signed coefficient plus nonnegative scale, with exponent
+  removed and no rounding;
+- generic decimal trailing zeros are insignificant, while fixed-scale fields
+  retain the institution-profile scale;
+- monetary amounts bind explicit asset/unit, coefficient, and profile scale;
+- RFC 3339 timestamps normalize to UTC with six fractional digits and reject
+  sub-microsecond rounding;
+- Unicode is preserved as-is per JCS, `null` differs from absent, set-like
+  reference arrays are sorted/deduplicated by declared rules, and identity
+  collisions fail until represented as explicit conflicts.
+
+The executable design-only reference semantics live in
+`scripts/gate3_reference_semantics.py`. They are validation support, not target
+v2 runtime code and do not select a production hash algorithm.
 
 ## Privacy, reconstruction, and time
 
@@ -221,11 +249,15 @@ status.
 
 ## Contract and implementation boundary
 
-All G3-R01–G3-R10 and G3-Q01–G3-Q14 refinements are
+All G3-R01–G3-R11 and G3-Q01–G3-Q15 refinements are
 `proposed_not_canonical`. They require CCO and Architect review. The approved
 contract files are unchanged. This ledger creates no runtime, adapter, endpoint,
 production-crypto, chronology, Reflex Memory, settlement, or capital-movement
 authority.
+
+Gate 3 semantic completion remains blocked until `G3-R01`, `G3-R03`, `G3-R08`,
+`G3-R11`, and `G3-Q15` are reviewed. This blocker classification does not block
+design review and does not create implementation authority.
 
 This design does not establish that any system is quantum safe, quantum proof,
 post-quantum secure, or future proof. Such a claim would require exact

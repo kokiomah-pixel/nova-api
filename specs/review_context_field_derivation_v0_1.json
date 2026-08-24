@@ -56,6 +56,81 @@
     "review_completeness_precedence": "requires_reviewed_profile_rule_or_G3-R08_remains_unresolved",
     "proof_state_changes_other_dimensions_automatically": false
   },
+  "semantic_completion": {
+    "status": "blocked_pending_refinement_review",
+    "blockers": ["G3-R01", "G3-R03", "G3-R08", "G3-R11", "G3-Q15"],
+    "blocker_meaning": "Gate_3_semantic_completion_cannot_be_declared_until_CCO_and_Architect_review",
+    "implementation_authority_created": false
+  },
+  "canonical_numeric_and_interoperability_profile": {
+    "status": "proposed_not_canonical",
+    "contract_gap_reference": "G3-R11",
+    "profile_id": "nova-jcs-exact-financial-json",
+    "profile_version": "design-v0.1",
+    "base_standard": "RFC_8785_JCS",
+    "adoption_decision": "adopt_JCS_for_I_JSON_structure_strings_literals_property_order_and_UTF8_with_an_application_profile_for_exact_numeric_and_temporal_domains",
+    "JCS_deviation": false,
+    "application_profile_reason": "RFC_8785_IEEE_754_number_serialization_cannot_preserve_arbitrary_financial_decimal_precision_or_scale_semantics",
+    "unicode_behavior": "preserve_code_points_as_is_no_Unicode_normalization",
+    "object_property_order": "RFC_8785_UTF16_code_unit_lexicographic",
+    "array_default": "preserve_declared_sequence_order",
+    "duplicate_object_members": "reject",
+    "unknown_fields": "reject_from_semantic_material_unless_reviewed_extension",
+    "null_vs_absent": "distinct_required_absence_fails_projection_null_requires_declared_nullable_semantics",
+    "nullable_semantic_paths": [],
+    "json_numbers": {
+      "binary_float_permitted_in_semantic_material": false,
+      "safe_integer_primitive_range": [-9007199254740991, 9007199254740991],
+      "out_of_range_integer_behavior": "typed_exact_integer_required",
+      "NaN_and_infinity": "reject"
+    },
+    "exact_integer": {
+      "representation": {"numeric_type": "integer", "value": "canonical_base10_string"},
+      "leading_zeros": "reject_except_zero",
+      "exponent": "prohibited",
+      "negative_zero": "normalize_to_zero",
+      "precision": "field_profile_max_digits_no_rounding"
+    },
+    "exact_decimal": {
+      "representation": {"numeric_type": "decimal", "coefficient": "signed_base10_string", "scale": "nonnegative_integer"},
+      "exponent_input": "accepted_only_at_normalization_boundary_and_eliminated_from_canonical_representation",
+      "negative_zero": "coefficient_zero_without_sign",
+      "precision": "field_profile_max_digits_no_rounding",
+      "generic_trailing_zero_semantics": "insignificant_trim_to_minimum_scale",
+      "fixed_scale_trailing_zero_semantics": "significant_as_profile_declared_scale"
+    },
+    "monetary_amount": {
+      "representation": {"numeric_type": "monetary_amount", "asset_id": "explicit_opaque_asset_or_unit", "coefficient": "signed_base10_string", "scale": "profile_declared_nonnegative_integer"},
+      "implicit_currency_or_unit": false,
+      "binary_float_conversion": false,
+      "rounding": "prohibited",
+      "missing_asset_scale": "unresolved_not_canonicalizable"
+    },
+    "timestamp": {
+      "input": "RFC_3339_with_explicit_offset",
+      "timezone": "normalize_to_UTC_Z",
+      "fractional_second_digits": 6,
+      "sub_microsecond_input": "reject_without_rounding",
+      "output": "YYYY-MM-DDTHH:MM:SS.ffffffZ",
+      "trusted_time_claim_from_normalization": false
+    },
+    "timestamp_paths": [
+      "review_context_response.temporal_context.source_observed_at",
+      "review_context_response.temporal_context.source_received_at"
+    ],
+    "array_rules": {
+      "review_context_response.record_source_type.source_segmentation": {"semantics": "set", "identity_key": "source_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.context_state.reasons": {"semantics": "set", "exact_duplicate": "collapse"},
+      "review_context_response.source_state.sources": {"semantics": "set", "identity_key": "source_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.source_state.unresolved_source_conflicts": {"semantics": "set", "identity_key": "conflict_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.constraint_context.observed_constraints": {"semantics": "set", "identity_key": "reference_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.constraint_context.constraint_sources": {"semantics": "set", "identity_key": "source_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.chronology_context.prior_review_references": {"semantics": "set", "identity_key": "reference_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.chronology_context.accepted_memory_references": {"semantics": "set", "identity_key": "reference_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.reproducibility.source_versions": {"semantics": "set", "exact_duplicate": "collapse"},
+      "review_context_response.reproducibility.source_segmentation": {"semantics": "set", "identity_key": "source_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"}
+    }
+  },
   "cryptographic_profile_proposal": {
     "status": "proposed_not_canonical",
     "profile_identity": ["profile_id", "profile_version", "profile_hash"],
@@ -75,11 +150,24 @@
     "production_algorithm_selected": false
   },
   "semantic_context_integrity_proposal": {
-    "canonicalization_version": "gate3-canonical-json-v0.1",
+    "canonicalization_version": "nova-jcs-exact-financial-json-design-v0.1",
     "derivation_version": "gate3-field-derivation-v0.1",
     "algorithm_and_parameter_set_required": true,
     "semantic_hash_exclusions": ["review_context_response.context_id", "review_context_response.request_id", "review_context_response.created_at", "signature_bytes", "signature_algorithm", "key_reference", "key_epoch", "proof_renewal_time"],
-    "parallel_digest_migration": "all_digests_bind_identical_canonical_semantic_bytes"
+    "parallel_digest_migration": "all_digests_bind_identical_canonical_semantic_bytes",
+    "semantic_identity_is_any_individual_digest": false,
+    "continuity_contract_gap_reference": "G3-Q15"
+  },
+  "semantic_identity_continuity_proposal": {
+    "status": "proposed_not_canonical",
+    "contract_gap_reference": "G3-Q15",
+    "semantic_identity_basis": "identical_canonical_semantic_byte_sequence_under_the_same_canonicalization_derivation_and_profile_identity",
+    "individual_algorithm_qualified_digest_is_semantic_identity": false,
+    "migration_evidence": ["historical_digest_record", "successor_digest_record", "identical_canonical_semantic_bytes_or_verifiable_preserved_reference", "algorithm_and_parameter_identity", "verification_result"],
+    "historical_digest_evidence_preserved": true,
+    "successor_digest_replaces_historical_digest": false,
+    "same_hash_value_claim_permitted": false,
+    "canonical_material_unavailable_behavior": "continuity_unresolved"
   },
   "proof_attestations_proposal": {
     "status": "proposed_not_canonical",
@@ -164,7 +252,7 @@
     "review_context_response.schema_version": {"template": "contract_constant", "rule_version": "0.1.0", "required_inputs": ["approved_contract.version"], "derivation_rule": "Emit the exact approved response schema version.", "contract_gap_references": []},
     "review_context_response.context_id": {"template": "generated_envelope_metadata", "rule_version": "0.1.0", "required_inputs": ["constructed_record"], "derivation_rule": "Generate a record identifier after semantic material is fixed; exclude it from semantic identity.", "contract_gap_references": []},
     "review_context_response.request_id": {"template": "external_reference", "rule_version": "0.1.0", "required_inputs": ["review_context_request.request_id"], "derivation_rule": "Preserve the opaque request identifier in the envelope while excluding it from semantic hash material.", "semantic_hash_inclusion": false, "contract_gap_references": []},
-    "review_context_response.created_at": {"template": "generated_envelope_metadata", "rule_version": "0.1.0", "required_inputs": ["Nova_clock_observation"], "derivation_rule": "Record construction time; do not claim independently trusted time.", "contract_gap_references": ["G3-Q08"]},
+    "review_context_response.created_at": {"template": "generated_envelope_metadata", "rule_version": "0.1.0", "required_inputs": ["Nova_clock_observation"], "derivation_rule": "Record construction time; normalize under G3-R11 for the envelope and do not claim independently trusted time.", "contract_gap_references": ["G3-R11", "G3-Q08"]},
 
     "review_context_response.prepared_action_reference.reference_id": {"template": "external_reference", "rule_version": "0.1.0", "required_inputs": ["institution_action_id", "institution_proposal_version_id_or_labeled_Nova_fingerprint"], "derivation_rule": "Preserve distinct stable action and exact proposal identities when supplied; never replay a revision under an earlier proposal proof.", "sensitivity_class": "opaque_action_reference", "contract_gap_references": ["G3-R01", "G3-R09"]},
     "review_context_response.prepared_action_reference.reference_type": {"template": "contract_constant", "rule_version": "0.1.0", "required_inputs": ["approved_contract.prepared_action_reference.reference_type"], "derivation_rule": "Emit opaque_external_reference.", "contract_gap_references": ["G3-R01"]},
@@ -189,10 +277,10 @@
     "review_context_response.constraint_context.constraint_sources": {"template": "deterministic_collection", "rule_version": "0.1.0", "required_inputs": ["constraint_source_references"], "derivation_rule": "Preserve scoped authority and segmentation for each constraint source.", "contract_gap_references": ["G3-R04"]},
     "review_context_response.constraint_context.unresolved_constraint_questions": {"template": "deterministic_collection", "rule_version": "0.1.0", "required_inputs": ["unresolved_constraint_relationships"], "derivation_rule": "Emit stable unresolved question codes without Nova policy selection.", "contract_gap_references": ["G3-R02"]},
 
-    "review_context_response.temporal_context.source_observed_at": {"template": "temporal_value", "rule_version": "0.1.0", "required_inputs": ["evidence.observed_at"], "derivation_rule": "Normalize supplied observation time or mark unknown.", "contract_gap_references": ["G3-Q08"]},
-    "review_context_response.temporal_context.source_received_at": {"template": "temporal_value", "rule_version": "0.1.0", "required_inputs": ["evidence.received_at"], "derivation_rule": "Normalize supplied receipt time or mark unknown.", "contract_gap_references": ["G3-Q08"]},
-    "review_context_response.temporal_context.review_context_created_at": {"template": "generated_envelope_metadata", "rule_version": "0.1.0", "required_inputs": ["review_context_response.created_at"], "derivation_rule": "Mirror normalized construction time as Nova clock evidence only.", "semantic_hash_inclusion": false, "contract_gap_references": ["G3-Q08"]},
-    "review_context_response.temporal_context.intended_action_window": {"template": "temporal_value", "rule_version": "0.1.0", "required_inputs": ["prepared_action.intended_time_window"], "derivation_rule": "Preserve the external intended window without implying clearance.", "sensitivity_class": "sensitive_action_metadata", "contract_gap_references": []},
+    "review_context_response.temporal_context.source_observed_at": {"template": "temporal_value", "rule_version": "0.1.0", "required_inputs": ["evidence.observed_at"], "derivation_rule": "Normalize supplied observation time to the G3-R11 fixed UTC precision or mark unknown.", "contract_gap_references": ["G3-R11", "G3-Q08"]},
+    "review_context_response.temporal_context.source_received_at": {"template": "temporal_value", "rule_version": "0.1.0", "required_inputs": ["evidence.received_at"], "derivation_rule": "Normalize supplied receipt time to the G3-R11 fixed UTC precision or mark unknown.", "contract_gap_references": ["G3-R11", "G3-Q08"]},
+    "review_context_response.temporal_context.review_context_created_at": {"template": "generated_envelope_metadata", "rule_version": "0.1.0", "required_inputs": ["review_context_response.created_at"], "derivation_rule": "Mirror G3-R11-normalized construction time as Nova clock evidence only.", "semantic_hash_inclusion": false, "contract_gap_references": ["G3-R11", "G3-Q08"]},
+    "review_context_response.temporal_context.intended_action_window": {"template": "temporal_value", "rule_version": "0.1.0", "required_inputs": ["prepared_action.intended_time_window"], "derivation_rule": "Normalize each explicit window boundary under G3-R11 and preserve it without implying clearance.", "sensitivity_class": "sensitive_action_metadata", "contract_gap_references": ["G3-R11"]},
     "review_context_response.temporal_context.temporal_conflicts": {"template": "deterministic_collection", "rule_version": "0.1.0", "required_inputs": ["normalized_temporal_relationships"], "derivation_rule": "Collect temporal conflicts without resolving them.", "contract_gap_references": []},
     "review_context_response.temporal_context.pending_state": {"template": "deterministic_collection", "rule_version": "0.1.0", "required_inputs": ["unresolved_temporal_conditions"], "derivation_rule": "Collect pending temporal conditions as descriptive codes.", "contract_gap_references": []},
 
@@ -222,7 +310,7 @@
     "review_context_response.reproducibility.review_profile_hash": {"template": "reproducibility_reference", "rule_version": "0.1.0", "required_inputs": ["review_profile_reference.profile_hash"], "derivation_rule": "Join algorithm-qualified profile digest.", "contract_gap_references": ["G3-Q02", "G3-Q05"]},
     "review_context_response.reproducibility.record_source_type": {"template": "reproducibility_reference", "rule_version": "0.1.0", "required_inputs": ["record_source_type.value"], "derivation_rule": "Preserve declared aggregate source type without promotion.", "contract_gap_references": ["G3-R03"]},
     "review_context_response.reproducibility.source_segmentation": {"template": "reproducibility_reference", "rule_version": "0.1.0", "required_inputs": ["record_source_type.source_segmentation"], "derivation_rule": "Preserve exact stable source segmentation.", "contract_gap_references": ["G3-R03"]},
-    "review_context_response.reproducibility.context_hash": {"template": "semantic_digest", "rule_version": "0.1.0", "required_inputs": ["canonical_semantic_context_bytes", "cryptographic_profile.semantic_hash_policy"], "derivation_rule": "Digest the canonical semantic bytes using explicit algorithm and parameter identity; never include the digest in itself.", "contract_gap_references": ["G3-R05", "G3-R06", "G3-Q01", "G3-Q02", "G3-Q05", "G3-Q13"]},
+    "review_context_response.reproducibility.context_hash": {"template": "semantic_digest", "rule_version": "0.1.0", "required_inputs": ["canonical_semantic_context_bytes", "cryptographic_profile.semantic_hash_policy"], "derivation_rule": "Produce algorithm-qualified digest evidence over G3-R11 canonical bytes; the digest is not semantic identity and migration continuity follows G3-Q15.", "contract_gap_references": ["G3-R05", "G3-R06", "G3-R11", "G3-Q01", "G3-Q02", "G3-Q05", "G3-Q13", "G3-Q15"]},
     "review_context_response.reproducibility.signature": {"template": "proof_attestation_slot", "rule_version": "0.1.0", "required_inputs": ["proof_record_envelope", "cryptographic_profile.attestation_policy"], "derivation_rule": "Preserve the approved contract slot as a compatibility proof reference while proposing plural attestations; unknown suites are unverifiable.", "contract_gap_references": ["G3-Q01", "G3-Q03", "G3-Q04", "G3-Q05", "G3-Q06", "G3-Q07", "G3-Q11", "G3-Q14"]},
 
     "review_context_response.boundary.approval_effect": {"template": "contract_constant", "rule_version": "0.1.0", "required_inputs": ["approved_contract.boundary.approval_effect"], "derivation_rule": "Emit none.", "contract_gap_references": []},

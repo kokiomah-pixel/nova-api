@@ -18,6 +18,34 @@
     "created_at": "2026-08-24T12:00:00Z",
     "attestation": {"signature_algorithm": "fixture-suite-a", "key_reference": "fixture-key-a", "key_epoch": "1", "signature_value": "synthetic-signature-a"}
   },
+  "reference_response": {
+    "schema_version": "design-v2",
+    "context_id": "generated-context-reference",
+    "request_id": "generated-request-reference",
+    "created_at": "2026-08-24T12:00:00Z",
+    "prepared_action_reference": {"reference_id": "synthetic-action-001:proposal-v1", "reference_type": "opaque_external_reference", "payload_embedded": false},
+    "review_profile_reference": {"profile_id": "synthetic-treasury-review", "profile_version": "1", "profile_owner": "synthetic-institution", "profile_hash": "fixture-profile-digest"},
+    "record_source_type": {"value": "synthetic", "source_segmentation": [{"source_id": "source-b", "record_source_type": "synthetic"}, {"source_id": "source-a", "record_source_type": "synthetic"}]},
+    "context_state": {"value": "current", "reasons": ["profile_temporal_conditions_satisfied"]},
+    "source_state": {"value": "complete", "sources": [{"source_id": "source-b", "source_version_or_digest": "v1"}, {"source_id": "source-a", "source_version_or_digest": "v1"}], "unresolved_source_conflicts": []},
+    "constraint_context": {"observed_constraints": [{"reference_id": "constraint-b"}, {"reference_id": "constraint-a"}], "constraint_sources": [{"source_id": "constraint-source-a"}], "unresolved_constraint_questions": []},
+    "temporal_context": {"source_observed_at": "2026-08-24T07:00:00-05:00", "source_received_at": "2026-08-24T12:00:01Z", "review_context_created_at": "2026-08-24T12:00:02Z", "intended_action_window": {"start": "2026-08-24T13:00:00Z", "end": "2026-08-24T14:00:00Z"}, "temporal_conflicts": [], "pending_state": []},
+    "contradiction_context": {"source_conflicts": [], "constraint_conflicts": [], "temporal_conflicts": [], "chronology_conflicts": [], "unresolved_questions": []},
+    "review_completeness": {"value": "complete", "missing_context": [], "unresolved_conditions": []},
+    "chronology_context": {"prior_review_references": [{"reference_id": "prior-b"}, {"reference_id": "prior-a"}], "accepted_memory_references": [], "relevant_changes_since_prior_review": []},
+    "authority_handoff": {"decision_owner": "local_institutional_authority", "execution_owner": "external_system", "Nova_authority_effect": "none"},
+    "reproducibility": {"schema_version": "design-v2", "source_versions": ["source-b:v1", "source-a:v1"], "classification_version": "gate3-field-derivation-v0.1", "review_profile_id": "synthetic-treasury-review", "review_profile_version": "1", "review_profile_hash": "fixture-profile-digest", "record_source_type": "synthetic", "source_segmentation": [{"source_id": "source-b", "record_source_type": "synthetic"}, {"source_id": "source-a", "record_source_type": "synthetic"}], "context_hash": "fixture-context-digest", "signature": "fixture-signature"},
+    "boundary": {"approval_effect": "none", "authorization_effect": "none", "execution_effect": "none"}
+  },
+  "reference_vectors": {
+    "unicode": {"composed": "é", "decomposed": "é", "expected_equal": false},
+    "integer": {"input": "-000", "expected_error": true, "negative_zero_input": "-0", "negative_zero_expected": {"numeric_type": "integer", "value": "0"}},
+    "decimal": {"input": "1.2300", "max_precision": 10, "expected": {"numeric_type": "decimal", "coefficient": "123", "scale": 2}},
+    "decimal_exponent": {"input": "1.2300e2", "max_precision": 10, "expected": {"numeric_type": "decimal", "coefficient": "123", "scale": 0}},
+    "monetary_amount": {"input": "1.0", "asset_id": "SYNTH-USD", "scale": 2, "max_precision": 10, "expected": {"numeric_type": "monetary_amount", "asset_id": "SYNTH-USD", "coefficient": "100", "scale": 2}},
+    "timestamp": {"input": "2026-08-24T07:00:00-05:00", "expected": "2026-08-24T12:00:00.000000Z"},
+    "references": {"input": [{"source_id": "b", "value": 2}, {"source_id": "a", "value": 1}, {"source_id": "a", "value": 1}], "expected": [{"source_id": "a", "value": 1}, {"source_id": "b", "value": 2}]}
+  },
   "cases": [
     {"id": "complete_source_coverage", "category": "core", "inputs": {"required": ["balance", "constraint"], "observed": ["balance", "constraint"], "unavailable": [], "conflicts": []}, "expected": {"source_state": "complete", "scope_limited": true}},
     {"id": "partial_source_coverage", "category": "core", "inputs": {"required": ["balance", "constraint"], "observed": ["balance"], "unavailable": [], "conflicts": []}, "expected": {"source_state": "partial", "missing_visible": true}},
@@ -44,6 +72,12 @@
     {"id": "missing_trusted_time_evidence", "category": "crypto_agility", "inputs": {"recorded_at": "2026-08-24T12:00:00Z", "source_type": "Nova_clock", "external_time_reference": null}, "expected": {"trusted_time_claim": false, "verification_status": "unresolved"}},
     {"id": "invalid_proof_signature", "category": "crypto_agility", "inputs": {"signature_validation": "invalid"}, "expected": {"proof_verification_state": "invalid", "context_state_automatic_change": false, "source_state_automatic_change": false, "review_completeness_automatic_change": false}},
     {"id": "reconstruction_material_unavailable", "category": "crypto_agility", "inputs": {"digest_valid": true, "source_material_available": false}, "expected": {"reconstruction_scope": "reconstruction_unavailable", "full_reconstruction_claim": false}},
-    {"id": "missing_external_identifier_salt", "category": "crypto_agility", "inputs": {"raw_identifier": "synthetic-wallet-identifier", "external_salt": null}, "expected": {"output": "redacted", "raw_value_substituted": false}}
+    {"id": "missing_external_identifier_salt", "category": "crypto_agility", "inputs": {"raw_identifier": "synthetic-wallet-identifier", "external_salt": null}, "expected": {"output": "redacted", "raw_value_substituted": false}},
+    {"id": "canonical_numeric_normalization", "category": "reference_semantics", "inputs": {"vectors": ["integer", "decimal", "decimal_exponent", "monetary_amount"]}, "expected": {"binary_float_used": false, "rounding_used": false, "G3_R11_exercised": true}},
+    {"id": "unicode_codepoint_preservation", "category": "reference_semantics", "inputs": {"vector": "unicode"}, "expected": {"NFC_applied_by_canonicalizer": false, "composed_equals_decomposed": false}},
+    {"id": "null_absent_projection", "category": "reference_semantics", "inputs": {"null_object": {"value": null}, "absent_object": {}}, "expected": {"canonical_bytes_equal": false, "required_absence_fails": true}},
+    {"id": "timestamp_precision_and_timezone", "category": "reference_semantics", "inputs": {"vector": "timestamp"}, "expected": {"UTC_Z": true, "fractional_second_digits": 6, "rounding_used": false}},
+    {"id": "reference_order_and_duplicates", "category": "reference_semantics", "inputs": {"vector": "references"}, "expected": {"stable_order": true, "exact_duplicates_collapsed": true, "conflicting_identity_rejected": true}},
+    {"id": "semantic_identity_digest_continuity", "category": "reference_semantics", "inputs": {"fixture_digest_algorithms": ["fixture-digest-a", "fixture-digest-b"]}, "expected": {"G3_Q15_exercised": true, "historical_evidence_preserved": true, "same_hash_value_claim": false}}
   ]
 }

@@ -32,6 +32,7 @@ authority. The machine register is
 | G3-R08 | Review completeness is profile-relative. | Exact state precedence is unspecified. | Require a reviewed profile precedence; otherwise preserve unresolved. |
 | G3-R09 | Hashing is not redaction. | Identifier salt and fallback rules are absent. | Require external scoped salt; redact on absence, with no raw fallback. |
 | G3-R10 | Prior records do not imply current applicability. | Chronology treatment and applicability are not independently qualified. | Add explicit treatment/applicability status including `unknown`. |
+| G3-R11 | Canonical bytes preserve exact numeric, monetary, temporal, Unicode, null, and ordering meaning. | Numeric representation was implementation-defined and JCS/financial-decimal interoperability was undecided. | Adopt RFC 8785/JCS with a versioned exact-numeric application profile using typed base-10 coefficient/scale objects, fixed timestamp precision, and declared array/duplicate rules. |
 
 ## Gate 3A cryptographic-agility refinement family
 
@@ -54,13 +55,37 @@ changes as canonical contract fields.
 | G3-Q12 | Design cannot claim implemented quantum resistance. | Claim-evidence requirements are absent. | Require exact suite, scope, verification date, provider/library, and evidence. |
 | G3-Q13 | Digest migration binds one semantic byte sequence. | `context_hash` is singular. | Allow parallel algorithm-qualified digests over identical canonical bytes. |
 | G3-Q14 | Proof state is separate from context state. | No proof-verification object exists. | Add versioned verified/deprecated/unverifiable/invalid/unresolved states. |
+| G3-Q15 | Semantic identity is not an individual digest. | Continuity across successor digest algorithms and historical evidence preservation were not explicit. | Bind historical and successor digest records to identical canonical semantic bytes; preserve history and prohibit “same hash value” language across algorithms. |
 
 ## Additional gaps discovered
 
-No additional gap beyond G3-R01–G3-R10 and G3-Q01–G3-Q14 was required to
-complete this design ledger. The known G3-R08 precedence ambiguity remains
-explicit and prevents an implementation from inventing a completeness policy;
-it does not prevent the other field rules from being reviewed.
+```yaml
+newly_discovered:
+  - G3-R11 canonical_numeric_and_interoperability_profile
+  - G3-Q15 semantic_identity_continuity_across_digest_migration
+```
+
+`G3-R11` completes the design-level numeric model but remains non-canonical
+until review. `G3-Q15` closes the conceptual distinction between semantic
+identity and digest evidence, but its continuity structure likewise remains a
+proposal.
+
+## Gate 3 semantic-completion blockers
+
+```yaml
+semantic_completion:
+  status: blocked_pending_refinement_review
+  blockers:
+    - G3-R01
+    - G3-R03
+    - G3-R08
+    - G3-R11
+    - G3-Q15
+```
+
+Gate 3 design review may continue, but semantic completion cannot be declared
+until CCO and Architect review resolves these five gaps. No blocker creates
+runtime or implementation authority.
 
 ## Review and adoption rule
 

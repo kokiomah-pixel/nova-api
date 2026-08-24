@@ -10,6 +10,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+try:
+    from scripts.gate3_reference_semantics import reference_self_check
+except ModuleNotFoundError:  # Direct execution places scripts/ on sys.path.
+    from gate3_reference_semantics import reference_self_check
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DERIVATION_SPEC = REPO_ROOT / "specs/review_context_field_derivation_v0_1.json"
@@ -32,8 +37,10 @@ REQUIRED_DOCS = {
     "docs/target-v2/gate-3-contract-gap-report-v0.1.md": (
         "G3-R01",
         "G3-R10",
+        "G3-R11",
         "G3-Q01",
         "G3-Q14",
+        "G3-Q15",
         "proposed_not_canonical",
     ),
     "docs/target-v2/context-proof-canonicalization-v0.1.md": (
@@ -42,6 +49,9 @@ REQUIRED_DOCS = {
         "null",
         "Unicode",
         "reconstruction_unavailable",
+        "RFC 8785",
+        "G3-R11",
+        "G3-Q15",
     ),
 }
 
@@ -66,8 +76,16 @@ REQUIRED_RULE_KEYS = {
 }
 
 EXPECTED_GAPS = {
-    *(f"G3-R{index:02d}" for index in range(1, 11)),
-    *(f"G3-Q{index:02d}" for index in range(1, 15)),
+    *(f"G3-R{index:02d}" for index in range(1, 12)),
+    *(f"G3-Q{index:02d}" for index in range(1, 16)),
+}
+
+EXPECTED_SEMANTIC_COMPLETION_BLOCKERS = {
+    "G3-R01",
+    "G3-R03",
+    "G3-R08",
+    "G3-R11",
+    "G3-Q15",
 }
 
 EXPECTED_FIXTURES = {
@@ -96,6 +114,12 @@ EXPECTED_FIXTURES = {
     "invalid_proof_signature",
     "reconstruction_material_unavailable",
     "missing_external_identifier_salt",
+    "canonical_numeric_normalization",
+    "unicode_codepoint_preservation",
+    "null_absent_projection",
+    "timestamp_precision_and_timezone",
+    "reference_order_and_duplicates",
+    "semantic_identity_digest_continuity",
 }
 
 
@@ -227,6 +251,12 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
 
         if gap_ids != EXPECTED_GAPS:
             errors.append(ValidationError("contract_gaps.ids", f"expected {sorted(EXPECTED_GAPS)}, got {sorted(gap_ids)}"))
+        blockers = set(gaps.get("semantic_completion_blockers", []))
+        if blockers != EXPECTED_SEMANTIC_COMPLETION_BLOCKERS:
+            errors.append(ValidationError("contract_gaps.semantic_completion_blockers", f"expected {sorted(EXPECTED_SEMANTIC_COMPLETION_BLOCKERS)}, got {sorted(blockers)}"))
+        spec_blockers = set(spec.get("semantic_completion", {}).get("blockers", []))
+        if spec_blockers != EXPECTED_SEMANTIC_COMPLETION_BLOCKERS:
+            errors.append(ValidationError("spec.semantic_completion.blockers", f"expected {sorted(EXPECTED_SEMANTIC_COMPLETION_BLOCKERS)}, got {sorted(spec_blockers)}"))
         for gap in gaps.get("contract_refinements", []):
             if not isinstance(gap, dict):
                 errors.append(ValidationError("contract_gaps.record", "must be an object"))
@@ -234,6 +264,19 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
             for key, expected in (("authority_effect", "none"), ("execution_effect", "none"), ("requires_CCO_review", True), ("requires_Architect_review", True), ("silently_canonical", False)):
                 if gap.get(key) != expected:
                     errors.append(ValidationError(f"contract_gaps.{gap.get('id')}.{key}", f"must be {expected!r}"))
+            if gap.get("id") in EXPECTED_SEMANTIC_COMPLETION_BLOCKERS and gap.get("semantic_completion_blocker") is not True:
+                errors.append(ValidationError(f"contract_gaps.{gap.get('id')}.semantic_completion_blocker", "must be true"))
+
+        if set(gaps.get("additional_gaps_discovered", [])) != {"G3-R11", "G3-Q15"}:
+            errors.append(ValidationError("contract_gaps.additional_gaps_discovered", "must identify G3-R11 and G3-Q15"))
+        gap_by_id = {item.get("id"): item for item in gaps.get("contract_refinements", []) if isinstance(item, dict)}
+        expected_new_names = {
+            "G3-R11": "canonical_numeric_and_interoperability_profile",
+            "G3-Q15": "semantic_identity_continuity_across_digest_migration",
+        }
+        for gap_id, expected_name in expected_new_names.items():
+            if gap_by_id.get(gap_id, {}).get("name") != expected_name:
+                errors.append(ValidationError(f"contract_gaps.{gap_id}.name", f"must be {expected_name}"))
 
         crypto = spec.get("cryptographic_profile_proposal", {})
         attestation = crypto.get("attestation_policy", {})
@@ -245,6 +288,21 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
             errors.append(ValidationError("crypto.production_algorithm_selected", "must remain false"))
         if spec.get("proof_verification_state_proposal", {}).get("separate_from") != ["context_state", "source_state", "review_completeness"]:
             errors.append(ValidationError("proof_verification_state.separate_from", "state dimensions must remain separate"))
+
+        numeric_profile = spec.get("canonical_numeric_and_interoperability_profile", {})
+        if numeric_profile.get("base_standard") != "RFC_8785_JCS":
+            errors.append(ValidationError("canonical_profile.base_standard", "must evaluate and adopt RFC 8785/JCS baseline"))
+        if numeric_profile.get("JCS_deviation") is not False:
+            errors.append(ValidationError("canonical_profile.JCS_deviation", "exact numeric handling must be an explicit application profile, not an unqualified JCS claim"))
+        if numeric_profile.get("json_numbers", {}).get("binary_float_permitted_in_semantic_material") is not False:
+            errors.append(ValidationError("canonical_profile.binary_float", "must be prohibited"))
+        if numeric_profile.get("monetary_amount", {}).get("rounding") != "prohibited":
+            errors.append(ValidationError("canonical_profile.monetary_rounding", "must be prohibited"))
+        continuity = spec.get("semantic_identity_continuity_proposal", {})
+        if continuity.get("individual_algorithm_qualified_digest_is_semantic_identity") is not False:
+            errors.append(ValidationError("semantic_identity_continuity.digest_is_identity", "must be false"))
+        if continuity.get("historical_digest_evidence_preserved") is not True or continuity.get("same_hash_value_claim_permitted") is not False:
+            errors.append(ValidationError("semantic_identity_continuity.evidence", "must preserve history and prohibit same-hash-value claims"))
 
         exclusions = set(spec.get("semantic_context_integrity_proposal", {}).get("semantic_hash_exclusions", []))
         required_exclusions = {"review_context_response.context_id", "review_context_response.request_id", "review_context_response.created_at", "signature_bytes", "signature_algorithm", "key_reference", "key_epoch", "proof_renewal_time"}
@@ -259,6 +317,8 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
             errors.append(ValidationError("fixtures.scope", "fixtures must be synthetic and disconnected from production"))
         if fixture_ids != EXPECTED_FIXTURES:
             errors.append(ValidationError("fixtures.ids", f"missing={sorted(EXPECTED_FIXTURES - fixture_ids)} extra={sorted(fixture_ids - EXPECTED_FIXTURES)}"))
+        for message in reference_self_check(spec, fixtures):
+            errors.append(ValidationError("reference_semantics", message))
     finally:
         if REPO_ROOT != original_root:
             REPO_ROOT = original_root
@@ -284,6 +344,8 @@ def main() -> int:
     print(f"  required_response_fields_with_rules: {len(spec['field_rules'])}")
     print(f"  contract_gaps_recorded: {len(gaps['contract_refinements'])}")
     print(f"  synthetic_fixture_cases: {len(fixtures['cases'])}")
+    print("  executable_reference_semantics: passed")
+    print("  semantic_completion: blocked_pending_refinement_review")
     print("  runtime_implementation_authority: false")
     return 0
 
