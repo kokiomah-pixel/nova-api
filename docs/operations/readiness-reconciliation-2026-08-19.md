@@ -4,13 +4,15 @@
 
 This receipt reconciles the production-readiness baseline against evidence observed after the July 25 readiness snapshot. It does not create production readiness, institutional readiness, accepted state, chronology, Reflex Memory, implementation authority, or deployment authority.
 
+The receipt was extended on August 24, 2026 with an Architect-supplied authenticated CDP control-plane observation. The original August 19 evidence remains preserved below.
+
 ## Evidence Boundary
 
 ```text
 Observed != inferred != recommended != authorized != implemented != independently verified
 ```
 
-Repository state is independently verified through the connected GitHub control plane. Render and Legacy v1 control-plane facts are Architect-attested unless explicitly stated otherwise. Coinbase Developer Platform custody and historical settlement activity remain unverified.
+Repository state is independently verified through the connected GitHub control plane. Render, Legacy v1, and CDP control-plane facts are Architect-attested unless explicitly stated otherwise. Historical CDP activity and settlement history remain unresolved.
 
 ## Repository Evidence
 
@@ -74,20 +76,68 @@ Legacy_v1_dependency_evidence:
 
 No external consumer observed does not prove that no external consumer ever existed outside the reviewed retention window. It does establish that no external compatibility window is presently required on the evidence reviewed.
 
+## CDP Custody Addendum — 2026-08-24
+
+The Architect supplied an authenticated CDP portal observation for the Nova Infrastructure Systems Corporation entity/project context.
+
+```yaml
+CDP_current_custody_evidence:
+  organization_or_entity_name: Nova Infrastructure Systems Corporation
+  project_name: not_provided
+  observed_role: Admin/Owner
+  can_manage_project_settings: true
+  can_manage_API_keys: true
+
+  active_API_keys:
+    total: 1
+    Nova_or_x402_related_key_present: true
+    observed_owner_classification: founder_internal
+
+  x402_or_facilitator:
+    service_enabled: unknown
+    current_Nova_integration_present: unknown
+    settlement_configuration_present: unknown
+    linked_settlement_destination_present: false
+
+  activity:
+    review_window_visible: unknown
+    verification_requests: unknown
+    successful_verifications: unknown
+    failed_verifications: unknown
+    settlement_requests: unknown
+    successful_settlements: unknown
+    failed_settlements: unknown
+    historical_retention_limit: unknown
+    older_activity_available: unknown
+
+  evidence_state: Architect_attested_authenticated_portal_observation
+  independently_verified_provider_control_plane: false
+```
+
+The literal `true/false` placeholders supplied for x402/facilitator configuration are treated as unresolved, not as false. Blank activity fields are treated as unknown, not zero.
+
+The observation establishes current administrative custody and current API-key management authority. It does not establish whether the x402/facilitator service is enabled, whether Nova has a current facilitator integration, whether settlement configuration is present, or what historical verification/settlement activity occurred.
+
 ## CDP and Settlement Evidence
 
 ```yaml
 CDP_and_settlement:
   Render_CDP_API_KEY_ID_present: false
   Render_CDP_API_KEY_SECRET_present: false
-  current_CDP_provider_custody: unverified
+  current_CDP_provider_custody: Architect_attested
+  current_CDP_role: Admin/Owner
+  current_CDP_API_key_management: true
+  current_active_CDP_API_keys: 1
+  current_active_key_owner_classification: founder_internal
+  linked_settlement_destination_present: false
+  current_settlement_configuration: unknown
   CDP_activity_review_complete: false
   historical_settlement_activity_clear: false
   successful_unexpected_settlement: unknown
   historical_retention_complete: unknown
 ```
 
-Absence of CDP credentials from the current Render environment does not prove absence of historical CDP verification or settlement activity, provider-side custody, or retained external configuration.
+Absence of CDP credentials from the current Render environment and absence of a linked settlement destination do not prove absence of historical CDP verification or settlement activity, provider-side configuration, or retained external activity.
 
 The repository contains an earlier settlement investigation record showing facilitator verification became reachable and settlement remained under investigation after an `invalid_payload` rejection. That record is historical interoperability evidence, not current provider-control evidence.
 
@@ -101,6 +151,15 @@ readiness_reconciliation:
   Render_custody:
     status: CONDITIONALLY_READY
     limitation: Architect_attested_provider_state_and_founder_linked_git_credential
+
+  CDP_custody:
+    status: CONDITIONALLY_READY
+    evidence:
+      - authenticated_Admin_Owner_role_Architect_attested
+      - project_settings_management_available
+      - API_key_management_available
+      - one_active_key_classified_founder_internal
+    limitation: provider_state_not_independently_verified
 
   deployed_commit_attestation:
     status: CONDITIONALLY_READY
@@ -118,21 +177,17 @@ readiness_reconciliation:
     status: CONDITIONALLY_READY
     limitation: no_external_consumers_observed_but_provider_evidence_not_independently_verified
 
-  CDP_custody:
-    status: BLOCKED
-    reason: authenticated_provider_custody_not_attested
-
   settlement_activity_inventory:
     status: BLOCKED
-    reason: CDP_activity_and_historical_retention_not_reconciled
+    reason: current_settlement_configuration_and_CDP_activity_history_unresolved
 
   incident_closure:
     status: BLOCKED
-    reason: incident_closure_standard_requires_current_CDP_ownership_and_settlement_configuration_evidence
+    reason: incident_closure_standard_requires_current_settlement_configuration_and_activity_or_retention_disposition
 
   v2_field_derivation:
     status: BLOCKED
-    reason: Gate_1_production_custody_not_complete
+    reason: production_incident_remains_OPERATIONALLY_OPEN
 
   v2_adapter:
     status: NOT_STARTED
@@ -145,15 +200,16 @@ readiness_reconciliation:
 
 ```yaml
 Gate_1_production_custody:
-  status: BLOCKED
+  status: CONDITIONAL_PASS
   satisfied:
     - Render_access_and_service_identity_Architect_attested
     - corporate_repository_source_aligned
     - deployed_commit_Architect_attested
-  unresolved:
-    - CDP_authenticated_custody
-    - current_settlement_configuration
-    - independent_provider_verification
+    - CDP_Admin_Owner_custody_Architect_attested
+    - CDP_API_key_management_under_Architect_control
+  limitations:
+    - provider_control_planes_not_independently_verified
+    - founder_concentration_remains
 
 Gate_2_Legacy_v1_dependency:
   status: CONDITIONAL_PASS
@@ -168,8 +224,13 @@ Gate_2_Legacy_v1_dependency:
 
 Gate_3_v2_field_derivation_design:
   status: BLOCKED
-  reason: Gate_1_incomplete
+  reason:
+    - production_incident_remains_OPERATIONALLY_OPEN
+    - current_settlement_configuration_unknown
+    - CDP_activity_and_historical_retention_not_reconciled
 ```
+
+Gate 1 custody uncertainty has been materially reduced. This does not close the active production/discovery incident or authorize Gate 3 progression while the incident-closure standard remains unsatisfied.
 
 ## Non-Effects
 
