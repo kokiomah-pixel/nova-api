@@ -136,10 +136,12 @@
       "exponent_input": "accepted_only_at_normalization_boundary_and_eliminated_from_canonical_representation",
       "negative_zero": "coefficient_zero_without_sign",
       "precision": "field_profile_max_digits_no_rounding",
-      "required_limits": ["max_precision", "max_scale", "max_abs_exponent"],
-      "max_scale": "field_profile_required_nonnegative_bound",
+      "required_limits": ["max_precision", "max_scale", "max_abs_exponent", "max_input_characters"],
+      "max_scale": "field_profile_required_nonnegative_bound_applied_to_generic_canonical_scale_after_insignificant_trailing_zero_trim_or_to_fixed_declared_scale",
       "max_abs_exponent": "field_profile_required_nonnegative_bound_checked_before_coefficient_expansion",
+      "max_input_characters": "field_profile_required_positive_bound_checked_before_numeric_parsing",
       "excessive_scale_or_exponent": "reject_before_coefficient_expansion",
+      "excessive_input_size": "reject_before_numeric_parsing",
       "generic_trailing_zero_semantics": "insignificant_trim_to_minimum_scale",
       "fixed_scale_trailing_zero_semantics": "significant_as_profile_declared_scale"
     },
@@ -148,7 +150,7 @@
       "implicit_currency_or_unit": false,
       "binary_float_conversion": false,
       "rounding": "prohibited",
-      "required_limits": ["max_precision", "max_scale", "max_abs_exponent"],
+      "required_limits": ["max_precision", "max_scale", "max_abs_exponent", "max_input_characters"],
       "missing_asset_scale": "unresolved_not_canonicalizable"
     },
     "timestamp": {
@@ -164,6 +166,15 @@
       "review_context_response.temporal_context.source_observed_at",
       "review_context_response.temporal_context.source_received_at"
     ],
+    "timestamp_object_rules": {
+      "review_context_response.temporal_context.intended_action_window": {
+        "boundary_fields": ["start", "end"],
+        "boundary_value": "RFC_3339_normalized_to_UTC_fixed_precision_or_explicit_unresolved_state",
+        "missing_boundary": "projection_failure_unless_explicit_unresolved_boundary_is_present",
+        "malformed_unknown_offset_or_over_precision": "projection_failure_never_silent_normalization",
+        "unknown_fields": "reject"
+      }
+    },
     "semantic_array_paths": [
       "review_context_response.record_source_type.source_segmentation",
       "review_context_response.context_state.reasons",
@@ -360,7 +371,7 @@
     "review_context_response.temporal_context.source_observed_at": {"template": "temporal_value", "rule_version": "0.1.0", "required_inputs": ["evidence.observed_at"], "derivation_rule": "Normalize supplied observation time to the G3-R11 fixed UTC precision or mark unknown.", "contract_gap_references": ["G3-R11", "G3-Q08"]},
     "review_context_response.temporal_context.source_received_at": {"template": "temporal_value", "rule_version": "0.1.0", "required_inputs": ["evidence.received_at"], "derivation_rule": "Normalize supplied receipt time to the G3-R11 fixed UTC precision or mark unknown.", "contract_gap_references": ["G3-R11", "G3-Q08"]},
     "review_context_response.temporal_context.review_context_created_at": {"template": "generated_envelope_metadata", "rule_version": "0.1.0", "required_inputs": ["review_context_response.created_at"], "derivation_rule": "Mirror G3-R11-normalized construction time as Nova clock evidence only.", "semantic_hash_inclusion": false, "contract_gap_references": ["G3-R11", "G3-Q08"]},
-    "review_context_response.temporal_context.intended_action_window": {"template": "temporal_value", "rule_version": "0.1.0", "required_inputs": ["prepared_action.intended_time_window"], "derivation_rule": "Normalize each explicit window boundary under G3-R11 and preserve it without implying clearance.", "sensitivity_class": "sensitive_action_metadata", "contract_gap_references": ["G3-R11"]},
+    "review_context_response.temporal_context.intended_action_window": {"template": "temporal_value", "rule_version": "0.1.0", "required_inputs": ["prepared_action.intended_time_window.start", "prepared_action.intended_time_window.end"], "derivation_rule": "Normalize each explicit start/end boundary under G3-R11 RFC3339 UTC fixed precision. Preserve only a structured explicit unresolved boundary; missing, malformed, -00:00, over-precision, or unknown members fail projection without silent normalization.", "missing_input_behavior": "projection_fails_unless_each_start_end_boundary_is_present_as_timestamp_or_explicit_unresolved_state", "unavailable_input_behavior": "explicit_unresolved_boundary_state_required", "sensitivity_class": "sensitive_action_metadata", "contract_gap_references": ["G3-R11"]},
     "review_context_response.temporal_context.temporal_conflicts": {"template": "deterministic_collection", "rule_version": "0.1.0", "required_inputs": ["normalized_temporal_relationships"], "derivation_rule": "Collect temporal conflicts without resolving them.", "contract_gap_references": []},
     "review_context_response.temporal_context.pending_state": {"template": "deterministic_collection", "rule_version": "0.1.0", "required_inputs": ["unresolved_temporal_conditions"], "derivation_rule": "Collect pending temporal conditions as descriptive codes.", "contract_gap_references": []},
 

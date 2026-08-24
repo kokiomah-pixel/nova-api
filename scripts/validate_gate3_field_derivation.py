@@ -304,12 +304,25 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
         if numeric_profile.get("monetary_amount", {}).get("rounding") != "prohibited":
             errors.append(ValidationError("canonical_profile.monetary_rounding", "must be prohibited"))
         exact_decimal = numeric_profile.get("exact_decimal", {})
-        if set(exact_decimal.get("required_limits", [])) != {"max_precision", "max_scale", "max_abs_exponent"}:
-            errors.append(ValidationError("canonical_profile.decimal_limits", "must require max_precision, max_scale, and max_abs_exponent"))
+        if set(exact_decimal.get("required_limits", [])) != {"max_precision", "max_scale", "max_abs_exponent", "max_input_characters"}:
+            errors.append(ValidationError("canonical_profile.decimal_limits", "must require max_precision, max_scale, max_abs_exponent, and max_input_characters"))
+        if exact_decimal.get("max_scale") != "field_profile_required_nonnegative_bound_applied_to_generic_canonical_scale_after_insignificant_trailing_zero_trim_or_to_fixed_declared_scale":
+            errors.append(ValidationError("canonical_profile.max_scale", "generic max_scale must apply after insignificant trailing-zero trimming"))
         if exact_decimal.get("excessive_scale_or_exponent") != "reject_before_coefficient_expansion":
             errors.append(ValidationError("canonical_profile.decimal_bounds", "must reject excessive scale/exponent before expansion"))
+        if exact_decimal.get("excessive_input_size") != "reject_before_numeric_parsing":
+            errors.append(ValidationError("canonical_profile.decimal_input_size", "must reject excessive input size before numeric parsing"))
         if numeric_profile.get("timestamp", {}).get("unknown_offset_minus_00_00") != "reject_not_UTC_equivalent":
             errors.append(ValidationError("canonical_profile.timestamp_unknown_offset", "RFC3339 -00:00 must not normalize to UTC"))
+        intended_window_path = "review_context_response.temporal_context.intended_action_window"
+        intended_window_rule = numeric_profile.get("timestamp_object_rules", {}).get(intended_window_path, {})
+        if intended_window_rule.get("boundary_fields") != ["start", "end"]:
+            errors.append(ValidationError("canonical_profile.intended_action_window.boundaries", "must explicitly normalize start and end"))
+        if intended_window_rule.get("malformed_unknown_offset_or_over_precision") != "projection_failure_never_silent_normalization":
+            errors.append(ValidationError("canonical_profile.intended_action_window.failures", "invalid boundaries must fail without silent normalization"))
+        intended_field_rule = field_rules.get(intended_window_path, {})
+        if intended_field_rule.get("unavailable_input_behavior") != "explicit_unresolved_boundary_state_required":
+            errors.append(ValidationError("field_rules.intended_action_window.unavailable", "must require explicit unresolved boundary state"))
 
         array_rules = numeric_profile.get("array_rules", {})
         semantic_array_paths = set(numeric_profile.get("semantic_array_paths", []))

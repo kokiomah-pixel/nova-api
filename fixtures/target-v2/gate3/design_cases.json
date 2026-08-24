@@ -40,13 +40,15 @@
   "reference_vectors": {
     "unicode": {"composed": "é", "decomposed": "é", "expected_equal": false},
     "integer": {"input": "-000", "expected_error": true, "negative_zero_input": "-0", "negative_zero_expected": {"numeric_type": "integer", "value": "0"}},
-    "decimal": {"input": "1.2300", "max_precision": 10, "max_scale": 4, "max_abs_exponent": 4, "expected": {"numeric_type": "decimal", "coefficient": "123", "scale": 2}},
-    "decimal_exponent": {"input": "1.2300e2", "max_precision": 10, "max_scale": 4, "max_abs_exponent": 4, "expected": {"numeric_type": "decimal", "coefficient": "123", "scale": 0}},
-    "decimal_excessive_exponent": {"input": "1e100000", "max_precision": 10, "max_scale": 4, "max_abs_exponent": 12, "expected_error": "exponent_bound_before_expansion"},
-    "decimal_excessive_scale": {"input": "0.0000001", "max_precision": 10, "max_scale": 6, "max_abs_exponent": 12, "expected_error": "scale_bound_before_expansion"},
-    "monetary_amount": {"input": "1.0", "asset_id": "SYNTH-USD", "scale": 2, "max_precision": 10, "max_scale": 4, "max_abs_exponent": 4, "expected": {"numeric_type": "monetary_amount", "asset_id": "SYNTH-USD", "coefficient": "100", "scale": 2}},
+    "decimal": {"input": "1.2300", "max_precision": 10, "max_scale": 2, "max_abs_exponent": 4, "max_input_characters": 64, "expected": {"numeric_type": "decimal", "coefficient": "123", "scale": 2}},
+    "decimal_exponent": {"input": "1.2300e2", "max_precision": 10, "max_scale": 2, "max_abs_exponent": 4, "max_input_characters": 64, "expected": {"numeric_type": "decimal", "coefficient": "123", "scale": 0}},
+    "decimal_excessive_exponent": {"input": "1e100000", "max_precision": 10, "max_scale": 4, "max_abs_exponent": 12, "max_input_characters": 64, "expected_error": "exponent_bound_before_expansion"},
+    "decimal_excessive_scale": {"input": "1.001", "max_precision": 10, "max_scale": 2, "max_abs_exponent": 12, "max_input_characters": 64, "expected_error": "canonical_scale_bound_before_expansion"},
+    "decimal_excessive_input_size": {"input": "12345678901234567", "max_precision": 20, "max_scale": 2, "max_abs_exponent": 12, "max_input_characters": 16, "expected_error": "input_size_bound_before_parsing"},
+    "monetary_amount": {"input": "1.0", "asset_id": "SYNTH-USD", "scale": 2, "max_precision": 10, "max_scale": 4, "max_abs_exponent": 4, "max_input_characters": 64, "expected": {"numeric_type": "monetary_amount", "asset_id": "SYNTH-USD", "coefficient": "100", "scale": 2}},
     "timestamp": {"input": "2026-08-24T07:00:00-05:00", "expected": "2026-08-24T12:00:00.000000Z"},
     "timestamp_unknown_offset": {"input": "2026-08-24T12:00:00-00:00", "expected_error": "unknown_offset_rejected"},
+    "intended_action_window": {"input": {"start": "2026-08-24T08:00:00-05:00", "end": "2026-08-24T14:00:00.1Z"}, "expected": {"start": "2026-08-24T13:00:00.000000Z", "end": "2026-08-24T14:00:00.100000Z"}, "explicit_unresolved": {"start": {"state": "unresolved", "reason": "start_time_unavailable"}, "end": "2026-08-24T14:00:00Z"}},
     "prepared_action_versions": {"v1": {"action_type": "synthetic-transfer", "asset_or_resource": "SYNTH-USD", "amount_or_scope": {"coefficient": "100", "scale": 2}}, "v2": {"action_type": "synthetic-transfer", "asset_or_resource": "SYNTH-USD", "amount_or_scope": {"coefficient": "200", "scale": 2}}},
     "references": {"input": [{"source_id": "b", "value": 2}, {"source_id": "a", "value": 1}, {"source_id": "a", "value": 1}], "expected": [{"source_id": "a", "value": 1}, {"source_id": "b", "value": 2}]}
   },
@@ -82,11 +84,11 @@
     {"id": "canonical_numeric_normalization", "category": "reference_semantics", "inputs": {"vectors": ["integer", "decimal", "decimal_exponent", "monetary_amount"]}, "expected": {"binary_float_used": false, "rounding_used": false, "G3_R11_exercised": true}},
     {"id": "unicode_codepoint_preservation", "category": "reference_semantics", "inputs": {"vector": "unicode"}, "expected": {"NFC_applied_by_canonicalizer": false, "composed_equals_decomposed": false}},
     {"id": "null_absent_projection", "category": "reference_semantics", "inputs": {"null_object": {"value": null}, "absent_object": {}}, "expected": {"canonical_bytes_equal": false, "required_absence_fails": true}},
-    {"id": "timestamp_precision_and_timezone", "category": "reference_semantics", "inputs": {"vector": "timestamp"}, "expected": {"UTC_Z": true, "fractional_second_digits": 6, "rounding_used": false}},
+    {"id": "timestamp_precision_and_timezone", "category": "reference_semantics", "inputs": {"vectors": ["timestamp", "intended_action_window"]}, "expected": {"UTC_Z": true, "fractional_second_digits": 6, "window_start_end_normalized": true, "invalid_window_boundary_silent_normalization": false, "rounding_used": false}},
     {"id": "reference_order_and_duplicates", "category": "reference_semantics", "inputs": {"vector": "references"}, "expected": {"stable_order": true, "exact_duplicates_collapsed": true, "conflicting_identity_rejected": true}},
     {"id": "all_semantic_array_rules", "category": "reference_semantics", "inputs": {"declared_classes": ["ordered_sequence", "set", "multiset"]}, "expected": {"every_semantic_array_declared": true, "every_deterministic_collection_executable": true, "every_set_field_order_invariant": true}},
     {"id": "timestamp_unknown_offset_rejection", "category": "reference_semantics", "inputs": {"vector": "timestamp_unknown_offset"}, "expected": {"minus_00_00_treated_as_UTC": false, "normalization_rejected": true}},
-    {"id": "decimal_scale_exponent_bounds", "category": "reference_semantics", "inputs": {"vectors": ["decimal_excessive_exponent", "decimal_excessive_scale"]}, "expected": {"max_scale_enforced": true, "max_abs_exponent_enforced": true, "rejected_before_coefficient_expansion": true}},
+    {"id": "decimal_scale_exponent_bounds", "category": "reference_semantics", "inputs": {"vectors": ["decimal", "decimal_excessive_exponent", "decimal_excessive_scale", "decimal_excessive_input_size"]}, "expected": {"generic_trailing_zero_trim_before_scale_bound": true, "max_scale_enforced": true, "max_abs_exponent_enforced": true, "max_input_characters_enforced": true, "rejected_before_coefficient_expansion": true, "rounding_used": false}},
     {"id": "semantic_identity_digest_continuity", "category": "reference_semantics", "inputs": {"fixture_digest_algorithms": ["fixture-digest-a", "fixture-digest-b"]}, "expected": {"G3_Q15_exercised": true, "historical_evidence_preserved": true, "same_hash_value_claim": false}}
   ]
 }

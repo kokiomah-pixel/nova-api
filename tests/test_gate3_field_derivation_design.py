@@ -22,6 +22,7 @@ from scripts.gate3_reference_semantics import (
     normalize_reference_array,
     normalize_semantic_array,
     normalize_timestamp,
+    normalize_timestamp_window,
     parse_json_no_duplicates,
     project_semantic_material,
     resolve_prepared_action_identity,
@@ -378,23 +379,26 @@ def test_numeric_decimal_and_monetary_reference_semantics_are_exact() -> None:
     assert normalize_exact_integer(vectors["integer"]["negative_zero_input"], max_digits=10) == vectors["integer"]["negative_zero_expected"]
     with pytest.raises(ReferenceSemanticsError, match="without exponent or leading zeros"):
         normalize_exact_integer(vectors["integer"]["input"], max_digits=10)
-    assert normalize_exact_decimal(vectors["decimal"]["input"], max_precision=vectors["decimal"]["max_precision"], max_scale=vectors["decimal"]["max_scale"], max_abs_exponent=vectors["decimal"]["max_abs_exponent"]) == vectors["decimal"]["expected"]
-    assert normalize_exact_decimal(vectors["decimal_exponent"]["input"], max_precision=vectors["decimal_exponent"]["max_precision"], max_scale=vectors["decimal_exponent"]["max_scale"], max_abs_exponent=vectors["decimal_exponent"]["max_abs_exponent"]) == vectors["decimal_exponent"]["expected"]
+    assert normalize_exact_decimal(vectors["decimal"]["input"], max_precision=vectors["decimal"]["max_precision"], max_scale=vectors["decimal"]["max_scale"], max_abs_exponent=vectors["decimal"]["max_abs_exponent"], max_input_characters=vectors["decimal"]["max_input_characters"]) == vectors["decimal"]["expected"]
+    assert normalize_exact_decimal(vectors["decimal_exponent"]["input"], max_precision=vectors["decimal_exponent"]["max_precision"], max_scale=vectors["decimal_exponent"]["max_scale"], max_abs_exponent=vectors["decimal_exponent"]["max_abs_exponent"], max_input_characters=vectors["decimal_exponent"]["max_input_characters"]) == vectors["decimal_exponent"]["expected"]
     money = vectors["monetary_amount"]
-    assert normalize_monetary_amount(money["input"], asset_id=money["asset_id"], scale=money["scale"], max_precision=money["max_precision"], max_scale=money["max_scale"], max_abs_exponent=money["max_abs_exponent"]) == money["expected"]
+    assert normalize_monetary_amount(money["input"], asset_id=money["asset_id"], scale=money["scale"], max_precision=money["max_precision"], max_scale=money["max_scale"], max_abs_exponent=money["max_abs_exponent"], max_input_characters=money["max_input_characters"]) == money["expected"]
     with pytest.raises(ReferenceSemanticsError, match="rounding is prohibited"):
-        normalize_monetary_amount("1.001", asset_id="SYNTH-USD", scale=2, max_precision=10, max_scale=4, max_abs_exponent=4)
+        normalize_monetary_amount("1.001", asset_id="SYNTH-USD", scale=2, max_precision=10, max_scale=4, max_abs_exponent=4, max_input_characters=64)
     excessive_exponent = vectors["decimal_excessive_exponent"]
     with pytest.raises(ReferenceSemanticsError, match="exponent exceeds"):
-        normalize_exact_decimal(excessive_exponent["input"], max_precision=excessive_exponent["max_precision"], max_scale=excessive_exponent["max_scale"], max_abs_exponent=excessive_exponent["max_abs_exponent"])
+        normalize_exact_decimal(excessive_exponent["input"], max_precision=excessive_exponent["max_precision"], max_scale=excessive_exponent["max_scale"], max_abs_exponent=excessive_exponent["max_abs_exponent"], max_input_characters=excessive_exponent["max_input_characters"])
     with pytest.raises(ReferenceSemanticsError, match="exponent exceeds"):
-        normalize_exact_decimal("1e" + "9" * 5000, max_precision=10, max_scale=4, max_abs_exponent=12)
+        normalize_exact_decimal("1e" + "9" * 5000, max_precision=10, max_scale=4, max_abs_exponent=12, max_input_characters=6000)
     excessive_scale = vectors["decimal_excessive_scale"]
     with pytest.raises(ReferenceSemanticsError, match="scale exceeds"):
-        normalize_exact_decimal(excessive_scale["input"], max_precision=excessive_scale["max_precision"], max_scale=excessive_scale["max_scale"], max_abs_exponent=excessive_scale["max_abs_exponent"])
+        normalize_exact_decimal(excessive_scale["input"], max_precision=excessive_scale["max_precision"], max_scale=excessive_scale["max_scale"], max_abs_exponent=excessive_scale["max_abs_exponent"], max_input_characters=excessive_scale["max_input_characters"])
+    excessive_input = vectors["decimal_excessive_input_size"]
+    with pytest.raises(ReferenceSemanticsError, match="character bound"):
+        normalize_exact_decimal(excessive_input["input"], max_precision=excessive_input["max_precision"], max_scale=excessive_input["max_scale"], max_abs_exponent=excessive_input["max_abs_exponent"], max_input_characters=excessive_input["max_input_characters"])
     with pytest.raises(ReferenceSemanticsError, match="binary/implicit decimal"):
         canonicalize_jcs_profile({"amount": 1.25})
-    assert canonicalize_jcs_profile(normalize_exact_decimal("1.2300", max_precision=10, max_scale=4, max_abs_exponent=4)) == canonicalize_jcs_profile(normalize_exact_decimal("1.23", max_precision=10, max_scale=4, max_abs_exponent=4))
+    assert canonicalize_jcs_profile(normalize_exact_decimal("1.2300", max_precision=10, max_scale=2, max_abs_exponent=4, max_input_characters=64)) == canonicalize_jcs_profile(normalize_exact_decimal("1.23", max_precision=10, max_scale=2, max_abs_exponent=4, max_input_characters=64))
 
 
 def test_null_and_absent_are_distinct_and_required_absence_fails_projection() -> None:
@@ -425,6 +429,40 @@ def test_timestamp_normalization_is_utc_fixed_precision_and_never_rounds() -> No
         normalize_timestamp("2026-08-24T12:00:00-00:00")
 
 
+def test_intended_action_window_normalizes_each_boundary_and_fails_closed() -> None:
+    fixtures = _load(FIXTURE_PATH)
+    spec = _load(SPEC_PATH)
+    vector = fixtures["reference_vectors"]["intended_action_window"]
+    rule = spec["canonical_numeric_and_interoperability_profile"]["timestamp_object_rules"][
+        "review_context_response.temporal_context.intended_action_window"
+    ]
+    assert normalize_timestamp_window(
+        vector["input"],
+        boundary_fields=rule["boundary_fields"],
+        precision=6,
+    ) == vector["expected"]
+
+    unresolved = normalize_timestamp_window(
+        vector["explicit_unresolved"],
+        boundary_fields=rule["boundary_fields"],
+        precision=6,
+    )
+    assert unresolved["start"] == {"state": "unresolved", "reason": "start_time_unavailable"}
+    assert unresolved["end"] == "2026-08-24T14:00:00.000000Z"
+
+    invalid_windows = [
+        {"start": "2026-08-24T13:00:00Z"},
+        {"start": "not-a-time", "end": "2026-08-24T14:00:00Z"},
+        {"start": "2026-08-24T13:00:00-00:00", "end": "2026-08-24T14:00:00Z"},
+        {"start": "2026-08-24T13:00:00.1234567Z", "end": "2026-08-24T14:00:00Z"},
+    ]
+    for window in invalid_windows:
+        response = copy.deepcopy(fixtures["reference_response"])
+        response["temporal_context"]["intended_action_window"] = window
+        with pytest.raises(ReferenceSemanticsError):
+            project_semantic_material(response, spec)
+
+
 def test_reference_ordering_exact_deduplication_and_identity_collision() -> None:
     vector = _load(FIXTURE_PATH)["reference_vectors"]["references"]
 
@@ -442,6 +480,10 @@ def test_projection_applies_declared_timestamp_and_reference_array_rules() -> No
     projected = project_semantic_material(fixtures["reference_response"], spec)["review_context_response"]
 
     assert projected["temporal_context"]["source_observed_at"] == "2026-08-24T12:00:00.000000Z"
+    assert projected["temporal_context"]["intended_action_window"] == {
+        "start": "2026-08-24T13:00:00.000000Z",
+        "end": "2026-08-24T14:00:00.000000Z",
+    }
     assert [item["source_id"] for item in projected["source_state"]["sources"]] == ["source-a", "source-b"]
     assert projected["reproducibility"]["source_versions"] == ["source-a:v1", "source-b:v1"]
     assert "context_id" not in projected

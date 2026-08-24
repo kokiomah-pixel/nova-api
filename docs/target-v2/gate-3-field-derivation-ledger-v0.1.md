@@ -168,7 +168,7 @@ is machine-readable in the companion spec.
 | 22 | `review_context_response.temporal_context.source_observed_at` | Normalized source time or explicit unknown. |
 | 23 | `review_context_response.temporal_context.source_received_at` | Normalized receipt time or explicit unknown. |
 | 24 | `review_context_response.temporal_context.review_context_created_at` | Nova record time, semantic-hash excluded. |
-| 25 | `review_context_response.temporal_context.intended_action_window` | External intended window without authority effect. |
+| 25 | `review_context_response.temporal_context.intended_action_window` | Normalize explicit `start`/`end` under G3-R11 timestamp rules or preserve structured unresolved boundaries; invalid boundaries fail without authority effect. |
 | 26 | `review_context_response.temporal_context.temporal_conflicts` | Stable collection of all temporal conflicts. |
 | 27 | `review_context_response.temporal_context.pending_state` | Explicit unresolved temporal conditions. |
 | 28 | `review_context_response.contradiction_context.source_conflicts` | Normalized source conflicts. |
@@ -176,7 +176,7 @@ is machine-readable in the companion spec.
 | 30 | `review_context_response.contradiction_context.temporal_conflicts` | Normalized temporal conflicts. |
 | 31 | `review_context_response.contradiction_context.chronology_conflicts` | Existing-reference conflicts; no chronology write. |
 | 32 | `review_context_response.contradiction_context.unresolved_questions` | Stable union of unresolved questions. |
-| 33 | `review_context_response.review_completeness.value` | Reviewed profile precedence or explicit unresolved gap. |
+| 33 | `review_context_response.review_completeness.value` | Proposed target-v2 contract precedence is `unavailable > conflicted > partial > complete`; profiles define requirements, evidence, thresholds, applicability, and revalidation, not enum meaning or precedence. |
 | 34 | `review_context_response.review_completeness.missing_context` | Stable list of missing profile-required fields. |
 | 35 | `review_context_response.review_completeness.unresolved_conditions` | Unresolved evaluation conditions and precedence. |
 | 36 | `review_context_response.chronology_context.prior_review_references` | Existing references only. |

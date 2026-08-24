@@ -117,6 +117,7 @@ def normalize_exact_decimal(
     max_precision: int,
     max_scale: int,
     max_abs_exponent: int,
+    max_input_characters: int,
     fixed_scale: int | None = None,
 ) -> dict[str, Any]:
     """Normalize an exact decimal to a signed coefficient and nonnegative scale.
@@ -128,6 +129,10 @@ def normalize_exact_decimal(
 
     if min(max_precision, max_scale, max_abs_exponent) < 0 or max_precision == 0:
         raise ReferenceSemanticsError("decimal limits must be explicit nonnegative bounds with positive precision")
+    if max_input_characters <= 0:
+        raise ReferenceSemanticsError("decimal input-size bound must be positive")
+    if len(value) > max_input_characters:
+        raise ReferenceSemanticsError("decimal input exceeds the declared character bound")
     if fixed_scale is not None and (fixed_scale < 0 or fixed_scale > max_scale):
         raise ReferenceSemanticsError("fixed scale exceeds the declared maximum scale")
 
@@ -147,8 +152,6 @@ def normalize_exact_decimal(
     fraction = match.group("fraction") or ""
     coefficient_digits = (match.group("integer") + fraction).lstrip("0") or "0"
     scale = len(fraction) - exponent
-    if max(scale, 0) > max_scale:
-        raise ReferenceSemanticsError("decimal scale exceeds the declared maximum before expansion")
 
     if coefficient_digits == "0":
         expansion = 0
@@ -194,6 +197,7 @@ def normalize_monetary_amount(
     max_precision: int,
     max_scale: int,
     max_abs_exponent: int,
+    max_input_characters: int,
 ) -> dict[str, Any]:
     """Normalize money without float conversion, rounding, or implicit units."""
 
@@ -202,6 +206,7 @@ def normalize_monetary_amount(
         max_precision=max_precision,
         max_scale=max_scale,
         max_abs_exponent=max_abs_exponent,
+        max_input_characters=max_input_characters,
         fixed_scale=scale,
     )
     return {
@@ -235,6 +240,41 @@ def normalize_timestamp(value: str, *, precision: int = CANONICAL_TIMESTAMP_PREC
     fraction_text = f"{utc.microsecond:06d}"[:precision]
     suffix = f".{fraction_text}" if precision else ""
     return utc.strftime("%Y-%m-%dT%H:%M:%S") + suffix + "Z"
+
+
+def normalize_timestamp_boundary(value: Any, *, precision: int) -> Any:
+    """Normalize a timestamp string or preserve a declared unresolved state."""
+
+    if isinstance(value, str):
+        return normalize_timestamp(value, precision=precision)
+    if isinstance(value, dict):
+        if set(value) != {"state", "reason"}:
+            raise ReferenceSemanticsError("timestamp unresolved state must contain only state and reason")
+        if value.get("state") != "unresolved" or not isinstance(value.get("reason"), str) or not value["reason"]:
+            raise ReferenceSemanticsError("timestamp unresolved state must have a nonempty stable reason")
+        return copy.deepcopy(value)
+    raise ReferenceSemanticsError("timestamp boundary must be RFC 3339 text or explicit unresolved state")
+
+
+def normalize_timestamp_window(
+    value: Any,
+    *,
+    boundary_fields: Iterable[str],
+    precision: int,
+) -> dict[str, Any]:
+    """Normalize every declared intended-window boundary deterministically."""
+
+    if not isinstance(value, dict):
+        raise ReferenceSemanticsError("intended action window must be an object")
+    boundaries = list(boundary_fields)
+    if set(value) != set(boundaries):
+        missing = sorted(set(boundaries) - set(value))
+        extra = sorted(set(value) - set(boundaries))
+        raise ReferenceSemanticsError(f"intended action window boundary mismatch: missing={missing} extra={extra}")
+    return {
+        boundary: normalize_timestamp_boundary(value[boundary], precision=precision)
+        for boundary in boundaries
+    }
 
 
 def normalize_reference_array(
@@ -384,6 +424,13 @@ def _normalize_field_value(path: str, value: Any, profile: dict[str, Any]) -> An
     timestamp_paths = set(profile.get("timestamp_paths", []))
     if path in timestamp_paths and isinstance(value, str):
         value = normalize_timestamp(value, precision=profile["timestamp"]["fractional_second_digits"])
+    timestamp_object_rule = profile.get("timestamp_object_rules", {}).get(path)
+    if timestamp_object_rule:
+        value = normalize_timestamp_window(
+            value,
+            boundary_fields=timestamp_object_rule["boundary_fields"],
+            precision=profile["timestamp"]["fractional_second_digits"],
+        )
     if isinstance(value, list):
         rule = profile.get("array_rules", {}).get(path)
         if not rule:
@@ -525,6 +572,7 @@ def reference_self_check(spec: dict[str, Any], fixtures: dict[str, Any]) -> list
             max_precision=decimal_vector["max_precision"],
             max_scale=decimal_vector["max_scale"],
             max_abs_exponent=decimal_vector["max_abs_exponent"],
+            max_input_characters=decimal_vector["max_input_characters"],
         ) != decimal_vector["expected"]:
             errors.append("exact decimal vector failed")
         timestamp_vector = fixtures["reference_vectors"]["timestamp"]
@@ -538,6 +586,7 @@ def reference_self_check(spec: dict[str, Any], fixtures: dict[str, Any]) -> list
             max_precision=money_vector["max_precision"],
             max_scale=money_vector["max_scale"],
             max_abs_exponent=money_vector["max_abs_exponent"],
+            max_input_characters=money_vector["max_input_characters"],
         ) != money_vector["expected"]:
             errors.append("monetary amount vector failed")
         excessive_exponent = fixtures["reference_vectors"]["decimal_excessive_exponent"]
@@ -547,8 +596,33 @@ def reference_self_check(spec: dict[str, Any], fixtures: dict[str, Any]) -> list
                 max_precision=excessive_exponent["max_precision"],
                 max_scale=excessive_exponent["max_scale"],
                 max_abs_exponent=excessive_exponent["max_abs_exponent"],
+                max_input_characters=excessive_exponent["max_input_characters"],
             )
             errors.append("excessive decimal exponent was not rejected")
+        except ReferenceSemanticsError:
+            pass
+        excessive_scale = fixtures["reference_vectors"]["decimal_excessive_scale"]
+        try:
+            normalize_exact_decimal(
+                excessive_scale["input"],
+                max_precision=excessive_scale["max_precision"],
+                max_scale=excessive_scale["max_scale"],
+                max_abs_exponent=excessive_scale["max_abs_exponent"],
+                max_input_characters=excessive_scale["max_input_characters"],
+            )
+            errors.append("excessive canonical decimal scale was not rejected")
+        except ReferenceSemanticsError:
+            pass
+        excessive_input = fixtures["reference_vectors"]["decimal_excessive_input_size"]
+        try:
+            normalize_exact_decimal(
+                excessive_input["input"],
+                max_precision=excessive_input["max_precision"],
+                max_scale=excessive_input["max_scale"],
+                max_abs_exponent=excessive_input["max_abs_exponent"],
+                max_input_characters=excessive_input["max_input_characters"],
+            )
+            errors.append("excessive decimal input size was not rejected")
         except ReferenceSemanticsError:
             pass
         try:
@@ -556,6 +630,16 @@ def reference_self_check(spec: dict[str, Any], fixtures: dict[str, Any]) -> list
             errors.append("RFC3339 unknown offset was normalized instead of rejected")
         except ReferenceSemanticsError:
             pass
+        window_vector = fixtures["reference_vectors"]["intended_action_window"]
+        window_rule = spec["canonical_numeric_and_interoperability_profile"]["timestamp_object_rules"][
+            "review_context_response.temporal_context.intended_action_window"
+        ]
+        if normalize_timestamp_window(
+            window_vector["input"],
+            boundary_fields=window_rule["boundary_fields"],
+            precision=spec["canonical_numeric_and_interoperability_profile"]["timestamp"]["fractional_second_digits"],
+        ) != window_vector["expected"]:
+            errors.append("intended action window boundary normalization failed")
         reference_vector = fixtures["reference_vectors"]["references"]
         if normalize_reference_array(reference_vector["input"], identity_key="source_id") != reference_vector["expected"]:
             errors.append("reference ordering/deduplication vector failed")
@@ -658,6 +742,8 @@ __all__ = [
     "normalize_reference_array",
     "normalize_semantic_array",
     "normalize_timestamp",
+    "normalize_timestamp_boundary",
+    "normalize_timestamp_window",
     "parse_json_no_duplicates",
     "project_semantic_material",
     "reference_self_check",
