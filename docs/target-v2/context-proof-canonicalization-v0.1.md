@@ -6,7 +6,8 @@
 status: proposed_not_canonical
 design_only: true
 canonicalization_design_defined: true
-semantic_completion: blocked_pending_G3-R11_review
+semantic_completion: blocked_pending_refinement_review
+semantic_completion_blockers: [G3-R01, G3-R03, G3-R08, G3-R11, G3-Q15]
 canonicalization_version: nova-jcs-exact-financial-json-design-v0.1
 derivation_version: gate3-field-derivation-v0.1
 production_algorithm_selected: false
@@ -37,8 +38,11 @@ metadata changes. Cryptographic attestation identity may change independently.
 ### Semantic material includes
 
 - exact schema, derivation, and canonicalization identities;
-- stable action identity and exact proposal-version identity once G3-R01 is
-  approved, or an explicitly labeled fallback state;
+- externally supplied stable action identity when lineage is claimed, plus the
+  exact proposal-version identity once G3-R01 is approved. If action identity
+  is absent, lineage is explicitly unavailable; a proposal-version fallback is
+  algorithm-qualified, labeled `Nova_derived_proposal_fingerprint`, and limited
+  to canonical prepared-action material;
 - exact review-profile identity/version/hash;
 - normalized source, constraint, temporal, contradiction, completeness, and
   existing chronology-reference context;
@@ -155,8 +159,10 @@ accepted only at the normalization boundary and is eliminated from canonical
 material. Negative zero becomes coefficient `0`. A generic exact decimal trims
 insignificant trailing zeros to its minimum scale, so `1.2300` becomes
 coefficient `123`, scale `2`. A field with fixed-scale semantics retains exactly
-the profile-declared scale. Maximum precision and scale are profile inputs; no
-rounding is permitted.
+the profile-declared scale. Every exact-decimal field profile must supply
+`max_precision`, `max_scale`, and `max_abs_exponent`. Exponent and resulting
+scale bounds are checked before coefficient expansion. No rounding is
+permitted.
 
 ### Monetary amount
 
@@ -167,11 +173,12 @@ coefficient: signed_base10_string
 scale: profile_declared_nonnegative_integer
 ```
 
-Asset/unit and scale are never inferred. For a scale-2 asset, `1`, `1.0`, and
-`1.00` normalize to coefficient `100`, scale `2`; `1.001` fails because rounding
-would be required. Missing asset/scale metadata leaves the amount unresolved and
-not canonicalizable. Normalization has no approval, pricing, settlement, or
-execution effect.
+Asset/unit and scale are never inferred. Monetary profiles also require
+`max_precision`, `max_scale`, and `max_abs_exponent`. For a scale-2 asset, `1`,
+`1.0`, and `1.00` normalize to coefficient `100`, scale `2`; `1.001` fails
+because rounding would be required. Missing asset/scale metadata leaves the
+amount unresolved and not canonicalizable. Normalization has no approval,
+pricing, settlement, or execution effect.
 
 ## Timestamp model
 
@@ -183,15 +190,33 @@ YYYY-MM-DDTHH:MM:SS.ffffffZ
 ```
 
 Whole seconds are padded with `.000000`; shorter fractions are right-padded.
-Sub-microsecond input is rejected rather than rounded. Leap-second or invalid
-calendar input fails. This fixed precision is part of the proposed G3-R11
-profile and remains a semantic-completion blocker until reviewed. Normalization
-does not turn a Nova clock value into independently trusted time.
+Sub-microsecond input is rejected rather than rounded. RFC 3339 `-00:00` denotes
+an unknown local offset and is rejected by this proposed profile; it is never
+silently normalized to UTC `Z`. Leap-second or invalid calendar input fails.
+This fixed precision is part of the proposed G3-R11 profile and remains a
+semantic-completion blocker until reviewed. Normalization does not turn a Nova
+clock value into independently trusted time.
 
 ## Array ordering and duplicate references
 
-Array semantics are declared per field, never inferred from incidental input
-order.
+Array semantics are declared per field as exactly one of `ordered_sequence`,
+`set`, or `multiset`; undeclared semantic arrays fail projection. JCS preserves
+array order structurally, while the application profile normalizes each
+declared set or multiset before JCS. The current response semantic-array
+inventory classifies every listed field as `set`:
+
+| Area | Set-valued semantic fields |
+|---|---|
+| Source and state | `record_source_type.source_segmentation`, `context_state.reasons`, `source_state.sources`, `source_state.unresolved_source_conflicts` |
+| Constraints and time | `constraint_context.observed_constraints`, `constraint_context.constraint_sources`, `constraint_context.unresolved_constraint_questions`, `temporal_context.temporal_conflicts`, `temporal_context.pending_state` |
+| Contradictions | `contradiction_context.source_conflicts`, `constraint_conflicts`, `temporal_conflicts`, `chronology_conflicts`, `unresolved_questions` |
+| Completeness and chronology | `review_completeness.missing_context`, `review_completeness.unresolved_conditions`, `chronology_context.prior_review_references`, `accepted_memory_references`, `relevant_changes_since_prior_review` |
+| Reproducibility | `reproducibility.source_versions`, `reproducibility.source_segmentation` |
+
+This covers every `deterministic_collection` and every other current set-like
+semantic response field. A future array must choose one of the three classes
+before entering canonical material; it does not inherit set semantics by
+analogy.
 
 - Sets of source, constraint, conflict, unresolved-question, chronology,
   digest, and reference objects are normalized then sorted by a declared tuple.

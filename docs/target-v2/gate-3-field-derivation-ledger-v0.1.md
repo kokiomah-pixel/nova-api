@@ -56,28 +56,44 @@ Every field rule resolves these questions:
 action_id != proposal_version_id
 ```
 
-`action_id` is stable across revisions. `proposal_version_id` identifies the
-exact proposal reviewed. Institution-supplied identities remain opaque external
-references. If only the stable identity exists, a content fingerprint may be
-proposed, but it must be labeled `Nova-derived proposal fingerprint`; it is not
-an institution-issued version identity. A proposal revision changes semantic
+`action_id` is stable across revisions only when an institution or orchestrator
+supplies it. It is required whenever cross-revision lineage is claimed. Nova
+must not derive it from mutable proposal content. If it is absent, lineage is
+`unavailable`; two proposal versions must not be inferred to belong to the same
+action.
+
+`proposal_version_id` identifies the exact proposal reviewed and should likewise
+prefer an external institution/orchestrator identifier. If that identifier is
+absent, the proposal permits only an algorithm-qualified value explicitly
+labeled `Nova_derived_proposal_fingerprint`, derived from canonical
+prepared-action material alone. That fallback distinguishes proposal content;
+it cannot establish action lineage. A proposal revision changes semantic
 context and cannot replay under the proof of an earlier proposal.
 
-The approved response currently has one `prepared_action_reference.reference_id`.
-Separate identity fields therefore remain proposed refinement `G3-R01`; this
-ledger does not add them to the contract.
+The approved request has action content but no `action_id` or
+`proposal_version_id`, and the approved response has one
+`prepared_action_reference.reference_id`. Proposed refinement `G3-R01` covers
+both request input and response reference binding; this ledger does not add the
+fields to the approved contract.
 
 ## Profile-driven requirements
 
 The identified institution-approved review profile, not Nova, defines required
-evidence, maximum age, source hierarchy, constraint applicability, required
-fields, revalidation conditions, and completeness precedence. Its ID, version,
+evidence, maximum age and other thresholds, source hierarchy, constraint
+applicability, required fields, and revalidation conditions. Its ID, version,
 owner, and hash are preserved. A profile change may explain a completeness or
 semantic-hash change even when evidence is unchanged.
 
-Missing or conflicting profile rules remain unresolved. The approved contract
-does not specify exact completeness precedence, so `G3-R08` records that gap.
-No unstated precedence is made canonical here.
+Missing or conflicting profile rules remain unresolved. Proposed `G3-R08`
+places public enum meaning and precedence in the target-v2 contract rather than
+institution profiles: `unavailable`, `conflicted`, `partial`, then `complete`.
+`unavailable` means the profile or required-field inventory prevents evaluation;
+`conflicted` means required context has unresolved material conflict; `partial`
+means required context is missing/unavailable without a higher-priority
+conflict; `complete` means every required dimension is represented, including
+allowed explicit unresolved states, with no material conflict. This remains a
+proposal because the approved contract is unchanged. Complete never means
+policy satisfied, safe, permitted, approved, or executable.
 
 ## Scoped source authority
 
@@ -114,10 +130,11 @@ state change does not automatically change source, context, or completeness.
 ## Evidence-environment segmentation
 
 `synthetic`, `production_like`, and `live` remain visible at field or source
-reference level. Mixed packets retain each segment. `production_like` is never
-promoted to `live`; `live` never means true, accepted, or approved. Because the
-contract also requires one aggregate value, deterministic mixed aggregation is
-proposed gap `G3-R03`.
+reference level. Proposed `G3-R03` adds aggregate value `mixed`, meaning that
+more than one evidence-environment class is represented. `source_segmentation`
+remains authoritative component provenance. No strongest/weakest heuristic is
+used, `production_like` is never promoted to `live`, and `live` never means
+true, accepted, or approved.
 
 ## Required response-field ledger
 
@@ -131,14 +148,14 @@ is machine-readable in the companion spec.
 | 2 | `review_context_response.context_id` | Generated envelope ID; excluded from semantic identity. |
 | 3 | `review_context_response.request_id` | Opaque request reference; excluded from semantic identity. |
 | 4 | `review_context_response.created_at` | Nova record time; not independently trusted time. |
-| 5 | `review_context_response.prepared_action_reference.reference_id` | Opaque action/proposal reference subject to G3-R01. |
+| 5 | `review_context_response.prepared_action_reference.reference_id` | Compatibility reference binding proposed request-side external lineage and exact proposal identity under G3-R01; missing action lineage stays unavailable. |
 | 6 | `review_context_response.prepared_action_reference.reference_type` | Contract constant `opaque_external_reference`. |
 | 7 | `review_context_response.prepared_action_reference.payload_embedded` | Contract constant `false`. |
 | 8 | `review_context_response.review_profile_reference.profile_id` | Exact institution profile ID. |
 | 9 | `review_context_response.review_profile_reference.profile_version` | Exact version; never inferred latest. |
 | 10 | `review_context_response.review_profile_reference.profile_owner` | Declared owner; no Nova policy authority. |
 | 11 | `review_context_response.review_profile_reference.profile_hash` | Supplied digest; algorithm qualification proposed. |
-| 12 | `review_context_response.record_source_type.value` | Homogeneous aggregate only; mixed semantics are G3-R03. |
+| 12 | `review_context_response.record_source_type.value` | Proposed G3-R03 aggregate: homogeneous environment or `mixed`; segmentation remains authoritative. |
 | 13 | `review_context_response.record_source_type.source_segmentation` | Stable source/field environment segments without promotion. |
 | 14 | `review_context_response.context_state.value` | Profile-temporal and supersession evaluation. |
 | 15 | `review_context_response.context_state.reasons` | Stable reason codes, not generated prose. |
@@ -219,15 +236,19 @@ financial values. Binary floats, NaN, and infinity are prohibited.
 - exact integers use a typed canonical base-10 string, with no exponent,
   leading zeros, or negative zero;
 - exact decimals use signed coefficient plus nonnegative scale, with exponent
-  removed and no rounding;
+  removed and no rounding; every field profile declares `max_precision`,
+  `max_scale`, and `max_abs_exponent`, enforced before coefficient expansion;
 - generic decimal trailing zeros are insignificant, while fixed-scale fields
   retain the institution-profile scale;
 - monetary amounts bind explicit asset/unit, coefficient, and profile scale;
-- RFC 3339 timestamps normalize to UTC with six fractional digits and reject
-  sub-microsecond rounding;
-- Unicode is preserved as-is per JCS, `null` differs from absent, set-like
-  reference arrays are sorted/deduplicated by declared rules, and identity
-  collisions fail until represented as explicit conflicts.
+- RFC 3339 timestamps normalize to UTC with six fractional digits, reject
+  sub-microsecond rounding, and reject `-00:00` as unknown offset rather than
+  silently treating it as UTC `Z`;
+- Unicode is preserved as-is per JCS and `null` differs from absent;
+- every semantic array explicitly declares `ordered_sequence`, `set`, or
+  `multiset` semantics. Every `deterministic_collection` has an executable
+  rule; all current set-like response fields are sorted/deduplicated by their
+  declared rule, and identity collisions fail until represented as conflicts.
 
 The executable design-only reference semantics live in
 `scripts/gate3_reference_semantics.py`. They are validation support, not target

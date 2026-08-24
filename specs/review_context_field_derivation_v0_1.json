@@ -27,16 +27,30 @@
     "Nova does not execute."
   ],
   "identity_model": {
+    "scope": ["review_context_request", "review_context_response.prepared_action_reference"],
     "action_id": {
       "meaning": "stable_identity_across_revisions",
-      "authority": "opaque_institution_reference_when_supplied"
+      "authority": "external_institution_or_orchestrator_only",
+      "required_when_cross_revision_lineage_is_claimed": true,
+      "Nova_content_derivation_permitted": false,
+      "mutable_proposal_content_is_lineage_evidence": false,
+      "missing_behavior": ["preserve_lineage_as_unavailable", "do_not_infer_same_action_across_revisions"]
     },
     "proposal_version_id": {
       "meaning": "identity_of_exact_proposal_reviewed",
-      "authority": "opaque_institution_reference_when_supplied"
+      "preferred_source": "external_institution_or_orchestrator",
+      "fallback": {
+        "source": "Nova_derived_proposal_fingerprint",
+        "explicit_label_required": true,
+        "material_scope": "canonical_prepared_action_material_only",
+        "algorithm_qualified": true,
+        "may_establish_action_lineage": false
+      }
     },
     "identities_collapsed": false,
     "Nova_fingerprint_fallback": "labeled_Nova_derived_proposal_fingerprint_only_when_external_version_id_absent",
+    "request_side_proposal": "add_explicit_action_id_and_proposal_version_id_inputs_in_a_future_reviewed_target_v2_contract_revision",
+    "response_side_proposal": "bind_the_response_reference_to_the_resolved_request_identity_pair_without_reconstructing_lineage_from_content",
     "contract_gap_reference": "G3-R01"
   },
   "review_profile_model": {
@@ -47,13 +61,39 @@
     "missing_requirement_behavior": "preserve_unresolved",
     "contract_gap_reference": "G3-R02"
   },
+  "record_source_type_proposal": {
+    "status": "proposed_not_canonical",
+    "contract_gap_reference": "G3-R03",
+    "permitted_values": ["synthetic", "production_like", "live", "mixed"],
+    "mixed_meaning": "more_than_one_evidence_environment_class_is_represented",
+    "source_segmentation_authoritative_for_component_provenance": true,
+    "aggregate_environment_ranking": "prohibited",
+    "production_like_promotion_to_live": false,
+    "mixed_reduction_to_strongest_or_weakest": false
+  },
+  "review_completeness_proposal": {
+    "status": "proposed_not_canonical",
+    "contract_gap_reference": "G3-R08",
+    "semantic_owner_after_contract_adoption": "target_v2_contract",
+    "precedence": ["unavailable", "conflicted", "partial", "complete"],
+    "meanings": {
+      "unavailable": "completeness_cannot_be_evaluated_because_the_applicable_profile_or_required_field_inventory_is_unavailable",
+      "conflicted": "required_context_contains_unresolved_material_conflict",
+      "partial": "required_context_is_missing_or_unavailable_without_a_higher_priority_material_conflict",
+      "complete": "all_required_dimensions_are_represented_including_explicit_unresolved_states_where_allowed_and_no_material_conflict_exists"
+    },
+    "profile_defines": ["required_fields", "required_evidence", "thresholds", "applicability", "revalidation"],
+    "profile_may_redefine_enum_meaning_or_precedence": false,
+    "complete_does_not_mean": ["policy_satisfied", "safe", "permitted", "approved", "executable"]
+  },
   "aggregate_state_model": {
     "dimensions_separate": ["source_state", "context_state", "review_completeness", "proof_verification_state"],
     "source_state_precedence": ["unavailable", "conflicted", "partial", "complete"],
     "source_state_complete_scope": "complete_within_profile_declared_scope_only",
     "context_state_precedence": ["superseded", "stale", "uncertain", "current"],
     "missing_timestamp_result": "uncertain",
-    "review_completeness_precedence": "requires_reviewed_profile_rule_or_G3-R08_remains_unresolved",
+    "review_completeness_precedence": ["unavailable", "conflicted", "partial", "complete"],
+    "review_completeness_precedence_authority_after_adoption": "target_v2_contract_not_institution_profile",
     "proof_state_changes_other_dimensions_automatically": false
   },
   "semantic_completion": {
@@ -96,6 +136,10 @@
       "exponent_input": "accepted_only_at_normalization_boundary_and_eliminated_from_canonical_representation",
       "negative_zero": "coefficient_zero_without_sign",
       "precision": "field_profile_max_digits_no_rounding",
+      "required_limits": ["max_precision", "max_scale", "max_abs_exponent"],
+      "max_scale": "field_profile_required_nonnegative_bound",
+      "max_abs_exponent": "field_profile_required_nonnegative_bound_checked_before_coefficient_expansion",
+      "excessive_scale_or_exponent": "reject_before_coefficient_expansion",
       "generic_trailing_zero_semantics": "insignificant_trim_to_minimum_scale",
       "fixed_scale_trailing_zero_semantics": "significant_as_profile_declared_scale"
     },
@@ -104,6 +148,7 @@
       "implicit_currency_or_unit": false,
       "binary_float_conversion": false,
       "rounding": "prohibited",
+      "required_limits": ["max_precision", "max_scale", "max_abs_exponent"],
       "missing_asset_scale": "unresolved_not_canonicalizable"
     },
     "timestamp": {
@@ -111,12 +156,36 @@
       "timezone": "normalize_to_UTC_Z",
       "fractional_second_digits": 6,
       "sub_microsecond_input": "reject_without_rounding",
+      "unknown_offset_minus_00_00": "reject_not_UTC_equivalent",
       "output": "YYYY-MM-DDTHH:MM:SS.ffffffZ",
       "trusted_time_claim_from_normalization": false
     },
     "timestamp_paths": [
       "review_context_response.temporal_context.source_observed_at",
       "review_context_response.temporal_context.source_received_at"
+    ],
+    "semantic_array_paths": [
+      "review_context_response.record_source_type.source_segmentation",
+      "review_context_response.context_state.reasons",
+      "review_context_response.source_state.sources",
+      "review_context_response.source_state.unresolved_source_conflicts",
+      "review_context_response.constraint_context.observed_constraints",
+      "review_context_response.constraint_context.constraint_sources",
+      "review_context_response.constraint_context.unresolved_constraint_questions",
+      "review_context_response.temporal_context.temporal_conflicts",
+      "review_context_response.temporal_context.pending_state",
+      "review_context_response.contradiction_context.source_conflicts",
+      "review_context_response.contradiction_context.constraint_conflicts",
+      "review_context_response.contradiction_context.temporal_conflicts",
+      "review_context_response.contradiction_context.chronology_conflicts",
+      "review_context_response.contradiction_context.unresolved_questions",
+      "review_context_response.review_completeness.missing_context",
+      "review_context_response.review_completeness.unresolved_conditions",
+      "review_context_response.chronology_context.prior_review_references",
+      "review_context_response.chronology_context.accepted_memory_references",
+      "review_context_response.chronology_context.relevant_changes_since_prior_review",
+      "review_context_response.reproducibility.source_versions",
+      "review_context_response.reproducibility.source_segmentation"
     ],
     "array_rules": {
       "review_context_response.record_source_type.source_segmentation": {"semantics": "set", "identity_key": "source_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
@@ -125,8 +194,19 @@
       "review_context_response.source_state.unresolved_source_conflicts": {"semantics": "set", "identity_key": "conflict_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
       "review_context_response.constraint_context.observed_constraints": {"semantics": "set", "identity_key": "reference_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
       "review_context_response.constraint_context.constraint_sources": {"semantics": "set", "identity_key": "source_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.constraint_context.unresolved_constraint_questions": {"semantics": "set", "identity_key": "question_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.temporal_context.temporal_conflicts": {"semantics": "set", "identity_key": "conflict_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.temporal_context.pending_state": {"semantics": "set", "identity_key": "condition_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.contradiction_context.source_conflicts": {"semantics": "set", "identity_key": "conflict_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.contradiction_context.constraint_conflicts": {"semantics": "set", "identity_key": "conflict_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.contradiction_context.temporal_conflicts": {"semantics": "set", "identity_key": "conflict_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.contradiction_context.chronology_conflicts": {"semantics": "set", "identity_key": "conflict_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.contradiction_context.unresolved_questions": {"semantics": "set", "identity_key": "question_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.review_completeness.missing_context": {"semantics": "set", "exact_duplicate": "collapse"},
+      "review_context_response.review_completeness.unresolved_conditions": {"semantics": "set", "identity_key": "condition_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
       "review_context_response.chronology_context.prior_review_references": {"semantics": "set", "identity_key": "reference_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
       "review_context_response.chronology_context.accepted_memory_references": {"semantics": "set", "identity_key": "reference_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.chronology_context.relevant_changes_since_prior_review": {"semantics": "set", "identity_key": "change_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
       "review_context_response.reproducibility.source_versions": {"semantics": "set", "exact_duplicate": "collapse"},
       "review_context_response.reproducibility.source_segmentation": {"semantics": "set", "identity_key": "source_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"}
     }
@@ -254,7 +334,7 @@
     "review_context_response.request_id": {"template": "external_reference", "rule_version": "0.1.0", "required_inputs": ["review_context_request.request_id"], "derivation_rule": "Preserve the opaque request identifier in the envelope while excluding it from semantic hash material.", "semantic_hash_inclusion": false, "contract_gap_references": []},
     "review_context_response.created_at": {"template": "generated_envelope_metadata", "rule_version": "0.1.0", "required_inputs": ["Nova_clock_observation"], "derivation_rule": "Record construction time; normalize under G3-R11 for the envelope and do not claim independently trusted time.", "contract_gap_references": ["G3-R11", "G3-Q08"]},
 
-    "review_context_response.prepared_action_reference.reference_id": {"template": "external_reference", "rule_version": "0.1.0", "required_inputs": ["institution_action_id", "institution_proposal_version_id_or_labeled_Nova_fingerprint"], "derivation_rule": "Preserve distinct stable action and exact proposal identities when supplied; never replay a revision under an earlier proposal proof.", "sensitivity_class": "opaque_action_reference", "contract_gap_references": ["G3-R01", "G3-R09"]},
+    "review_context_response.prepared_action_reference.reference_id": {"template": "external_reference", "rule_version": "0.1.0", "required_inputs": ["request.action_id_if_externally_supplied", "request.proposal_version_id_or_algorithm_qualified_labeled_Nova_fingerprint"], "derivation_rule": "Bind the response to distinct request-side identities: action_id is externally supplied and never content-derived; prefer an external proposal_version_id, else label a Nova-derived fingerprint over canonical prepared-action material only; absent action_id leaves lineage unavailable and forbids same-action inference.", "sensitivity_class": "opaque_action_reference", "contract_gap_references": ["G3-R01", "G3-R09"]},
     "review_context_response.prepared_action_reference.reference_type": {"template": "contract_constant", "rule_version": "0.1.0", "required_inputs": ["approved_contract.prepared_action_reference.reference_type"], "derivation_rule": "Emit opaque_external_reference.", "contract_gap_references": ["G3-R01"]},
     "review_context_response.prepared_action_reference.payload_embedded": {"template": "contract_constant", "rule_version": "0.1.0", "required_inputs": ["approved_contract.prepared_action_reference.payload_embedded"], "derivation_rule": "Emit false; sensitive action payload is reference-only by default.", "contract_gap_references": []},
 
@@ -263,7 +343,7 @@
     "review_context_response.review_profile_reference.profile_owner": {"template": "profile_reference", "rule_version": "0.1.0", "required_inputs": ["review_profile.profile_owner"], "derivation_rule": "Preserve the declared profile owner without granting Nova policy authority.", "contract_gap_references": ["G3-R02"]},
     "review_context_response.review_profile_reference.profile_hash": {"template": "profile_reference", "rule_version": "0.1.0", "required_inputs": ["review_profile.profile_hash"], "derivation_rule": "Preserve the supplied algorithm-qualified profile digest or mark qualification unresolved.", "contract_gap_references": ["G3-Q02", "G3-Q05"]},
 
-    "review_context_response.record_source_type.value": {"template": "aggregate_state", "rule_version": "0.1.0", "required_inputs": ["source_environment_segments"], "derivation_rule": "Emit a single value only for homogeneous packets; mixed packets remain segmented and require G3-R03 refinement.", "contract_gap_references": ["G3-R03"]},
+    "review_context_response.record_source_type.value": {"template": "aggregate_state", "rule_version": "0.1.0", "required_inputs": ["source_environment_segments"], "derivation_rule": "Propose synthetic, production_like, or live only for a homogeneous packet and mixed whenever more than one evidence-environment class is represented; source_segmentation remains authoritative, with no strongest/weakest ranking or production_like promotion.", "contract_gap_references": ["G3-R03"]},
     "review_context_response.record_source_type.source_segmentation": {"template": "deterministic_collection", "rule_version": "0.1.0", "required_inputs": ["source_environment_segments"], "derivation_rule": "Stable-sort field/source segments and preserve synthetic, production_like, and live without promotion.", "contract_gap_references": ["G3-R03"]},
 
     "review_context_response.context_state.value": {"template": "aggregate_state", "rule_version": "0.1.0", "required_inputs": ["profile_temporal_rules", "source_times", "supersession_references"], "derivation_rule": "Evaluate superseded, stale, uncertain, then current; current requires all reviewed temporal conditions.", "contract_gap_references": ["G3-R02"]},
@@ -290,9 +370,9 @@
     "review_context_response.contradiction_context.chronology_conflicts": {"template": "deterministic_collection", "rule_version": "0.1.0", "required_inputs": ["existing_chronology_references"], "derivation_rule": "Describe conflicts among existing references without writing or accepting chronology.", "contract_gap_references": ["G3-R10"]},
     "review_context_response.contradiction_context.unresolved_questions": {"template": "deterministic_collection", "rule_version": "0.1.0", "required_inputs": ["all_unresolved_relationships"], "derivation_rule": "Stable-union unresolved questions across dimensions.", "contract_gap_references": []},
 
-    "review_context_response.review_completeness.value": {"template": "aggregate_state", "rule_version": "0.1.0", "required_inputs": ["review_profile.required_context_fields", "field_presence", "unresolved_conditions"], "derivation_rule": "Apply only a reviewed profile precedence; otherwise preserve precedence as unresolved under G3-R08.", "contract_gap_references": ["G3-R02", "G3-R08"]},
+    "review_context_response.review_completeness.value": {"template": "aggregate_state", "rule_version": "0.1.0", "required_inputs": ["review_profile.required_context_fields", "field_presence", "required_context_availability", "unresolved_material_conflicts"], "derivation_rule": "Apply proposed target-v2 contract precedence unavailable, conflicted, partial, complete. The profile defines requirements, evidence, thresholds, applicability, and revalidation but cannot redefine enum meaning or precedence.", "contract_gap_references": ["G3-R02", "G3-R08"]},
     "review_context_response.review_completeness.missing_context": {"template": "deterministic_collection", "rule_version": "0.1.0", "required_inputs": ["review_profile.required_context_fields", "field_presence"], "derivation_rule": "Stable-sort profile-required fields that are absent.", "contract_gap_references": ["G3-R02"]},
-    "review_context_response.review_completeness.unresolved_conditions": {"template": "deterministic_collection", "rule_version": "0.1.0", "required_inputs": ["profile_evaluation_unresolved_conditions"], "derivation_rule": "Preserve unresolved evaluation conditions including missing precedence.", "contract_gap_references": ["G3-R08"]},
+    "review_context_response.review_completeness.unresolved_conditions": {"template": "deterministic_collection", "rule_version": "0.1.0", "required_inputs": ["profile_evaluation_unresolved_conditions"], "derivation_rule": "Preserve unresolved evaluation conditions; explicit unresolved representation may satisfy a profile-required dimension only when that profile allows it and no material conflict exists.", "contract_gap_references": ["G3-R08"]},
 
     "review_context_response.chronology_context.prior_review_references": {"template": "deterministic_collection", "rule_version": "0.1.0", "required_inputs": ["institution_context.prior_review_references"], "derivation_rule": "Preserve existing prior review references; create no chronology event.", "contract_gap_references": ["G3-R10"]},
     "review_context_response.chronology_context.accepted_memory_references": {"template": "deterministic_collection", "rule_version": "0.1.0", "required_inputs": ["already_accepted_memory_references"], "derivation_rule": "Reference only already accepted memory and preserve unknown applicability.", "contract_gap_references": ["G3-R10"]},

@@ -22,17 +22,17 @@ authority. The machine register is
 
 | ID | Approved invariant | Current gap | Proposed refinement |
 |---|---|---|---|
-| G3-R01 | Stable action identity differs from exact proposal identity. | One `reference_id` cannot express both. | Separate opaque `action_id` and `proposal_version_id`; label any Nova fingerprint. |
+| G3-R01 | Stable action lineage differs from exact proposal identity on both request and response. | The request lacks both identities and one response `reference_id` cannot express them. | Require externally supplied `action_id` for cross-revision lineage; prefer external `proposal_version_id`, with only an algorithm-qualified, explicitly labeled Nova fingerprint over canonical prepared-action material as fallback. |
 | G3-R02 | Institution-approved profiles define requirements. | Age, source, applicability, and revalidation rules lack normalized shapes. | Add versioned profile requirement structures; preserve missing rules as unresolved. |
-| G3-R03 | Mixed evidence environments preserve segmentation. | One aggregate source value cannot cleanly express mixed packets. | Define a mixed aggregate or make segmentation authoritative with a reviewed compatibility rule. |
+| G3-R03 | Mixed evidence environments preserve authoritative component segmentation. | One aggregate source value cannot express mixed packets. | Add `mixed` for more than one environment class; retain segmentation as authoritative and prohibit ranking or promotion. |
 | G3-R04 | Source authority is scoped and conflicts remain visible. | Source references lack designation scope. | Add `designated_by`, `applies_to`, and authority reference metadata. |
 | G3-R05 | Semantic material differs from proof-envelope material. | Neither scope is explicit. | Declare separate canonical scopes. |
 | G3-R06 | Visible versions explain deterministic changes. | Derivation and canonicalization versions are absent. | Add both to reproducibility/proof material. |
 | G3-R07 | Digest integrity differs from reconstruction availability. | Reconstruction scope is absent. | Add full, reference-only, and unavailable classifications. |
-| G3-R08 | Review completeness is profile-relative. | Exact state precedence is unspecified. | Require a reviewed profile precedence; otherwise preserve unresolved. |
+| G3-R08 | Profiles define requirements, while the contract owns stable completeness enum meaning. | Contract-level state meanings and precedence are unspecified. | Propose contract precedence `unavailable > conflicted > partial > complete`; profiles continue to define requirements, evidence, thresholds, applicability, and revalidation. |
 | G3-R09 | Hashing is not redaction. | Identifier salt and fallback rules are absent. | Require external scoped salt; redact on absence, with no raw fallback. |
 | G3-R10 | Prior records do not imply current applicability. | Chronology treatment and applicability are not independently qualified. | Add explicit treatment/applicability status including `unknown`. |
-| G3-R11 | Canonical bytes preserve exact numeric, monetary, temporal, Unicode, null, and ordering meaning. | Numeric representation was implementation-defined and JCS/financial-decimal interoperability was undecided. | Adopt RFC 8785/JCS with a versioned exact-numeric application profile using typed base-10 coefficient/scale objects, fixed timestamp precision, and declared array/duplicate rules. |
+| G3-R11 | Canonical bytes preserve exact numeric, monetary, temporal, Unicode, null, and ordering meaning. | Exact-financial bounds, exhaustive semantic-array rules, and unknown-offset behavior were incomplete. | Keep RFC 8785/JCS plus the exact-financial application profile; require precision/scale/exponent bounds, reject `-00:00`, and classify every semantic array with executable rules. |
 
 ## Gate 3A cryptographic-agility refinement family
 
@@ -65,10 +65,31 @@ newly_discovered:
   - G3-Q15 semantic_identity_continuity_across_digest_migration
 ```
 
-`G3-R11` completes the design-level numeric model but remains non-canonical
-until review. `G3-Q15` closes the conceptual distinction between semantic
-identity and digest evidence, but its continuity structure likewise remains a
-proposal.
+`G3-R11` completes the design-level numeric and collection model but remains
+non-canonical until review. `G3-Q15` is unchanged: CCO accepts its semantic
+direction, while its continuity structure still remains a proposal pending the
+required complete review and contract-revision process.
+
+## CCO remediation decisions within the existing gap family
+
+- `G3-R01` covers request input and response reference semantics. `action_id`
+  is externally supplied and required for any cross-revision lineage claim; it
+  is never derived from mutable content. An absent `action_id` means lineage is
+  unavailable. `proposal_version_id` prefers an external identifier; the sole
+  fallback is an algorithm-qualified value labeled
+  `Nova_derived_proposal_fingerprint` over canonical prepared-action material.
+- `G3-R03` resolves the former either/or: the aggregate is `mixed` whenever
+  more than one evidence-environment class appears. Segmentation remains
+  authoritative, without strongest/weakest reduction or promotion to `live`.
+- `G3-R08` proposes stable target-v2 contract meanings and precedence:
+  `unavailable`, `conflicted`, `partial`, then `complete`. Institution profiles
+  determine what must be evaluated, but cannot redefine the public enum.
+  `complete` never means policy satisfied, safe, permitted, approved, or
+  executable.
+- `G3-R11` requires `max_precision`, `max_scale`, and `max_abs_exponent`, rejects
+  excessive bounds before coefficient expansion, rejects RFC 3339 `-00:00`,
+  and gives every semantic array an executable `ordered_sequence`, `set`, or
+  `multiset` declaration.
 
 ## Gate 3 semantic-completion blockers
 

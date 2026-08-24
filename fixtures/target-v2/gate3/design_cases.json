@@ -40,10 +40,14 @@
   "reference_vectors": {
     "unicode": {"composed": "é", "decomposed": "é", "expected_equal": false},
     "integer": {"input": "-000", "expected_error": true, "negative_zero_input": "-0", "negative_zero_expected": {"numeric_type": "integer", "value": "0"}},
-    "decimal": {"input": "1.2300", "max_precision": 10, "expected": {"numeric_type": "decimal", "coefficient": "123", "scale": 2}},
-    "decimal_exponent": {"input": "1.2300e2", "max_precision": 10, "expected": {"numeric_type": "decimal", "coefficient": "123", "scale": 0}},
-    "monetary_amount": {"input": "1.0", "asset_id": "SYNTH-USD", "scale": 2, "max_precision": 10, "expected": {"numeric_type": "monetary_amount", "asset_id": "SYNTH-USD", "coefficient": "100", "scale": 2}},
+    "decimal": {"input": "1.2300", "max_precision": 10, "max_scale": 4, "max_abs_exponent": 4, "expected": {"numeric_type": "decimal", "coefficient": "123", "scale": 2}},
+    "decimal_exponent": {"input": "1.2300e2", "max_precision": 10, "max_scale": 4, "max_abs_exponent": 4, "expected": {"numeric_type": "decimal", "coefficient": "123", "scale": 0}},
+    "decimal_excessive_exponent": {"input": "1e100000", "max_precision": 10, "max_scale": 4, "max_abs_exponent": 12, "expected_error": "exponent_bound_before_expansion"},
+    "decimal_excessive_scale": {"input": "0.0000001", "max_precision": 10, "max_scale": 6, "max_abs_exponent": 12, "expected_error": "scale_bound_before_expansion"},
+    "monetary_amount": {"input": "1.0", "asset_id": "SYNTH-USD", "scale": 2, "max_precision": 10, "max_scale": 4, "max_abs_exponent": 4, "expected": {"numeric_type": "monetary_amount", "asset_id": "SYNTH-USD", "coefficient": "100", "scale": 2}},
     "timestamp": {"input": "2026-08-24T07:00:00-05:00", "expected": "2026-08-24T12:00:00.000000Z"},
+    "timestamp_unknown_offset": {"input": "2026-08-24T12:00:00-00:00", "expected_error": "unknown_offset_rejected"},
+    "prepared_action_versions": {"v1": {"action_type": "synthetic-transfer", "asset_or_resource": "SYNTH-USD", "amount_or_scope": {"coefficient": "100", "scale": 2}}, "v2": {"action_type": "synthetic-transfer", "asset_or_resource": "SYNTH-USD", "amount_or_scope": {"coefficient": "200", "scale": 2}}},
     "references": {"input": [{"source_id": "b", "value": 2}, {"source_id": "a", "value": 1}, {"source_id": "a", "value": 1}], "expected": [{"source_id": "a", "value": 1}, {"source_id": "b", "value": 2}]}
   },
   "cases": [
@@ -55,8 +59,10 @@
     {"id": "stale_under_profile_threshold", "category": "core", "inputs": {"age_seconds": 361, "profile_max_age_seconds": 360}, "expected": {"context_state": "stale", "threshold_authority": "review_profile"}},
     {"id": "profile_version_change", "category": "core", "changes": {"semantic": {"review_profile_reference.profile_version": ["1", "2"], "review_profile_reference.profile_hash.digest": ["profile-v1", "profile-v2"]}}, "expected": {"semantic_identity": "different", "completeness_change_explained_by": "profile_version"}},
     {"id": "proposal_revision", "category": "core", "changes": {"semantic": {"prepared_action_identity.proposal_version_id": ["synthetic-proposal-001-v1", "synthetic-proposal-001-v2"]}}, "expected": {"action_id": "same", "proposal_version_id": "different", "semantic_identity": "different"}},
-    {"id": "mixed_synthetic_production_like", "category": "core", "inputs": {"segments": ["synthetic", "production_like"]}, "expected": {"segmentation_preserved": true, "promoted_to_live": false, "contract_gap": "G3-R03"}},
-    {"id": "mixed_production_like_live", "category": "core", "inputs": {"segments": ["production_like", "live"]}, "expected": {"segmentation_preserved": true, "production_like_promoted": false, "contract_gap": "G3-R03"}},
+    {"id": "mixed_synthetic_production_like", "category": "core", "inputs": {"segments": ["synthetic", "production_like"]}, "expected": {"aggregate": "mixed", "segmentation_authoritative": true, "segmentation_preserved": true, "promoted_to_live": false, "environment_ranking_used": false, "contract_gap": "G3-R03"}},
+    {"id": "mixed_production_like_live", "category": "core", "inputs": {"segments": ["production_like", "live"]}, "expected": {"aggregate": "mixed", "segmentation_authoritative": true, "segmentation_preserved": true, "production_like_promoted": false, "environment_ranking_used": false, "contract_gap": "G3-R03"}},
+    {"id": "request_response_identity_lineage", "category": "core", "inputs": {"action_id_source": "external_or_absent", "proposal_version_source": "external_or_labeled_Nova_fingerprint", "fingerprint_scope": "canonical_prepared_action_material_only"}, "expected": {"mutable_content_derives_action_id": false, "missing_action_id_lineage": "unavailable", "same_action_inferred_when_missing": false, "response_binds_resolved_request_identity": true, "contract_gap": "G3-R01"}},
+    {"id": "review_completeness_contract_precedence", "category": "core", "inputs": {"precedence": ["unavailable", "conflicted", "partial", "complete"]}, "expected": {"semantic_owner": "target_v2_contract", "profile_redefines_precedence": false, "complete_grants_authority": false, "contract_gap": "G3-R08"}},
     {"id": "chronology_unknown_applicability", "category": "core", "inputs": {"prior_reference": "synthetic-prior-review", "treatment": "unknown", "applicability": "unknown"}, "expected": {"chronology_write": false, "applicability_inferred": false, "contract_gap": "G3-R10"}},
     {"id": "model_claim_provenance_no_authority", "category": "core", "inputs": {"claim_genesis": "model_originated", "validation_scope": "synthetic_method_only"}, "expected": {"genesis_visible": true, "authority_effect": "none"}},
     {"id": "legacy_outcome_changes_only", "category": "core", "changes": {"legacy_only": {"decision_status": ["ALLOW", "HALT"]}}, "expected": {"semantic_identity": "same", "target_field_change": false}},
@@ -78,6 +84,9 @@
     {"id": "null_absent_projection", "category": "reference_semantics", "inputs": {"null_object": {"value": null}, "absent_object": {}}, "expected": {"canonical_bytes_equal": false, "required_absence_fails": true}},
     {"id": "timestamp_precision_and_timezone", "category": "reference_semantics", "inputs": {"vector": "timestamp"}, "expected": {"UTC_Z": true, "fractional_second_digits": 6, "rounding_used": false}},
     {"id": "reference_order_and_duplicates", "category": "reference_semantics", "inputs": {"vector": "references"}, "expected": {"stable_order": true, "exact_duplicates_collapsed": true, "conflicting_identity_rejected": true}},
+    {"id": "all_semantic_array_rules", "category": "reference_semantics", "inputs": {"declared_classes": ["ordered_sequence", "set", "multiset"]}, "expected": {"every_semantic_array_declared": true, "every_deterministic_collection_executable": true, "every_set_field_order_invariant": true}},
+    {"id": "timestamp_unknown_offset_rejection", "category": "reference_semantics", "inputs": {"vector": "timestamp_unknown_offset"}, "expected": {"minus_00_00_treated_as_UTC": false, "normalization_rejected": true}},
+    {"id": "decimal_scale_exponent_bounds", "category": "reference_semantics", "inputs": {"vectors": ["decimal_excessive_exponent", "decimal_excessive_scale"]}, "expected": {"max_scale_enforced": true, "max_abs_exponent_enforced": true, "rejected_before_coefficient_expansion": true}},
     {"id": "semantic_identity_digest_continuity", "category": "reference_semantics", "inputs": {"fixture_digest_algorithms": ["fixture-digest-a", "fixture-digest-b"]}, "expected": {"G3_Q15_exercised": true, "historical_evidence_preserved": true, "same_hash_value_claim": false}}
   ]
 }

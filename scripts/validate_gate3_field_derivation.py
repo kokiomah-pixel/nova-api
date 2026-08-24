@@ -120,6 +120,11 @@ EXPECTED_FIXTURES = {
     "timestamp_precision_and_timezone",
     "reference_order_and_duplicates",
     "semantic_identity_digest_continuity",
+    "request_response_identity_lineage",
+    "review_completeness_contract_precedence",
+    "all_semantic_array_rules",
+    "timestamp_unknown_offset_rejection",
+    "decimal_scale_exponent_bounds",
 }
 
 
@@ -298,6 +303,56 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
             errors.append(ValidationError("canonical_profile.binary_float", "must be prohibited"))
         if numeric_profile.get("monetary_amount", {}).get("rounding") != "prohibited":
             errors.append(ValidationError("canonical_profile.monetary_rounding", "must be prohibited"))
+        exact_decimal = numeric_profile.get("exact_decimal", {})
+        if set(exact_decimal.get("required_limits", [])) != {"max_precision", "max_scale", "max_abs_exponent"}:
+            errors.append(ValidationError("canonical_profile.decimal_limits", "must require max_precision, max_scale, and max_abs_exponent"))
+        if exact_decimal.get("excessive_scale_or_exponent") != "reject_before_coefficient_expansion":
+            errors.append(ValidationError("canonical_profile.decimal_bounds", "must reject excessive scale/exponent before expansion"))
+        if numeric_profile.get("timestamp", {}).get("unknown_offset_minus_00_00") != "reject_not_UTC_equivalent":
+            errors.append(ValidationError("canonical_profile.timestamp_unknown_offset", "RFC3339 -00:00 must not normalize to UTC"))
+
+        array_rules = numeric_profile.get("array_rules", {})
+        semantic_array_paths = set(numeric_profile.get("semantic_array_paths", []))
+        if set(array_rules) != semantic_array_paths:
+            errors.append(ValidationError("canonical_profile.array_rules", "every semantic array path must have exactly one explicit rule"))
+        deterministic_paths = {
+            path for path, rule in field_rules.items()
+            if isinstance(rule, dict) and rule.get("template") == "deterministic_collection"
+        }
+        if not deterministic_paths <= set(array_rules):
+            errors.append(ValidationError("canonical_profile.array_rules", f"deterministic collections missing rules: {sorted(deterministic_paths - set(array_rules))}"))
+        for path, rule in array_rules.items():
+            if rule.get("semantics") not in {"ordered_sequence", "set", "multiset"}:
+                errors.append(ValidationError(f"canonical_profile.array_rules.{path}", "semantics must be ordered_sequence, set, or multiset"))
+            if rule.get("semantics") == "set" and rule.get("exact_duplicate") != "collapse":
+                errors.append(ValidationError(f"canonical_profile.array_rules.{path}", "set exact duplicates must collapse"))
+
+        identity = spec.get("identity_model", {})
+        action_identity = identity.get("action_id", {})
+        proposal_identity = identity.get("proposal_version_id", {})
+        if set(identity.get("scope", [])) != {"review_context_request", "review_context_response.prepared_action_reference"}:
+            errors.append(ValidationError("identity.scope", "G3-R01 must cover request and response semantics"))
+        if action_identity.get("authority") != "external_institution_or_orchestrator_only" or action_identity.get("Nova_content_derivation_permitted") is not False:
+            errors.append(ValidationError("identity.action_id", "action lineage must be external and never content-derived"))
+        if action_identity.get("missing_behavior") != ["preserve_lineage_as_unavailable", "do_not_infer_same_action_across_revisions"]:
+            errors.append(ValidationError("identity.action_id.missing_behavior", "must preserve unavailable lineage without inference"))
+        fallback = proposal_identity.get("fallback", {})
+        if fallback.get("material_scope") != "canonical_prepared_action_material_only" or fallback.get("algorithm_qualified") is not True or fallback.get("explicit_label_required") is not True:
+            errors.append(ValidationError("identity.proposal_version_id.fallback", "Nova fallback must be labeled, algorithm-qualified, and prepared-action-only"))
+
+        source_type = spec.get("record_source_type_proposal", {})
+        if source_type.get("permitted_values") != ["synthetic", "production_like", "live", "mixed"]:
+            errors.append(ValidationError("record_source_type.permitted_values", "must add mixed without changing existing values"))
+        if source_type.get("source_segmentation_authoritative_for_component_provenance") is not True or source_type.get("mixed_reduction_to_strongest_or_weakest") is not False:
+            errors.append(ValidationError("record_source_type.mixed", "segmentation must remain authoritative without environment ranking"))
+
+        completeness = spec.get("review_completeness_proposal", {})
+        if completeness.get("precedence") != ["unavailable", "conflicted", "partial", "complete"]:
+            errors.append(ValidationError("review_completeness.precedence", "must be target-v2 contract-level unavailable, conflicted, partial, complete"))
+        if completeness.get("profile_may_redefine_enum_meaning_or_precedence") is not False:
+            errors.append(ValidationError("review_completeness.profile_authority", "profiles must not redefine enum meaning or precedence"))
+        if set(completeness.get("complete_does_not_mean", [])) != {"policy_satisfied", "safe", "permitted", "approved", "executable"}:
+            errors.append(ValidationError("review_completeness.boundary", "complete must preserve all non-authorization meanings"))
         continuity = spec.get("semantic_identity_continuity_proposal", {})
         if continuity.get("individual_algorithm_qualified_digest_is_semantic_identity") is not False:
             errors.append(ValidationError("semantic_identity_continuity.digest_is_identity", "must be false"))

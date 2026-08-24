@@ -13,14 +13,18 @@ from scripts.gate3_reference_semantics import (
     build_digest_evidence,
     canonical_semantic_bytes,
     canonicalize_jcs_profile,
+    derive_record_source_type,
     evaluate_proof_verification,
+    evaluate_review_completeness,
     normalize_exact_decimal,
     normalize_exact_integer,
     normalize_monetary_amount,
     normalize_reference_array,
+    normalize_semantic_array,
     normalize_timestamp,
     parse_json_no_duplicates,
     project_semantic_material,
+    resolve_prepared_action_identity,
     verify_semantic_identity_continuity,
 )
 from scripts.validate_gate3_field_derivation import (
@@ -147,6 +151,48 @@ def test_proposal_revision_changes_version_and_semantic_identity_only() -> None:
     assert _canonical_bytes(left) != _canonical_bytes(right)
 
 
+def test_request_and_response_identity_never_infer_lineage_from_mutable_content() -> None:
+    vectors = _load(FIXTURE_PATH)["reference_vectors"]["prepared_action_versions"]
+    fixture_fingerprint = lambda value: f"fixture:{len(value)}:{sum(value)}"
+    absent_v1 = resolve_prepared_action_identity(
+        prepared_action=vectors["v1"],
+        action_id=None,
+        external_proposal_version_id=None,
+        fingerprint_algorithm="fixture-only",
+        fingerprint_function=fixture_fingerprint,
+    )
+    absent_v2 = resolve_prepared_action_identity(
+        prepared_action=vectors["v2"],
+        action_id=None,
+        external_proposal_version_id=None,
+        fingerprint_algorithm="fixture-only",
+        fingerprint_function=fixture_fingerprint,
+    )
+
+    assert absent_v1["action_id"] == absent_v2["action_id"] == {
+        "value": None,
+        "source": "unavailable",
+        "lineage": "unavailable",
+    }
+    assert absent_v1["same_action_inference_permitted"] is False
+    assert absent_v2["same_action_inference_permitted"] is False
+    assert absent_v1["proposal_version_id"]["value"] != absent_v2["proposal_version_id"]["value"]
+    assert absent_v1["proposal_version_id"]["source"] == "Nova_derived_proposal_fingerprint"
+    assert absent_v1["proposal_version_id"]["material_scope"] == "canonical_prepared_action_material_only"
+
+    external = resolve_prepared_action_identity(
+        prepared_action=vectors["v1"],
+        action_id="external-action-lineage",
+        external_proposal_version_id="external-proposal-v1",
+    )
+    assert external["action_id"]["source"] == "external_institution_or_orchestrator"
+    assert external["proposal_version_id"] == {
+        "value": "external-proposal-v1",
+        "source": "external_institution_or_orchestrator",
+    }
+    assert external["same_action_inference_permitted"] is True
+
+
 def test_profile_version_change_is_visible_and_explainable() -> None:
     fixtures = _load(FIXTURE_PATH)
     left = fixtures["base_semantic_context"]
@@ -189,9 +235,59 @@ def test_mixed_source_packets_preserve_segments_without_live_promotion() -> None
     live_mix = _fixture_case("mixed_production_like_live")
 
     assert synthetic_mix["expected"]["segmentation_preserved"] is True
+    assert derive_record_source_type(synthetic_mix["inputs"]["segments"]) == "mixed"
+    assert synthetic_mix["expected"]["aggregate"] == "mixed"
+    assert synthetic_mix["expected"]["environment_ranking_used"] is False
     assert synthetic_mix["expected"]["promoted_to_live"] is False
     assert live_mix["expected"]["segmentation_preserved"] is True
+    assert derive_record_source_type(live_mix["inputs"]["segments"]) == "mixed"
+    assert live_mix["expected"]["aggregate"] == "mixed"
+    assert live_mix["expected"]["environment_ranking_used"] is False
     assert live_mix["expected"]["production_like_promoted"] is False
+    assert derive_record_source_type(["production_like", "production_like"]) == "production_like"
+
+
+def test_review_completeness_uses_contract_meanings_and_precedence() -> None:
+    assert evaluate_review_completeness(
+        profile_available=False,
+        required_field_inventory_available=True,
+        unresolved_material_conflicts=["conflict"],
+        missing_or_unavailable_required_context=["missing"],
+        explicit_unresolved_required_context=[],
+        profile_allows_explicit_unresolved=False,
+        all_required_dimensions_represented=False,
+    ) == "unavailable"
+    assert evaluate_review_completeness(
+        profile_available=True,
+        required_field_inventory_available=True,
+        unresolved_material_conflicts=["conflict"],
+        missing_or_unavailable_required_context=["missing"],
+        explicit_unresolved_required_context=[],
+        profile_allows_explicit_unresolved=False,
+        all_required_dimensions_represented=False,
+    ) == "conflicted"
+    assert evaluate_review_completeness(
+        profile_available=True,
+        required_field_inventory_available=True,
+        unresolved_material_conflicts=[],
+        missing_or_unavailable_required_context=["missing"],
+        explicit_unresolved_required_context=[],
+        profile_allows_explicit_unresolved=False,
+        all_required_dimensions_represented=False,
+    ) == "partial"
+    assert evaluate_review_completeness(
+        profile_available=True,
+        required_field_inventory_available=True,
+        unresolved_material_conflicts=[],
+        missing_or_unavailable_required_context=[],
+        explicit_unresolved_required_context=["allowed-explicit-unresolved"],
+        profile_allows_explicit_unresolved=True,
+        all_required_dimensions_represented=True,
+    ) == "complete"
+    proposal = _load(SPEC_PATH)["review_completeness_proposal"]
+    assert proposal["precedence"] == ["unavailable", "conflicted", "partial", "complete"]
+    assert proposal["profile_may_redefine_enum_meaning_or_precedence"] is False
+    assert set(proposal["complete_does_not_mean"]) == {"policy_satisfied", "safe", "permitted", "approved", "executable"}
 
 
 def test_legacy_outcome_change_cannot_change_target_semantic_context() -> None:
@@ -282,15 +378,23 @@ def test_numeric_decimal_and_monetary_reference_semantics_are_exact() -> None:
     assert normalize_exact_integer(vectors["integer"]["negative_zero_input"], max_digits=10) == vectors["integer"]["negative_zero_expected"]
     with pytest.raises(ReferenceSemanticsError, match="without exponent or leading zeros"):
         normalize_exact_integer(vectors["integer"]["input"], max_digits=10)
-    assert normalize_exact_decimal(vectors["decimal"]["input"], max_precision=vectors["decimal"]["max_precision"]) == vectors["decimal"]["expected"]
-    assert normalize_exact_decimal(vectors["decimal_exponent"]["input"], max_precision=vectors["decimal_exponent"]["max_precision"]) == vectors["decimal_exponent"]["expected"]
+    assert normalize_exact_decimal(vectors["decimal"]["input"], max_precision=vectors["decimal"]["max_precision"], max_scale=vectors["decimal"]["max_scale"], max_abs_exponent=vectors["decimal"]["max_abs_exponent"]) == vectors["decimal"]["expected"]
+    assert normalize_exact_decimal(vectors["decimal_exponent"]["input"], max_precision=vectors["decimal_exponent"]["max_precision"], max_scale=vectors["decimal_exponent"]["max_scale"], max_abs_exponent=vectors["decimal_exponent"]["max_abs_exponent"]) == vectors["decimal_exponent"]["expected"]
     money = vectors["monetary_amount"]
-    assert normalize_monetary_amount(money["input"], asset_id=money["asset_id"], scale=money["scale"], max_precision=money["max_precision"]) == money["expected"]
+    assert normalize_monetary_amount(money["input"], asset_id=money["asset_id"], scale=money["scale"], max_precision=money["max_precision"], max_scale=money["max_scale"], max_abs_exponent=money["max_abs_exponent"]) == money["expected"]
     with pytest.raises(ReferenceSemanticsError, match="rounding is prohibited"):
-        normalize_monetary_amount("1.001", asset_id="SYNTH-USD", scale=2, max_precision=10)
+        normalize_monetary_amount("1.001", asset_id="SYNTH-USD", scale=2, max_precision=10, max_scale=4, max_abs_exponent=4)
+    excessive_exponent = vectors["decimal_excessive_exponent"]
+    with pytest.raises(ReferenceSemanticsError, match="exponent exceeds"):
+        normalize_exact_decimal(excessive_exponent["input"], max_precision=excessive_exponent["max_precision"], max_scale=excessive_exponent["max_scale"], max_abs_exponent=excessive_exponent["max_abs_exponent"])
+    with pytest.raises(ReferenceSemanticsError, match="exponent exceeds"):
+        normalize_exact_decimal("1e" + "9" * 5000, max_precision=10, max_scale=4, max_abs_exponent=12)
+    excessive_scale = vectors["decimal_excessive_scale"]
+    with pytest.raises(ReferenceSemanticsError, match="scale exceeds"):
+        normalize_exact_decimal(excessive_scale["input"], max_precision=excessive_scale["max_precision"], max_scale=excessive_scale["max_scale"], max_abs_exponent=excessive_scale["max_abs_exponent"])
     with pytest.raises(ReferenceSemanticsError, match="binary/implicit decimal"):
         canonicalize_jcs_profile({"amount": 1.25})
-    assert canonicalize_jcs_profile(normalize_exact_decimal("1.2300", max_precision=10)) == canonicalize_jcs_profile(normalize_exact_decimal("1.23", max_precision=10))
+    assert canonicalize_jcs_profile(normalize_exact_decimal("1.2300", max_precision=10, max_scale=4, max_abs_exponent=4)) == canonicalize_jcs_profile(normalize_exact_decimal("1.23", max_precision=10, max_scale=4, max_abs_exponent=4))
 
 
 def test_null_and_absent_are_distinct_and_required_absence_fails_projection() -> None:
@@ -317,6 +421,8 @@ def test_timestamp_normalization_is_utc_fixed_precision_and_never_rounds() -> No
         normalize_timestamp("2026-08-24T12:00:00.1234567Z")
     with pytest.raises(ReferenceSemanticsError, match="explicit offset"):
         normalize_timestamp("2026-08-24T12:00:00")
+    with pytest.raises(ReferenceSemanticsError, match="unknown offset is rejected"):
+        normalize_timestamp("2026-08-24T12:00:00-00:00")
 
 
 def test_reference_ordering_exact_deduplication_and_identity_collision() -> None:
@@ -343,6 +449,37 @@ def test_projection_applies_declared_timestamp_and_reference_array_rules() -> No
     assert "created_at" not in projected
     assert "signature" not in projected["reproducibility"]
     assert "context_hash" not in projected["reproducibility"]
+
+
+def test_every_set_like_semantic_field_is_order_invariant_and_deduplicated() -> None:
+    fixtures = _load(FIXTURE_PATH)
+    spec = _load(SPEC_PATH)
+    profile = spec["canonical_numeric_and_interoperability_profile"]
+    rules = profile["array_rules"]
+    assert set(rules) == set(profile["semantic_array_paths"])
+    deterministic_paths = {
+        path for path, rule in spec["field_rules"].items() if rule["template"] == "deterministic_collection"
+    }
+    assert deterministic_paths <= set(rules)
+
+    set_paths = [path for path, rule in rules.items() if rule["semantics"] == "set"]
+    assert set_paths
+    for path in set_paths:
+        identity_key = rules[path].get("identity_key")
+        values = (
+            [{identity_key: "set-b", "value": 2}, {identity_key: "set-a", "value": 1}]
+            if identity_key
+            else ["set-b", "set-a"]
+        )
+        left = copy.deepcopy(fixtures["reference_response"])
+        right = copy.deepcopy(fixtures["reference_response"])
+        relative_path = path.removeprefix("review_context_response.")
+        _set_path(left, relative_path, values)
+        _set_path(right, relative_path, list(reversed(values)) + [copy.deepcopy(values[0])])
+        assert canonical_semantic_bytes(left, spec) == canonical_semantic_bytes(right, spec), path
+
+    assert normalize_semantic_array(["b", "a"], semantics="ordered_sequence") == ["b", "a"]
+    assert normalize_semantic_array(["b", "a", "a"], semantics="multiset") == ["a", "a", "b"]
 
 
 def test_time_reconstruction_and_redaction_fail_closed() -> None:
