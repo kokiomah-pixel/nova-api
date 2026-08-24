@@ -39,6 +39,10 @@ current_product_state:
     CDP_custody: Architect_attested_Admin_Owner
     CDP_API_key_management: true
     CDP_active_API_keys: 1
+    CDP_business_verification_status: pending
+    CDP_x402_or_facilitator_enabled: false
+    CDP_current_Nova_integration_present: false
+    CDP_settlement_configuration_present: false
     linked_settlement_destination_present: false
     full_gate_status: conditional_pass
 
@@ -47,7 +51,7 @@ current_product_state:
     runtime_implemented: false
     private_adapter_implemented: false
     production_active: false
-    field_derivation_progression: blocked_by_open_production_incident_and_unresolved_settlement_evidence
+    field_derivation_progression: blocked_pending_incident_disposition_and_remaining_design_requirements
 
   Phase_1:
     offline_proof_chain: completed
@@ -85,7 +89,10 @@ The repository and current evidence establish:
 * Architect-attested healthy deployment matching current GitHub `main`;
 * Architect-attested CDP Admin/Owner access with project-setting and API-key management authority;
 * one active CDP API key classified founder/internal;
-* no linked settlement destination observed in the supplied CDP control-plane observation;
+* Architect-attested current CDP x402/facilitator disabled state;
+* Architect-attested absence of a current Nova CDP integration;
+* Architect-attested absence of settlement configuration and linked settlement destination;
+* a current visible CDP payment/settlement summary showing zero entries, zero successful settlements, and zero failed settlements;
 * an Architect-attested Legacy v1 key and route-history review with no external consumers observed in the reviewed evidence;
 * an initialized content operating system.
 
@@ -97,11 +104,9 @@ The available evidence does not establish:
 * a production-active target v2 endpoint;
 * independently verified full production-custody attestation;
 * independently verified Legacy v1 consumer history across all retention periods;
-* whether the CDP x402/facilitator service is currently enabled;
-* whether a current Nova CDP facilitator integration is present;
-* whether settlement configuration exists beyond the observed absence of a linked destination;
-* reconciled CDP activity and historical settlement history;
-* incident closure under the production incident-closure standard;
+* complete historical CDP activity or settlement history;
+* a provider-stated historical retention boundary for the observed x402 Payments surface;
+* final incident disposition under the production incident-closure standard;
 * a live institutional pilot;
 * demonstrated operator dependency;
 * buyer pull;
@@ -113,8 +118,8 @@ The available evidence does not establish:
 
 ## Current implementation priority
 
-The immediate readiness priority is to close or disposition the remaining
-settlement/activity evidence gap before progressing target v2 field derivation.
+The immediate readiness priority is to complete the final incident-disposition
+control before progressing target v2 field derivation.
 
 ```yaml
 current_readiness_priority:
@@ -123,6 +128,7 @@ current_readiness_priority:
     limitations:
       - provider_control_planes_not_independently_verified
       - founder_concentration_remains
+      - CDP_business_verification_pending
 
   Gate_2_Legacy_v1_dependency:
     status: conditional_pass
@@ -131,13 +137,12 @@ current_readiness_priority:
       - historical_retention_not_proven_complete
 
   production_incident:
-    status: operationally_open
-    unresolved:
-      - current_x402_or_facilitator_service_state
-      - current_Nova_CDP_integration_state
-      - current_settlement_configuration
-      - CDP_activity_review
-      - historical_retention_limitations
+    status: operationally_open_pending_final_disposition
+    likely_supported_outcome: contained_historically_unattested
+    remaining:
+      - current_external_boundary_recheck
+      - historical_retention_gap_documented_as_unattested
+      - Architect_final_incident_disposition
 
   Gate_3_v2_field_derivation:
     status: blocked_until_incident_disposition_and_remaining_design_requirements
@@ -177,13 +182,16 @@ not part of the public entry-link surface.
 
 Repository ownership and merged repository state are independently verified
 through GitHub. Render, Legacy v1, and CDP control-plane observations in the
-current reconciliation are Architect-attested. Current x402/facilitator state,
-settlement configuration, CDP activity review, and historical settlement
-completeness remain unresolved.
+current reconciliation are Architect-attested.
 
-Absence of current CDP credentials in Render and absence of a linked settlement
-destination in the supplied CDP observation do not prove absence of historical
-CDP verification or settlement activity.
+The current CDP x402/facilitator and settlement configuration is attested as
+disabled. The visible CDP payment summary shows zero activity, but the portal
+does not expose a review window or retention boundary sufficient to establish
+that no historical CDP verification or settlement activity ever occurred.
+
+Coinbase business verification for Nova Infrastructure Systems Corporation is
+currently pending. That is a provider-onboarding state, not evidence of Nova
+institutional adoption, buyer validation, or enterprise readiness.
 
 ## Claim rule
 
