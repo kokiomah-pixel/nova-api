@@ -3,7 +3,7 @@
   "version": "design-v2.1",
   "interface_type": "proposed_response_contract",
   "implementation_status": "not_implemented",
-  "contract_revision_status": "candidate",
+  "canonicality_source": "authoritative_repository_main",
   "incorporated_Gate_3_refinements": [
     "G3-R01",
     "G3-R03",
@@ -136,7 +136,7 @@
     "prepared_action_reference": {
       "required_fields": [
         "reference_id",
-        "proposal_version_id",
+        "proposal_version_identity",
         "reference_type",
         "payload_embedded"
       ],
@@ -145,6 +145,28 @@
       ],
       "reference_type": "opaque_external_reference",
       "payload_embedded": false,
+      "proposal_version_identity": {
+        "required_fields": [
+          "value",
+          "source_type"
+        ],
+        "source_type_permitted_values": [
+          "external_institution_or_orchestrator",
+          "Nova_derived_proposal_fingerprint"
+        ],
+        "conditional_fields": {
+          "when_source_type_is_Nova_derived_proposal_fingerprint": {
+            "algorithm_qualification": "required",
+            "material_scope": "canonical_prepared_action_material_only"
+          },
+          "when_source_type_is_external_institution_or_orchestrator": {
+            "algorithm_qualification": "absent",
+            "material_scope": "absent",
+            "value_treatment": "preserve_opaque_external_value"
+          }
+        },
+        "establishes_action_lineage": false
+      },
       "semantics": {
         "action_origin": "external_to_Nova",
         "Nova_owns_action": false,
@@ -158,17 +180,14 @@
             "required_when_cross_revision_lineage_is_claimed": true,
             "missing_behavior": "lineage_unavailable_and_no_same_action_inference"
           },
-          "proposal_version_id": {
+          "proposal_version_identity": {
             "meaning": "identity_of_exact_proposal_reviewed",
             "required": true,
-            "permitted_sources": [
-              "external_institution_or_orchestrator",
-              "Nova_derived_proposal_fingerprint"
-            ],
+            "source_genesis_machine_visible": true,
             "Nova_fallback_must_be_explicitly_labeled": true,
             "Nova_fallback_material_scope": "canonical_prepared_action_material_only",
             "Nova_fallback_algorithm_qualified": true,
-            "Nova_fallback_establishes_action_lineage": false
+            "establishes_action_lineage": false
           },
           "reference_id": "compatibility_reference_not_a_substitute_for_both_identities"
         }
@@ -473,32 +492,77 @@
       "undeclared_array_behavior": "projection_failure",
       "set_semantics": {
         "deterministic_normalization": true,
-        "deterministic_sort_key": "RFC_8785_JCS_canonical_bytes",
+        "deterministic_sort_key": "declared_field_or_type_specific_tuple",
+        "JCS_role": "serialize_after_declared_tuple_normalization",
         "byte_identical_duplicate": "collapse_only_for_declared_set",
-        "same_identity_different_content": "conflict"
+        "same_identity_different_content": "conflict",
+        "same_declared_sort_tuple_different_content": "conflict"
+      },
+      "sort_tuple_profiles": {
+        "source_reference_sort": [
+          "source_id",
+          "source_version_or_digest",
+          "authority_scope",
+          "observed_at",
+          "received_at",
+          "record_source_type"
+        ],
+        "constraint_reference_sort": [
+          "constraint_id_or_digest",
+          "source_id",
+          "applicability_scope"
+        ],
+        "chronology_reference_sort": [
+          "reference_type",
+          "reference_id",
+          "version_or_digest",
+          "treatment_status",
+          "applicability_status"
+        ],
+        "digest_record_sort": [
+          "algorithm",
+          "parameter_set",
+          "output_encoding",
+          "digest"
+        ],
+        "conflict_reference_sort": [
+          "conflict_id"
+        ],
+        "question_reference_sort": [
+          "question_id"
+        ],
+        "condition_reference_sort": [
+          "condition_id"
+        ],
+        "change_reference_sort": [
+          "change_id"
+        ],
+        "stable_scalar_sort": [
+          "$value"
+        ]
       },
       "array_rules": {
-        "review_context_response.record_source_type.source_segmentation": "set",
-        "review_context_response.context_state.reasons": "set",
-        "review_context_response.source_state.sources": "set",
-        "review_context_response.source_state.unresolved_source_conflicts": "set",
-        "review_context_response.constraint_context.observed_constraints": "set",
-        "review_context_response.constraint_context.constraint_sources": "set",
-        "review_context_response.constraint_context.unresolved_constraint_questions": "set",
-        "review_context_response.temporal_context.temporal_conflicts": "set",
-        "review_context_response.temporal_context.pending_state": "set",
-        "review_context_response.contradiction_context.source_conflicts": "set",
-        "review_context_response.contradiction_context.constraint_conflicts": "set",
-        "review_context_response.contradiction_context.temporal_conflicts": "set",
-        "review_context_response.contradiction_context.chronology_conflicts": "set",
-        "review_context_response.contradiction_context.unresolved_questions": "set",
-        "review_context_response.review_completeness.missing_context": "set",
-        "review_context_response.review_completeness.unresolved_conditions": "set",
-        "review_context_response.chronology_context.prior_review_references": "set",
-        "review_context_response.chronology_context.accepted_memory_references": "set",
-        "review_context_response.chronology_context.relevant_changes_since_prior_review": "set",
-        "review_context_response.reproducibility.source_versions": "set",
-        "review_context_response.reproducibility.source_segmentation": "set"
+        "review_context_response.record_source_type.source_segmentation": {"classification": "set", "sort_tuple_profile": "source_reference_sort"},
+        "review_context_response.context_state.reasons": {"classification": "set", "sort_tuple_profile": "stable_scalar_sort"},
+        "review_context_response.source_state.sources": {"classification": "set", "sort_tuple_profile": "source_reference_sort"},
+        "review_context_response.source_state.unresolved_source_conflicts": {"classification": "set", "sort_tuple_profile": "conflict_reference_sort"},
+        "review_context_response.constraint_context.observed_constraints": {"classification": "set", "sort_tuple_profile": "constraint_reference_sort"},
+        "review_context_response.constraint_context.constraint_sources": {"classification": "set", "sort_tuple_profile": "source_reference_sort"},
+        "review_context_response.constraint_context.unresolved_constraint_questions": {"classification": "set", "sort_tuple_profile": "question_reference_sort"},
+        "review_context_response.temporal_context.temporal_conflicts": {"classification": "set", "sort_tuple_profile": "conflict_reference_sort"},
+        "review_context_response.temporal_context.pending_state": {"classification": "set", "sort_tuple_profile": "condition_reference_sort"},
+        "review_context_response.contradiction_context.source_conflicts": {"classification": "set", "sort_tuple_profile": "conflict_reference_sort"},
+        "review_context_response.contradiction_context.constraint_conflicts": {"classification": "set", "sort_tuple_profile": "conflict_reference_sort"},
+        "review_context_response.contradiction_context.temporal_conflicts": {"classification": "set", "sort_tuple_profile": "conflict_reference_sort"},
+        "review_context_response.contradiction_context.chronology_conflicts": {"classification": "set", "sort_tuple_profile": "conflict_reference_sort"},
+        "review_context_response.contradiction_context.unresolved_questions": {"classification": "set", "sort_tuple_profile": "question_reference_sort"},
+        "review_context_response.review_completeness.missing_context": {"classification": "set", "sort_tuple_profile": "stable_scalar_sort"},
+        "review_context_response.review_completeness.unresolved_conditions": {"classification": "set", "sort_tuple_profile": "condition_reference_sort"},
+        "review_context_response.chronology_context.prior_review_references": {"classification": "set", "sort_tuple_profile": "chronology_reference_sort"},
+        "review_context_response.chronology_context.accepted_memory_references": {"classification": "set", "sort_tuple_profile": "chronology_reference_sort"},
+        "review_context_response.chronology_context.relevant_changes_since_prior_review": {"classification": "set", "sort_tuple_profile": "change_reference_sort"},
+        "review_context_response.reproducibility.source_versions": {"classification": "set", "sort_tuple_profile": "stable_scalar_sort"},
+        "review_context_response.reproducibility.source_segmentation": {"classification": "set", "sort_tuple_profile": "source_reference_sort"}
       }
     }
   },
@@ -666,7 +730,7 @@
     "accepted_state_review_required": true,
     "chronology_review_required": true,
     "consumer_inventory_required": true,
-    "Gate_3_field_derivation_design": "complete_on_contract_revision_merge",
+    "Gate_3_field_derivation_design": "complete_for_design_v2.1_contract",
     "Gate_4_private_synthetic_adapter": {
       "status": "not_authorized",
       "implementation_started": false

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the design-v2.1 target-v2 contract revision candidate.
+"""Validate the design-v2.1 target-v2 contract revision.
 
 This validator is design-only. It does not import runtime code, select
 production cryptography, or authorize an endpoint, adapter, Gate 4, or merge.
@@ -22,6 +22,24 @@ MACHINE_CONTRACT = Path("specs/review_context_contract_v2.json")
 DERIVATION_SPEC = Path("specs/review_context_field_derivation_v0_1.json")
 GAP_REGISTER = Path("specs/review_context_contract_gaps_v0_1.json")
 TARGET_README = Path("docs/target-v2/README.md")
+PERSISTENT_LIFECYCLE_ARTIFACTS = (
+    HUMAN_CONTRACT,
+    TARGET_README,
+    Path("docs/target-v2/context-proof-canonicalization-v0.1.md"),
+    Path("docs/target-v2/gate-3-contract-gap-report-v0.1.md"),
+    Path("docs/target-v2/gate-3-field-derivation-ledger-v0.1.md"),
+    MACHINE_CONTRACT,
+    DERIVATION_SPEC,
+    GAP_REGISTER,
+)
+BRANCH_RELATIVE_LIFECYCLE_MARKERS = {
+    "contract_revision_status",
+    "contract_revision_candidate",
+    "candidate_present",
+    "canonical_on_main",
+    "false_until_merge",
+    "approved_contract_modified",
+}
 
 INCORPORATED_REFINEMENTS = {"G3-R01", "G3-R03", "G3-R08", "G3-R11", "G3-Q15"}
 ALL_GAPS = {
@@ -110,6 +128,7 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
         return errors
 
     _expect(errors, contract.get("version") == "design-v2.1", "contract.version", "must be design-v2.1")
+    _expect(errors, contract.get("canonicality_source") == "authoritative_repository_main", "contract.canonicality_source", "must be authoritative_repository_main")
     human_versions = set(re.findall(r"version:\s*(design-v[^\s]+)", human))
     _expect(errors, human_versions == {"design-v2.1"}, "human_contract.version", "must match design-v2.1 exactly")
     _expect(
@@ -158,8 +177,14 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
     _expect(errors, fallback.get("algorithm_qualified") is True, "G3-R01.fallback.algorithm", "must be qualified")
     _expect(errors, fallback.get("establishes_action_lineage") is False, "G3-R01.fallback.lineage", "must not establish lineage")
     response_identity = contract.get("response_model", {}).get("prepared_action_reference", {})
-    _expect(errors, "proposal_version_id" in response_identity.get("required_fields", []), "G3-R01.response.proposal_version_id", "must bind exact proposal identity")
+    _expect(errors, "proposal_version_identity" in response_identity.get("required_fields", []), "G3-R01.response.proposal_version_identity", "must bind structured exact proposal identity")
     _expect(errors, "action_id" in response_identity.get("optional_fields", []), "G3-R01.response.action_id", "must bind external lineage when available")
+    response_proposal = response_identity.get("proposal_version_identity", {})
+    _expect(errors, response_proposal.get("required_fields") == ["value", "source_type"], "G3-R01.response.genesis", "value and source_type must be machine-visible")
+    _expect(errors, response_proposal.get("source_type_permitted_values") == ["external_institution_or_orchestrator", "Nova_derived_proposal_fingerprint"], "G3-R01.response.source_type", "must distinguish external from Nova-derived genesis")
+    nova_condition = response_proposal.get("conditional_fields", {}).get("when_source_type_is_Nova_derived_proposal_fingerprint", {})
+    _expect(errors, nova_condition == {"algorithm_qualification": "required", "material_scope": "canonical_prepared_action_material_only"}, "G3-R01.response.Nova_derived", "must expose algorithm qualification and prepared-action-only scope")
+    _expect(errors, response_proposal.get("establishes_action_lineage") is False, "G3-R01.response.lineage", "proposal identity must not establish action lineage")
 
     source_type = contract.get("response_model", {}).get("record_source_type", {})
     _expect(errors, source_type.get("permitted_values") == ["synthetic", "production_like", "live", "mixed"], "G3-R03.permitted_values", "must add only mixed")
@@ -184,7 +209,8 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
     decimal = numeric.get("exact_decimal", {})
     money = numeric.get("monetary_amount", {})
     timestamp = canonical.get("timestamp", {})
-    array_rules = canonical.get("semantic_arrays", {}).get("array_rules", {})
+    semantic_arrays = canonical.get("semantic_arrays", {})
+    array_rules = semantic_arrays.get("array_rules", {})
     _expect(errors, canonical.get("structural_baseline") == "RFC_8785_JCS", "G3-R11.structural_baseline", "must be RFC 8785/JCS")
     _expect(errors, canonical.get("JCS_deviation") is False, "G3-R11.JCS_deviation", "must be false")
     _expect(errors, canonical.get("production_hash_algorithm_selected") is False, "G3-R11.production_hash", "must be false")
@@ -198,7 +224,20 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
     _expect(errors, timestamp.get("fractional_second_digits") == 6, "G3-R11.timestamp_precision", "must be six")
     _expect(errors, timestamp.get("unknown_offset_minus_00_00") == "reject_not_UTC_equivalent", "G3-R11.unknown_offset", "must reject -00:00")
     _expect(errors, set(array_rules) == EXPECTED_ARRAY_PATHS, "G3-R11.array_rules", "must classify every semantic response array")
-    _expect(errors, set(array_rules.values()) == {"set"}, "G3-R11.array_classification", "declared response arrays must have explicit set semantics")
+    _expect(errors, all(rule.get("classification") == "set" for rule in array_rules.values()), "G3-R11.array_classification", "declared response arrays must have explicit set semantics")
+    expected_sort_tuples = {
+        "source_reference_sort": ["source_id", "source_version_or_digest", "authority_scope", "observed_at", "received_at", "record_source_type"],
+        "constraint_reference_sort": ["constraint_id_or_digest", "source_id", "applicability_scope"],
+        "chronology_reference_sort": ["reference_type", "reference_id", "version_or_digest", "treatment_status", "applicability_status"],
+        "digest_record_sort": ["algorithm", "parameter_set", "output_encoding", "digest"],
+    }
+    sort_tuple_profiles = semantic_arrays.get("sort_tuple_profiles", {})
+    for profile_name, expected_tuple in expected_sort_tuples.items():
+        _expect(errors, sort_tuple_profiles.get(profile_name) == expected_tuple, f"G3-R11.sort_tuple_profiles.{profile_name}", f"must be {expected_tuple!r}")
+    _expect(errors, semantic_arrays.get("set_semantics", {}).get("deterministic_sort_key") == "declared_field_or_type_specific_tuple", "G3-R11.set_sort_key", "must use declared tuples")
+    _expect(errors, semantic_arrays.get("set_semantics", {}).get("JCS_role") == "serialize_after_declared_tuple_normalization", "G3-R11.JCS_role", "JCS must serialize only after tuple normalization")
+    _expect(errors, semantic_arrays.get("set_semantics", {}).get("same_declared_sort_tuple_different_content") == "conflict", "G3-R11.tuple_collision", "tuple collisions must fail as conflicts")
+    _expect(errors, all(rule.get("sort_tuple_profile") in sort_tuple_profiles for rule in array_rules.values()), "G3-R11.array_sort_profiles", "every set must name a declared tuple profile")
 
     continuity = contract.get("semantic_identity_continuity", {})
     _expect(errors, continuity.get("semantic_identity_is_individual_digest") is False, "G3-Q15.digest_identity", "must be false")
@@ -221,8 +260,8 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
         for field, expected in {
             "design_disposition": "approved_for_incorporation",
             "contract_revision_target": "design-v2.1",
-            "contract_revision_candidate": "present",
-            "canonical_on_main": "false_until_merge",
+            "canonical_contract_status": "incorporated_in_design_v2.1_contract",
+            "canonicality_source": "authoritative_repository_main",
             "implementation_authority": False,
             "silently_canonical": False,
         }.items():
@@ -231,12 +270,14 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
         record = by_id.get(gap_id, {})
         _expect(errors, record.get("requires_CCO_review") is True, f"gap_register.{gap_id}.requires_CCO_review", "must remain true")
         _expect(errors, record.get("requires_Architect_review") is True, f"gap_register.{gap_id}.requires_Architect_review", "must remain true")
-        _expect(errors, "contract_revision_candidate" not in record, f"gap_register.{gap_id}.contract_revision_candidate", "must not be incorporated")
+        _expect(errors, "contract_revision_target" not in record, f"gap_register.{gap_id}.contract_revision_target", "must not be incorporated")
 
     contract_reference = derivation.get("approved_contract", {})
     actual_digest = hashlib.sha256((root / MACHINE_CONTRACT).read_bytes()).hexdigest()
     _expect(errors, contract_reference.get("sha256") == actual_digest, "derivation.approved_contract.sha256", "must match machine contract bytes")
     _expect(errors, contract_reference.get("version") == "design-v2.1", "derivation.approved_contract.version", "must be design-v2.1")
+    _expect(errors, contract_reference.get("incorporation_status") == "incorporated_in_design_v2.1_contract", "derivation.approved_contract.incorporation_status", "must record incorporation")
+    _expect(errors, contract_reference.get("canonicality_source") == "authoritative_repository_main", "derivation.approved_contract.canonicality_source", "must be merge-stable")
     _expect(errors, derivation.get("design_only") is True, "derivation.design_only", "must remain true")
     _expect(errors, derivation.get("runtime_implementation_authority") is False, "derivation.runtime_implementation_authority", "must remain false")
 
@@ -255,6 +296,10 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
         "Gate 3 design completion does not activate Gate 4.",
     ):
         _expect(errors, marker in readme, "target_v2.README", f"missing marker: {marker}")
+    for relative in PERSISTENT_LIFECYCLE_ARTIFACTS:
+        text = (root / relative).read_text(encoding="utf-8")
+        for marker in BRANCH_RELATIVE_LIFECYCLE_MARKERS:
+            _expect(errors, marker not in text, f"merge_stable_lifecycle.{relative}", f"must not contain branch-relative marker: {marker}")
     return errors
 
 
@@ -266,7 +311,7 @@ def main() -> int:
             print(f"- {error.format()}", file=sys.stderr)
         return 1
     print("target_v2_contract_revision:")
-    print("  status: coherent_revision_candidate")
+    print("  status: coherent_design_v2.1_contract")
     print("  contract_version: design-v2.1")
     print("  incorporated_refinements: [G3-R01, G3-R03, G3-R08, G3-R11, G3-Q15]")
     print("  historical_gap_count: 26")

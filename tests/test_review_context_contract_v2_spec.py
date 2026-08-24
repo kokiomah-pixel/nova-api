@@ -212,7 +212,7 @@ def test_prepared_action_reference_is_opaque_and_does_not_embed_payload():
 
     assert reference["required_fields"] == [
         "reference_id",
-        "proposal_version_id",
+        "proposal_version_identity",
         "reference_type",
         "payload_embedded",
     ]
@@ -226,7 +226,14 @@ def test_prepared_action_reference_is_opaque_and_does_not_embed_payload():
     assert reference["semantics"]["reference_grants_execution_authority"] is False
     identity = reference["semantics"]["identity_semantics"]
     assert identity["action_and_proposal_identity_distinct"] is True
-    assert identity["proposal_version_id"]["Nova_fallback_establishes_action_lineage"] is False
+    assert identity["proposal_version_identity"]["source_genesis_machine_visible"] is True
+    assert identity["proposal_version_identity"]["establishes_action_lineage"] is False
+    proposal_identity = reference["proposal_version_identity"]
+    assert proposal_identity["required_fields"] == ["value", "source_type"]
+    assert proposal_identity["conditional_fields"]["when_source_type_is_Nova_derived_proposal_fingerprint"] == {
+        "algorithm_qualification": "required",
+        "material_scope": "canonical_prepared_action_material_only",
+    }
 
 
 def test_reproducibility_preserves_profile_and_source_segmentation():

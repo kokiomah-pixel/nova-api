@@ -24,8 +24,10 @@ from scripts.gate3_reference_semantics import (
 )
 from scripts.validate_target_v2_contract_revision import (
     ALL_GAPS,
+    BRANCH_RELATIVE_LIFECYCLE_MARKERS,
     FORBIDDEN_RESPONSE_SHAPES,
     INCORPORATED_REFINEMENTS,
+    PERSISTENT_LIFECYCLE_ARTIFACTS,
     UNAPPROVED_REFINEMENTS,
     validate_repository,
 )
@@ -68,7 +70,7 @@ def test_incorporated_refinement_set_is_exact_and_other_21_remain_unapproved() -
     for gap_id in UNAPPROVED_REFINEMENTS:
         assert by_id[gap_id]["requires_CCO_review"] is True
         assert by_id[gap_id]["requires_Architect_review"] is True
-        assert "contract_revision_candidate" not in by_id[gap_id]
+        assert "contract_revision_target" not in by_id[gap_id]
 
 
 def test_r01_distinguishes_external_action_lineage_from_exact_proposal_identity() -> None:
@@ -95,9 +97,11 @@ def test_r01_distinguishes_external_action_lineage_from_exact_proposal_identity(
     }
     assert v1["same_action_inference_permitted"] is False
     assert v2["same_action_inference_permitted"] is False
-    assert v1["proposal_version_id"]["value"] != v2["proposal_version_id"]["value"]
-    assert v1["proposal_version_id"]["source"] == "Nova_derived_proposal_fingerprint"
-    assert v1["proposal_version_id"]["material_scope"] == "canonical_prepared_action_material_only"
+    assert v1["proposal_version_identity"]["value"] != v2["proposal_version_identity"]["value"]
+    assert v1["proposal_version_identity"]["source_type"] == "Nova_derived_proposal_fingerprint"
+    assert v1["proposal_version_identity"]["algorithm_qualification"] == "fixture-only-a"
+    assert v1["proposal_version_identity"]["material_scope"] == "canonical_prepared_action_material_only"
+    assert v1["proposal_version_identity"]["establishes_action_lineage"] is False
 
 
 def test_r01_external_identity_is_preserved_without_content_derivation() -> None:
@@ -109,7 +113,11 @@ def test_r01_external_identity_is_preserved_without_content_derivation() -> None
 
     assert resolved["action_id"]["source"] == "external_institution_or_orchestrator"
     assert resolved["action_id"]["value"] == "external-action-7"
-    assert resolved["proposal_version_id"]["value"] == "external-proposal-7.2"
+    assert resolved["proposal_version_identity"] == {
+        "value": "external-proposal-7.2",
+        "source_type": "external_institution_or_orchestrator",
+        "establishes_action_lineage": False,
+    }
     assert resolved["same_action_inference_permitted"] is True
 
 
@@ -233,12 +241,93 @@ def test_r11_timestamps_and_window_boundaries_normalize_without_silent_unknown_o
 def test_r11_semantic_arrays_and_null_absence_are_explicit() -> None:
     left = [{"source_id": "b"}, {"source_id": "a"}, {"source_id": "a"}]
     right = list(reversed(left))
-    assert normalize_semantic_array(left, semantics="set", identity_key="source_id") == normalize_semantic_array(
-        right, semantics="set", identity_key="source_id"
+    source_sort = _load(MACHINE_CONTRACT)["canonicalization_semantics"]["semantic_arrays"]["sort_tuple_profiles"]["source_reference_sort"]
+    assert normalize_semantic_array(left, semantics="set", sort_tuple=source_sort, identity_key="source_id") == normalize_semantic_array(
+        right, semantics="set", sort_tuple=source_sort, identity_key="source_id"
     )
     with pytest.raises(ReferenceSemanticsError):
         normalize_semantic_array(left, semantics="undeclared", identity_key="source_id")
     assert canonicalize_jcs_profile({"value": None}) != canonicalize_jcs_profile({})
+
+
+def test_r11_declared_type_tuples_drive_order_before_jcs_serialization() -> None:
+    arrays = _load(MACHINE_CONTRACT)["canonicalization_semantics"]["semantic_arrays"]
+    profiles = arrays["sort_tuple_profiles"]
+
+    source_values = [
+        {"aaa": "0", "source_id": "b", "source_version_or_digest": "1"},
+        {"aaa": "9", "source_id": "a", "source_version_or_digest": "1"},
+    ]
+    assert [item["source_id"] for item in sorted(source_values, key=canonicalize_jcs_profile)] == ["b", "a"]
+    assert [item["source_id"] for item in normalize_semantic_array(
+        source_values,
+        semantics="set",
+        sort_tuple=profiles["source_reference_sort"],
+        identity_key="source_id",
+    )] == ["a", "b"]
+
+    constraint_values = [
+        {"constraint_id_or_digest": "z", "reference_id": "constraint-z"},
+        {"constraint_id_or_digest": "a", "reference_id": "constraint-a"},
+    ]
+    assert [item["constraint_id_or_digest"] for item in normalize_semantic_array(
+        constraint_values,
+        semantics="set",
+        sort_tuple=profiles["constraint_reference_sort"],
+        identity_key="reference_id",
+    )] == ["a", "z"]
+
+    chronology_values = [
+        {"reference_type": "review", "reference_id": "z"},
+        {"reference_type": "memory", "reference_id": "a"},
+    ]
+    assert [item["reference_type"] for item in normalize_semantic_array(
+        chronology_values,
+        semantics="set",
+        sort_tuple=profiles["chronology_reference_sort"],
+        identity_key="reference_id",
+    )] == ["memory", "review"]
+
+    digest_values = [
+        {"algorithm": "fixture-z", "parameter_set": "1", "output_encoding": "hex", "digest": "00"},
+        {"algorithm": "fixture-a", "parameter_set": "1", "output_encoding": "hex", "digest": "ff"},
+    ]
+    assert [item["algorithm"] for item in normalize_semantic_array(
+        digest_values,
+        semantics="set",
+        sort_tuple=profiles["digest_record_sort"],
+    )] == ["fixture-a", "fixture-z"]
+
+    with pytest.raises(ReferenceSemanticsError, match="conflicting duplicate declared sort tuple"):
+        normalize_semantic_array(
+            [{"algorithm": "a", "extra": 1}, {"algorithm": "a", "extra": 2}],
+            semantics="set",
+            sort_tuple=profiles["digest_record_sort"],
+        )
+
+
+def test_r01_response_genesis_is_machine_visible_for_both_origins() -> None:
+    identity = _load(MACHINE_CONTRACT)["response_model"]["prepared_action_reference"]["proposal_version_identity"]
+
+    assert identity["required_fields"] == ["value", "source_type"]
+    assert identity["source_type_permitted_values"] == [
+        "external_institution_or_orchestrator",
+        "Nova_derived_proposal_fingerprint",
+    ]
+    assert identity["conditional_fields"]["when_source_type_is_Nova_derived_proposal_fingerprint"] == {
+        "algorithm_qualification": "required",
+        "material_scope": "canonical_prepared_action_material_only",
+    }
+    assert identity["establishes_action_lineage"] is False
+
+
+def test_persistent_artifacts_use_merge_stable_repository_canonicality() -> None:
+    contract = _load(MACHINE_CONTRACT)
+    assert contract["canonicality_source"] == "authoritative_repository_main"
+    for relative in PERSISTENT_LIFECYCLE_ARTIFACTS:
+        text = (REPO_ROOT / relative).read_text(encoding="utf-8")
+        for marker in BRANCH_RELATIVE_LIFECYCLE_MARKERS:
+            assert marker not in text
 
 
 def test_r11_jcs_baseline_and_financial_float_boundary_are_canonical() -> None:
@@ -292,8 +381,9 @@ def test_unapproved_transport_shapes_and_all_runtime_authorities_remain_absent()
     }
 
 
-def test_recorded_contract_digest_matches_exact_revision_candidate_bytes() -> None:
+def test_recorded_contract_digest_matches_exact_design_v2_1_bytes() -> None:
     reference = _load(DERIVATION_SPEC)["approved_contract"]
     assert reference["version"] == "design-v2.1"
-    assert reference["canonical_on_main"] == "false_until_merge"
+    assert reference["incorporation_status"] == "incorporated_in_design_v2.1_contract"
+    assert reference["canonicality_source"] == "authoritative_repository_main"
     assert reference["sha256"] == hashlib.sha256(MACHINE_CONTRACT.read_bytes()).hexdigest()

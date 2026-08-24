@@ -3,16 +3,16 @@
 ## Status
 
 ```yaml
-artifact_status: contract_revision_candidate_present_not_canonical_on_main
-approved_target_v2_contract_modified: true
+artifact_status: design_review_complete_contract_revision_incorporated
+contract_revision_incorporated: true
 authority_effect: none
 execution_effect: none
 CCO_review: approved
 Architect_review: approved
-design_review_status: design_review_complete_contract_revision_candidate_present
-canonical_contract_revision: candidate_present
+design_review_status: complete
+canonical_contract_revision: incorporated
 contract_revision_target: design-v2.1
-canonical_on_main: false_until_merge
+canonicality_source: authoritative_repository_main
 merge_authority: false
 deployment_authority: false
 implementation_authority: false
@@ -20,8 +20,8 @@ implementation_authority: false
 
 This report preserves the historical gap inventory discovered while defining
 field derivation and applying the approved Gate 3A cryptographic-agility design
-input. Exactly `G3-R01`, `G3-R03`, `G3-R08`, `G3-R11`, and `G3-Q15` are present
-in the `design-v2.1` contract revision candidate. The other 21 records remain
+input. Exactly `G3-R01`, `G3-R03`, `G3-R08`, `G3-R11`, and `G3-Q15` are
+incorporated in the `design-v2.1` contract. The other 21 records remain
 unapproved and are not incorporated. The machine register is
 [`review_context_contract_gaps_v0_1.json`](../../specs/review_context_contract_gaps_v0_1.json).
 
@@ -74,8 +74,8 @@ newly_discovered:
 
 `G3-R11` completes the design-level numeric and collection model. `G3-Q15`
 preserves semantic identity across digest migration. CCO and Architect design
-review is complete for both; they are present in the contract revision candidate
-and remain non-canonical on `main` until merge.
+review is complete for both; they are incorporated in `design-v2.1` without
+runtime or implementation authority.
 
 ## CCO remediation decisions within the existing gap family
 
@@ -89,7 +89,7 @@ and remain non-canonical on `main` until merge.
   more than one evidence-environment class appears. Segmentation remains
   authoritative, without strongest/weakest reduction or promotion to `live`.
 - `G3-R08` supplies the stable target-v2 contract meanings and precedence
-  incorporated in the revision candidate:
+  incorporated in the contract revision:
   `unavailable`, `conflicted`, `partial`, then `complete`. Institution profiles
   determine what must be evaluated, but cannot redefine the public enum.
   `complete` never means policy satisfied, safe, permitted, approved, or
@@ -103,7 +103,7 @@ and remain non-canonical on `main` until merge.
 
 ```yaml
 semantic_completion:
-  status: design_review_complete_contract_revision_candidate_present
+  status: complete_for_design_v2.1_contract
   active_review_blockers: []
   historical_review_blockers:
     - G3-R01
@@ -117,16 +117,16 @@ semantic_completion:
     - G3-R08
     - G3-R11
     - G3-Q15
-  canonical_contract_revision: candidate_present
+  canonical_contract_revision: incorporated
   contract_revision_target: design-v2.1
-  canonical_on_main: false_until_merge
+  canonicality_source: authoritative_repository_main
 ```
 
 The five records remain in the historical contract-gap inventory with their
 prior blocker provenance. Their active review-blocker status is cleared because
-CCO and Architect approved their design disposition. Presence in the revision
-candidate does not make them canonical on `main` before merge and creates no
-runtime or implementation authority.
+CCO and Architect approved their design disposition. Contract incorporation
+creates no runtime or implementation authority. Canonicality is determined by
+authoritative repository `main`.
 
 ## Review and adoption rule
 
@@ -137,17 +137,16 @@ CCO_review: approved
 Architect_review: approved
 design_disposition: approved_for_incorporation
 contract_revision_target: design-v2.1
-contract_revision_candidate: present
-canonical_on_main: false_until_merge
-canonical_contract_status: contract_revision_candidate_present
+canonical_contract_status: incorporated_in_design_v2.1_contract
+canonicality_source: authoritative_repository_main
 authority_effect: none
 execution_effect: none
 silently_canonical: false
 implementation_authority: false
 ```
 
-Canonical adoption on `main` requires review and merge of the explicit contract
-revision candidate. No deployment, runtime, endpoint, private adapter,
+Repository canonicality is established by authoritative `main`, not embedded
+branch state. No deployment, runtime, endpoint, private adapter,
 cryptographic implementation, chronology entry, Reflex Memory entry, or
 production configuration follows from this report. The other 21 gap records
 retain their unapproved, review-required lifecycle metadata.

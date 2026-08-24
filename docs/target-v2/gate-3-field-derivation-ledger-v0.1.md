@@ -4,14 +4,14 @@
 
 ```yaml
 gate: Gate_3_v2_field_derivation_design
-status: design_review_complete_contract_revision_candidate_present
-artifact_status: contract_revision_candidate_present_not_canonical_on_main
+status: complete_for_design_v2.1_contract
+artifact_status: design_review_complete_contract_revision_incorporated
 CCO_review: approved
 Architect_review: approved
 approved_for_incorporation: [G3-R01, G3-R03, G3-R08, G3-R11, G3-Q15]
-canonical_contract_revision: candidate_present
+canonical_contract_revision: incorporated
 contract_revision_target: design-v2.1
-canonical_on_main: false_until_merge
+canonicality_source: authoritative_repository_main
 design_only: true
 target_v2_runtime_implemented: false
 private_adapter_implemented: false
@@ -24,8 +24,9 @@ authority_effect: none
 execution_effect: none
 ```
 
-This ledger uses the `design-v2.1` target-v2 contract revision candidate and its
-machine specification as semantic authorities for this branch. The approved Gate 3A cryptographic-agility and
+This ledger uses the `design-v2.1` target-v2 contract and its machine
+specification as semantic authorities. Canonicality is determined by
+authoritative repository `main`. The approved Gate 3A cryptographic-agility and
 post-quantum threat-model invariants are design input. Legacy v1 is migration
 reference only and is never target-v2 semantic authority.
 
@@ -39,7 +40,7 @@ Nova does not execute.
 
 Every required field in the approved response contract has one rule in
 [`review_context_field_derivation_v0_1.json`](../../specs/review_context_field_derivation_v0_1.json).
-The machine spec remains design-only. The contract revision candidate creates
+The machine spec remains design-only. The contract revision creates
 no runtime or implementation authority.
 
 ## Governing derivation rule
@@ -80,10 +81,10 @@ context and cannot replay under the proof of an earlier proposal.
 
 The `design-v2.1` request now accepts optional `action_id` and
 `proposal_version_id` inputs. The response binds the exact
-`prepared_action_reference.proposal_version_id` and an external `action_id`
+`prepared_action_reference.proposal_version_identity` and an external `action_id`
 when available; its existing `reference_id` remains a compatibility reference
 and never substitutes for both identities. This is the incorporated `G3-R01`
-contract revision candidate, not runtime implementation.
+contract revision, not runtime implementation.
 
 ## Profile-driven requirements
 
@@ -158,7 +159,7 @@ is machine-readable in the companion spec.
 | 3 | `review_context_response.request_id` | Opaque request reference; excluded from semantic identity. |
 | 4 | `review_context_response.created_at` | Nova record time; not independently trusted time. |
 | 5 | `review_context_response.prepared_action_reference.reference_id` | Compatibility reference only; it is not both stable lineage and exact proposal identity. |
-| 5a | `review_context_response.prepared_action_reference.proposal_version_id` | Exact proposal identity from an external identifier or the narrowly labeled Nova fingerprint fallback. |
+| 5a | `review_context_response.prepared_action_reference.proposal_version_identity` | Structured exact-proposal identity with visible external or Nova-derived genesis; Nova derivation carries algorithm qualification and prepared-action-only scope. |
 | 6 | `review_context_response.prepared_action_reference.reference_type` | Contract constant `opaque_external_reference`. |
 | 7 | `review_context_response.prepared_action_reference.payload_embedded` | Contract constant `false`. |
 | 8 | `review_context_response.review_profile_reference.profile_id` | Exact institution profile ID. |
@@ -235,7 +236,7 @@ identical canonical semantic byte sequence. Semantic identity is not any one
 digest. Historical evidence is preserved, successor digests do not replace it,
 and different algorithms are never described as producing the same hash value.
 This continuity rule is incorporated refinement `G3-Q15` in the contract
-revision candidate; it does not add the unapproved G3-Q13 plural transport.
+revision; it does not add the unapproved G3-Q13 plural transport.
 
 ## Canonical numeric and interoperability model
 
@@ -283,12 +284,12 @@ status.
 
 CCO and Architect design review is complete for `G3-R01`, `G3-R03`, `G3-R08`,
 `G3-R11`, and `G3-Q15`. Their disposition is `approved_for_incorporation`, and
-each is present in the `design-v2.1` contract revision candidate while remaining
-`false_until_merge` for `canonical_on_main`. They remain in the historical
-contract-gap inventory with their prior blocker provenance. Other inventory
-records retain their unapproved, review-required lifecycle state.
+each is incorporated in the `design-v2.1` contract. Canonicality is determined
+by authoritative repository `main`. They remain in the historical contract-gap
+inventory with their prior blocker provenance. Other inventory records retain
+their unapproved, review-required lifecycle state.
 
-The contract revision candidate creates no implementation, merge, deployment,
+The contract revision creates no implementation, merge, deployment,
 runtime, adapter, endpoint, production-crypto, chronology, Reflex Memory,
 settlement, or capital-movement authority. Gate 3 design completion on revision
 merge does not activate Gate 4.

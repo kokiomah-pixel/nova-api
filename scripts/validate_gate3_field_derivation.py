@@ -27,7 +27,7 @@ REQUIRED_DOCS = {
         "Every required field",
         "action_id != proposal_version_id",
         "proof_verification_state",
-        "design_review_complete_contract_revision_candidate_present",
+        "complete_for_design_v2.1_contract",
     ),
     "docs/target-v2/gate-3-contract-gap-report-v0.1.md": (
         "G3-R01",
@@ -36,7 +36,7 @@ REQUIRED_DOCS = {
         "G3-Q01",
         "G3-Q14",
         "G3-Q15",
-        "contract_revision_candidate_present_not_canonical_on_main",
+        "design_review_complete_contract_revision_incorporated",
     ),
     "docs/target-v2/context-proof-canonicalization-v0.1.md": (
         "semantic_context_material",
@@ -180,13 +180,13 @@ def _validate_contract_revision_digest(spec: dict[str, Any], errors: list[Valida
         errors.append(ValidationError(f"contract_revision.{relative}", str(exc)))
         return
     if contract_reference.get("sha256") != actual:
-        errors.append(ValidationError("spec.approved_contract.sha256", "must match the design-v2.1 revision candidate"))
+        errors.append(ValidationError("spec.approved_contract.sha256", "must match the design-v2.1 contract"))
     if contract_reference.get("version") != "design-v2.1":
         errors.append(ValidationError("spec.approved_contract.version", "must be design-v2.1"))
-    if contract_reference.get("revision_candidate") is not True:
-        errors.append(ValidationError("spec.approved_contract.revision_candidate", "must be true"))
-    if contract_reference.get("canonical_on_main") != "false_until_merge":
-        errors.append(ValidationError("spec.approved_contract.canonical_on_main", "must remain false_until_merge"))
+    if contract_reference.get("incorporation_status") != "incorporated_in_design_v2.1_contract":
+        errors.append(ValidationError("spec.approved_contract.incorporation_status", "must record design-v2.1 incorporation"))
+    if contract_reference.get("canonicality_source") != "authoritative_repository_main":
+        errors.append(ValidationError("spec.approved_contract.canonicality_source", "must be authoritative_repository_main"))
 
 
 def _validate_docs(errors: list[ValidationError]) -> None:
@@ -226,8 +226,8 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
 
         if spec.get("design_only") is not True:
             errors.append(ValidationError("spec.design_only", "must be true"))
-        if spec.get("status") != "contract_revision_candidate_present_not_canonical_on_main":
-            errors.append(ValidationError("spec.status", "must identify the contract revision candidate without canonical-on-main authority"))
+        if spec.get("status") != "design_review_complete_contract_revision_incorporated":
+            errors.append(ValidationError("spec.status", "must record merge-stable design-v2.1 incorporation"))
         for key in ("runtime_implementation_authority", "authority_effect", "execution_effect"):
             expected: Any = False if key == "runtime_implementation_authority" else "none"
             if spec.get(key) != expected:
@@ -262,25 +262,25 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
 
         if gap_ids != EXPECTED_GAPS:
             errors.append(ValidationError("contract_gaps.ids", f"expected {sorted(EXPECTED_GAPS)}, got {sorted(gap_ids)}"))
-        if gaps.get("status") != "contract_revision_candidate_present_not_canonical_on_main":
-            errors.append(ValidationError("contract_gaps.status", "must identify the contract revision candidate without canonical-on-main authority"))
-        if gaps.get("design_review_status") != "design_review_complete_contract_revision_candidate_present":
-            errors.append(ValidationError("contract_gaps.design_review_status", "must record completed design review and the candidate revision"))
+        if gaps.get("status") != "design_review_complete_contract_revision_incorporated":
+            errors.append(ValidationError("contract_gaps.status", "must record merge-stable design-v2.1 incorporation"))
+        if gaps.get("design_review_status") != "complete":
+            errors.append(ValidationError("contract_gaps.design_review_status", "must record completed design review"))
         if set(gaps.get("active_semantic_completion_blockers", [])):
             errors.append(ValidationError("contract_gaps.active_semantic_completion_blockers", "must be empty after completed design review"))
         if set(gaps.get("historical_semantic_completion_blockers", [])) != EXPECTED_APPROVED_FOR_INCORPORATION:
             errors.append(ValidationError("contract_gaps.historical_semantic_completion_blockers", "must preserve the five historical blockers"))
         if set(gaps.get("approved_for_incorporation", [])) != EXPECTED_APPROVED_FOR_INCORPORATION:
             errors.append(ValidationError("contract_gaps.approved_for_incorporation", "must contain the five reviewed refinements"))
-        expected_revision = {"status": "candidate_present", "target": "design-v2.1", "canonical_on_main": "false_until_merge"}
+        expected_revision = {"status": "incorporated", "target": "design-v2.1", "canonicality_source": "authoritative_repository_main"}
         if gaps.get("canonical_contract_revision") != expected_revision:
             errors.append(ValidationError("contract_gaps.canonical_contract_revision", f"must be {expected_revision!r}"))
         if gaps.get("implementation_authority") is not False:
             errors.append(ValidationError("contract_gaps.implementation_authority", "must remain false"))
 
         semantic_completion = spec.get("semantic_completion", {})
-        if semantic_completion.get("status") != "design_review_complete_contract_revision_candidate_present":
-            errors.append(ValidationError("spec.semantic_completion.status", "must record completed review and the candidate revision"))
+        if semantic_completion.get("status") != "complete_for_design_v2.1_contract":
+            errors.append(ValidationError("spec.semantic_completion.status", "must record completed design-v2.1 incorporation"))
         if set(semantic_completion.get("active_review_blockers", [])):
             errors.append(ValidationError("spec.semantic_completion.active_review_blockers", "must be empty"))
         if set(semantic_completion.get("historical_review_blockers", [])) != EXPECTED_APPROVED_FOR_INCORPORATION:
@@ -302,9 +302,8 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
                     "Architect_review": "approved",
                     "design_disposition": "approved_for_incorporation",
                     "contract_revision_target": "design-v2.1",
-                    "contract_revision_candidate": "present",
-                    "canonical_on_main": "false_until_merge",
-                    "canonical_contract_status": "contract_revision_candidate_present",
+                    "canonical_contract_status": "incorporated_in_design_v2.1_contract",
+                    "canonicality_source": "authoritative_repository_main",
                     "implementation_authority": False,
                     "requires_CCO_review": False,
                     "requires_Architect_review": False,
@@ -319,7 +318,7 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
 
         design_review = spec.get("design_review", {})
         expected_design_review = {
-            "status": "design_review_complete_contract_revision_candidate_present",
+            "status": "complete",
             "CCO": "complete",
             "Architect": "complete",
             "merge_authority": False,
@@ -341,8 +340,8 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
             "G3-Q15": spec.get("semantic_identity_continuity_proposal", {}),
         }
         for gap_id, section in reviewed_spec_sections.items():
-            if section.get("status") != "incorporated_in_design_v2.1_contract_revision_candidate":
-                errors.append(ValidationError(f"spec.{gap_id}.status", "must identify incorporation in the design-v2.1 revision candidate"))
+            if section.get("status") != "incorporated_in_design_v2.1_contract":
+                errors.append(ValidationError(f"spec.{gap_id}.status", "must identify incorporation in design-v2.1"))
 
         if set(gaps.get("additional_gaps_discovered", [])) != {"G3-R11", "G3-Q15"}:
             errors.append(ValidationError("contract_gaps.additional_gaps_discovered", "must identify G3-R11 and G3-Q15"))
@@ -397,6 +396,18 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
             errors.append(ValidationError("field_rules.intended_action_window.unavailable", "must require explicit unresolved boundary state"))
 
         array_rules = numeric_profile.get("array_rules", {})
+        expected_sort_tuples = {
+            "source_reference_sort": ["source_id", "source_version_or_digest", "authority_scope", "observed_at", "received_at", "record_source_type"],
+            "constraint_reference_sort": ["constraint_id_or_digest", "source_id", "applicability_scope"],
+            "chronology_reference_sort": ["reference_type", "reference_id", "version_or_digest", "treatment_status", "applicability_status"],
+            "digest_record_sort": ["algorithm", "parameter_set", "output_encoding", "digest"],
+        }
+        sort_tuple_profiles = numeric_profile.get("sort_tuple_profiles", {})
+        for profile_name, expected_tuple in expected_sort_tuples.items():
+            if sort_tuple_profiles.get(profile_name) != expected_tuple:
+                errors.append(ValidationError(f"canonical_profile.sort_tuple_profiles.{profile_name}", f"must be {expected_tuple!r}"))
+        if numeric_profile.get("declared_sort_tuple_collision") != "reject_until_conflict_is_explicitly_represented":
+            errors.append(ValidationError("canonical_profile.declared_sort_tuple_collision", "must reject ambiguous tuple collisions"))
         semantic_array_paths = set(numeric_profile.get("semantic_array_paths", []))
         if set(array_rules) != semantic_array_paths:
             errors.append(ValidationError("canonical_profile.array_rules", "every semantic array path must have exactly one explicit rule"))
@@ -411,6 +422,9 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
                 errors.append(ValidationError(f"canonical_profile.array_rules.{path}", "semantics must be ordered_sequence, set, or multiset"))
             if rule.get("semantics") == "set" and rule.get("exact_duplicate") != "collapse":
                 errors.append(ValidationError(f"canonical_profile.array_rules.{path}", "set exact duplicates must collapse"))
+            sort_profile = rule.get("sort_tuple_profile")
+            if sort_profile not in sort_tuple_profiles:
+                errors.append(ValidationError(f"canonical_profile.array_rules.{path}.sort_tuple_profile", "must name a declared field/type-specific tuple"))
 
         identity = spec.get("identity_model", {})
         action_identity = identity.get("action_id", {})
@@ -485,8 +499,8 @@ def main() -> int:
     print(f"  contract_gaps_recorded: {len(gaps['contract_refinements'])}")
     print(f"  synthetic_fixture_cases: {len(fixtures['cases'])}")
     print("  executable_reference_semantics: passed")
-    print("  semantic_completion: design_review_complete_contract_revision_candidate_present")
-    print("  canonical_contract_revision: candidate_present_not_canonical_on_main")
+    print("  semantic_completion: complete_for_design_v2.1_contract")
+    print("  canonical_contract_revision: incorporated_canonicality_from_authoritative_main")
     print("  runtime_implementation_authority: false")
     return 0
 

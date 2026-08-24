@@ -3,17 +3,17 @@
 ## Status and boundary
 
 ```yaml
-status: incorporated_in_design_v2.1_contract_revision_candidate
+status: incorporated_in_design_v2.1_contract
 design_only: true
 canonicalization_design_defined: true
-semantic_completion: design_review_complete_contract_revision_candidate_present
+semantic_completion: complete_for_design_v2.1_contract
 active_review_blockers: []
 historical_review_blockers: [G3-R01, G3-R03, G3-R08, G3-R11, G3-Q15]
 CCO_review: approved
 Architect_review: approved
-canonical_contract_revision: candidate_present
+canonical_contract_revision: incorporated
 contract_revision_target: design-v2.1
-canonical_on_main: false_until_merge
+canonicality_source: authoritative_repository_main
 canonicalization_version: nova-jcs-exact-financial-json-design-v0.1
 derivation_version: gate3-field-derivation-v0.1
 production_algorithm_selected: false
@@ -23,7 +23,8 @@ execution_effect: none
 ```
 
 This design artifact supplies the G3-R11 and G3-Q15 semantics incorporated in
-the `design-v2.1` contract revision candidate. It does not implement target v2,
+the `design-v2.1` contract. Canonicality is determined by authoritative
+repository `main`. It does not implement target v2,
 select a production signature/hash suite, or authorize production cryptography.
 
 ## Two identities and two scopes
@@ -106,12 +107,12 @@ resulting document remains valid JCS/I-JSON.
 ```yaml
 G3-R11:
   name: canonical_numeric_and_interoperability_profile
-  status: incorporated_in_design_v2.1_contract_revision_candidate
+  status: incorporated_in_design_v2.1_contract
   CCO_review: approved
   Architect_review: approved
   design_disposition: approved_for_incorporation
-  canonical_contract_status: contract_revision_candidate_present
-  canonical_on_main: false_until_merge
+  canonical_contract_status: incorporated_in_design_v2.1_contract
+  canonicality_source: authoritative_repository_main
   silently_canonical: false
   implementation_authority: false
   base_standard: RFC_8785_JCS
@@ -205,8 +206,8 @@ Whole seconds are padded with `.000000`; shorter fractions are right-padded.
 Sub-microsecond input is rejected rather than rounded. RFC 3339 `-00:00` denotes
 an unknown local offset and is rejected by this proposed profile; it is never
 silently normalized to UTC `Z`. Leap-second or invalid calendar input fails.
-This fixed precision is part of the reviewed G3-R11 design, approved for
-incorporation but not canonical until contract revision. Normalization does not
+This fixed precision is part of G3-R11 as incorporated in `design-v2.1`.
+Normalization does not
 turn a Nova clock value into independently trusted time.
 
 ## Array ordering and duplicate references
@@ -251,7 +252,9 @@ Byte-identical duplicate references collapse to one only when the field rule
 declares set semantics. Same identity with different content is a conflict, not
 a duplicate; the reference canonicalizer rejects the unqualified set until the
 conflict is explicitly represented in the contract's conflict fields, where all
-variants remain visible. Duplicate attestations remain separate only when their
+variants remain visible. Distinct content with an identical declared sort tuple
+is rejected rather than falling back to input order or a universal JCS byte
+tie-breaker. Duplicate attestations remain separate only when their
 IDs or signed scope differ; exact byte duplicates may be rejected.
 
 ## Algorithm and digest identity
@@ -280,12 +283,12 @@ referenced verifiably, continuity is `unresolved`.
 
 ```yaml
 G3-Q15:
-  status: incorporated_in_design_v2.1_contract_revision_candidate
+  status: incorporated_in_design_v2.1_contract
   CCO_review: approved
   Architect_review: approved
   design_disposition: approved_for_incorporation
-  canonical_contract_status: contract_revision_candidate_present
-  canonical_on_main: false_until_merge
+  canonical_contract_status: incorporated_in_design_v2.1_contract
+  canonicality_source: authoritative_repository_main
   silently_canonical: false
   implementation_authority: false
   semantic_identity_is_individual_digest: false

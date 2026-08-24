@@ -6,6 +6,7 @@
 contract:
   name: Nova External Review-Context Contract
   version: design-v2.1
+  canonicality_source: authoritative_repository_main
   implementation_status: proposed_not_implemented
   runtime_implemented: false
   approved_for_runtime_implementation: false
@@ -22,10 +23,11 @@ contract:
     - G3-Q15
 ```
 
-This `design-v2.1` document is the canonical target-v2 contract revision
-candidate. It incorporates only `G3-R01`, `G3-R03`, `G3-R08`, `G3-R11`, and
-`G3-Q15`. It remains a design gate, not an implemented endpoint, public
-capability, or production contract. It does not change `/v1/context`,
+This `design-v2.1` document incorporates only `G3-R01`, `G3-R03`, `G3-R08`,
+`G3-R11`, and `G3-Q15`. Canonicality is determined by presence on authoritative
+repository `main`, not by permanent branch-relative metadata in this document.
+It remains a design gate, not an implemented endpoint, public capability, or
+production contract. It does not change `/v1/context`,
 `/v1/proof/{decision_id}`, or any current runtime behavior.
 
 ## Purpose
@@ -161,7 +163,11 @@ review_context_response:
   prepared_action_reference:
     reference_id:
     action_id:
-    proposal_version_id:
+    proposal_version_identity:
+      value:
+      source_type:
+      algorithm_qualification:
+      material_scope:
     reference_type: opaque_external_reference
     payload_embedded: false
 
@@ -324,13 +330,18 @@ prepared_action_reference_semantics:
     required_when_cross_revision_lineage_is_claimed: true
     Nova_content_derivation_permitted: false
     missing_behavior: lineage_unavailable_and_no_same_action_inference
-  proposal_version_id:
+  proposal_version_identity:
     meaning: identity_of_exact_proposal_reviewed
     required_in_response: true
-    preferred_source: external_institution_or_orchestrator
-    fallback: algorithm_qualified_explicitly_labeled_Nova_derived_proposal_fingerprint
-    fallback_material_scope: canonical_prepared_action_material_only
-    fallback_establishes_action_lineage: false
+    source_genesis_machine_visible: true
+    value: opaque_external_id_or_Nova_derived_fingerprint
+    source_type:
+      - external_institution_or_orchestrator
+      - Nova_derived_proposal_fingerprint
+    when_Nova_derived:
+      algorithm_qualification: required
+      material_scope: canonical_prepared_action_material_only
+    establishes_action_lineage: false
   reference_id: compatibility_reference_not_a_substitute_for_both_identities
   Nova_owns_action: false
   full_action_payload_required_in_response: false
@@ -339,8 +350,13 @@ prepared_action_reference_semantics:
 ```
 
 The response binds the exact proposal-version identity and, when supplied, the
-external stable action-lineage identity. A revised proposal cannot reuse proof
-identity from an earlier proposal. The response must not reproduce destination addresses, full transaction
+external stable action-lineage identity. Its structured
+`proposal_version_identity` makes genesis deterministic: an external value
+preserves its opaque origin, while a Nova-derived fingerprint visibly carries
+its source type, algorithm qualification, and
+`canonical_prepared_action_material_only` scope. Neither form can establish
+stable action lineage. A revised proposal cannot reuse proof identity from an
+earlier proposal. The response must not reproduce destination addresses, full transaction
 payloads, policy-sensitive details, personal data, or institution secrets
 unless a separately approved review profile explicitly requires them.
 
@@ -620,9 +636,46 @@ reproducibility.source_versions
 reproducibility.source_segmentation
 ```
 
-Set values normalize and sort deterministically using JCS canonical bytes.
-Byte-identical duplicates collapse only for a declared set. The same identity
-with different content is a conflict, not a duplicate.
+Set values normalize and sort by declared field/type-specific tuples before JCS
+serializes the normalized result. JCS canonical bytes are not a universal
+semantic set-order key:
+
+```yaml
+source_reference_sort:
+  - source_id
+  - source_version_or_digest
+  - authority_scope
+  - observed_at
+  - received_at
+  - record_source_type
+
+constraint_reference_sort:
+  - constraint_id_or_digest
+  - source_id
+  - applicability_scope
+
+chronology_reference_sort:
+  - reference_type
+  - reference_id
+  - version_or_digest
+  - treatment_status
+  - applicability_status
+
+digest_record_sort:
+  - algorithm
+  - parameter_set
+  - output_encoding
+  - digest
+```
+
+Source references and segmentation use `source_reference_sort`; constraint
+references use `constraint_reference_sort`; chronology, prior-review, and
+accepted-memory references use `chronology_reference_sort`; digest records use
+`digest_record_sort`. Other set-like fields declare their own stable scalar or
+identity tuple. Byte-identical duplicates collapse only for a declared set. The
+same identity with different content is a conflict, not a duplicate. Distinct
+content with the same declared sort tuple is likewise rejected as an unresolved
+conflict; input iteration order is never used as a tie-breaker.
 
 ## Semantic Identity Continuity Across Digest Migration
 
@@ -724,7 +777,7 @@ runtime work:
 
 ```yaml
 Gate_3:
-  field_derivation_design: complete_on_contract_revision_merge
+  field_derivation_design: complete
 
 Gate_4_private_synthetic_adapter:
   status: not_authorized
@@ -737,7 +790,7 @@ target_v2_runtime:
 
 No `/v2/context` endpoint, private adapter, signer, cryptographic deployment,
 payment, settlement, execution, chronology mutation, or Reflex Memory mutation
-is authorized by this revision candidate.
+is authorized by this contract revision.
 
 ## Design Review Answers
 
