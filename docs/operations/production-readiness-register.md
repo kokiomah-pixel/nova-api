@@ -3,9 +3,9 @@
 ## Purpose
 
 This register is the canonical readiness view for repository governance,
-production custody, Legacy v1 dependency, v2 progression, institutional use,
-monetization, and machine discovery. Readiness is evidence-based and does not
-convert unknown production history into a favorable claim.
+production custody, Legacy v1 dependency, target v2 progression, institutional
+use, monetization, and machine discovery. Readiness is evidence-based and does
+not convert unknown production history into a favorable claim.
 
 ## Public current-state authority
 
@@ -13,18 +13,19 @@ For the compressed public system status, see:
 
 - [Current State](../../CURRENT_STATE.md)
 
-This register provides gate-level detail.
-
-It does not permit a reader to combine a `READY` or `CONDITIONALLY_READY`
-subcomponent with blocked production controls and conclude that Sharpe Nova OS
-is system-wide production-ready.
+This register provides gate-level detail. It does not permit a reader to combine
+a `READY` or `CONDITIONALLY_READY` subcomponent with incomplete future-stage
+controls and conclude that Sharpe Nova OS is system-wide production-ready.
 
 ```yaml
 public_claim_summary:
   repository_governance: ready
   Legacy_v1_runtime: implemented
   Legacy_v1_dependency: conditionally_ready_no_external_consumers_observed
+  readiness_gate_baseline: closed
+  production_incident: contained_historically_unattested
   target_v2_contract: approved
+  target_v2_field_derivation: ready_for_design_review
   target_v2_runtime: not_implemented
   target_v2_production: not_active
   institutional_pilot: not_started
@@ -64,47 +65,56 @@ readiness_states:
 
 ## Current State
 
-The following state is a point-in-time governance reconciliation, not live
-telemetry. It is supported by the readiness reconciliation evidence receipt in
-this directory.
+The current readiness baseline was closed on August 24, 2026 after the Architect
+accepted the disclosed historical retention limitation and approved the incident
+disposition `CONTAINED_HISTORICALLY_UNATTESTED`.
+
+The named evidence chain is:
+
+- `docs/operations/readiness-reconciliation-2026-08-19.md`;
+- `docs/operations/incident-closure-receipt-2026-08-24.md`.
 
 ```yaml
 state_snapshot:
   as_of_date: "2026-08-24"
-  evidence_scope:
-    independently_verified:
-      - GitHub_repository_corporate_ownership
-      - GitHub_current_main
-      - GitHub_PR_38_identity_reconciliation_merge
-    Architect_attested:
-      - Render_authenticated_service_view
-      - Render_repository_binding
-      - Render_deployed_commit
-      - Render_service_health
-      - Render_environment_presence_and_effective_fail_closed_containment
-      - Legacy_v1_key_inventory
-      - Legacy_v1_route_history_review
-      - Legacy_v1_consumer_classification
-      - CDP_Admin_Owner_role
-      - CDP_project_settings_management
-      - CDP_API_key_management
-      - one_active_CDP_key_classified_founder_internal
-      - CDP_x402_or_facilitator_disabled
-      - CDP_current_Nova_integration_absent
-      - CDP_settlement_configuration_absent
-      - CDP_linked_settlement_destination_absent
-      - CDP_visible_payment_or_settlement_summary_zero
-    unresolved:
-      - CDP_historical_activity_review
-      - historical_settlement_activity
-      - historical_retention_completeness
+
+  repository_evidence:
+    repository: nova-infrastructure-systems/sharpe-nova-os
+    closure_evidence_capture_commit: f313d57a5b2b120a22ba981ba9e9d65771a401ae
+    evidence_capture_commit_verified_via_GitHub: true
+    note: closure_evidence_capture_commit_is_not_a_permanent_latest-head_claim
+
+  Architect_attested:
+    - Render_authenticated_service_view
+    - Render_repository_binding
+    - Render_post_merge_deployed_commit
+    - Render_service_health
+    - Render_environment_presence_and_effective_fail_closed_containment
+    - Legacy_v1_key_inventory
+    - Legacy_v1_route_history_review
+    - Legacy_v1_consumer_classification
+    - CDP_Admin_Owner_role
+    - CDP_project_settings_management
+    - CDP_API_key_management
+    - one_active_CDP_key_classified_founder_internal
+    - CDP_x402_or_facilitator_disabled
+    - CDP_current_Nova_integration_absent
+    - CDP_settlement_configuration_absent
+    - CDP_linked_settlement_destination_absent
+    - CDP_visible_payment_or_settlement_summary_zero
+    - external_public_boundary_matches_expected_contract
+
+  unresolved_historical_limitations:
+    - CDP_historical_activity_review_complete
+    - historical_settlement_activity_complete
+    - historical_retention_boundary_known
 ```
 
 ```yaml
 current_state:
   GitHub:
     corporate_repository: nova-infrastructure-systems/sharpe-nova-os
-    main_commit: 95ca9d5adea7658e7ece5e3ebd0a33d0ab483e41
+    closure_evidence_capture_commit: f313d57a5b2b120a22ba981ba9e9d65771a401ae
     repository_transfer_verified: true
     repository_identity_reconciliation_verified: true
     historical_provenance_preserved: true
@@ -116,22 +126,23 @@ current_state:
     independent_second_owner: false
 
   public_runtime:
-    health: available
-    OpenAPI: contained_last_attested
-    Swagger: contained_last_attested
-    ReDoc: contained_last_attested
-    services_manifest: contained_last_attested
-    public_x402: contained_last_attested
-    unauthenticated_v1: blocked_last_verified
+    health: 200_last_verified
+    OpenAPI: 404_last_verified
+    Swagger: 404_last_verified
+    ReDoc: 404_last_verified
+    services_manifest: 404_last_verified
+    constraint_pressure_feed: 404_last_verified
+    unauthenticated_v1_context: 401_last_verified
+    unauthenticated_v1_proof: 401_last_verified
 
   production_control:
     primary_owner: Kome_Okiomah
     Render_control_plane_attested: Architect_attested
     Render_repository_source: nova-infrastructure-systems/sharpe-nova-os
-    Render_deployed_commit: 95ca9d5adea7658e7ece5e3ebd0a33d0ab483e41
-    Render_deployed_commit_matches_main: true
+    Render_evidence_capture_deployed_commit: f313d57a5b2b120a22ba981ba9e9d65771a401ae
     Render_service_health: healthy
     Render_git_credential: founder_linked
+
     CDP_control_plane_attested: Architect_attested_Admin_Owner
     CDP_project_settings_manageable: true
     CDP_API_keys_manageable: true
@@ -147,6 +158,7 @@ current_state:
     CDP_visible_failed_settlements: 0
     CDP_activity_history_visible: false
     CDP_historical_retention_limit: unknown
+
     production_keys_inventoried: Architect_attested
     route_activity_reviewed: Architect_attested
     settlement_configuration_reviewed: Architect_attested
@@ -169,9 +181,12 @@ current_state:
 
 Architect-attested provider observations are not independent provider-control
 verification. The Render git credential and GitHub organization remain
-founder-concentrated continuity risks. The current CDP x402/settlement posture
-is attested as disabled, but the portal does not expose sufficient retained
-history or a retention boundary to prove historical settlement inactivity.
+founder-concentrated continuity risks.
+
+The current CDP x402/settlement posture is attested as disabled, but the provider
+surface does not expose sufficient retained history or a retention boundary to
+prove historical settlement inactivity. That limitation is preserved by the
+approved incident outcome rather than converted into a zero-activity claim.
 
 Pending Coinbase business verification is a provider-onboarding condition. It
 is not institutional validation of Nova and does not authorize x402 activation.
@@ -191,14 +206,16 @@ production_readiness:
 
   public_runtime_containment:
     status: CONDITIONALLY_READY
-    limitation: last_attested_containment_is_not_independently_provider_verified_post_merge
+    evidence:
+      - expected_external_public_boundary_verified
+    limitation: external_observation_is_Architect_supplied_not_independently_provider_verified
 
   Render_custody:
     status: CONDITIONALLY_READY
     evidence:
       - authenticated_service_view_Architect_attested
       - corporate_repository_binding_Architect_attested
-      - deployed_commit_Architect_attested
+      - post_merge_deployed_commit_Architect_attested
       - service_health_Architect_attested
     limitation: founder_linked_git_credential_and_no_independent_provider_verification
 
@@ -214,7 +231,7 @@ production_readiness:
   deployed_commit_attestation:
     status: CONDITIONALLY_READY
     evidence:
-      - exact_commit_matches_verified_GitHub_main
+      - closure_evidence_capture_commit_matches_GitHub
       - service_live_and_healthy_Architect_attested
     limitation: Render_control_plane_not_independently_verified
 
@@ -244,9 +261,14 @@ production_readiness:
     limitation: historical_activity_not_visible_and_retention_boundary_unknown
 
   incident_closure:
-    status: BLOCKED
-    limitation: final_current_external_boundary_recheck_and_Architect_disposition_required
-    likely_outcome: CONTAINED_HISTORICALLY_UNATTESTED
+    status: CLOSED_WITH_HISTORICAL_LIMITATION
+    outcome: CONTAINED_HISTORICALLY_UNATTESTED
+    evidence:
+      - current_control_plane_custody_attested
+      - current_x402_and_settlement_configuration_contained
+      - external_public_boundary_verified
+      - historical_retention_gap_documented
+      - Architect_final_disposition_approved
 
   Legacy_v1_dependency:
     status: CONDITIONALLY_READY
@@ -261,8 +283,8 @@ production_readiness:
     status: READY
 
   v2_field_derivation:
-    status: BLOCKED
-    limitation: production_incident_not_yet_formally_dispositioned
+    status: READY_FOR_DESIGN_REVIEW
+    limitation: canonical_derivation_rules_and_proof_canonicalization_not_yet_completed
 
   v2_adapter:
     status: NOT_STARTED
@@ -280,9 +302,8 @@ production_readiness:
     status: BLOCKED
 ```
 
-`READY` for repository governance does not mean production is fully governed.
-The Architect's administrator bypass, sole human ownership, and founder-linked
-Render credential remain documented continuity limitations.
+`READY` for repository governance and closure of the Readiness Gate Baseline do
+not mean the system is fully production-ready or institutionally ready.
 
 ## Product Progression Gates
 
@@ -294,18 +315,15 @@ product_progression:
     satisfied:
       - Render_access_and_service_identity_Architect_attested
       - corporate_repository_source_aligned
-      - deployed_commit_Architect_attested_and_matches_main
+      - closure_evidence_capture_commit_deployed_and_live
       - CDP_Admin_Owner_custody_Architect_attested
       - CDP_API_key_management_under_Architect_control
       - current_x402_and_settlement_configuration_reviewed_and_disabled
+      - external_public_boundary_verified
     limitations:
       - provider_control_planes_not_independently_verified
       - founder_concentration_remains
       - CDP_business_verification_pending
-    requirement:
-      - Render_attested
-      - CDP_attested
-      - credentials_under_Architect_control
 
   Gate_2:
     name: Legacy_v1_dependency
@@ -318,22 +336,18 @@ product_progression:
     limitations:
       - evidence_not_independently_verified
       - historical_retention_not_proven_complete
-    requirement:
-      - keys_inventoried
-      - logs_reviewed
-      - consumers_classified
 
   Gate_3:
     name: v2_field_derivation_design
-    status: BLOCKED
-    reason:
-      - production_incident_not_yet_formally_dispositioned
-      - final_current_external_boundary_recheck_required
-    requirement:
-      - Gate_1_complete
-      - Gate_2_complete
+    status: READY_FOR_DESIGN_REVIEW
+    entry_condition:
+      - readiness_gate_baseline_closed
+      - production_incident_disposition_approved
+    remaining_requirements:
       - canonical_derivation_rules_defined
       - proof_canonicalization_defined
+    implementation_authority: false
+    production_activation_authority: false
 
   Gate_4:
     name: private_v2_adapter
@@ -379,39 +393,42 @@ permits public activation by implication.
 
 ## Incident Posture
 
-The active production/discovery incident is no longer blocked by unknown current
-CDP ownership or unknown current settlement configuration. Current custody and
-current x402/settlement configuration are Architect-attested as contained.
-
-The evidence does not support `CLOSED` because historical provider activity and
-retention completeness cannot be reconstructed from the visible CDP portal
-surface. The evidence now supports a likely disposition of
-`CONTAINED_HISTORICALLY_UNATTESTED` once the current external boundary is
-rechecked and the Architect explicitly accepts the documented historical gap.
+The production/discovery incident is formally dispositioned as
+`CONTAINED_HISTORICALLY_UNATTESTED`.
 
 ```yaml
 incident_posture:
-  current_outcome: OPERATIONALLY_OPEN_PENDING_FINAL_DISPOSITION
-  likely_supported_outcome: CONTAINED_HISTORICALLY_UNATTESTED
+  current_outcome: CONTAINED_HISTORICALLY_UNATTESTED
+  active_exposure_closed: true
+
   current_exposure:
     Render_source_alignment: contained
-    public_documentation_and_discovery: contained_last_attested
-    public_x402_and_settlement: disabled_last_attested
+    public_documentation_and_discovery: contained
+    public_x402_and_settlement: disabled
     CDP_x402_or_facilitator: disabled_Architect_attested
     CDP_current_Nova_integration: absent_Architect_attested
     CDP_settlement_configuration: absent_Architect_attested
     CDP_linked_settlement_destination: absent_Architect_attested
+
   current_custody:
     Render: Architect_attested
     CDP: Architect_attested_Admin_Owner
-  remaining:
-    - current_external_boundary_recheck
-    - historical_retention_gap_documented_as_unattested
-    - Architect_final_incident_disposition
+
+  historical_limitations:
+    - complete_CDP_activity_history_unavailable
+    - provider_retention_boundary_unknown
+
+  Architect_historical_limitation_acceptance: approved
 ```
 
-`OPERATIONALLY_OPEN_PENDING_FINAL_DISPOSITION` means current exposure is
-materially contained but the formal closure procedure has not yet completed.
+This outcome closes the active exposure while preserving the historical unknown.
+It must not be represented as proof that no Legacy v1 consumer, verification
+request, or settlement ever existed.
+
+Reopen the incident if a prohibited public surface reappears, a successful
+unexpected settlement is discovered, the deployed source becomes unrecognized,
+credential custody becomes uncertain, or the public authentication boundary
+regresses.
 
 ## Monetization Boundary
 
@@ -467,7 +484,8 @@ institutional_readiness:
 ```
 
 No institutional pilot may be described as ready merely because repository
-tests, a synthetic demonstration, or external route containment passes.
+tests, a synthetic demonstration, external route containment, or incident
+closure passes.
 
 ## GTM and Claim Controls
 
@@ -479,9 +497,12 @@ GTM_claim_controls:
     - current_Render_source_is_Architect_attested_to_corporate_repository
     - current_CDP_Admin_Owner_custody_is_Architect_attested
     - current_CDP_x402_and_settlement_configuration_is_Architect_attested_as_disabled
+    - readiness_gate_baseline_is_closed
+    - production_incident_is_contained_historically_unattested
     - Legacy_v1_is_implemented
     - no_external_Legacy_v1_consumers_were_observed_in_the_reviewed_evidence
     - v2_contract_design_is_approved
+    - Gate_3_design_review_may_begin
 
   must_not_claim_without_further_evidence:
     - full_production_control_plane_is_independently_attested
