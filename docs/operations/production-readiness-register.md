@@ -29,6 +29,7 @@ public_claim_summary:
   target_v2_runtime: not_implemented
   target_v2_production: not_active
   institutional_pilot: not_started
+  production_custody_attestation: not_complete
   system_wide_production_readiness: not_established
 ```
 
