@@ -28,7 +28,7 @@ public_claim_summary:
   target_v2_runtime: not_implemented
   target_v2_production: not_active
   institutional_pilot: not_started
-  production_custody_attestation: incomplete
+  production_custody_attestation: not_complete
   system_wide_production_readiness: not_established
 ```
 
@@ -65,13 +65,12 @@ readiness_states:
 ## Current State
 
 The following state is a point-in-time governance reconciliation, not live
-telemetry. It is supported by the named evidence receipt:
-
-- [Readiness Reconciliation Evidence Receipt — 2026-08-19](readiness-reconciliation-2026-08-19.md)
+telemetry. It is supported by the readiness reconciliation evidence receipt in
+this directory.
 
 ```yaml
 state_snapshot:
-  as_of_date: "2026-08-19"
+  as_of_date: "2026-08-24"
   evidence_scope:
     independently_verified:
       - GitHub_repository_corporate_ownership
@@ -86,8 +85,14 @@ state_snapshot:
       - Legacy_v1_key_inventory
       - Legacy_v1_route_history_review
       - Legacy_v1_consumer_classification
+      - CDP_Admin_Owner_role
+      - CDP_project_settings_management
+      - CDP_API_key_management
+      - one_active_CDP_key_classified_founder_internal
     unresolved:
-      - CDP_authenticated_provider_custody
+      - current_x402_or_facilitator_service_state
+      - current_Nova_CDP_integration_state
+      - current_settlement_configuration
       - CDP_activity_review
       - historical_settlement_activity
       - historical_retention_completeness
@@ -125,9 +130,15 @@ current_state:
     Render_deployed_commit_matches_main: true
     Render_service_health: healthy
     Render_git_credential: founder_linked
-    CDP_control_plane_attested: false
+    CDP_control_plane_attested: Architect_attested_Admin_Owner
+    CDP_project_settings_manageable: true
+    CDP_API_keys_manageable: true
+    CDP_active_API_keys: 1
+    CDP_active_key_owner_classification: founder_internal
+    linked_settlement_destination_present: false
     production_keys_inventoried: Architect_attested
     route_activity_reviewed: Architect_attested
+    settlement_configuration_reviewed: false
     settlement_activity_reviewed: false
 
   Legacy_v1:
@@ -147,8 +158,9 @@ current_state:
 
 Architect-attested provider observations are not independent provider-control
 verification. The Render git credential and GitHub organization remain
-founder-concentrated continuity risks. Absence of current Render CDP credentials
-does not prove absence of historical CDP activity or settlement.
+founder-concentrated continuity risks. A single founder/internal CDP API key and
+absence of a linked settlement destination do not prove that x402/facilitator
+services are disabled or that historical settlement activity is absent.
 
 ## Production Readiness
 
@@ -177,8 +189,13 @@ production_readiness:
     limitation: founder_linked_git_credential_and_no_independent_provider_verification
 
   CDP_custody:
-    status: BLOCKED
-    limitation: authenticated_provider_custody_not_attested
+    status: CONDITIONALLY_READY
+    evidence:
+      - authenticated_Admin_Owner_role_Architect_attested
+      - project_settings_management_available
+      - API_key_management_available
+      - one_active_key_classified_founder_internal
+    limitation: provider_state_not_independently_verified
 
   deployed_commit_attestation:
     status: CONDITIONALLY_READY
@@ -189,19 +206,19 @@ production_readiness:
 
   production_key_inventory:
     status: CONDITIONALLY_READY
-    limitation: Architect_attested_internal_test_classification_not_independently_verified
+    limitation: ownership_classification_Architect_attested
 
   route_activity_inventory:
     status: CONDITIONALLY_READY
-    limitation: Architect_attested_review_window_and_retention_not_independently_verified
+    limitation: reviewed_window_and_retention_are_Architect_attested
 
   settlement_activity_inventory:
     status: BLOCKED
-    limitation: CDP_activity_and_historical_retention_not_reconciled
+    limitation: current_settlement_configuration_and_CDP_activity_history_unresolved
 
   incident_closure:
     status: BLOCKED
-    limitation: current_CDP_ownership_and_settlement_configuration_evidence_required
+    limitation: current_settlement_configuration_and_activity_or_retention_disposition_required
 
   Legacy_v1_dependency:
     status: CONDITIONALLY_READY
@@ -217,7 +234,7 @@ production_readiness:
 
   v2_field_derivation:
     status: BLOCKED
-    limitation: Gate_1_production_custody_incomplete
+    limitation: production_incident_remains_OPERATIONALLY_OPEN
 
   v2_adapter:
     status: NOT_STARTED
@@ -245,15 +262,16 @@ Render credential remain documented continuity limitations.
 product_progression:
   Gate_1:
     name: production_custody
-    status: BLOCKED
+    status: CONDITIONAL_PASS
     satisfied:
       - Render_access_and_service_identity_Architect_attested
       - corporate_repository_source_aligned
       - deployed_commit_Architect_attested_and_matches_main
-    unresolved:
-      - CDP_authenticated_custody
-      - current_settlement_configuration
-      - independent_provider_verification
+      - CDP_Admin_Owner_custody_Architect_attested
+      - CDP_API_key_management_under_Architect_control
+    limitations:
+      - provider_control_planes_not_independently_verified
+      - founder_concentration_remains
     requirement:
       - Render_attested
       - CDP_attested
@@ -278,7 +296,10 @@ product_progression:
   Gate_3:
     name: v2_field_derivation_design
     status: BLOCKED
-    reason: Gate_1_incomplete
+    reason:
+      - production_incident_remains_OPERATIONALLY_OPEN
+      - current_settlement_configuration_unknown
+      - CDP_activity_and_historical_retention_not_reconciled
     requirement:
       - Gate_1_complete
       - Gate_2_complete
@@ -330,9 +351,9 @@ permits public activation by implication.
 ## Incident Posture
 
 The active production/discovery incident cannot yet be classified `CLOSED` or
-`CONTAINED_HISTORICALLY_UNATTESTED` under the
-[Incident Closure Standard](incident-closure-standard.md), because current CDP
-ownership and settlement configuration remain unresolved.
+`CONTAINED_HISTORICALLY_UNATTESTED` under the Incident Closure Standard because
+current settlement configuration and CDP activity/retention evidence remain
+unresolved.
 
 ```yaml
 incident_posture:
@@ -341,8 +362,12 @@ incident_posture:
     Render_source_alignment: contained
     public_documentation_and_discovery: contained_last_attested
     public_x402_and_settlement: disabled_last_attested
+  current_custody:
+    Render: Architect_attested
+    CDP: Architect_attested_Admin_Owner
   unresolved:
-    - CDP_current_ownership
+    - current_x402_or_facilitator_service_state
+    - current_Nova_CDP_integration_state
     - current_settlement_configuration
     - CDP_activity_review
     - historical_retention_completeness
@@ -415,6 +440,7 @@ GTM_claim_controls:
     - repository_governance_controls_exist
     - corporate_repository_ownership_is_verified
     - current_Render_source_is_Architect_attested_to_corporate_repository
+    - current_CDP_Admin_Owner_custody_is_Architect_attested
     - Legacy_v1_is_implemented
     - no_external_Legacy_v1_consumers_were_observed_in_the_reviewed_evidence
     - v2_contract_design_is_approved
@@ -423,7 +449,8 @@ GTM_claim_controls:
     - full_production_control_plane_is_attested
     - Legacy_v1_never_had_external_consumers
     - production_settlement_history_is_clear
-    - CDP_custody_is_attested
+    - x402_or_facilitator_is_disabled
+    - settlement_configuration_is_absent
     - v2_is_implemented_or_available
     - institutional_adoption
     - buyer_validation
