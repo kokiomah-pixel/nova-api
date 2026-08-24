@@ -89,11 +89,13 @@ state_snapshot:
       - CDP_project_settings_management
       - CDP_API_key_management
       - one_active_CDP_key_classified_founder_internal
+      - CDP_x402_or_facilitator_disabled
+      - CDP_current_Nova_integration_absent
+      - CDP_settlement_configuration_absent
+      - CDP_linked_settlement_destination_absent
+      - CDP_visible_payment_or_settlement_summary_zero
     unresolved:
-      - current_x402_or_facilitator_service_state
-      - current_Nova_CDP_integration_state
-      - current_settlement_configuration
-      - CDP_activity_review
+      - CDP_historical_activity_review
       - historical_settlement_activity
       - historical_retention_completeness
 ```
@@ -135,11 +137,20 @@ current_state:
     CDP_API_keys_manageable: true
     CDP_active_API_keys: 1
     CDP_active_key_owner_classification: founder_internal
+    CDP_business_verification_status: pending
+    CDP_x402_or_facilitator_enabled: false
+    CDP_current_Nova_integration_present: false
+    CDP_settlement_configuration_present: false
     linked_settlement_destination_present: false
+    CDP_visible_payment_or_settlement_entries: 0
+    CDP_visible_successful_settlements: 0
+    CDP_visible_failed_settlements: 0
+    CDP_activity_history_visible: false
+    CDP_historical_retention_limit: unknown
     production_keys_inventoried: Architect_attested
     route_activity_reviewed: Architect_attested
-    settlement_configuration_reviewed: false
-    settlement_activity_reviewed: false
+    settlement_configuration_reviewed: Architect_attested
+    settlement_activity_reviewed: current_visible_summary_only
 
   Legacy_v1:
     implemented: true
@@ -158,9 +169,12 @@ current_state:
 
 Architect-attested provider observations are not independent provider-control
 verification. The Render git credential and GitHub organization remain
-founder-concentrated continuity risks. A single founder/internal CDP API key and
-absence of a linked settlement destination do not prove that x402/facilitator
-services are disabled or that historical settlement activity is absent.
+founder-concentrated continuity risks. The current CDP x402/settlement posture
+is attested as disabled, but the portal does not expose sufficient retained
+history or a retention boundary to prove historical settlement inactivity.
+
+Pending Coinbase business verification is a provider-onboarding condition. It
+is not institutional validation of Nova and does not authorize x402 activation.
 
 ## Production Readiness
 
@@ -212,13 +226,27 @@ production_readiness:
     status: CONDITIONALLY_READY
     limitation: reviewed_window_and_retention_are_Architect_attested
 
+  settlement_configuration:
+    status: CONDITIONALLY_READY
+    evidence:
+      - x402_or_facilitator_disabled
+      - current_Nova_integration_absent
+      - settlement_configuration_absent
+      - linked_settlement_destination_absent
+    limitation: Architect_attested_provider_state_not_independently_verified
+
   settlement_activity_inventory:
-    status: BLOCKED
-    limitation: current_settlement_configuration_and_CDP_activity_history_unresolved
+    status: CONDITIONALLY_READY
+    evidence:
+      - current_visible_payment_or_settlement_entries_zero
+      - current_visible_successful_settlements_zero
+      - current_visible_failed_settlements_zero
+    limitation: historical_activity_not_visible_and_retention_boundary_unknown
 
   incident_closure:
     status: BLOCKED
-    limitation: current_settlement_configuration_and_activity_or_retention_disposition_required
+    limitation: final_current_external_boundary_recheck_and_Architect_disposition_required
+    likely_outcome: CONTAINED_HISTORICALLY_UNATTESTED
 
   Legacy_v1_dependency:
     status: CONDITIONALLY_READY
@@ -234,7 +262,7 @@ production_readiness:
 
   v2_field_derivation:
     status: BLOCKED
-    limitation: production_incident_remains_OPERATIONALLY_OPEN
+    limitation: production_incident_not_yet_formally_dispositioned
 
   v2_adapter:
     status: NOT_STARTED
@@ -269,9 +297,11 @@ product_progression:
       - deployed_commit_Architect_attested_and_matches_main
       - CDP_Admin_Owner_custody_Architect_attested
       - CDP_API_key_management_under_Architect_control
+      - current_x402_and_settlement_configuration_reviewed_and_disabled
     limitations:
       - provider_control_planes_not_independently_verified
       - founder_concentration_remains
+      - CDP_business_verification_pending
     requirement:
       - Render_attested
       - CDP_attested
@@ -297,9 +327,8 @@ product_progression:
     name: v2_field_derivation_design
     status: BLOCKED
     reason:
-      - production_incident_remains_OPERATIONALLY_OPEN
-      - current_settlement_configuration_unknown
-      - CDP_activity_and_historical_retention_not_reconciled
+      - production_incident_not_yet_formally_dispositioned
+      - final_current_external_boundary_recheck_required
     requirement:
       - Gate_1_complete
       - Gate_2_complete
@@ -350,31 +379,39 @@ permits public activation by implication.
 
 ## Incident Posture
 
-The active production/discovery incident cannot yet be classified `CLOSED` or
-`CONTAINED_HISTORICALLY_UNATTESTED` under the Incident Closure Standard because
-current settlement configuration and CDP activity/retention evidence remain
-unresolved.
+The active production/discovery incident is no longer blocked by unknown current
+CDP ownership or unknown current settlement configuration. Current custody and
+current x402/settlement configuration are Architect-attested as contained.
+
+The evidence does not support `CLOSED` because historical provider activity and
+retention completeness cannot be reconstructed from the visible CDP portal
+surface. The evidence now supports a likely disposition of
+`CONTAINED_HISTORICALLY_UNATTESTED` once the current external boundary is
+rechecked and the Architect explicitly accepts the documented historical gap.
 
 ```yaml
 incident_posture:
-  current_outcome: OPERATIONALLY_OPEN
+  current_outcome: OPERATIONALLY_OPEN_PENDING_FINAL_DISPOSITION
+  likely_supported_outcome: CONTAINED_HISTORICALLY_UNATTESTED
   current_exposure:
     Render_source_alignment: contained
     public_documentation_and_discovery: contained_last_attested
     public_x402_and_settlement: disabled_last_attested
+    CDP_x402_or_facilitator: disabled_Architect_attested
+    CDP_current_Nova_integration: absent_Architect_attested
+    CDP_settlement_configuration: absent_Architect_attested
+    CDP_linked_settlement_destination: absent_Architect_attested
   current_custody:
     Render: Architect_attested
     CDP: Architect_attested_Admin_Owner
-  unresolved:
-    - current_x402_or_facilitator_service_state
-    - current_Nova_CDP_integration_state
-    - current_settlement_configuration
-    - CDP_activity_review
-    - historical_retention_completeness
+  remaining:
+    - current_external_boundary_recheck
+    - historical_retention_gap_documented_as_unattested
+    - Architect_final_incident_disposition
 ```
 
-`OPERATIONALLY_OPEN` here means required closure evidence is incomplete. It does
-not mean an active public exposure has been observed.
+`OPERATIONALLY_OPEN_PENDING_FINAL_DISPOSITION` means current exposure is
+materially contained but the formal closure procedure has not yet completed.
 
 ## Monetization Boundary
 
@@ -441,16 +478,17 @@ GTM_claim_controls:
     - corporate_repository_ownership_is_verified
     - current_Render_source_is_Architect_attested_to_corporate_repository
     - current_CDP_Admin_Owner_custody_is_Architect_attested
+    - current_CDP_x402_and_settlement_configuration_is_Architect_attested_as_disabled
     - Legacy_v1_is_implemented
     - no_external_Legacy_v1_consumers_were_observed_in_the_reviewed_evidence
     - v2_contract_design_is_approved
 
   must_not_claim_without_further_evidence:
-    - full_production_control_plane_is_attested
+    - full_production_control_plane_is_independently_attested
     - Legacy_v1_never_had_external_consumers
     - production_settlement_history_is_clear
-    - x402_or_facilitator_is_disabled
-    - settlement_configuration_is_absent
+    - no_historical_CDP_activity_ever_occurred
+    - Coinbase_business_verification_implies_Nova_institutional_validation
     - v2_is_implemented_or_available
     - institutional_adoption
     - buyer_validation
