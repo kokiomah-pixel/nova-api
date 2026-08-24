@@ -30,9 +30,9 @@ from scripts.gate3_reference_semantics import (
 )
 from scripts.validate_gate3_field_derivation import (
     APPROVED_AUTHORITY_HASHES,
+    EXPECTED_APPROVED_FOR_INCORPORATION,
     EXPECTED_GAPS,
     EXPECTED_FIXTURES,
-    EXPECTED_SEMANTIC_COMPLETION_BLOCKERS,
     _required_response_leaf_paths,
     validate_repository,
 )
@@ -95,23 +95,50 @@ def test_approved_contract_authorities_are_unchanged() -> None:
         assert hashlib.sha256((REPO_ROOT / relative).read_bytes()).hexdigest() == expected
 
 
-def test_all_refinements_are_review_gated_and_noncanonical() -> None:
+def test_reviewed_refinements_are_approved_pending_contract_revision_without_authority() -> None:
     register = _load(GAPS_PATH)
     records = register["contract_refinements"]
 
     assert {record["id"] for record in records} == EXPECTED_GAPS
-    assert all(record["requires_CCO_review"] is True for record in records)
-    assert all(record["requires_Architect_review"] is True for record in records)
     assert all(record["silently_canonical"] is False for record in records)
     assert all(record["authority_effect"] == "none" for record in records)
     assert all(record["execution_effect"] == "none" for record in records)
-    assert set(register["semantic_completion_blockers"]) == EXPECTED_SEMANTIC_COMPLETION_BLOCKERS
-    blocker_records = {record["id"] for record in records if record.get("semantic_completion_blocker") is True}
-    assert blocker_records == EXPECTED_SEMANTIC_COMPLETION_BLOCKERS
+    assert register["status"] == "approved_for_incorporation_not_yet_canonical"
+    assert register["design_review_status"] == "design_review_complete_pending_contract_revision"
+    assert register["active_semantic_completion_blockers"] == []
+    assert set(register["historical_semantic_completion_blockers"]) == EXPECTED_APPROVED_FOR_INCORPORATION
+    assert set(register["approved_for_incorporation"]) == EXPECTED_APPROVED_FOR_INCORPORATION
+    assert register["canonical_contract_revision"] == {"status": "not_started"}
+    assert register["implementation_authority"] is False
     assert set(register["additional_gaps_discovered"]) == {"G3-R11", "G3-Q15"}
     by_id = {record["id"]: record for record in records}
+    for gap_id in EXPECTED_APPROVED_FOR_INCORPORATION:
+        record = by_id[gap_id]
+        assert record["semantic_completion_blocker"] is False
+        assert record["historical_semantic_completion_blocker"] is True
+        assert record["CCO_review"] == "approved"
+        assert record["Architect_review"] == "approved"
+        assert record["design_disposition"] == "approved_for_incorporation"
+        assert record["canonical_contract_status"] == "pending_contract_revision"
+        assert record["implementation_authority"] is False
+        assert record["requires_CCO_review"] is False
+        assert record["requires_Architect_review"] is False
+    for record in records:
+        if record["id"] not in EXPECTED_APPROVED_FOR_INCORPORATION:
+            assert record["requires_CCO_review"] is True
+            assert record["requires_Architect_review"] is True
     assert by_id["G3-R11"]["name"] == "canonical_numeric_and_interoperability_profile"
     assert by_id["G3-Q15"]["name"] == "semantic_identity_continuity_across_digest_migration"
+
+    spec = _load(SPEC_PATH)
+    assert spec["status"] == "approved_for_incorporation_not_yet_canonical"
+    assert spec["semantic_completion"]["status"] == "design_review_complete_pending_contract_revision"
+    assert spec["semantic_completion"]["active_review_blockers"] == []
+    assert set(spec["semantic_completion"]["historical_review_blockers"]) == EXPECTED_APPROVED_FOR_INCORPORATION
+    assert spec["design_review"]["canonical_contract_revision"] == {"status": "not_started"}
+    assert spec["design_review"]["merge_authority"] is False
+    assert spec["design_review"]["deployment_authority"] is False
+    assert spec["design_review"]["implementation_authority"] is False
 
 
 def test_jcs_key_order_is_invariant_and_unicode_is_preserved_as_is() -> None:

@@ -1,11 +1,21 @@
 {
   "name": "review_context_field_derivation",
   "version": "design-v0.1",
-  "status": "proposed_not_canonical",
+  "status": "approved_for_incorporation_not_yet_canonical",
   "design_only": true,
   "runtime_implementation_authority": false,
   "authority_effect": "none",
   "execution_effect": "none",
+  "design_review": {
+    "status": "design_review_complete_pending_contract_revision",
+    "CCO": "complete",
+    "Architect": "complete",
+    "approved_for_incorporation": ["G3-R01", "G3-R03", "G3-R08", "G3-R11", "G3-Q15"],
+    "canonical_contract_revision": {"status": "not_started"},
+    "merge_authority": false,
+    "deployment_authority": false,
+    "implementation_authority": false
+  },
   "approved_contract": {
     "path": "specs/review_context_contract_v2.json",
     "version": "design-v2",
@@ -27,6 +37,7 @@
     "Nova does not execute."
   ],
   "identity_model": {
+    "status": "approved_for_incorporation_not_yet_canonical",
     "scope": ["review_context_request", "review_context_response.prepared_action_reference"],
     "action_id": {
       "meaning": "stable_identity_across_revisions",
@@ -62,7 +73,7 @@
     "contract_gap_reference": "G3-R02"
   },
   "record_source_type_proposal": {
-    "status": "proposed_not_canonical",
+    "status": "approved_for_incorporation_not_yet_canonical",
     "contract_gap_reference": "G3-R03",
     "permitted_values": ["synthetic", "production_like", "live", "mixed"],
     "mixed_meaning": "more_than_one_evidence_environment_class_is_represented",
@@ -72,7 +83,7 @@
     "mixed_reduction_to_strongest_or_weakest": false
   },
   "review_completeness_proposal": {
-    "status": "proposed_not_canonical",
+    "status": "approved_for_incorporation_not_yet_canonical",
     "contract_gap_reference": "G3-R08",
     "semantic_owner_after_contract_adoption": "target_v2_contract",
     "precedence": ["unavailable", "conflicted", "partial", "complete"],
@@ -97,13 +108,15 @@
     "proof_state_changes_other_dimensions_automatically": false
   },
   "semantic_completion": {
-    "status": "blocked_pending_refinement_review",
-    "blockers": ["G3-R01", "G3-R03", "G3-R08", "G3-R11", "G3-Q15"],
-    "blocker_meaning": "Gate_3_semantic_completion_cannot_be_declared_until_CCO_and_Architect_review",
+    "status": "design_review_complete_pending_contract_revision",
+    "active_review_blockers": [],
+    "historical_review_blockers": ["G3-R01", "G3-R03", "G3-R08", "G3-R11", "G3-Q15"],
+    "approved_for_incorporation": ["G3-R01", "G3-R03", "G3-R08", "G3-R11", "G3-Q15"],
+    "canonical_contract_status": "pending_contract_revision",
     "implementation_authority_created": false
   },
   "canonical_numeric_and_interoperability_profile": {
-    "status": "proposed_not_canonical",
+    "status": "approved_for_incorporation_not_yet_canonical",
     "contract_gap_reference": "G3-R11",
     "profile_id": "nova-jcs-exact-financial-json",
     "profile_version": "design-v0.1",
@@ -250,7 +263,7 @@
     "continuity_contract_gap_reference": "G3-Q15"
   },
   "semantic_identity_continuity_proposal": {
-    "status": "proposed_not_canonical",
+    "status": "approved_for_incorporation_not_yet_canonical",
     "contract_gap_reference": "G3-Q15",
     "semantic_identity_basis": "identical_canonical_semantic_byte_sequence_under_the_same_canonicalization_derivation_and_profile_identity",
     "individual_algorithm_qualified_digest_is_semantic_identity": false,

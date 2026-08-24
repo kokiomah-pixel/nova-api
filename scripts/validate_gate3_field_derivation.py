@@ -32,7 +32,7 @@ REQUIRED_DOCS = {
         "Every required field",
         "action_id != proposal_version_id",
         "proof_verification_state",
-        "READY_FOR_DESIGN_REVIEW",
+        "design_review_complete_pending_contract_revision",
     ),
     "docs/target-v2/gate-3-contract-gap-report-v0.1.md": (
         "G3-R01",
@@ -41,7 +41,7 @@ REQUIRED_DOCS = {
         "G3-Q01",
         "G3-Q14",
         "G3-Q15",
-        "proposed_not_canonical",
+        "approved_for_incorporation_not_yet_canonical",
     ),
     "docs/target-v2/context-proof-canonicalization-v0.1.md": (
         "semantic_context_material",
@@ -80,7 +80,7 @@ EXPECTED_GAPS = {
     *(f"G3-Q{index:02d}" for index in range(1, 16)),
 }
 
-EXPECTED_SEMANTIC_COMPLETION_BLOCKERS = {
+EXPECTED_APPROVED_FOR_INCORPORATION = {
     "G3-R01",
     "G3-R03",
     "G3-R08",
@@ -222,6 +222,8 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
 
         if spec.get("design_only") is not True:
             errors.append(ValidationError("spec.design_only", "must be true"))
+        if spec.get("status") != "approved_for_incorporation_not_yet_canonical":
+            errors.append(ValidationError("spec.status", "must be approved_for_incorporation_not_yet_canonical"))
         for key in ("runtime_implementation_authority", "authority_effect", "execution_effect"):
             expected: Any = False if key == "runtime_implementation_authority" else "none"
             if spec.get(key) != expected:
@@ -256,21 +258,83 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
 
         if gap_ids != EXPECTED_GAPS:
             errors.append(ValidationError("contract_gaps.ids", f"expected {sorted(EXPECTED_GAPS)}, got {sorted(gap_ids)}"))
-        blockers = set(gaps.get("semantic_completion_blockers", []))
-        if blockers != EXPECTED_SEMANTIC_COMPLETION_BLOCKERS:
-            errors.append(ValidationError("contract_gaps.semantic_completion_blockers", f"expected {sorted(EXPECTED_SEMANTIC_COMPLETION_BLOCKERS)}, got {sorted(blockers)}"))
-        spec_blockers = set(spec.get("semantic_completion", {}).get("blockers", []))
-        if spec_blockers != EXPECTED_SEMANTIC_COMPLETION_BLOCKERS:
-            errors.append(ValidationError("spec.semantic_completion.blockers", f"expected {sorted(EXPECTED_SEMANTIC_COMPLETION_BLOCKERS)}, got {sorted(spec_blockers)}"))
+        if gaps.get("status") != "approved_for_incorporation_not_yet_canonical":
+            errors.append(ValidationError("contract_gaps.status", "must be approved_for_incorporation_not_yet_canonical"))
+        if gaps.get("design_review_status") != "design_review_complete_pending_contract_revision":
+            errors.append(ValidationError("contract_gaps.design_review_status", "must record completed design review pending contract revision"))
+        if set(gaps.get("active_semantic_completion_blockers", [])):
+            errors.append(ValidationError("contract_gaps.active_semantic_completion_blockers", "must be empty after completed design review"))
+        if set(gaps.get("historical_semantic_completion_blockers", [])) != EXPECTED_APPROVED_FOR_INCORPORATION:
+            errors.append(ValidationError("contract_gaps.historical_semantic_completion_blockers", "must preserve the five historical blockers"))
+        if set(gaps.get("approved_for_incorporation", [])) != EXPECTED_APPROVED_FOR_INCORPORATION:
+            errors.append(ValidationError("contract_gaps.approved_for_incorporation", "must contain the five reviewed refinements"))
+        if gaps.get("canonical_contract_revision", {}).get("status") != "not_started":
+            errors.append(ValidationError("contract_gaps.canonical_contract_revision", "must remain not_started"))
+        if gaps.get("implementation_authority") is not False:
+            errors.append(ValidationError("contract_gaps.implementation_authority", "must remain false"))
+
+        semantic_completion = spec.get("semantic_completion", {})
+        if semantic_completion.get("status") != "design_review_complete_pending_contract_revision":
+            errors.append(ValidationError("spec.semantic_completion.status", "must record completed design review pending contract revision"))
+        if set(semantic_completion.get("active_review_blockers", [])):
+            errors.append(ValidationError("spec.semantic_completion.active_review_blockers", "must be empty"))
+        if set(semantic_completion.get("historical_review_blockers", [])) != EXPECTED_APPROVED_FOR_INCORPORATION:
+            errors.append(ValidationError("spec.semantic_completion.historical_review_blockers", "must preserve the five historical blockers"))
+        if set(semantic_completion.get("approved_for_incorporation", [])) != EXPECTED_APPROVED_FOR_INCORPORATION:
+            errors.append(ValidationError("spec.semantic_completion.approved_for_incorporation", "must contain the five reviewed refinements"))
         for gap in gaps.get("contract_refinements", []):
             if not isinstance(gap, dict):
                 errors.append(ValidationError("contract_gaps.record", "must be an object"))
                 continue
-            for key, expected in (("authority_effect", "none"), ("execution_effect", "none"), ("requires_CCO_review", True), ("requires_Architect_review", True), ("silently_canonical", False)):
+            for key, expected in (("authority_effect", "none"), ("execution_effect", "none"), ("silently_canonical", False)):
                 if gap.get(key) != expected:
                     errors.append(ValidationError(f"contract_gaps.{gap.get('id')}.{key}", f"must be {expected!r}"))
-            if gap.get("id") in EXPECTED_SEMANTIC_COMPLETION_BLOCKERS and gap.get("semantic_completion_blocker") is not True:
-                errors.append(ValidationError(f"contract_gaps.{gap.get('id')}.semantic_completion_blocker", "must be true"))
+            if gap.get("id") in EXPECTED_APPROVED_FOR_INCORPORATION:
+                approved_expectations = {
+                    "semantic_completion_blocker": False,
+                    "historical_semantic_completion_blocker": True,
+                    "CCO_review": "approved",
+                    "Architect_review": "approved",
+                    "design_disposition": "approved_for_incorporation",
+                    "canonical_contract_status": "pending_contract_revision",
+                    "implementation_authority": False,
+                    "requires_CCO_review": False,
+                    "requires_Architect_review": False,
+                }
+                for key, expected in approved_expectations.items():
+                    if gap.get(key) != expected:
+                        errors.append(ValidationError(f"contract_gaps.{gap.get('id')}.{key}", f"must be {expected!r}"))
+            else:
+                for key in ("requires_CCO_review", "requires_Architect_review"):
+                    if gap.get(key) is not True:
+                        errors.append(ValidationError(f"contract_gaps.{gap.get('id')}.{key}", "existing lifecycle must remain review-required"))
+
+        design_review = spec.get("design_review", {})
+        expected_design_review = {
+            "status": "design_review_complete_pending_contract_revision",
+            "CCO": "complete",
+            "Architect": "complete",
+            "merge_authority": False,
+            "deployment_authority": False,
+            "implementation_authority": False,
+        }
+        for key, expected in expected_design_review.items():
+            if design_review.get(key) != expected:
+                errors.append(ValidationError(f"spec.design_review.{key}", f"must be {expected!r}"))
+        if set(design_review.get("approved_for_incorporation", [])) != EXPECTED_APPROVED_FOR_INCORPORATION:
+            errors.append(ValidationError("spec.design_review.approved_for_incorporation", "must contain the five reviewed refinements"))
+        if design_review.get("canonical_contract_revision", {}).get("status") != "not_started":
+            errors.append(ValidationError("spec.design_review.canonical_contract_revision", "must remain not_started"))
+        reviewed_spec_sections = {
+            "G3-R01": spec.get("identity_model", {}),
+            "G3-R03": spec.get("record_source_type_proposal", {}),
+            "G3-R08": spec.get("review_completeness_proposal", {}),
+            "G3-R11": spec.get("canonical_numeric_and_interoperability_profile", {}),
+            "G3-Q15": spec.get("semantic_identity_continuity_proposal", {}),
+        }
+        for gap_id, section in reviewed_spec_sections.items():
+            if section.get("status") != "approved_for_incorporation_not_yet_canonical":
+                errors.append(ValidationError(f"spec.{gap_id}.status", "must be approved_for_incorporation_not_yet_canonical"))
 
         if set(gaps.get("additional_gaps_discovered", [])) != {"G3-R11", "G3-Q15"}:
             errors.append(ValidationError("contract_gaps.additional_gaps_discovered", "must identify G3-R11 and G3-Q15"))
@@ -413,7 +477,8 @@ def main() -> int:
     print(f"  contract_gaps_recorded: {len(gaps['contract_refinements'])}")
     print(f"  synthetic_fixture_cases: {len(fixtures['cases'])}")
     print("  executable_reference_semantics: passed")
-    print("  semantic_completion: blocked_pending_refinement_review")
+    print("  semantic_completion: design_review_complete_pending_contract_revision")
+    print("  canonical_contract_revision: not_started")
     print("  runtime_implementation_authority: false")
     return 0
 

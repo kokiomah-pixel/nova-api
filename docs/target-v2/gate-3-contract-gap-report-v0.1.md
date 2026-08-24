@@ -3,12 +3,16 @@
 ## Status
 
 ```yaml
-artifact_status: proposed_not_canonical
+artifact_status: approved_for_incorporation_not_yet_canonical
 approved_target_v2_contract_modified: false
 authority_effect: none
 execution_effect: none
-requires_CCO_review: true
-requires_Architect_review: true
+CCO_review: approved
+Architect_review: approved
+design_review_status: design_review_complete_pending_contract_revision
+canonical_contract_revision: not_started
+merge_authority: false
+deployment_authority: false
 implementation_authority: false
 ```
 
@@ -65,10 +69,10 @@ newly_discovered:
   - G3-Q15 semantic_identity_continuity_across_digest_migration
 ```
 
-`G3-R11` completes the design-level numeric and collection model but remains
-non-canonical until review. `G3-Q15` is unchanged: CCO accepts its semantic
-direction, while its continuity structure still remains a proposal pending the
-required complete review and contract-revision process.
+`G3-R11` completes the design-level numeric and collection model. `G3-Q15`
+preserves semantic identity across digest migration. CCO and Architect design
+review is complete for both; they are approved for incorporation but remain
+non-canonical pending a contract revision.
 
 ## CCO remediation decisions within the existing gap family
 
@@ -91,36 +95,49 @@ required complete review and contract-revision process.
   and gives every semantic array an executable `ordered_sequence`, `set`, or
   `multiset` declaration.
 
-## Gate 3 semantic-completion blockers
+## Gate 3 design-review disposition
 
 ```yaml
 semantic_completion:
-  status: blocked_pending_refinement_review
-  blockers:
+  status: design_review_complete_pending_contract_revision
+  active_review_blockers: []
+  historical_review_blockers:
     - G3-R01
     - G3-R03
     - G3-R08
     - G3-R11
     - G3-Q15
+  approved_for_incorporation:
+    - G3-R01
+    - G3-R03
+    - G3-R08
+    - G3-R11
+    - G3-Q15
+  canonical_contract_revision: not_started
 ```
 
-Gate 3 design review may continue, but semantic completion cannot be declared
-until CCO and Architect review resolves these five gaps. No blocker creates
-runtime or implementation authority.
+The five records remain in the historical contract-gap inventory with their
+prior blocker provenance. Their active review-blocker status is cleared because
+CCO and Architect approved their design disposition. Approval does not make
+them canonical and creates no runtime or implementation authority.
 
 ## Review and adoption rule
 
-Every record above has:
+The five approved records have:
 
 ```yaml
+CCO_review: approved
+Architect_review: approved
+design_disposition: approved_for_incorporation
+canonical_contract_status: pending_contract_revision
 authority_effect: none
 execution_effect: none
-requires_CCO_review: true
-requires_Architect_review: true
 silently_canonical: false
+implementation_authority: false
 ```
 
-Adoption requires an explicit contract revision after both reviews. Until then,
-the existing approved contract wins. No runtime, endpoint, private adapter,
-cryptographic implementation, chronology entry, Reflex Memory entry, or
-production configuration follows from this report.
+Canonical adoption requires an explicit contract revision, whose status is
+`not_started`. Until then, the existing approved contract wins. No merge,
+deployment, runtime, endpoint, private adapter, cryptographic implementation,
+chronology entry, Reflex Memory entry, or production configuration follows from
+this report. Other gap records retain their existing lifecycle metadata.

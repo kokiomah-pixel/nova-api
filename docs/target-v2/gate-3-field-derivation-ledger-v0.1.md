@@ -4,14 +4,20 @@
 
 ```yaml
 gate: Gate_3_v2_field_derivation_design
-status: READY_FOR_DESIGN_REVIEW
-artifact_status: proposed_not_canonical
-semantic_completion: blocked_pending_refinement_review
+status: design_review_complete_pending_contract_revision
+artifact_status: approved_for_incorporation_not_yet_canonical
+CCO_review: approved
+Architect_review: approved
+approved_for_incorporation: [G3-R01, G3-R03, G3-R08, G3-R11, G3-Q15]
+canonical_contract_revision: not_started
 design_only: true
 target_v2_runtime_implemented: false
 private_adapter_implemented: false
 production_activation_authority: false
 cryptographic_implementation_authority: false
+merge_authority: false
+deployment_authority: false
+implementation_authority: false
 authority_effect: none
 execution_effect: none
 ```
@@ -270,15 +276,18 @@ status.
 
 ## Contract and implementation boundary
 
-All G3-R01–G3-R11 and G3-Q01–G3-Q15 refinements are
-`proposed_not_canonical`. They require CCO and Architect review. The approved
-contract files are unchanged. This ledger creates no runtime, adapter, endpoint,
-production-crypto, chronology, Reflex Memory, settlement, or capital-movement
-authority.
+CCO and Architect design review is complete for `G3-R01`, `G3-R03`, `G3-R08`,
+`G3-R11`, and `G3-Q15`. Their disposition is
+`approved_for_incorporation_not_yet_canonical`; each remains
+`pending_contract_revision`. They remain in the historical contract-gap
+inventory with their prior blocker provenance, but they are no longer active
+design-review blockers. Other inventory records retain their existing lifecycle
+state.
 
-Gate 3 semantic completion remains blocked until `G3-R01`, `G3-R03`, `G3-R08`,
-`G3-R11`, and `G3-Q15` are reviewed. This blocker classification does not block
-design review and does not create implementation authority.
+The canonical contract revision has not started, and the approved contract files
+are unchanged. Design approval creates no implementation, merge, deployment,
+runtime, adapter, endpoint, production-crypto, chronology, Reflex Memory,
+settlement, or capital-movement authority.
 
 This design does not establish that any system is quantum safe, quantum proof,
 post-quantum secure, or future proof. Such a claim would require exact

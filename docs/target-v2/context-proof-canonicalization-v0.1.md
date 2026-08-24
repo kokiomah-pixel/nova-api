@@ -3,11 +3,15 @@
 ## Status and boundary
 
 ```yaml
-status: proposed_not_canonical
+status: approved_for_incorporation_not_yet_canonical
 design_only: true
 canonicalization_design_defined: true
-semantic_completion: blocked_pending_refinement_review
-semantic_completion_blockers: [G3-R01, G3-R03, G3-R08, G3-R11, G3-Q15]
+semantic_completion: design_review_complete_pending_contract_revision
+active_review_blockers: []
+historical_review_blockers: [G3-R01, G3-R03, G3-R08, G3-R11, G3-Q15]
+CCO_review: approved
+Architect_review: approved
+canonical_contract_revision: not_started
 canonicalization_version: nova-jcs-exact-financial-json-design-v0.1
 derivation_version: gate3-field-derivation-v0.1
 production_algorithm_selected: false
@@ -100,11 +104,16 @@ resulting document remains valid JCS/I-JSON.
 ```yaml
 G3-R11:
   name: canonical_numeric_and_interoperability_profile
-  status: proposed_not_canonical
+  status: approved_for_incorporation_not_yet_canonical
+  CCO_review: approved
+  Architect_review: approved
+  design_disposition: approved_for_incorporation
+  canonical_contract_status: pending_contract_revision
+  silently_canonical: false
+  implementation_authority: false
   base_standard: RFC_8785_JCS
   JCS_deviation: false
   application_profile: nova-jcs-exact-financial-json-design-v0.1
-  semantic_completion_blocker_until_reviewed: true
 ```
 
 ## Canonical JSON and interoperability rules
@@ -193,9 +202,9 @@ Whole seconds are padded with `.000000`; shorter fractions are right-padded.
 Sub-microsecond input is rejected rather than rounded. RFC 3339 `-00:00` denotes
 an unknown local offset and is rejected by this proposed profile; it is never
 silently normalized to UTC `Z`. Leap-second or invalid calendar input fails.
-This fixed precision is part of the proposed G3-R11 profile and remains a
-semantic-completion blocker until reviewed. Normalization does not turn a Nova
-clock value into independently trusted time.
+This fixed precision is part of the reviewed G3-R11 design, approved for
+incorporation but not canonical until contract revision. Normalization does not
+turn a Nova clock value into independently trusted time.
 
 ## Array ordering and duplicate references
 
@@ -268,12 +277,17 @@ referenced verifiably, continuity is `unresolved`.
 
 ```yaml
 G3-Q15:
-  status: proposed_not_canonical
+  status: approved_for_incorporation_not_yet_canonical
+  CCO_review: approved
+  Architect_review: approved
+  design_disposition: approved_for_incorporation
+  canonical_contract_status: pending_contract_revision
+  silently_canonical: false
+  implementation_authority: false
   semantic_identity_is_individual_digest: false
   historical_digest_evidence_preserved: true
   successor_digest_replaces_history: false
   same_hash_value_claim: prohibited
-  semantic_completion_blocker_until_reviewed: true
 ```
 
 This design names no production algorithm, parameter set, provider, or library.
