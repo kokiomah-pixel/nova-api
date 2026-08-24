@@ -1,0 +1,292 @@
+#!/usr/bin/env python3
+"""Validate Gate 3 design artifacts without invoking target-v2 runtime behavior."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+DERIVATION_SPEC = REPO_ROOT / "specs/review_context_field_derivation_v0_1.json"
+GAP_REGISTER = REPO_ROOT / "specs/review_context_contract_gaps_v0_1.json"
+CONTRACT = REPO_ROOT / "specs/review_context_contract_v2.json"
+FIXTURES = REPO_ROOT / "fixtures/target-v2/gate3/design_cases.json"
+
+APPROVED_AUTHORITY_HASHES = {
+    "docs/architecture/external-review-context-contract-v2.md": "745067e1806e278ce2bd2a485bac266f18958043743fb573321a4c892fee9def",
+    "specs/review_context_contract_v2.json": "873c4183a43930b858e2d53f6499421ed87e79e96944ab4c2c3d2a9fc1dd847e",
+}
+
+REQUIRED_DOCS = {
+    "docs/target-v2/gate-3-field-derivation-ledger-v0.1.md": (
+        "Every required field",
+        "action_id != proposal_version_id",
+        "proof_verification_state",
+        "READY_FOR_DESIGN_REVIEW",
+    ),
+    "docs/target-v2/gate-3-contract-gap-report-v0.1.md": (
+        "G3-R01",
+        "G3-R10",
+        "G3-Q01",
+        "G3-Q14",
+        "proposed_not_canonical",
+    ),
+    "docs/target-v2/context-proof-canonicalization-v0.1.md": (
+        "semantic_context_material",
+        "proof_record_envelope",
+        "null",
+        "Unicode",
+        "reconstruction_unavailable",
+    ),
+}
+
+REQUIRED_RULE_KEYS = {
+    "derivation_class",
+    "source_authority_scope",
+    "derivation_rule",
+    "rule_version",
+    "required_inputs",
+    "missing_input_behavior",
+    "unavailable_input_behavior",
+    "conflict_behavior",
+    "temporal_behavior",
+    "record_source_segmentation",
+    "sensitivity_class",
+    "semantic_hash_inclusion",
+    "proof_envelope_inclusion",
+    "proof_disclosure",
+    "cryptographic_profile_dependency",
+    "reconstruction_requirement",
+    "contract_gap_references",
+}
+
+EXPECTED_GAPS = {
+    *(f"G3-R{index:02d}" for index in range(1, 11)),
+    *(f"G3-Q{index:02d}" for index in range(1, 15)),
+}
+
+EXPECTED_FIXTURES = {
+    "complete_source_coverage",
+    "partial_source_coverage",
+    "required_source_unavailable",
+    "unresolved_conflicting_sources",
+    "missing_timestamps",
+    "stale_under_profile_threshold",
+    "profile_version_change",
+    "proposal_revision",
+    "mixed_synthetic_production_like",
+    "mixed_production_like_live",
+    "chronology_unknown_applicability",
+    "model_claim_provenance_no_authority",
+    "legacy_outcome_changes_only",
+    "same_context_different_signing_key",
+    "same_context_different_signature_suite",
+    "later_proof_renewal",
+    "algorithm_deprecation",
+    "unknown_signature_algorithm",
+    "cryptographic_profile_downgrade",
+    "parallel_classical_pqc_attestations",
+    "parallel_digest_migration",
+    "missing_trusted_time_evidence",
+    "invalid_proof_signature",
+    "reconstruction_material_unavailable",
+    "missing_external_identifier_salt",
+}
+
+
+@dataclass(frozen=True)
+class ValidationError:
+    field: str
+    message: str
+
+    def format(self) -> str:
+        return f"{self.field}: {self.message}"
+
+
+def _load_json(path: Path, errors: list[ValidationError]) -> dict[str, Any]:
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        errors.append(ValidationError(str(path.relative_to(REPO_ROOT)), str(exc)))
+        return {}
+    if not isinstance(value, dict):
+        errors.append(ValidationError(str(path.relative_to(REPO_ROOT)), "root must be an object"))
+        return {}
+    return value
+
+
+def _required_response_leaf_paths(contract: dict[str, Any]) -> set[str]:
+    response = contract.get("response_model", {})
+    paths: set[str] = set()
+    for field in response.get("required_fields", []):
+        definition = response.get(field)
+        nested: list[str] = []
+        if isinstance(definition, dict):
+            if isinstance(definition.get("required_fields"), list):
+                nested = definition["required_fields"]
+            elif field in {"authority_handoff", "boundary"}:
+                nested = list(definition)
+        if nested:
+            paths.update(f"review_context_response.{field}.{child}" for child in nested)
+        else:
+            paths.add(f"review_context_response.{field}")
+    return paths
+
+
+def _resolved_rule(spec: dict[str, Any], path: str) -> dict[str, Any]:
+    rule = spec.get("field_rules", {}).get(path, {})
+    template = spec.get("rule_templates", {}).get(rule.get("template"), {})
+    return {**template, **rule}
+
+
+def _validate_authorities(errors: list[ValidationError]) -> None:
+    for relative, expected_hash in APPROVED_AUTHORITY_HASHES.items():
+        path = REPO_ROOT / relative
+        try:
+            actual = hashlib.sha256(path.read_bytes()).hexdigest()
+        except OSError as exc:
+            errors.append(ValidationError(f"approved_authority.{relative}", str(exc)))
+            continue
+        if actual != expected_hash:
+            errors.append(ValidationError(f"approved_authority.{relative}", "approved contract authority was modified"))
+
+
+def _validate_docs(errors: list[ValidationError]) -> None:
+    for relative, markers in REQUIRED_DOCS.items():
+        path = REPO_ROOT / relative
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeError) as exc:
+            errors.append(ValidationError(f"documents.{relative}", str(exc)))
+            continue
+        for marker in markers:
+            if marker not in text:
+                errors.append(ValidationError(f"documents.{relative}", f"missing marker: {marker}"))
+
+
+def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
+    """Return deterministic design-coherence errors for the repository at *root*."""
+
+    global REPO_ROOT, DERIVATION_SPEC, GAP_REGISTER, CONTRACT, FIXTURES
+    original_root = REPO_ROOT
+    if root.resolve() != REPO_ROOT.resolve():
+        REPO_ROOT = root.resolve()
+        DERIVATION_SPEC = REPO_ROOT / "specs/review_context_field_derivation_v0_1.json"
+        GAP_REGISTER = REPO_ROOT / "specs/review_context_contract_gaps_v0_1.json"
+        CONTRACT = REPO_ROOT / "specs/review_context_contract_v2.json"
+        FIXTURES = REPO_ROOT / "fixtures/target-v2/gate3/design_cases.json"
+
+    errors: list[ValidationError] = []
+    try:
+        contract = _load_json(CONTRACT, errors)
+        spec = _load_json(DERIVATION_SPEC, errors)
+        gaps = _load_json(GAP_REGISTER, errors)
+        fixtures = _load_json(FIXTURES, errors)
+
+        _validate_authorities(errors)
+        _validate_docs(errors)
+
+        if spec.get("design_only") is not True:
+            errors.append(ValidationError("spec.design_only", "must be true"))
+        for key in ("runtime_implementation_authority", "authority_effect", "execution_effect"):
+            expected: Any = False if key == "runtime_implementation_authority" else "none"
+            if spec.get(key) != expected:
+                errors.append(ValidationError(f"spec.{key}", f"must be {expected!r}"))
+
+        required_paths = _required_response_leaf_paths(contract)
+        field_rules = spec.get("field_rules", {})
+        present_paths = set(field_rules) if isinstance(field_rules, dict) else set()
+        for path in sorted(required_paths - present_paths):
+            errors.append(ValidationError(f"field_rules.{path}", "missing derivation rule"))
+        for path in sorted(present_paths - required_paths):
+            errors.append(ValidationError(f"field_rules.{path}", "not a required approved-contract field"))
+
+        gap_ids = {item.get("id") for item in gaps.get("contract_refinements", []) if isinstance(item, dict)}
+        prohibited = set(spec.get("prohibited_dependencies", []))
+        for path in sorted(required_paths & present_paths):
+            resolved = _resolved_rule(spec, path)
+            missing_keys = REQUIRED_RULE_KEYS - set(resolved)
+            if missing_keys:
+                errors.append(ValidationError(f"field_rules.{path}", f"missing metadata: {sorted(missing_keys)}"))
+            if not resolved.get("rule_version"):
+                errors.append(ValidationError(f"field_rules.{path}.rule_version", "must be non-empty"))
+            dependencies = set(resolved.get("dependencies", [])) | set(resolved.get("required_inputs", []))
+            bad_dependencies = dependencies & prohibited
+            if bad_dependencies:
+                errors.append(ValidationError(f"field_rules.{path}.dependencies", f"prohibited: {sorted(bad_dependencies)}"))
+            unknown_gaps = set(resolved.get("contract_gap_references", [])) - gap_ids
+            if unknown_gaps:
+                errors.append(ValidationError(f"field_rules.{path}.contract_gap_references", f"unknown: {sorted(unknown_gaps)}"))
+            if resolved.get("sensitivity_class", "").startswith("sensitive") and resolved.get("proof_disclosure") in {"public", "raw"}:
+                errors.append(ValidationError(f"field_rules.{path}.proof_disclosure", "sensitive material cannot be raw-public"))
+
+        if gap_ids != EXPECTED_GAPS:
+            errors.append(ValidationError("contract_gaps.ids", f"expected {sorted(EXPECTED_GAPS)}, got {sorted(gap_ids)}"))
+        for gap in gaps.get("contract_refinements", []):
+            if not isinstance(gap, dict):
+                errors.append(ValidationError("contract_gaps.record", "must be an object"))
+                continue
+            for key, expected in (("authority_effect", "none"), ("execution_effect", "none"), ("requires_CCO_review", True), ("requires_Architect_review", True), ("silently_canonical", False)):
+                if gap.get(key) != expected:
+                    errors.append(ValidationError(f"contract_gaps.{gap.get('id')}.{key}", f"must be {expected!r}"))
+
+        crypto = spec.get("cryptographic_profile_proposal", {})
+        attestation = crypto.get("attestation_policy", {})
+        if attestation.get("unknown_suite_behavior") != "unverifiable":
+            errors.append(ValidationError("crypto.unknown_suite_behavior", "must be unverifiable"))
+        if attestation.get("downgrade_behavior") != "fail_closed":
+            errors.append(ValidationError("crypto.downgrade_behavior", "must fail closed"))
+        if crypto.get("production_algorithm_selected") is not False:
+            errors.append(ValidationError("crypto.production_algorithm_selected", "must remain false"))
+        if spec.get("proof_verification_state_proposal", {}).get("separate_from") != ["context_state", "source_state", "review_completeness"]:
+            errors.append(ValidationError("proof_verification_state.separate_from", "state dimensions must remain separate"))
+
+        exclusions = set(spec.get("semantic_context_integrity_proposal", {}).get("semantic_hash_exclusions", []))
+        required_exclusions = {"review_context_response.context_id", "review_context_response.request_id", "review_context_response.created_at", "signature_bytes", "signature_algorithm", "key_reference", "key_epoch", "proof_renewal_time"}
+        if not required_exclusions <= exclusions:
+            errors.append(ValidationError("semantic_hash.exclusions", f"missing: {sorted(required_exclusions - exclusions)}"))
+        for path in ("review_context_response.context_id", "review_context_response.request_id", "review_context_response.created_at", "review_context_response.reproducibility.signature"):
+            if _resolved_rule(spec, path).get("semantic_hash_inclusion") is not False:
+                errors.append(ValidationError(f"field_rules.{path}.semantic_hash_inclusion", "generated/attestation metadata must be excluded"))
+
+        fixture_ids = {case.get("id") for case in fixtures.get("cases", []) if isinstance(case, dict)}
+        if fixtures.get("synthetic_only") is not True or fixtures.get("production_connections") is not False:
+            errors.append(ValidationError("fixtures.scope", "fixtures must be synthetic and disconnected from production"))
+        if fixture_ids != EXPECTED_FIXTURES:
+            errors.append(ValidationError("fixtures.ids", f"missing={sorted(EXPECTED_FIXTURES - fixture_ids)} extra={sorted(fixture_ids - EXPECTED_FIXTURES)}"))
+    finally:
+        if REPO_ROOT != original_root:
+            REPO_ROOT = original_root
+            DERIVATION_SPEC = REPO_ROOT / "specs/review_context_field_derivation_v0_1.json"
+            GAP_REGISTER = REPO_ROOT / "specs/review_context_contract_gaps_v0_1.json"
+            CONTRACT = REPO_ROOT / "specs/review_context_contract_v2.json"
+            FIXTURES = REPO_ROOT / "fixtures/target-v2/gate3/design_cases.json"
+    return errors
+
+
+def main() -> int:
+    errors = validate_repository()
+    if errors:
+        print("gate3_field_derivation_design: invalid", file=sys.stderr)
+        for error in errors:
+            print(f"- {error.format()}", file=sys.stderr)
+        return 1
+    spec = json.loads(DERIVATION_SPEC.read_text(encoding="utf-8"))
+    gaps = json.loads(GAP_REGISTER.read_text(encoding="utf-8"))
+    fixtures = json.loads(FIXTURES.read_text(encoding="utf-8"))
+    print("gate3_field_derivation_design:")
+    print("  status: coherent")
+    print(f"  required_response_fields_with_rules: {len(spec['field_rules'])}")
+    print(f"  contract_gaps_recorded: {len(gaps['contract_refinements'])}")
+    print(f"  synthetic_fixture_cases: {len(fixtures['cases'])}")
+    print("  runtime_implementation_authority: false")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,49 @@
+{
+  "fixture_set": "gate3_field_derivation_design_v0.1",
+  "synthetic_only": true,
+  "production_connections": false,
+  "base_semantic_context": {
+    "schema_version": "design-v2",
+    "prepared_action_identity": {"action_id": "synthetic-action-001", "proposal_version_id": "synthetic-proposal-001-v1"},
+    "review_profile_reference": {"profile_id": "synthetic-treasury-review", "profile_version": "1", "profile_owner": "synthetic-institution", "profile_hash": {"algorithm": "fixture-only", "parameter_set": "none", "digest": "profile-v1"}},
+    "record_source_type": {"value": "synthetic", "source_segmentation": [{"source_id": "synthetic-balance", "record_source_type": "synthetic"}]},
+    "context_state": {"value": "current", "reasons": ["profile_temporal_conditions_satisfied"]},
+    "source_state": {"value": "complete", "sources": ["synthetic-balance"], "unresolved_source_conflicts": []},
+    "review_completeness": {"value": "complete", "missing_context": [], "unresolved_conditions": []},
+    "boundary": {"approval_effect": "none", "authorization_effect": "none", "execution_effect": "none"}
+  },
+  "base_proof_envelope": {
+    "context_id": "generated-context-a",
+    "request_id": "generated-request-a",
+    "created_at": "2026-08-24T12:00:00Z",
+    "attestation": {"signature_algorithm": "fixture-suite-a", "key_reference": "fixture-key-a", "key_epoch": "1", "signature_value": "synthetic-signature-a"}
+  },
+  "cases": [
+    {"id": "complete_source_coverage", "category": "core", "inputs": {"required": ["balance", "constraint"], "observed": ["balance", "constraint"], "unavailable": [], "conflicts": []}, "expected": {"source_state": "complete", "scope_limited": true}},
+    {"id": "partial_source_coverage", "category": "core", "inputs": {"required": ["balance", "constraint"], "observed": ["balance"], "unavailable": [], "conflicts": []}, "expected": {"source_state": "partial", "missing_visible": true}},
+    {"id": "required_source_unavailable", "category": "core", "inputs": {"required": ["balance", "constraint"], "observed": ["balance"], "unavailable": ["constraint"], "conflicts": []}, "expected": {"source_state": "unavailable", "unavailability_visible": true}},
+    {"id": "unresolved_conflicting_sources", "category": "core", "inputs": {"required": ["balance"], "observed": ["balance-a", "balance-b"], "unavailable": [], "conflicts": ["balance-a!=balance-b"]}, "expected": {"source_state": "conflicted", "Nova_selects_winner": false}},
+    {"id": "missing_timestamps", "category": "core", "inputs": {"observed_at": null, "received_at": "2026-08-24T11:59:00Z"}, "expected": {"context_state": "uncertain", "current": false}},
+    {"id": "stale_under_profile_threshold", "category": "core", "inputs": {"age_seconds": 361, "profile_max_age_seconds": 360}, "expected": {"context_state": "stale", "threshold_authority": "review_profile"}},
+    {"id": "profile_version_change", "category": "core", "changes": {"semantic": {"review_profile_reference.profile_version": ["1", "2"], "review_profile_reference.profile_hash.digest": ["profile-v1", "profile-v2"]}}, "expected": {"semantic_identity": "different", "completeness_change_explained_by": "profile_version"}},
+    {"id": "proposal_revision", "category": "core", "changes": {"semantic": {"prepared_action_identity.proposal_version_id": ["synthetic-proposal-001-v1", "synthetic-proposal-001-v2"]}}, "expected": {"action_id": "same", "proposal_version_id": "different", "semantic_identity": "different"}},
+    {"id": "mixed_synthetic_production_like", "category": "core", "inputs": {"segments": ["synthetic", "production_like"]}, "expected": {"segmentation_preserved": true, "promoted_to_live": false, "contract_gap": "G3-R03"}},
+    {"id": "mixed_production_like_live", "category": "core", "inputs": {"segments": ["production_like", "live"]}, "expected": {"segmentation_preserved": true, "production_like_promoted": false, "contract_gap": "G3-R03"}},
+    {"id": "chronology_unknown_applicability", "category": "core", "inputs": {"prior_reference": "synthetic-prior-review", "treatment": "unknown", "applicability": "unknown"}, "expected": {"chronology_write": false, "applicability_inferred": false, "contract_gap": "G3-R10"}},
+    {"id": "model_claim_provenance_no_authority", "category": "core", "inputs": {"claim_genesis": "model_originated", "validation_scope": "synthetic_method_only"}, "expected": {"genesis_visible": true, "authority_effect": "none"}},
+    {"id": "legacy_outcome_changes_only", "category": "core", "changes": {"legacy_only": {"decision_status": ["ALLOW", "HALT"]}}, "expected": {"semantic_identity": "same", "target_field_change": false}},
+
+    {"id": "same_context_different_signing_key", "category": "crypto_agility", "changes": {"envelope": {"attestation.key_reference": ["fixture-key-a", "fixture-key-b"]}}, "expected": {"semantic_identity": "same", "attestation_identity": "different"}},
+    {"id": "same_context_different_signature_suite", "category": "crypto_agility", "changes": {"envelope": {"attestation.signature_algorithm": ["fixture-suite-a", "fixture-suite-b"]}}, "expected": {"semantic_identity": "same", "attestation_identity": "different"}},
+    {"id": "later_proof_renewal", "category": "crypto_agility", "changes": {"envelope": {"created_at": ["2026-08-24T12:00:00Z", "2027-08-24T12:00:00Z"], "attestation.attestation_type": ["primary", "renewal"]}}, "expected": {"semantic_identity": "same", "proof_envelope": "different", "predecessor_required": true}},
+    {"id": "algorithm_deprecation", "category": "crypto_agility", "inputs": {"suite_status": "deprecated"}, "expected": {"historical_attestation_preserved": true, "proof_verification_state": "verified_with_deprecated_suite", "context_state_automatic_change": false}},
+    {"id": "unknown_signature_algorithm", "category": "crypto_agility", "inputs": {"suite_status": "unknown"}, "expected": {"proof_verification_state": "unverifiable", "silent_success": false}},
+    {"id": "cryptographic_profile_downgrade", "category": "crypto_agility", "inputs": {"required_profile_version": "2", "presented_profile_version": "1"}, "expected": {"downgrade_detected": true, "fallback": "fail_closed"}},
+    {"id": "parallel_classical_pqc_attestations", "category": "crypto_agility", "inputs": {"attestation_types": ["primary", "parallel_transition"], "suite_labels": ["fixture-classical", "fixture-pqc-candidate"]}, "expected": {"semantic_identity_count": 1, "production_suite_selected": false}},
+    {"id": "parallel_digest_migration", "category": "crypto_agility", "inputs": {"digest_profiles": ["fixture-digest-a", "fixture-digest-b"]}, "expected": {"canonical_semantic_bytes_identical": true, "semantic_material_count": 1}},
+    {"id": "missing_trusted_time_evidence", "category": "crypto_agility", "inputs": {"recorded_at": "2026-08-24T12:00:00Z", "source_type": "Nova_clock", "external_time_reference": null}, "expected": {"trusted_time_claim": false, "verification_status": "unresolved"}},
+    {"id": "invalid_proof_signature", "category": "crypto_agility", "inputs": {"signature_validation": "invalid"}, "expected": {"proof_verification_state": "invalid", "context_state_automatic_change": false, "source_state_automatic_change": false, "review_completeness_automatic_change": false}},
+    {"id": "reconstruction_material_unavailable", "category": "crypto_agility", "inputs": {"digest_valid": true, "source_material_available": false}, "expected": {"reconstruction_scope": "reconstruction_unavailable", "full_reconstruction_claim": false}},
+    {"id": "missing_external_identifier_salt", "category": "crypto_agility", "inputs": {"raw_identifier": "synthetic-wallet-identifier", "external_salt": null}, "expected": {"output": "redacted", "raw_value_substituted": false}}
+  ]
+}
