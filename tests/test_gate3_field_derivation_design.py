@@ -29,7 +29,6 @@ from scripts.gate3_reference_semantics import (
     verify_semantic_identity_continuity,
 )
 from scripts.validate_gate3_field_derivation import (
-    APPROVED_AUTHORITY_HASHES,
     EXPECTED_APPROVED_FOR_INCORPORATION,
     EXPECTED_GAPS,
     EXPECTED_FIXTURES,
@@ -85,17 +84,22 @@ def test_every_required_contract_leaf_has_exactly_one_rule() -> None:
     rules = _load(SPEC_PATH)["field_rules"]
     required = _required_response_leaf_paths(contract)
 
-    assert len(required) == 54
+    assert len(required) == 55
     assert set(rules) == required
     assert all(rule["rule_version"] == "0.1.0" for rule in rules.values())
 
 
-def test_approved_contract_authorities_are_unchanged() -> None:
-    for relative, expected in APPROVED_AUTHORITY_HASHES.items():
-        assert hashlib.sha256((REPO_ROOT / relative).read_bytes()).hexdigest() == expected
+def test_design_v2_1_contract_revision_digest_is_recorded() -> None:
+    spec = _load(SPEC_PATH)
+    contract_reference = spec["approved_contract"]
+
+    assert contract_reference["version"] == "design-v2.1"
+    assert contract_reference["revision_candidate"] is True
+    assert contract_reference["canonical_on_main"] == "false_until_merge"
+    assert hashlib.sha256((REPO_ROOT / contract_reference["path"]).read_bytes()).hexdigest() == contract_reference["sha256"]
 
 
-def test_reviewed_refinements_are_approved_pending_contract_revision_without_authority() -> None:
+def test_reviewed_refinements_are_in_revision_candidate_without_authority() -> None:
     register = _load(GAPS_PATH)
     records = register["contract_refinements"]
 
@@ -103,12 +107,13 @@ def test_reviewed_refinements_are_approved_pending_contract_revision_without_aut
     assert all(record["silently_canonical"] is False for record in records)
     assert all(record["authority_effect"] == "none" for record in records)
     assert all(record["execution_effect"] == "none" for record in records)
-    assert register["status"] == "approved_for_incorporation_not_yet_canonical"
-    assert register["design_review_status"] == "design_review_complete_pending_contract_revision"
+    assert register["status"] == "contract_revision_candidate_present_not_canonical_on_main"
+    assert register["design_review_status"] == "design_review_complete_contract_revision_candidate_present"
     assert register["active_semantic_completion_blockers"] == []
     assert set(register["historical_semantic_completion_blockers"]) == EXPECTED_APPROVED_FOR_INCORPORATION
     assert set(register["approved_for_incorporation"]) == EXPECTED_APPROVED_FOR_INCORPORATION
-    assert register["canonical_contract_revision"] == {"status": "not_started"}
+    expected_revision = {"status": "candidate_present", "target": "design-v2.1", "canonical_on_main": "false_until_merge"}
+    assert register["canonical_contract_revision"] == expected_revision
     assert register["implementation_authority"] is False
     assert set(register["additional_gaps_discovered"]) == {"G3-R11", "G3-Q15"}
     by_id = {record["id"]: record for record in records}
@@ -119,7 +124,10 @@ def test_reviewed_refinements_are_approved_pending_contract_revision_without_aut
         assert record["CCO_review"] == "approved"
         assert record["Architect_review"] == "approved"
         assert record["design_disposition"] == "approved_for_incorporation"
-        assert record["canonical_contract_status"] == "pending_contract_revision"
+        assert record["contract_revision_target"] == "design-v2.1"
+        assert record["contract_revision_candidate"] == "present"
+        assert record["canonical_on_main"] == "false_until_merge"
+        assert record["canonical_contract_status"] == "contract_revision_candidate_present"
         assert record["implementation_authority"] is False
         assert record["requires_CCO_review"] is False
         assert record["requires_Architect_review"] is False
@@ -131,11 +139,11 @@ def test_reviewed_refinements_are_approved_pending_contract_revision_without_aut
     assert by_id["G3-Q15"]["name"] == "semantic_identity_continuity_across_digest_migration"
 
     spec = _load(SPEC_PATH)
-    assert spec["status"] == "approved_for_incorporation_not_yet_canonical"
-    assert spec["semantic_completion"]["status"] == "design_review_complete_pending_contract_revision"
+    assert spec["status"] == "contract_revision_candidate_present_not_canonical_on_main"
+    assert spec["semantic_completion"]["status"] == "design_review_complete_contract_revision_candidate_present"
     assert spec["semantic_completion"]["active_review_blockers"] == []
     assert set(spec["semantic_completion"]["historical_review_blockers"]) == EXPECTED_APPROVED_FOR_INCORPORATION
-    assert spec["design_review"]["canonical_contract_revision"] == {"status": "not_started"}
+    assert spec["design_review"]["canonical_contract_revision"] == expected_revision
     assert spec["design_review"]["merge_authority"] is False
     assert spec["design_review"]["deployment_authority"] is False
     assert spec["design_review"]["implementation_authority"] is False

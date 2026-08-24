@@ -3,15 +3,17 @@
 ## Status and boundary
 
 ```yaml
-status: approved_for_incorporation_not_yet_canonical
+status: incorporated_in_design_v2.1_contract_revision_candidate
 design_only: true
 canonicalization_design_defined: true
-semantic_completion: design_review_complete_pending_contract_revision
+semantic_completion: design_review_complete_contract_revision_candidate_present
 active_review_blockers: []
 historical_review_blockers: [G3-R01, G3-R03, G3-R08, G3-R11, G3-Q15]
 CCO_review: approved
 Architect_review: approved
-canonical_contract_revision: not_started
+canonical_contract_revision: candidate_present
+contract_revision_target: design-v2.1
+canonical_on_main: false_until_merge
 canonicalization_version: nova-jcs-exact-financial-json-design-v0.1
 derivation_version: gate3-field-derivation-v0.1
 production_algorithm_selected: false
@@ -20,9 +22,9 @@ authority_effect: none
 execution_effect: none
 ```
 
-This draft defines deterministic material boundaries for design review. It does
-not implement target v2, select a production signature/hash suite, alter the
-approved contract, or authorize production cryptography.
+This design artifact supplies the G3-R11 and G3-Q15 semantics incorporated in
+the `design-v2.1` contract revision candidate. It does not implement target v2,
+select a production signature/hash suite, or authorize production cryptography.
 
 ## Two identities and two scopes
 
@@ -43,7 +45,7 @@ metadata changes. Cryptographic attestation identity may change independently.
 
 - exact schema, derivation, and canonicalization identities;
 - externally supplied stable action identity when lineage is claimed, plus the
-  exact proposal-version identity once G3-R01 is approved. If action identity
+  exact proposal-version identity as incorporated through G3-R01. If action identity
   is absent, lineage is explicitly unavailable; a proposal-version fallback is
   algorithm-qualified, labeled `Nova_derived_proposal_fingerprint`, and limited
   to canonical prepared-action material;
@@ -104,11 +106,12 @@ resulting document remains valid JCS/I-JSON.
 ```yaml
 G3-R11:
   name: canonical_numeric_and_interoperability_profile
-  status: approved_for_incorporation_not_yet_canonical
+  status: incorporated_in_design_v2.1_contract_revision_candidate
   CCO_review: approved
   Architect_review: approved
   design_disposition: approved_for_incorporation
-  canonical_contract_status: pending_contract_revision
+  canonical_contract_status: contract_revision_candidate_present
+  canonical_on_main: false_until_merge
   silently_canonical: false
   implementation_authority: false
   base_standard: RFC_8785_JCS
@@ -277,11 +280,12 @@ referenced verifiably, continuity is `unresolved`.
 
 ```yaml
 G3-Q15:
-  status: approved_for_incorporation_not_yet_canonical
+  status: incorporated_in_design_v2.1_contract_revision_candidate
   CCO_review: approved
   Architect_review: approved
   design_disposition: approved_for_incorporation
-  canonical_contract_status: pending_contract_revision
+  canonical_contract_status: contract_revision_candidate_present
+  canonical_on_main: false_until_merge
   silently_canonical: false
   implementation_authority: false
   semantic_identity_is_individual_digest: false

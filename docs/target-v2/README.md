@@ -6,9 +6,11 @@
 target_v2:
   canonical_future_external_model: true
   contract_approved: true
-  field_derivation_complete: false
+  field_derivation_complete: true
+  field_derivation_completion_effective: on_design_v2.1_contract_revision_merge
   runtime_implemented: false
   private_adapter_implemented: false
+  Gate_4_status: not_authorized
   production_active: false
   institutional_pilot_started: false
 ```
@@ -78,6 +80,10 @@ A deployed target v2 workflow has not yet been established.
 8. Commercial and distribution validation.
 
 No later gate becomes active merely because an earlier artifact exists.
+
+Gate 3 design completion does not activate Gate 4. The `design-v2.1` contract
+revision candidate creates no runtime, private-adapter, endpoint, deployment,
+payment, settlement, or execution authority.
 
 ## References
 

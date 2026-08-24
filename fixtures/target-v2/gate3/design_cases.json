@@ -23,7 +23,7 @@
     "context_id": "generated-context-reference",
     "request_id": "generated-request-reference",
     "created_at": "2026-08-24T12:00:00Z",
-    "prepared_action_reference": {"reference_id": "synthetic-action-001:proposal-v1", "reference_type": "opaque_external_reference", "payload_embedded": false},
+    "prepared_action_reference": {"reference_id": "synthetic-action-001:proposal-v1", "proposal_version_id": "synthetic-proposal-001-v1", "reference_type": "opaque_external_reference", "payload_embedded": false},
     "review_profile_reference": {"profile_id": "synthetic-treasury-review", "profile_version": "1", "profile_owner": "synthetic-institution", "profile_hash": "fixture-profile-digest"},
     "record_source_type": {"value": "synthetic", "source_segmentation": [{"source_id": "source-b", "record_source_type": "synthetic"}, {"source_id": "source-a", "record_source_type": "synthetic"}]},
     "context_state": {"value": "current", "reasons": ["profile_temporal_conditions_satisfied"]},

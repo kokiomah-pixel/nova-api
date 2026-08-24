@@ -1,26 +1,28 @@
 {
   "name": "review_context_field_derivation",
   "version": "design-v0.1",
-  "status": "approved_for_incorporation_not_yet_canonical",
+  "status": "contract_revision_candidate_present_not_canonical_on_main",
   "design_only": true,
   "runtime_implementation_authority": false,
   "authority_effect": "none",
   "execution_effect": "none",
   "design_review": {
-    "status": "design_review_complete_pending_contract_revision",
+    "status": "design_review_complete_contract_revision_candidate_present",
     "CCO": "complete",
     "Architect": "complete",
     "approved_for_incorporation": ["G3-R01", "G3-R03", "G3-R08", "G3-R11", "G3-Q15"],
-    "canonical_contract_revision": {"status": "not_started"},
+    "canonical_contract_revision": {"status": "candidate_present", "target": "design-v2.1", "canonical_on_main": "false_until_merge"},
     "merge_authority": false,
     "deployment_authority": false,
     "implementation_authority": false
   },
   "approved_contract": {
     "path": "specs/review_context_contract_v2.json",
-    "version": "design-v2",
-    "sha256": "873c4183a43930b858e2d53f6499421ed87e79e96944ab4c2c3d2a9fc1dd847e",
-    "modified_by_this_design": false
+    "version": "design-v2.1",
+    "sha256": "e8b634589ee5d24ebeffd58ffdd6126076fd9dae77aeeddcd4dbecb346a75ffb",
+    "modified_by_this_design": true,
+    "revision_candidate": true,
+    "canonical_on_main": "false_until_merge"
   },
   "design_authorities": [
     "docs/architecture/external-review-context-contract-v2.md",
@@ -37,7 +39,7 @@
     "Nova does not execute."
   ],
   "identity_model": {
-    "status": "approved_for_incorporation_not_yet_canonical",
+    "status": "incorporated_in_design_v2.1_contract_revision_candidate",
     "scope": ["review_context_request", "review_context_response.prepared_action_reference"],
     "action_id": {
       "meaning": "stable_identity_across_revisions",
@@ -60,8 +62,8 @@
     },
     "identities_collapsed": false,
     "Nova_fingerprint_fallback": "labeled_Nova_derived_proposal_fingerprint_only_when_external_version_id_absent",
-    "request_side_proposal": "add_explicit_action_id_and_proposal_version_id_inputs_in_a_future_reviewed_target_v2_contract_revision",
-    "response_side_proposal": "bind_the_response_reference_to_the_resolved_request_identity_pair_without_reconstructing_lineage_from_content",
+    "request_side_contract": "explicit_optional_action_id_and_proposal_version_id_inputs_with_external_lineage_only",
+    "response_side_contract": "bind_exact_proposal_version_and_external_action_lineage_when_available_without_content_lineage_inference",
     "contract_gap_reference": "G3-R01"
   },
   "review_profile_model": {
@@ -73,7 +75,7 @@
     "contract_gap_reference": "G3-R02"
   },
   "record_source_type_proposal": {
-    "status": "approved_for_incorporation_not_yet_canonical",
+    "status": "incorporated_in_design_v2.1_contract_revision_candidate",
     "contract_gap_reference": "G3-R03",
     "permitted_values": ["synthetic", "production_like", "live", "mixed"],
     "mixed_meaning": "more_than_one_evidence_environment_class_is_represented",
@@ -83,7 +85,7 @@
     "mixed_reduction_to_strongest_or_weakest": false
   },
   "review_completeness_proposal": {
-    "status": "approved_for_incorporation_not_yet_canonical",
+    "status": "incorporated_in_design_v2.1_contract_revision_candidate",
     "contract_gap_reference": "G3-R08",
     "semantic_owner_after_contract_adoption": "target_v2_contract",
     "precedence": ["unavailable", "conflicted", "partial", "complete"],
@@ -108,15 +110,15 @@
     "proof_state_changes_other_dimensions_automatically": false
   },
   "semantic_completion": {
-    "status": "design_review_complete_pending_contract_revision",
+    "status": "design_review_complete_contract_revision_candidate_present",
     "active_review_blockers": [],
     "historical_review_blockers": ["G3-R01", "G3-R03", "G3-R08", "G3-R11", "G3-Q15"],
     "approved_for_incorporation": ["G3-R01", "G3-R03", "G3-R08", "G3-R11", "G3-Q15"],
-    "canonical_contract_status": "pending_contract_revision",
+    "canonical_contract_status": "contract_revision_candidate_present_not_canonical_on_main",
     "implementation_authority_created": false
   },
   "canonical_numeric_and_interoperability_profile": {
-    "status": "approved_for_incorporation_not_yet_canonical",
+    "status": "incorporated_in_design_v2.1_contract_revision_candidate",
     "contract_gap_reference": "G3-R11",
     "profile_id": "nova-jcs-exact-financial-json",
     "profile_version": "design-v0.1",
@@ -263,7 +265,7 @@
     "continuity_contract_gap_reference": "G3-Q15"
   },
   "semantic_identity_continuity_proposal": {
-    "status": "approved_for_incorporation_not_yet_canonical",
+    "status": "incorporated_in_design_v2.1_contract_revision_candidate",
     "contract_gap_reference": "G3-Q15",
     "semantic_identity_basis": "identical_canonical_semantic_byte_sequence_under_the_same_canonicalization_derivation_and_profile_identity",
     "individual_algorithm_qualified_digest_is_semantic_identity": false,
@@ -358,7 +360,8 @@
     "review_context_response.request_id": {"template": "external_reference", "rule_version": "0.1.0", "required_inputs": ["review_context_request.request_id"], "derivation_rule": "Preserve the opaque request identifier in the envelope while excluding it from semantic hash material.", "semantic_hash_inclusion": false, "contract_gap_references": []},
     "review_context_response.created_at": {"template": "generated_envelope_metadata", "rule_version": "0.1.0", "required_inputs": ["Nova_clock_observation"], "derivation_rule": "Record construction time; normalize under G3-R11 for the envelope and do not claim independently trusted time.", "contract_gap_references": ["G3-R11", "G3-Q08"]},
 
-    "review_context_response.prepared_action_reference.reference_id": {"template": "external_reference", "rule_version": "0.1.0", "required_inputs": ["request.action_id_if_externally_supplied", "request.proposal_version_id_or_algorithm_qualified_labeled_Nova_fingerprint"], "derivation_rule": "Bind the response to distinct request-side identities: action_id is externally supplied and never content-derived; prefer an external proposal_version_id, else label a Nova-derived fingerprint over canonical prepared-action material only; absent action_id leaves lineage unavailable and forbids same-action inference.", "sensitivity_class": "opaque_action_reference", "contract_gap_references": ["G3-R01", "G3-R09"]},
+    "review_context_response.prepared_action_reference.reference_id": {"template": "external_reference", "rule_version": "0.1.0", "required_inputs": ["request.compatibility_reference_if_supplied"], "derivation_rule": "Preserve the compatibility reference without treating it as both stable action lineage and exact proposal-version identity.", "sensitivity_class": "opaque_action_reference", "contract_gap_references": ["G3-R09"]},
+    "review_context_response.prepared_action_reference.proposal_version_id": {"template": "external_reference", "rule_version": "0.1.0", "required_inputs": ["request.proposal_version_id_or_algorithm_qualified_labeled_Nova_fingerprint"], "derivation_rule": "Bind the exact proposal reviewed; prefer the external proposal_version_id, otherwise emit an algorithm-qualified value explicitly labeled Nova_derived_proposal_fingerprint over canonical prepared-action material only; the fallback never establishes action lineage.", "sensitivity_class": "opaque_action_reference", "contract_gap_references": ["G3-R01"]},
     "review_context_response.prepared_action_reference.reference_type": {"template": "contract_constant", "rule_version": "0.1.0", "required_inputs": ["approved_contract.prepared_action_reference.reference_type"], "derivation_rule": "Emit opaque_external_reference.", "contract_gap_references": ["G3-R01"]},
     "review_context_response.prepared_action_reference.payload_embedded": {"template": "contract_constant", "rule_version": "0.1.0", "required_inputs": ["approved_contract.prepared_action_reference.payload_embedded"], "derivation_rule": "Emit false; sensitive action payload is reference-only by default.", "contract_gap_references": []},
 
