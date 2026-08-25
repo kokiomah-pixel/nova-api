@@ -492,38 +492,37 @@
       "undeclared_array_behavior": "projection_failure",
       "set_semantics": {
         "deterministic_normalization": true,
-        "deterministic_sort_key": "declared_field_or_type_specific_primary_tuple_then_declared_final_tie_breaker",
-        "JCS_role": "serialize_after_declared_tuple_normalization_and_normalized_item_bytes_only_as_declared_final_tie_breaker",
+        "deterministic_sort_key": "declared_field_or_type_specific_primary_tuple",
+        "JCS_role": "serialize_normalized_result_after_declared_type_specific_ordering_not_a_semantic_tie_breaker",
         "byte_identical_duplicate": "collapse_only_for_declared_set",
         "same_identity_different_content": "conflict",
-        "primary_tuple_tie": "normalized_item_JCS_bytes_only_when_profile_declares_final_tie_breaker"
+        "primary_tuple_collision": {
+          "identical_normalized_item": {
+            "behavior": "collapse_when_field_is_declared_set"
+          },
+          "different_normalized_item": {
+            "behavior": "reject_as_conflict_until_explicitly_represented"
+          }
+        },
+        "whole_item_JCS_tie_breaker": "prohibited_without_future_separately_approved_complete_canonical_item_schema"
       },
       "sort_tuple_profiles": {
-        "source_reference_sort": {
-          "primary": [
-            "source_id",
-            "source_version_or_digest",
-            "observed_at",
-            "received_at",
-            "record_source_type"
-          ],
-          "final_tie_breaker": "normalized_item_JCS_bytes"
-        },
-        "constraint_reference_sort": {
-          "primary": [
-            "constraint_id_or_digest",
-            "source_id"
-          ],
-          "final_tie_breaker": "normalized_item_JCS_bytes"
-        },
-        "chronology_reference_sort": {
-          "primary": [
-            "reference_type",
-            "reference_id",
-            "version_or_digest"
-          ],
-          "final_tie_breaker": "normalized_item_JCS_bytes"
-        },
+        "source_reference_sort": [
+          "source_id",
+          "source_version_or_digest",
+          "observed_at",
+          "received_at",
+          "record_source_type"
+        ],
+        "constraint_reference_sort": [
+          "constraint_id_or_digest",
+          "source_id"
+        ],
+        "chronology_reference_sort": [
+          "reference_type",
+          "reference_id",
+          "version_or_digest"
+        ],
         "digest_record_sort": [
           "algorithm",
           "parameter_set",

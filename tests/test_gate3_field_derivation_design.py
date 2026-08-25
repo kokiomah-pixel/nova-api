@@ -512,8 +512,8 @@ def test_reference_ordering_exact_deduplication_and_identity_collision() -> None
         {"source_id": "a", "source_version_or_digest": "1", "extra": 1},
         {"source_id": "a", "source_version_or_digest": "1", "extra": 2},
     ]
-    assert normalize_reference_array(primary_tuple_tie, sort_tuple=source_sort) == primary_tuple_tie
-    assert normalize_reference_array(list(reversed(primary_tuple_tie)), sort_tuple=source_sort) == primary_tuple_tie
+    with pytest.raises(ReferenceSemanticsError, match="conflicting duplicate declared primary tuple"):
+        normalize_reference_array(primary_tuple_tie, sort_tuple=source_sort)
     with pytest.raises(ReferenceSemanticsError, match="duplicate object member"):
         parse_json_no_duplicates('{"a":1,"a":1}')
 

@@ -289,21 +289,13 @@ def test_r11_declared_type_tuples_drive_order_before_jcs_serialization() -> None
         identity_key="reference_id",
     )] == ["memory", "review"]
 
-    tied_vector = _load(REPO_ROOT / "fixtures/target-v2/gate3/design_cases.json")["reference_vectors"]["constraint_reference_primary_tie"]
-    tied_constraints = tied_vector["input"]
-    tied_normalized = normalize_semantic_array(
-        tied_constraints,
-        semantics="set",
-        sort_tuple=profiles["constraint_reference_sort"],
-        identity_key="reference_id",
-    )
-    assert tied_normalized == tied_vector["expected"]
-    assert tied_normalized == normalize_semantic_array(
-        list(reversed(tied_constraints)),
-        semantics="set",
-        sort_tuple=profiles["constraint_reference_sort"],
-        identity_key="reference_id",
-    )
+    collision_vector = _load(REPO_ROOT / "fixtures/target-v2/gate3/design_cases.json")["reference_vectors"]["source_reference_unapproved_field_collision"]
+    with pytest.raises(ReferenceSemanticsError, match="conflicting duplicate declared primary tuple"):
+        normalize_semantic_array(
+            collision_vector["input"],
+            semantics="set",
+            sort_tuple=profiles["source_reference_sort"],
+        )
 
     digest_values = [
         {"algorithm": "fixture-z", "parameter_set": "1", "output_encoding": "hex", "digest": "00"},
@@ -315,7 +307,7 @@ def test_r11_declared_type_tuples_drive_order_before_jcs_serialization() -> None
         sort_tuple=profiles["digest_record_sort"],
     )] == ["fixture-a", "fixture-z"]
 
-    with pytest.raises(ReferenceSemanticsError, match="conflicting duplicate declared sort tuple"):
+    with pytest.raises(ReferenceSemanticsError, match="conflicting duplicate declared primary tuple"):
         normalize_semantic_array(
             [{"algorithm": "a", "extra": 1}, {"algorithm": "a", "extra": 2}],
             semantics="set",
@@ -328,18 +320,9 @@ def test_r11_sort_profiles_exclude_fields_owned_by_unapproved_refinements() -> N
     derivation_profiles = _load(DERIVATION_SPEC)["canonical_numeric_and_interoperability_profile"]["sort_tuple_profiles"]
 
     expected = {
-        "source_reference_sort": {
-            "primary": ["source_id", "source_version_or_digest", "observed_at", "received_at", "record_source_type"],
-            "final_tie_breaker": "normalized_item_JCS_bytes",
-        },
-        "constraint_reference_sort": {
-            "primary": ["constraint_id_or_digest", "source_id"],
-            "final_tie_breaker": "normalized_item_JCS_bytes",
-        },
-        "chronology_reference_sort": {
-            "primary": ["reference_type", "reference_id", "version_or_digest"],
-            "final_tie_breaker": "normalized_item_JCS_bytes",
-        },
+        "source_reference_sort": ["source_id", "source_version_or_digest", "observed_at", "received_at", "record_source_type"],
+        "constraint_reference_sort": ["constraint_id_or_digest", "source_id"],
+        "chronology_reference_sort": ["reference_type", "reference_id", "version_or_digest"],
     }
     for name, rule in expected.items():
         assert machine_profiles[name] == rule
@@ -352,6 +335,16 @@ def test_r11_sort_profiles_exclude_fields_owned_by_unapproved_refinements() -> N
             for field in (profile["primary"] if isinstance(profile, dict) else profile)
         }
         assert primary_fields.isdisjoint(UNAPPROVED_SORT_FIELD_DEPENDENCIES)
+        assert "normalized_item_JCS_bytes" not in json.dumps(profiles, sort_keys=True)
+
+    set_semantics = _load(MACHINE_CONTRACT)["canonicalization_semantics"]["semantic_arrays"]["set_semantics"]
+    assert set_semantics["primary_tuple_collision"] == {
+        "identical_normalized_item": {"behavior": "collapse_when_field_is_declared_set"},
+        "different_normalized_item": {"behavior": "reject_as_conflict_until_explicitly_represented"},
+    }
+    assert set_semantics["whole_item_JCS_tie_breaker"] == (
+        "prohibited_without_future_separately_approved_complete_canonical_item_schema"
+    )
 
 
 def test_r01_response_genesis_is_machine_visible_for_both_origins() -> None:

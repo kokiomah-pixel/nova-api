@@ -19,7 +19,7 @@
   "approved_contract": {
     "path": "specs/review_context_contract_v2.json",
     "version": "design-v2.1",
-    "sha256": "005a7e8fe66cb7ca86d5dc98dd90e9a434d3cfcbdfdd0c4d38a95d32bfcfe30d",
+    "sha256": "2204b622643f4c88d4112099d66d46a2e4c5e28b4e84ffc70a71eafa32c2e6d9",
     "modified_by_this_design": true,
     "incorporation_status": "incorporated_in_design_v2.1_contract",
     "canonicality_source": "authoritative_repository_main"
@@ -215,9 +215,9 @@
       "review_context_response.reproducibility.source_segmentation"
     ],
     "sort_tuple_profiles": {
-      "source_reference_sort": {"primary": ["source_id", "source_version_or_digest", "observed_at", "received_at", "record_source_type"], "final_tie_breaker": "normalized_item_JCS_bytes"},
-      "constraint_reference_sort": {"primary": ["constraint_id_or_digest", "source_id"], "final_tie_breaker": "normalized_item_JCS_bytes"},
-      "chronology_reference_sort": {"primary": ["reference_type", "reference_id", "version_or_digest"], "final_tie_breaker": "normalized_item_JCS_bytes"},
+      "source_reference_sort": ["source_id", "source_version_or_digest", "observed_at", "received_at", "record_source_type"],
+      "constraint_reference_sort": ["constraint_id_or_digest", "source_id"],
+      "chronology_reference_sort": ["reference_type", "reference_id", "version_or_digest"],
       "digest_record_sort": ["algorithm", "parameter_set", "output_encoding", "digest"],
       "conflict_reference_sort": ["conflict_id"],
       "question_reference_sort": ["question_id"],
@@ -225,7 +225,8 @@
       "change_reference_sort": ["change_id"],
       "stable_scalar_sort": ["$value"]
     },
-    "declared_primary_tuple_tie": "use_normalized_item_JCS_bytes_only_when_profile_declares_final_tie_breaker_otherwise_reject",
+    "primary_tuple_collision": {"identical_normalized_item": {"behavior": "collapse_when_field_is_declared_set"}, "different_normalized_item": {"behavior": "reject_as_conflict_until_explicitly_represented"}},
+    "whole_item_JCS_tie_breaker": "prohibited_without_future_separately_approved_complete_canonical_item_schema",
     "array_rules": {
       "review_context_response.record_source_type.source_segmentation": {"semantics": "set", "sort_tuple_profile": "source_reference_sort", "identity_key": "source_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
       "review_context_response.context_state.reasons": {"semantics": "set", "sort_tuple_profile": "stable_scalar_sort", "exact_duplicate": "collapse"},

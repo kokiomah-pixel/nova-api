@@ -638,31 +638,24 @@ reproducibility.source_segmentation
 
 Set values normalize and sort by declared field/type-specific tuples before JCS
 serializes the normalized result. JCS canonical bytes are not a universal
-semantic set-order key; the three reference profiles below use them only as a
-final tie-breaker after their approved primary tuple:
+semantic set-order key or a tie-breaker for colliding reference identities:
 
 ```yaml
 source_reference_sort:
-  primary:
-    - source_id
-    - source_version_or_digest
-    - observed_at
-    - received_at
-    - record_source_type
-  final_tie_breaker: normalized_item_JCS_bytes
+  - source_id
+  - source_version_or_digest
+  - observed_at
+  - received_at
+  - record_source_type
 
 constraint_reference_sort:
-  primary:
-    - constraint_id_or_digest
-    - source_id
-  final_tie_breaker: normalized_item_JCS_bytes
+  - constraint_id_or_digest
+  - source_id
 
 chronology_reference_sort:
-  primary:
-    - reference_type
-    - reference_id
-    - version_or_digest
-  final_tie_breaker: normalized_item_JCS_bytes
+  - reference_type
+  - reference_id
+  - version_or_digest
 
 digest_record_sort:
   - algorithm
@@ -676,14 +669,18 @@ references use `constraint_reference_sort`; chronology, prior-review, and
 accepted-memory references use `chronology_reference_sort`; digest records use
 `digest_record_sort`. Other set-like fields declare their own stable scalar or
 identity tuple. Byte-identical duplicates collapse only for a declared set. The
-same identity with different content is a conflict, not a duplicate. A tie on
-one of the three primary reference tuples is resolved only by the JCS bytes of
-the already-normalized item; input iteration order is never a tie-breaker.
+same identity with different content is a conflict, not a duplicate. Identical
+normalized items sharing a primary tuple collapse when the field is a declared
+set. Different normalized items sharing a primary tuple are rejected as a
+conflict until explicitly represented. Neither input iteration order nor any
+whole-item field resolves the collision.
 
 `authority_scope` remains governed by unapproved G3-R04, while
 `treatment_status` and `applicability_status` remain governed by unapproved
 G3-R10. `applicability_scope` has no independent canonical target-v2 definition.
 None of those fields participates in design-v2.1 canonical ordering.
+Whole-item JCS bytes cannot be introduced as a tie-breaker unless a future,
+separately approved contract defines the complete canonical item schema.
 
 ## Semantic Identity Continuity Across Digest Migration
 

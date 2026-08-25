@@ -404,9 +404,9 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
 
         array_rules = numeric_profile.get("array_rules", {})
         expected_sort_tuples = {
-            "source_reference_sort": {"primary": ["source_id", "source_version_or_digest", "observed_at", "received_at", "record_source_type"], "final_tie_breaker": "normalized_item_JCS_bytes"},
-            "constraint_reference_sort": {"primary": ["constraint_id_or_digest", "source_id"], "final_tie_breaker": "normalized_item_JCS_bytes"},
-            "chronology_reference_sort": {"primary": ["reference_type", "reference_id", "version_or_digest"], "final_tie_breaker": "normalized_item_JCS_bytes"},
+            "source_reference_sort": ["source_id", "source_version_or_digest", "observed_at", "received_at", "record_source_type"],
+            "constraint_reference_sort": ["constraint_id_or_digest", "source_id"],
+            "chronology_reference_sort": ["reference_type", "reference_id", "version_or_digest"],
             "digest_record_sort": ["algorithm", "parameter_set", "output_encoding", "digest"],
         }
         sort_tuple_profiles = numeric_profile.get("sort_tuple_profiles", {})
@@ -421,8 +421,16 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
         for field, defining_gap in UNAPPROVED_SORT_FIELD_DEPENDENCIES.items():
             if field in primary_sort_fields:
                 errors.append(ValidationError(f"canonical_profile.unapproved_sort_field.{field}", f"must exclude field owned by {defining_gap}"))
-        if numeric_profile.get("declared_primary_tuple_tie") != "use_normalized_item_JCS_bytes_only_when_profile_declares_final_tie_breaker_otherwise_reject":
-            errors.append(ValidationError("canonical_profile.declared_primary_tuple_tie", "must use JCS only as an explicitly declared final tie-breaker"))
+        if "normalized_item_JCS_bytes" in json.dumps(sort_tuple_profiles, sort_keys=True):
+            errors.append(ValidationError("canonical_profile.whole_item_JCS_sort", "whole-item JCS bytes require a future separately approved complete canonical item schema"))
+        expected_collision = {
+            "identical_normalized_item": {"behavior": "collapse_when_field_is_declared_set"},
+            "different_normalized_item": {"behavior": "reject_as_conflict_until_explicitly_represented"},
+        }
+        if numeric_profile.get("primary_tuple_collision") != expected_collision:
+            errors.append(ValidationError("canonical_profile.primary_tuple_collision", "must collapse identical set items and reject distinct collisions"))
+        if numeric_profile.get("whole_item_JCS_tie_breaker") != "prohibited_without_future_separately_approved_complete_canonical_item_schema":
+            errors.append(ValidationError("canonical_profile.whole_item_JCS_tie_breaker", "must prohibit whole-item JCS tie-breaking"))
         semantic_array_paths = set(numeric_profile.get("semantic_array_paths", []))
         if set(array_rules) != semantic_array_paths:
             errors.append(ValidationError("canonical_profile.array_rules", "every semantic array path must have exactly one explicit rule"))

@@ -277,25 +277,13 @@ def normalize_timestamp_window(
     }
 
 
-def _sort_rule_parts(sort_rule: Iterable[str] | dict[str, Any]) -> tuple[list[str], bool]:
-    """Return primary fields and whether normalized-item JCS is the final tie-breaker."""
-
-    if isinstance(sort_rule, dict):
-        fields = list(sort_rule.get("primary", []))
-        tie_breaker = sort_rule.get("final_tie_breaker")
-        if tie_breaker != "normalized_item_JCS_bytes":
-            raise ReferenceSemanticsError("declared sort profile has an unsupported final tie-breaker")
-        return fields, True
-    return list(sort_rule), False
-
-
 def _declared_sort_key(
     value: Any,
-    sort_rule: Iterable[str] | dict[str, Any],
+    tuple_fields: Iterable[str],
 ) -> tuple[tuple[int, bytes], ...]:
-    """Build a total key from the declared primary tuple and optional final tie-breaker."""
+    """Build the declared primary-tuple key while preserving missing and null."""
 
-    fields, use_jcs_tie_breaker = _sort_rule_parts(sort_rule)
+    fields = list(tuple_fields)
     if not fields:
         raise ReferenceSemanticsError("set-like reference requires a declared sort tuple")
     components: list[tuple[int, bytes]] = []
@@ -306,22 +294,20 @@ def _declared_sort_key(
             components.append((1, canonicalize_jcs_profile(value[field])))
         else:
             components.append((0, b""))
-    if use_jcs_tie_breaker:
-        components.append((2, canonicalize_jcs_profile(value)))
     return tuple(components)
 
 
 def normalize_reference_array(
     values: Iterable[Any],
     *,
-    sort_tuple: Iterable[str] | dict[str, Any],
+    sort_tuple: Iterable[str],
     identity_key: str | None = None,
 ) -> list[Any]:
-    """Tuple-sort references, dedupe exact copies, and reject identity collisions."""
+    """Tuple-sort references, dedupe exact copies, and reject tuple conflicts."""
 
     unique: dict[bytes, Any] = {}
     identities: dict[Any, bytes] = {}
-    _, use_jcs_tie_breaker = _sort_rule_parts(sort_tuple)
+    tuple_fields = list(sort_tuple)
 
     for value in values:
         encoded = canonicalize_jcs_profile(value)
@@ -334,22 +320,21 @@ def normalize_reference_array(
                 raise ReferenceSemanticsError(f"conflicting duplicate reference identity: {identity}")
             identities[identity] = encoded
         unique.setdefault(encoded, copy.deepcopy(value))
-    if not use_jcs_tie_breaker:
-        tuple_identities: dict[tuple[tuple[int, bytes], ...], bytes] = {}
-        for encoded, value in unique.items():
-            tuple_identity = _declared_sort_key(value, sort_tuple)
-            existing = tuple_identities.get(tuple_identity)
-            if existing is not None and existing != encoded:
-                raise ReferenceSemanticsError("conflicting duplicate declared sort tuple")
-            tuple_identities[tuple_identity] = encoded
-    return sorted(unique.values(), key=lambda value: _declared_sort_key(value, sort_tuple))
+    tuple_identities: dict[tuple[tuple[int, bytes], ...], bytes] = {}
+    for encoded, value in unique.items():
+        tuple_identity = _declared_sort_key(value, tuple_fields)
+        existing = tuple_identities.get(tuple_identity)
+        if existing is not None and existing != encoded:
+            raise ReferenceSemanticsError("conflicting duplicate declared primary tuple")
+        tuple_identities[tuple_identity] = encoded
+    return sorted(unique.values(), key=lambda value: _declared_sort_key(value, tuple_fields))
 
 
 def normalize_semantic_array(
     values: Iterable[Any],
     *,
     semantics: str,
-    sort_tuple: Iterable[str] | dict[str, Any] | None = None,
+    sort_tuple: Iterable[str] | None = None,
     identity_key: str | None = None,
 ) -> list[Any]:
     """Apply one explicitly declared array semantic class."""
@@ -362,16 +347,14 @@ def normalize_semantic_array(
     if semantics == "set":
         return normalize_reference_array(materialized, sort_tuple=sort_tuple, identity_key=identity_key)
     if semantics == "multiset":
-        _, use_jcs_tie_breaker = _sort_rule_parts(sort_tuple)
-        if not use_jcs_tie_breaker:
-            tuple_identities: dict[tuple[tuple[int, bytes], ...], bytes] = {}
-            for value in materialized:
-                encoded = canonicalize_jcs_profile(value)
-                tuple_identity = _declared_sort_key(value, sort_tuple)
-                existing = tuple_identities.get(tuple_identity)
-                if existing is not None and existing != encoded:
-                    raise ReferenceSemanticsError("conflicting duplicate declared sort tuple")
-                tuple_identities[tuple_identity] = encoded
+        tuple_identities: dict[tuple[tuple[int, bytes], ...], bytes] = {}
+        for value in materialized:
+            encoded = canonicalize_jcs_profile(value)
+            tuple_identity = _declared_sort_key(value, sort_tuple)
+            existing = tuple_identities.get(tuple_identity)
+            if existing is not None and existing != encoded:
+                raise ReferenceSemanticsError("conflicting duplicate declared primary tuple")
+            tuple_identities[tuple_identity] = encoded
         return sorted(materialized, key=lambda value: _declared_sort_key(value, sort_tuple))
     raise ReferenceSemanticsError(f"undeclared array semantics: {semantics}")
 
@@ -705,14 +688,13 @@ def reference_self_check(spec: dict[str, Any], fixtures: dict[str, Any]) -> list
         source_sort = spec["canonical_numeric_and_interoperability_profile"]["sort_tuple_profiles"]["source_reference_sort"]
         if normalize_reference_array(reference_vector["input"], sort_tuple=source_sort, identity_key="source_id") != reference_vector["expected"]:
             errors.append("reference ordering/deduplication vector failed")
-        constraint_tie_vector = fixtures["reference_vectors"]["constraint_reference_primary_tie"]
-        constraint_sort = spec["canonical_numeric_and_interoperability_profile"]["sort_tuple_profiles"]["constraint_reference_sort"]
-        if normalize_reference_array(
-            constraint_tie_vector["input"],
-            sort_tuple=constraint_sort,
-            identity_key="reference_id",
-        ) != constraint_tie_vector["expected"]:
-            errors.append("constraint reference JCS final tie-breaker vector failed")
+        collision_vector = fixtures["reference_vectors"]["source_reference_unapproved_field_collision"]
+        try:
+            normalize_reference_array(collision_vector["input"], sort_tuple=source_sort)
+            errors.append("unapproved source field resolved a primary-tuple collision")
+        except ReferenceSemanticsError as exc:
+            if "conflicting duplicate declared primary tuple" not in str(exc):
+                errors.append("unapproved source field collision failed for an unexpected reason")
         if canonicalize_jcs_profile({"value": None}) == canonicalize_jcs_profile({}):
             errors.append("null and absent canonicalized identically")
         if derive_record_source_type(["production_like", "live"]) != "mixed":
@@ -766,11 +748,10 @@ def reference_self_check(spec: dict[str, Any], fixtures: dict[str, Any]) -> list
                 continue
             identity_key = rule.get("identity_key")
             sort_tuple = profile["sort_tuple_profiles"][rule["sort_tuple_profile"]]
-            primary_fields, _ = _sort_rule_parts(sort_tuple)
-            if primary_fields == ["$value"]:
+            if sort_tuple == ["$value"]:
                 values = ["b", "a"]
             else:
-                first_field = primary_fields[0]
+                first_field = sort_tuple[0]
                 values = [
                     {first_field: "b", **({identity_key: "b"} if identity_key else {}), "value": 2},
                     {first_field: "a", **({identity_key: "a"} if identity_key else {}), "value": 1},

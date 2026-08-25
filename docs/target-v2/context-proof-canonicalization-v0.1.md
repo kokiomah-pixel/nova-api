@@ -238,9 +238,6 @@ analogy.
 - Constraint references sort by `(constraint_id_or_digest, source_id)`.
 - Chronology/review/memory references sort by `(reference_type, reference_id,
   version_or_digest)`.
-- Each of those three reference profiles uses the JCS bytes of the
-  already-normalized item only as its final tie-breaker. JCS does not replace
-  the field/type-specific primary tuple.
 - Digest records sort by normalized `(algorithm, parameter_set,
   output_encoding, digest)`.
 - Attestations sort by `(attestation_type_rank, cryptographic_profile_id,
@@ -255,8 +252,9 @@ declares set semantics. Same identity with different content is a conflict, not
 a duplicate; the reference canonicalizer rejects the unqualified set until the
 conflict is explicitly represented in the contract's conflict fields, where all
 variants remain visible. Distinct content with an identical declared sort tuple
-is rejected unless that profile explicitly declares normalized-item JCS bytes
-as its final tie-breaker. Duplicate attestations remain separate only when their
+is rejected as a conflict until explicitly represented. JCS serializes only
+after declared type-specific ordering and never resolves a primary-tuple
+collision. Duplicate attestations remain separate only when their
 IDs or signed scope differ; exact byte duplicates may be rejected.
 
 Canonical ordering does not incorporate unapproved refinement fields.
@@ -264,6 +262,9 @@ Canonical ordering does not incorporate unapproved refinement fields.
 `applicability_status` remain G3-R10. `applicability_scope` is also excluded
 because the current canonical target-v2 contract does not define it
 independently.
+
+Whole-item JCS bytes are prohibited as a canonical sort tie-breaker unless a
+future separately approved contract defines the complete canonical item schema.
 
 ## Algorithm and digest identity
 
