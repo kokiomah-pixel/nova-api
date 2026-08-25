@@ -178,6 +178,21 @@ current_state:
   proposed_v2:
     contract_approved: true
     private_synthetic_reference_adapter_implemented: true
+    Gate_5_Entry_Design_Review:
+      status: COMPLETE
+      artifact: institutional_exposure_contract_v0.1
+      scope: institutional_exposure_contract_only
+      canonicality_source: authoritative_repository_main
+    Gate_5_authorization_preconditions:
+      status: NOT_YET_SATISFIED
+      preconditions_not_yet_evidenced: 18
+      silently_resolved: false
+    Gate_5:
+      status: NOT_STARTED
+      authority: false
+    institutional_pilot:
+      authorized: false
+      started: false
     runtime_implemented: false
     production_active: false
 ```
@@ -382,9 +397,24 @@ product_progression:
     system_wide_production_readiness: not_established
     production_activation_authority: false
 
+  Gate_5_Entry_Design_Review:
+    status: COMPLETE
+    artifact: institutional_exposure_contract_v0.1
+    scope: institutional_exposure_contract_only
+    canonicality_source: authoritative_repository_main
+
+  Gate_5_authorization_preconditions:
+    status: NOT_YET_SATISFIED
+    preconditions_not_yet_evidenced: 18
+    silently_resolved: false
+
   Gate_5:
     name: bounded_institutional_pilot
     status: NOT_STARTED
+    authority: false
+    institutional_pilot:
+      authorized: false
+      started: false
     requirement:
       - local_authority_handoff_verified
       - non_authority_contract_preserved

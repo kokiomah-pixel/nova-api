@@ -1,6 +1,6 @@
 # Sharpe Nova OS — Current State
 
-**Effective date:** August 24, 2026
+**Effective date:** August 25, 2026
 **Authority:** Architect
 **Coherence review:** Jarvis-Nova CCO
 
@@ -64,6 +64,26 @@ current_product_state:
       canonicality_source: authoritative_repository_main
 
     Gate_4: complete
+
+    Gate_5_Entry_Design_Review:
+      status: COMPLETE
+      artifact: institutional_exposure_contract_v0.1
+      scope: institutional_exposure_contract_only
+      canonicality_source: authoritative_repository_main
+
+    Gate_5_authorization_preconditions:
+      status: NOT_YET_SATISFIED
+      preconditions_not_yet_evidenced: 18
+      silently_resolved: false
+
+    Gate_5:
+      status: NOT_STARTED
+      authority: false
+
+    institutional_pilot:
+      authorized: false
+      started: false
+
     runtime_implemented: false
     production_active: false
     runtime_implementation_authority: false
@@ -189,8 +209,23 @@ current_readiness_priority:
     system_wide_production_readiness: not_established
     production_activation_authority: false
 
+  Gate_5_Entry_Design_Review:
+    status: COMPLETE
+    artifact: institutional_exposure_contract_v0.1
+    scope: institutional_exposure_contract_only
+    canonicality_source: authoritative_repository_main
+
+  Gate_5_authorization_preconditions:
+    status: NOT_YET_SATISFIED
+    preconditions_not_yet_evidenced: 18
+    silently_resolved: false
+
   Gate_5_bounded_institutional_pilot:
     status: not_started
+    authority: false
+    institutional_pilot:
+      authorized: false
+      started: false
     implementation_authority: false
     production_activation_authority: false
 ```
