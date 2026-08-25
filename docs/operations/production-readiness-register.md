@@ -26,7 +26,8 @@ public_claim_summary:
   production_incident: contained_historically_unattested
   Gate_3: complete
   canonical_contract: design-v2.1
-  Gate_4: authorized_for_bounded_branch_implementation
+  Gate_4: complete
+  private_synthetic_reference_adapter: implemented
   target_v2_runtime: not_implemented
   target_v2_production: not_active
   institutional_pilot: not_started
@@ -176,7 +177,8 @@ current_state:
 
   proposed_v2:
     contract_approved: true
-    implemented: false
+    private_synthetic_reference_adapter_implemented: true
+    runtime_implemented: false
     production_active: false
 ```
 
@@ -290,8 +292,23 @@ production_readiness:
       - Gate_3_field_derivation_design_complete
 
   v2_adapter:
-    status: NOT_STARTED
-    note: bounded_Gate_4_candidate_exists_only_on_draft_branch
+    status: READY
+    scope: private_synthetic_reference_only
+    evidence:
+      - deterministic_synthetic_conformance_verified
+      - Legacy_v1_derivation_dependency_absent
+      - runtime_import_absent
+      - public_route_absent
+      - production_data_dependency_absent
+      - production_credentials_absent
+      - production_crypto_selection_absent
+      - chronology_mutation_absent
+      - Reflex_Memory_mutation_absent
+    limitations:
+      - target_v2_runtime_not_implemented
+      - no_public_endpoint
+      - no_production_activation
+      - no_institutional_pilot
 
   v2_public_endpoint:
     status: NOT_STARTED
@@ -355,16 +372,15 @@ product_progression:
 
   Gate_4:
     name: private_v2_adapter
-    status: AUTHORIZED_FOR_BOUNDED_BRANCH_IMPLEMENTATION
-    requirement:
-      - design_approved
-      - synthetic_only
-      - no_public_endpoint
-      - no_production_activation
+    status: COMPLETE
+    scope: private_synthetic_reference_only
+    runtime_effect: none
+    public_endpoint_effect: none
+    production_effect: none
     target_v2_runtime: not_implemented
     target_v2_production: not_active
     system_wide_production_readiness: not_established
-    deployment_authority: false
+    production_activation_authority: false
 
   Gate_5:
     name: bounded_institutional_pilot
@@ -511,7 +527,7 @@ GTM_claim_controls:
     - no_external_Legacy_v1_consumers_were_observed_in_the_reviewed_evidence
     - canonical_target_v2_contract_is_design_v2.1
     - Gate_3_is_complete
-    - Gate_4_is_authorized_only_for_bounded_branch_implementation
+    - Gate_4_private_synthetic_reference_adapter_is_complete
 
   must_not_claim_without_further_evidence:
     - full_production_control_plane_is_independently_attested
@@ -519,7 +535,7 @@ GTM_claim_controls:
     - production_settlement_history_is_clear
     - no_historical_CDP_activity_ever_occurred
     - Coinbase_business_verification_implies_Nova_institutional_validation
-    - v2_is_implemented_or_available
+    - target_v2_runtime_or_public_endpoint_is_implemented_or_available
     - institutional_adoption
     - buyer_validation
     - successful_paid_usage

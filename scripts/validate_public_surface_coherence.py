@@ -190,7 +190,14 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
     _require(errors, "docs/target-v2/README.md" in readme, "root_README.links_to_target_v2", "missing target v2 entry link")
     _require(errors, all(line in readme for line in BOUNDARY_LINES), "root_README.canonical_boundary_present", "canonical five-line boundary is incomplete")
     _require(errors, "agent-prepared stablecoin treasury action" in readme.lower(), "root_README.first_workflow_present", "first bounded workflow is missing")
-    _require(errors, "## Current state" in readme and "runtime and private adapter are not yet implemented" in readme, "root_README.current_state_summary_present", "bounded current-state summary is missing")
+    _require(
+        errors,
+        "## Current state" in readme
+        and "private synthetic target-v2 reference adapter is implemented" in readme
+        and "target v2 runtime is not implemented" in readme,
+        "root_README.current_state_summary_present",
+        "bounded current-state summary is missing",
+    )
     quickstart_markers = ("NOVA_API_KEY=mytestkey", "/v1/context?intent=", "## Quick Local Check")
     _require(errors, not any(marker in readme for marker in quickstart_markers), "root_README.Legacy_v1_quickstart_absent", "Legacy v1 startup commands remain in the root README")
 
@@ -215,6 +222,7 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
     _require(errors, _contains_yaml_value(legacy, "implemented", "true"), "product_generation.Legacy_v1_implemented_true", "Legacy v1 must remain implemented")
     _require(errors, _contains_yaml_value(legacy, "canonical_future_external_model", "false"), "product_generation.Legacy_v1_canonical_future_false", "Legacy v1 cannot be the canonical future model")
     _require(errors, _contains_yaml_value(target, "contract_approved", "true"), "product_generation.target_v2_contract_approved_true", "target v2 contract approval is missing")
+    _require(errors, _contains_yaml_value(target, "private_synthetic_reference_adapter_implemented", "true"), "product_generation.target_v2_private_synthetic_reference_adapter_implemented_true", "Gate 4 reference adapter completion is missing")
     _require(errors, _contains_yaml_value(target, "runtime_implemented", "false"), "product_generation.target_v2_runtime_implemented_false", "target v2 runtime must remain not implemented")
     _require(errors, _contains_yaml_value(target, "production_active", "false"), "product_generation.target_v2_production_active_false", "target v2 production must remain inactive")
 

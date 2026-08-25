@@ -76,15 +76,88 @@ RUNTIME_ENTRYPOINTS = (
 ALLOWED_BRANCH_PATHS = {
     "CURRENT_STATE.md",
     "Makefile",
+    "README.md",
     "docs/operations/production-readiness-register.md",
     "docs/target-v2/README.md",
     "docs/target-v2/gate-4-private-synthetic-adapter-v0.1.md",
     "fixtures/target-v2/gate4/private_synthetic_adapter_v0_1.json",
     "scripts/validate_gate4_private_synthetic_adapter.py",
+    "scripts/validate_public_surface_coherence.py",
     "scripts/validate_target_v2_contract_revision.py",
     "tests/test_gate4_private_synthetic_adapter.py",
 }
 ALLOWED_BRANCH_PREFIXES = ("nova/harnesses/target_v2_private_synthetic_adapter/",)
+DURABLE_GATE4_PATHS = (
+    "CURRENT_STATE.md",
+    "docs/operations/production-readiness-register.md",
+    "docs/target-v2/README.md",
+    "docs/target-v2/gate-4-private-synthetic-adapter-v0.1.md",
+)
+STALE_DURABLE_STATE_MARKERS = (
+    "authorized_for_bounded_branch_implementation",
+    "candidate_exists_only_on_draft_branch",
+    "canonical_private_adapter_implemented: false",
+    "private_synthetic_adapter_branch_implemented",
+)
+DURABLE_REQUIRED_MARKERS = {
+    "CURRENT_STATE.md": (
+        "canonical_contract: design-v2.1",
+        "Gate_3: complete",
+        "private_synthetic_reference_adapter:",
+        "implemented: true",
+        "scope: private_synthetic_reference_only",
+        "canonicality_source: authoritative_repository_main",
+        "Gate_4: complete",
+        "runtime_implemented: false",
+        "production_active: false",
+        "runtime_implementation_authority: false",
+        "production_activation_authority: false",
+        "Gate_5_bounded_institutional_pilot:",
+        "status: not_started",
+        "system_wide_production_readiness: not_established",
+    ),
+    "docs/operations/production-readiness-register.md": (
+        "v2_field_derivation:\n    status: READY",
+        "v2_adapter:\n    status: READY",
+        "scope: private_synthetic_reference_only",
+        "deterministic_synthetic_conformance_verified",
+        "Legacy_v1_derivation_dependency_absent",
+        "runtime_import_absent",
+        "public_route_absent",
+        "production_data_dependency_absent",
+        "production_credentials_absent",
+        "production_crypto_selection_absent",
+        "chronology_mutation_absent",
+        "Reflex_Memory_mutation_absent",
+        "Gate_4:\n    name: private_v2_adapter\n    status: COMPLETE",
+        "target_v2_runtime: not_implemented",
+        "target_v2_production: not_active",
+        "institutional_pilot: not_started",
+        "Gate_5:\n    name: bounded_institutional_pilot\n    status: NOT_STARTED",
+        "system_wide_production_readiness: not_established",
+    ),
+    "docs/target-v2/README.md": (
+        "field_derivation_complete: true",
+        "private_synthetic_reference_adapter_implemented: true",
+        "Gate_4_status: complete",
+        "runtime_implemented: false",
+        "production_active: false",
+        "institutional_pilot_started: false",
+        "Gate 4 completion does not activate Gate 5.",
+    ),
+    "docs/target-v2/gate-4-private-synthetic-adapter-v0.1.md": (
+        "Gate_4:\n  status: complete\n  artifact: private_synthetic_reference_adapter",
+        "canonicality:\n  source: authoritative_repository_main",
+        "private_synthetic_reference_adapter:\n  implemented: true",
+        "target_v2_runtime_implemented: false",
+        "target_v2_production_active: false",
+        "system_wide_production_readiness: not_established",
+        "authority_effect: none",
+        "execution_effect: none",
+        "production_activation_authority: false",
+        "Gate_5_authority: false",
+    ),
+}
 
 
 @dataclass(frozen=True)
@@ -151,6 +224,27 @@ def _assigned_literal(tree: ast.Module, name: str) -> object | None:
     return None
 
 
+def validate_durable_merge_state(
+    documents: dict[str, str],
+) -> list[ValidationError]:
+    """Reject branch-relative state from persistent post-merge artifacts."""
+
+    errors: list[ValidationError] = []
+    for path in DURABLE_GATE4_PATHS:
+        text = documents.get(path, "")
+        for marker in STALE_DURABLE_STATE_MARKERS:
+            if marker in text:
+                errors.append(
+                    ValidationError(path, f"stale branch-relative marker: {marker}")
+                )
+        for marker in DURABLE_REQUIRED_MARKERS[path]:
+            if marker not in text:
+                errors.append(
+                    ValidationError(path, f"missing durable Gate 4 marker: {marker}")
+                )
+    return errors
+
+
 def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
     root = root.resolve()
     errors: list[ValidationError] = []
@@ -203,35 +297,14 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
         if not records[gap_id].get("requires_CCO_review") or not records[gap_id].get("requires_Architect_review"):
             errors.append(ValidationError(f"gap_register.{gap_id}", "unapproved refinement became approved"))
 
-    state = (root / "CURRENT_STATE.md").read_text(encoding="utf-8")
-    readiness = (root / "docs/operations/production-readiness-register.md").read_text(encoding="utf-8")
-    target_readme = (root / "docs/target-v2/README.md").read_text(encoding="utf-8")
-    required_state = (
-        "Gate_3: complete",
-        "canonical_contract: design-v2.1",
-        "Gate_4: authorized_for_bounded_branch_implementation",
-        "target_v2_runtime: not_implemented",
-        "target_v2_production: not_active",
-        "system_wide_production_readiness: not_established",
-    )
-    combined = state + "\n" + readiness + "\n" + target_readme
-    for marker in required_state:
-        if marker not in combined:
-            errors.append(ValidationError("governance_state", f"missing marker: {marker}"))
+    documents = {
+        path: (root / path).read_text(encoding="utf-8")
+        for path in DURABLE_GATE4_PATHS
+    }
+    errors.extend(validate_durable_merge_state(documents))
+    readiness = documents["docs/operations/production-readiness-register.md"]
     if "canonical_derivation_rules_and_proof_canonicalization_not_yet_completed" in readiness:
         errors.append(ValidationError("governance_state", "stale Gate 3 limitation remains"))
-    for marker in (
-        "v2_field_derivation:\n    status: READY",
-        "canonical_design_v2.1_contract_merged",
-        "Gate_3_field_derivation_design_complete",
-        "note: bounded_Gate_4_candidate_exists_only_on_draft_branch",
-    ):
-        if marker not in readiness:
-            errors.append(ValidationError("production_readiness", f"missing marker: {marker}"))
-    if "Gate_4_status: authorized_for_bounded_branch_implementation" not in target_readme:
-        errors.append(ValidationError("target_v2_README", "bounded Gate 4 authority is stale"))
-    if "private_adapter_implemented: false" not in target_readme:
-        errors.append(ValidationError("target_v2_README", "canonical adapter boundary is missing"))
     return errors
 
 
@@ -281,6 +354,9 @@ def main(argv: list[str] | None = None) -> int:
     print("Gate 4 private synthetic adapter validation passed.")
     print("runtime_imported=false route_added=false network_IO=false production_credentials_used=false")
     print("unapproved_Gate_3_gaps_incorporated=[] PR_33_dependency=none")
+    print("Gate_4_complete_does_not_mean_runtime=true target_v2_runtime_implemented=false")
+    print("target_v2_production_active=false Gate_5_not_started=true")
+    print("system_wide_production_readiness_not_established=true")
     if args.base_ref:
         print(f"branch_delta_base={args.base_ref} branch_file_scope=passed")
     return 0

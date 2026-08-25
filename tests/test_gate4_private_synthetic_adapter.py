@@ -19,6 +19,9 @@ from nova.harnesses.target_v2_private_synthetic_adapter import (
 )
 from scripts.gate3_reference_semantics import canonicalize_jcs_profile
 from scripts.validate_gate4_private_synthetic_adapter import (
+    DURABLE_GATE4_PATHS,
+    STALE_DURABLE_STATE_MARKERS,
+    validate_durable_merge_state,
     validate_implementation_source,
     validate_repository,
 )
@@ -39,6 +42,13 @@ def _adapter() -> TargetV2SyntheticAdapter:
     )
 
 
+def _durable_documents() -> dict[str, str]:
+    return {
+        path: (ROOT / path).read_text(encoding="utf-8")
+        for path in DURABLE_GATE4_PATHS
+    }
+
+
 def _add_second_source(request: dict, environment: str = "synthetic") -> None:
     request["evidence"]["sources"].append(
         {
@@ -53,6 +63,43 @@ def _add_second_source(request: dict, environment: str = "synthetic") -> None:
 
 def test_gate4_boundary_validator_passes() -> None:
     assert validate_repository() == []
+
+
+def test_durable_gate4_merge_state_passes() -> None:
+    assert validate_durable_merge_state(_durable_documents()) == []
+
+
+@pytest.mark.parametrize("marker", STALE_DURABLE_STATE_MARKERS)
+def test_durable_gate4_state_rejects_branch_relative_markers(marker: str) -> None:
+    documents = _durable_documents()
+    documents["CURRENT_STATE.md"] += f"\n{marker}\n"
+    errors = validate_durable_merge_state(documents)
+    assert any(marker in error.message for error in errors)
+
+
+@pytest.mark.parametrize(
+    ("path", "current", "stale"),
+    [
+        ("CURRENT_STATE.md", "runtime_implemented: false", "runtime_implemented: true"),
+        ("CURRENT_STATE.md", "production_active: false", "production_active: true"),
+        (
+            "CURRENT_STATE.md",
+            "system_wide_production_readiness: not_established",
+            "system_wide_production_readiness: established",
+        ),
+        (
+            "docs/operations/production-readiness-register.md",
+            "Gate_5:\n    name: bounded_institutional_pilot\n    status: NOT_STARTED",
+            "Gate_5:\n    name: bounded_institutional_pilot\n    status: READY",
+        ),
+    ],
+)
+def test_durable_gate4_state_preserves_non_runtime_boundaries(
+    path: str, current: str, stale: str
+) -> None:
+    documents = _durable_documents()
+    documents[path] = documents[path].replace(current, stale)
+    assert validate_durable_merge_state(documents)
 
 
 def test_gate4_safety_validator_does_not_require_git_history(monkeypatch: pytest.MonkeyPatch) -> None:

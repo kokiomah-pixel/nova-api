@@ -310,10 +310,11 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
     _expect(errors, runtime == {"status": "not_implemented", "implementation_authority": False}, "implementation_gate.target_v2_runtime", "must remain stopped")
     for marker in (
         "field_derivation_complete: true",
+        "private_synthetic_reference_adapter_implemented: true",
+        "Gate_4_status: complete",
         "runtime_implemented: false",
-        "private_adapter_implemented: false",
-        "Gate_4_status: authorized_for_bounded_branch_implementation",
-        "Gate 3 design completion does not activate Gate 4.",
+        "production_active: false",
+        "Gate 4 completion does not activate Gate 5.",
     ):
         _expect(errors, marker in readme, "target_v2.README", f"missing marker: {marker}")
     for relative in PERSISTENT_LIFECYCLE_ARTIFACTS:

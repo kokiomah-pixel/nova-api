@@ -3,8 +3,11 @@
 ## Scope
 
 ```yaml
-Gate_4: authorized_for_bounded_branch_implementation
-artifact: isolated_private_synthetic_reference_adapter
+Gate_4:
+  status: complete
+  artifact: private_synthetic_reference_adapter
+canonicality:
+  source: authoritative_repository_main
 canonical_contract: design-v2.1
 semantic_authorities:
   - docs/architecture/external-review-context-contract-v2.md
@@ -51,11 +54,18 @@ with `fixture-only-` and it is not a production default or security claim.
 ## Resulting state
 
 ```yaml
-private_synthetic_adapter_branch_implemented: true
-canonical_private_adapter_implemented: false
+Gate_4:
+  status: complete
+  artifact: private_synthetic_reference_adapter
+canonicality:
+  source: authoritative_repository_main
+private_synthetic_reference_adapter:
+  implemented: true
 target_v2_runtime_implemented: false
 target_v2_production_active: false
 system_wide_production_readiness: not_established
-merge_requested: false
-deployment_authority: false
+authority_effect: none
+execution_effect: none
+production_activation_authority: false
+Gate_5_authority: false
 ```
