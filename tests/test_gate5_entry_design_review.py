@@ -8,12 +8,16 @@ import pytest
 
 from scripts.validate_gate5_entry_design_review import (
     CANONICAL_AUTHORITY_HASHES,
+    DURABLE_LIFECYCLE_PATHS,
     EXPECTED_SCENARIOS,
+    EXPECTED_PRECONDITIONS,
     INCORPORATED,
     PROHIBITED_HUMAN_MEANING,
+    STALE_LIFECYCLE_MARKERS,
     evaluate_scenario,
     render_human_presentation,
     validate_contract,
+    validate_durable_lifecycle_documents,
     validate_fixtures,
     validate_human_presentation,
     validate_repository,
@@ -40,6 +44,13 @@ def _gaps() -> dict:
 
 def _errors(contract: dict) -> list:
     return validate_contract(contract, _gaps())
+
+
+def _durable_documents() -> dict[str, str]:
+    return {
+        path: (ROOT / path).read_text(encoding="utf-8")
+        for path in DURABLE_LIFECYCLE_PATHS
+    }
 
 
 def test_gate5_entry_repository_validator_passes() -> None:
@@ -245,9 +256,64 @@ def test_all_termination_states_have_complete_data_disposition_matrix() -> None:
 
 def test_gate5_and_institutional_pilot_remain_not_started_and_unauthorized() -> None:
     contract = _contract()
+    assert contract["status"] == "COMPLETE"
+    assert contract["workstream"]["status"] == "COMPLETE"
+    assert contract["workstream"]["canonicality_source"] == "authoritative_repository_main"
     assert contract["workstream"]["Gate_5_started"] is False
     assert contract["workstream"]["institutional_pilot_authorized"] is False
-    assert contract["Gate_5"] == {"status": "not_started", "authority": False}
+    assert contract["institutional_pilot"] == {"authorized": False, "started": False}
+    assert contract["Gate_5"] == {"status": "NOT_STARTED", "authority": False}
+
+
+def test_all_gate5_authorization_preconditions_remain_explicit_and_unevidenced() -> None:
+    preconditions = _contract()["Gate_5_authorization_preconditions"]
+    assert preconditions["status"] == "NOT_YET_SATISFIED"
+    assert preconditions["automatic_authorization_from_Entry_Review_completion"] is False
+    assert preconditions["preconditions_not_yet_evidenced"] == 18
+    assert preconditions["institution_specific_configuration_requirements"] == 14
+    assert preconditions["architectural_constraints"] == 4
+    assert preconditions["silently_resolved"] is False
+    for category, expected in EXPECTED_PRECONDITIONS.items():
+        assert preconditions[category] == expected
+
+
+@pytest.mark.parametrize(
+    ("category", "field"),
+    [
+        (category, field)
+        for category, fields in EXPECTED_PRECONDITIONS.items()
+        for field in fields
+    ],
+)
+def test_validator_rejects_disappearing_or_silently_resolved_precondition(
+    category: str, field: str
+) -> None:
+    removed = _contract()
+    removed["Gate_5_authorization_preconditions"][category].pop(field)
+    assert _errors(removed)
+    resolved = _contract()
+    resolved["Gate_5_authorization_preconditions"][category][field] = "satisfied"
+    assert _errors(resolved)
+
+
+def test_entry_review_completion_never_automatically_authorizes_gate5() -> None:
+    changed = _contract()
+    changed["Gate_5_authorization_preconditions"][
+        "automatic_authorization_from_Entry_Review_completion"
+    ] = True
+    changed["Gate_5"]["authority"] = True
+    assert _errors(changed)
+
+
+def test_durable_lifecycle_documents_are_merge_stable() -> None:
+    assert validate_durable_lifecycle_documents(_durable_documents()) == []
+
+
+@pytest.mark.parametrize("marker", STALE_LIFECYCLE_MARKERS)
+def test_durable_lifecycle_rejects_stale_premerge_markers(marker: str) -> None:
+    documents = _durable_documents()
+    documents["CURRENT_STATE.md"] += f"\n{marker}\n"
+    assert validate_durable_lifecycle_documents(documents)
 
 
 def test_PR33_and_unapproved_gate3_semantics_are_absent() -> None:
@@ -309,6 +375,12 @@ def test_validator_rejects_started_gate_or_pilot() -> None:
         changed = _contract()
         changed["workstream"][field] = True
         assert _errors(changed)
+    changed = _contract()
+    changed["institutional_pilot"]["authorized"] = True
+    assert _errors(changed)
+    changed = _contract()
+    changed["institutional_pilot"]["started"] = True
+    assert _errors(changed)
 
 
 def test_validator_rejects_real_tenant_idp_runtime_and_production_state() -> None:

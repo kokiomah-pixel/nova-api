@@ -4,18 +4,25 @@
 
 ```yaml
 workstream: Gate_5_Entry_Design_Review
-authorized: true
-architecture_reviewable_when_validated: true
-Gate_5_started: false
-institutional_pilot_authorized: false
+status: COMPLETE
+artifact: institutional_exposure_contract_v0.1
+scope: institutional_exposure_contract_only
+canonicality_source: authoritative_repository_main
 canonical_contract: design-v2.1
 action_class: agent_prepared_stablecoin_treasury_action
 additional_action_classes: false
 authority_effect: none
 execution_effect: none
+Gate_5:
+  status: NOT_STARTED
+  authority: false
+institutional_pilot:
+  authorized: false
+  started: false
 ```
 
-This pre-Gate package makes one institutional-exposure architecture reviewable.
+This completed pre-Gate review makes one institutional-exposure architecture
+reviewable.
 It does not authorize Gate 5, an institution, tenant, endpoint, runtime,
 identity-provider connection, production data, or production credentials.
 
@@ -70,7 +77,44 @@ No numerical pilot threshold is invented. Every metric carries a
 workflow owner and Architect. Legal title/licence terms, jurisdiction-specific
 retention duration, and backup deletion timing remain required counsel or
 institutional configuration decisions before any pilot authorization. They do
-not block review of this architecture and are not silently resolved here.
+not block completion of this architecture review and are not silently resolved
+here.
+
+## Gate 5 authorization preconditions
+
+Entry Review completion does not satisfy or waive any Gate 5 authorization
+precondition. The following 18 conditions remain unevidenced for a future
+institution-specific authorization:
+
+```yaml
+Gate_5_authorization_preconditions:
+  status: NOT_YET_SATISFIED
+  preconditions_not_yet_evidenced: 18
+  silently_resolved: false
+  institutional_configuration:
+    institution_and_workflow_owner_identified: required
+    local_decision_authority_identified: required
+    review_profile_owner_identified: required
+    external_identity_authority_defined: required
+  data_and_legal:
+    legal_title_and_license_terms_resolved: required
+    jurisdiction_specific_retention_duration_defined: required
+    backup_deletion_timing_defined: required
+    export_and_post_withdrawal_disposition_approved: required
+  measurement:
+    success_thresholds_agreed: required
+    falsification_thresholds_agreed: required
+    observation_windows_agreed: required
+  operations:
+    support_access_model_approved: required
+    incident_and_degradation_process_approved: required
+    withdrawal_requesters_and_process_approved: required
+  architecture:
+    one_action_class_only: required
+    local_authority_external_to_Nova: required
+    execution_path_through_Nova: prohibited
+    production_execution_credentials_in_Nova: prohibited
+```
 
 ## Canonical dependency audit
 
@@ -96,8 +140,9 @@ canonical main semantics, so G3-R10 and PR #33 are not dependencies.
 
 ## Completion meaning
 
-Passing this review means only that institutional exposure architecture is
-reviewable. Gate 5 remains `NOT_STARTED`; a pilot remains `NOT_AUTHORIZED`.
+This Entry Design Review is `COMPLETE`, meaning only that institutional
+exposure architecture is reviewable. Gate 5 remains `NOT_STARTED`; a pilot
+remains `NOT_AUTHORIZED`.
 Any later start requires a separate Architect decision after the named legal,
 policy, metric-threshold, identity, retention, incident, and withdrawal
 configuration is complete.

@@ -1,7 +1,9 @@
 {
   "schema_version": "0.1",
   "artifact": "Gate_5_Entry_institutional_exposure_contract",
-  "status": "authorized_design_workstream",
+  "status": "COMPLETE",
+  "scope": "institutional_exposure_contract_only",
+  "canonicality_source": "authoritative_repository_main",
   "canonical_target_contract": {
     "version": "design-v2.1",
     "mutation_permitted": false,
@@ -16,13 +18,56 @@
   },
   "workstream": {
     "type": "Gate_5_Entry_Design_Review",
-    "authorized": true,
+    "status": "COMPLETE",
+    "artifact": "institutional_exposure_contract_v0.1",
+    "scope": "institutional_exposure_contract_only",
+    "canonicality_source": "authoritative_repository_main",
     "Gate_5_started": false,
     "institutional_pilot_authorized": false,
     "institution_onboarded": false,
     "tenant_created": false,
     "runtime_activated": false,
     "production_active": false
+  },
+  "institutional_pilot": {
+    "authorized": false,
+    "started": false
+  },
+  "Gate_5_authorization_preconditions": {
+    "status": "NOT_YET_SATISFIED",
+    "automatic_authorization_from_Entry_Review_completion": false,
+    "preconditions_not_yet_evidenced": 18,
+    "institution_specific_configuration_requirements": 14,
+    "architectural_constraints": 4,
+    "silently_resolved": false,
+    "institutional_configuration": {
+      "institution_and_workflow_owner_identified": "required",
+      "local_decision_authority_identified": "required",
+      "review_profile_owner_identified": "required",
+      "external_identity_authority_defined": "required"
+    },
+    "data_and_legal": {
+      "legal_title_and_license_terms_resolved": "required",
+      "jurisdiction_specific_retention_duration_defined": "required",
+      "backup_deletion_timing_defined": "required",
+      "export_and_post_withdrawal_disposition_approved": "required"
+    },
+    "measurement": {
+      "success_thresholds_agreed": "required",
+      "falsification_thresholds_agreed": "required",
+      "observation_windows_agreed": "required"
+    },
+    "operations": {
+      "support_access_model_approved": "required",
+      "incident_and_degradation_process_approved": "required",
+      "withdrawal_requesters_and_process_approved": "required"
+    },
+    "architecture": {
+      "one_action_class_only": "required",
+      "local_authority_external_to_Nova": "required",
+      "execution_path_through_Nova": "prohibited",
+      "production_execution_credentials_in_Nova": "prohibited"
+    }
   },
   "action_boundary": {
     "permitted_action_classes": [
@@ -397,7 +442,7 @@
     "execution": false
   },
   "Gate_5": {
-    "status": "not_started",
+    "status": "NOT_STARTED",
     "authority": false
   }
 }

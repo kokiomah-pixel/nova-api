@@ -52,6 +52,37 @@ REQUIRED_DOMAINS = {
     "falsification",
     "withdrawal",
     "termination",
+    "Gate_5_authorization_preconditions",
+}
+EXPECTED_PRECONDITIONS = {
+    "institutional_configuration": {
+        "institution_and_workflow_owner_identified": "required",
+        "local_decision_authority_identified": "required",
+        "review_profile_owner_identified": "required",
+        "external_identity_authority_defined": "required",
+    },
+    "data_and_legal": {
+        "legal_title_and_license_terms_resolved": "required",
+        "jurisdiction_specific_retention_duration_defined": "required",
+        "backup_deletion_timing_defined": "required",
+        "export_and_post_withdrawal_disposition_approved": "required",
+    },
+    "measurement": {
+        "success_thresholds_agreed": "required",
+        "falsification_thresholds_agreed": "required",
+        "observation_windows_agreed": "required",
+    },
+    "operations": {
+        "support_access_model_approved": "required",
+        "incident_and_degradation_process_approved": "required",
+        "withdrawal_requesters_and_process_approved": "required",
+    },
+    "architecture": {
+        "one_action_class_only": "required",
+        "local_authority_external_to_Nova": "required",
+        "execution_path_through_Nova": "prohibited",
+        "production_execution_credentials_in_Nova": "prohibited",
+    },
 }
 REQUIRED_FAILURES = {
     "Nova_unavailable",
@@ -113,6 +144,21 @@ ALLOWED_BRANCH_PATHS = {
     "scripts/validate_gate5_entry_design_review.py",
     "tests/test_gate5_entry_design_review.py",
 }
+DURABLE_LIFECYCLE_PATHS = (
+    "CURRENT_STATE.md",
+    "docs/operations/production-readiness-register.md",
+    str(REVIEW_PATH),
+    str(CONTRACT_PATH),
+    str(SPEC_PATH),
+)
+STALE_LIFECYCLE_MARKERS = (
+    "authorized_design_workstream",
+    "architecture_reviewable_when_validated",
+    "candidate_complete",
+    "candidate only",
+    "draft branch",
+    "not canonical until merge",
+)
 
 
 @dataclass(frozen=True)
@@ -301,13 +347,53 @@ def validate_contract(
     errors.extend(_reject_enabled_prohibited_flags(contract))
     errors += _require(REQUIRED_DOMAINS <= contract.keys(), location, "institutional domains missing")
     errors += _require(contract.get("schema_version") == "0.1", location, "schema version must be 0.1")
+    errors += _require(contract.get("status") == "COMPLETE", location, "Entry Design Review status must be COMPLETE")
+    errors += _require(contract.get("scope") == "institutional_exposure_contract_only", location, "Entry Design Review scope changed")
+    errors += _require(contract.get("canonicality_source") == "authoritative_repository_main", location, "merge-stable canonicality source missing")
     canonical = contract.get("canonical_target_contract", {})
     errors += _require(canonical.get("version") == "design-v2.1", location, "canonical contract changed")
     errors += _require(set(canonical.get("incorporated_refinements", [])) == INCORPORATED, location, "incorporated set changed")
     errors += _require(canonical.get("unapproved_refinements_used") == [], location, "unapproved refinement used")
     workstream = contract.get("workstream", {})
+    errors += _require(
+        workstream.get("status") == "COMPLETE"
+        and workstream.get("artifact") == "institutional_exposure_contract_v0.1"
+        and workstream.get("canonicality_source") == "authoritative_repository_main",
+        location,
+        "durable Entry Design Review lifecycle is incomplete",
+    )
     for key in ("Gate_5_started", "institutional_pilot_authorized", "institution_onboarded", "tenant_created", "runtime_activated", "production_active"):
         errors += _require(workstream.get(key) is False, f"{location}.workstream.{key}", "must remain false")
+    errors += _require(
+        contract.get("institutional_pilot") == {"authorized": False, "started": False},
+        location,
+        "institutional pilot must remain unauthorized and not started",
+    )
+    preconditions = contract.get("Gate_5_authorization_preconditions", {})
+    errors += _require(
+        preconditions.get("status") == "NOT_YET_SATISFIED",
+        location,
+        "Gate 5 authorization preconditions must remain not yet satisfied",
+    )
+    errors += _require(
+        preconditions.get("automatic_authorization_from_Entry_Review_completion") is False,
+        location,
+        "Entry Review completion must not automatically authorize Gate 5",
+    )
+    errors += _require(
+        preconditions.get("preconditions_not_yet_evidenced") == 18
+        and preconditions.get("institution_specific_configuration_requirements") == 14
+        and preconditions.get("architectural_constraints") == 4
+        and preconditions.get("silently_resolved") is False,
+        location,
+        "Gate 5 precondition counts or unresolved state changed",
+    )
+    for category, expected in EXPECTED_PRECONDITIONS.items():
+        errors += _require(
+            preconditions.get(category) == expected,
+            f"{location}.Gate_5_authorization_preconditions.{category}",
+            "required authorization precondition disappeared or was silently resolved",
+        )
     action = contract.get("action_boundary", {})
     errors += _require(action.get("permitted_action_classes") == ["agent_prepared_stablecoin_treasury_action"], location, "exactly one bounded action class required")
     errors += _require(action.get("multiple_action_classes_permitted") is False, location, "multiple action classes prohibited")
@@ -360,7 +446,7 @@ def validate_contract(
     errors += _require(dependencies == {"PR_33": "none", "unapproved_Gate_3_gaps": [], "blocking_dependency": None}, location, "dependency boundary changed")
     mutations = contract.get("mutation_boundaries", {})
     errors += _require(mutations and not any(mutations.values()), location, "prohibited implementation mutation enabled")
-    errors += _require(contract.get("Gate_5") == {"status": "not_started", "authority": False}, location, "Gate 5 must remain not started")
+    errors += _require(contract.get("Gate_5") == {"status": "NOT_STARTED", "authority": False}, location, "Gate 5 must remain not started and unauthorized")
 
     approved_from_registry = {
         item["id"]
@@ -394,19 +480,34 @@ def validate_fixtures(fixtures: dict[str, Any]) -> list[ValidationError]:
     return errors
 
 
-def validate_documents(root: Path) -> list[ValidationError]:
+def validate_durable_lifecycle_documents(documents: dict[str, str]) -> list[ValidationError]:
     errors: list[ValidationError] = []
     required = {
-        REVIEW_PATH: ("Gate_5_started: false", "institutional_pilot_authorized: false", "PR_33_dependency: none", "unapproved_Gate_3_gaps: []"),
-        CONTRACT_PATH: ("Exactly one action class", "Authentication is not workflow authorization", "Nova does not select", "template only"),
-        Path("CURRENT_STATE.md"): ("Gate_5_Entry_Design_Review:", "authorized: true", "Gate_5_bounded_institutional_pilot:", "status: not_started"),
-        Path("docs/operations/production-readiness-register.md"): ("Gate_5_Entry_Design_Review:", "authorized: true", "Gate_5:", "status: NOT_STARTED"),
+        str(REVIEW_PATH): ("status: COMPLETE", "canonicality_source: authoritative_repository_main", "Gate_5_authorization_preconditions:", "preconditions_not_yet_evidenced: 18", "PR_33_dependency: none", "unapproved_Gate_3_gaps: []"),
+        str(CONTRACT_PATH): ("Entry_Design_Review_status: COMPLETE", "canonicality_source: authoritative_repository_main", "Gate_5_authorization_preconditions:", "preconditions_not_yet_evidenced: 18", "Exactly one action class", "Authentication is not workflow authorization", "Nova does not select", "template only"),
+        "CURRENT_STATE.md": ("Gate_5_Entry_Design_Review:", "status: COMPLETE", "canonicality_source: authoritative_repository_main", "Gate_5_authorization_preconditions:", "preconditions_not_yet_evidenced: 18", "Gate_5_bounded_institutional_pilot:", "status: NOT_STARTED", "authorized: false", "started: false"),
+        "docs/operations/production-readiness-register.md": ("Gate_5_Entry_Design_Review:", "status: COMPLETE", "canonicality_source: authoritative_repository_main", "Gate_5_authorization_preconditions:", "preconditions_not_yet_evidenced: 18", "Gate_5:", "status: NOT_STARTED", "authorized: false", "started: false"),
+        str(SPEC_PATH): ('"status": "COMPLETE"', '"canonicality_source": "authoritative_repository_main"', '"Gate_5_authorization_preconditions"', '"preconditions_not_yet_evidenced": 18', '"status": "NOT_STARTED"', '"authorized": false', '"started": false'),
     }
     for path, markers in required.items():
-        text = (root / path).read_text(encoding="utf-8") if (root / path).exists() else ""
+        text = documents.get(path, "")
         for marker in markers:
-            errors += _require(marker in text, str(path), f"required marker missing: {marker}")
+            errors += _require(marker in text, path, f"required marker missing: {marker}")
+    for path in DURABLE_LIFECYCLE_PATHS:
+        text = documents.get(path, "")
+        lowered = text.lower()
+        for marker in STALE_LIFECYCLE_MARKERS:
+            if marker.lower() in lowered:
+                errors.append(ValidationError(path, f"stale pre-merge lifecycle marker: {marker}"))
     return errors
+
+
+def validate_documents(root: Path) -> list[ValidationError]:
+    documents = {
+        path: (root / path).read_text(encoding="utf-8") if (root / path).exists() else ""
+        for path in DURABLE_LIFECYCLE_PATHS
+    }
+    return validate_durable_lifecycle_documents(documents)
 
 
 def validate_canonical_authorities(root: Path) -> list[ValidationError]:

@@ -4,10 +4,16 @@
 
 ```yaml
 artifact: Gate_5_Entry_institutional_exposure_contract
-status: authorized_design_workstream
+Entry_Design_Review_status: COMPLETE
+scope: institutional_exposure_contract_only
+canonicality_source: authoritative_repository_main
 canonical_target_contract: design-v2.1
-Gate_5_started: false
-institutional_pilot_authorized: false
+Gate_5:
+  status: NOT_STARTED
+  authority: false
+institutional_pilot:
+  authorized: false
+  started: false
 institution_onboarded: false
 tenant_created: false
 runtime_activated: false
@@ -16,8 +22,8 @@ authority_effect: none
 execution_effect: none
 ```
 
-This is the contract that must be reviewable before an Architect can decide
-whether to authorize a bounded Gate 5 pilot. It creates no present Gate 5,
+This is the completed Entry Design Review contract that must exist before an
+Architect can decide whether to authorize a bounded Gate 5 pilot. It creates no present Gate 5,
 deployment, tenant, institution, endpoint, identity-provider, or production
 authority.
 
@@ -210,6 +216,53 @@ acceptance, or mutation semantics.
 Legacy v1, design-v2.1, the Gate 4 adapter, runtime, routes, production crypto,
 x402, payments, settlement, execution, chronology, and Reflex Memory are not
 modified.
+
+## Gate 5 authorization preconditions
+
+The review is complete because the architecture and dependency surface are
+coherent. Gate 5 remains not started because no institution-specific
+authorization precondition has been evidenced. Completion must not trigger,
+imply, or automate Gate 5 authority.
+
+```yaml
+Gate_5_authorization_preconditions:
+  status: NOT_YET_SATISFIED
+  preconditions_not_yet_evidenced: 18
+  silently_resolved: false
+
+  institutional_configuration:
+    institution_and_workflow_owner_identified: required
+    local_decision_authority_identified: required
+    review_profile_owner_identified: required
+    external_identity_authority_defined: required
+
+  data_and_legal:
+    legal_title_and_license_terms_resolved: required
+    jurisdiction_specific_retention_duration_defined: required
+    backup_deletion_timing_defined: required
+    export_and_post_withdrawal_disposition_approved: required
+
+  measurement:
+    success_thresholds_agreed: required
+    falsification_thresholds_agreed: required
+    observation_windows_agreed: required
+
+  operations:
+    support_access_model_approved: required
+    incident_and_degradation_process_approved: required
+    withdrawal_requesters_and_process_approved: required
+
+  architecture:
+    one_action_class_only: required
+    local_authority_external_to_Nova: required
+    execution_path_through_Nova: prohibited
+    production_execution_credentials_in_Nova: prohibited
+```
+
+`required` means future authorization evidence is absent, not that a value has
+been guessed. `prohibited` is an invariant that a later authorization must
+continue to preserve. The inventory contains 14 institution-specific
+configuration requirements and four architectural constraints.
 
 ## Non-authorizing future decision template
 
