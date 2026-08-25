@@ -22,6 +22,10 @@ The adapter is an offline harness package at
 `nova/harnesses/target_v2_private_synthetic_adapter`. It has no application
 startup import, public route, service process, network input/output, production
 configuration, provider SDK, credential, or production-data dependency.
+Gate 4 v0.1 accepts only evidence whose `record_source_type` is `synthetic`;
+`production_like`, `live`, and mixed-source inputs fail before derivation. The
+broader G3-R03 environment model remains canonical contract semantics but is not
+instantiated by this bounded adapter.
 
 The adapter independently normalizes exact financial values, timestamps,
 declared sets, and JCS structural serialization. It constructs descriptive
@@ -29,6 +33,8 @@ target-v2 review context from explicit synthetic facts and profile rules. It
 does not consume Legacy v1 decisions or admissions, select a winning source,
 interpret chronology or accepted-memory references, or produce an approval,
 authorization, settlement, or execution result.
+Legacy-v1-only derivation fields fail closed at the request boundary rather than
+being ignored.
 
 ## Reference and proof boundary
 

@@ -94,8 +94,12 @@
     "temporal_uncertain": "remove evidence.sources[0].observed_at",
     "temporal_stale": "set evidence.sources[0].observed_at outside profile threshold",
     "temporal_superseded": "add prepared_action.superseded_by_reference",
-    "mixed_environment": "add a production_like source segment",
+    "production_like_environment_rejected": "set evidence.sources[0].record_source_type production_like",
+    "live_environment_rejected": "set evidence.sources[0].record_source_type live",
+    "mixed_environment_rejected": "add a non-synthetic source segment",
+    "Legacy_v1_decision_status_rejected": "add decision_status ALLOW",
+    "Legacy_v1_permission_budget_rejected": "add permission_budget fixture_value",
     "profile_version_difference": "change review_profile.profile_version and profile_hash",
-    "Legacy_v1_perturbation": "add ignored non-authoritative test control"
+    "Legacy_v1_outcome_independence": "all Legacy outcome variants fail before target-v2 derivation"
   }
 }

@@ -28,7 +28,22 @@ SOURCE_TUPLE = (
 )
 CONSTRAINT_TUPLE = ("constraint_id_or_digest", "source_id")
 CHRONOLOGY_TUPLE = ("reference_type", "reference_id", "version_or_digest")
-PERMITTED_ENVIRONMENTS = {"synthetic", "production_like", "live"}
+SYNTHETIC_ENVIRONMENT = "synthetic"
+PROHIBITED_LEGACY_FIELDS = frozenset(
+    {
+        "decision_status",
+        "decision_admission_record",
+        "permission_budget",
+        "permission_budget_class",
+        "execution_posture",
+        "recommended_action",
+        "adjusted_size",
+        "conditioned_size",
+        "halt_release_authority",
+        "prevented_action",
+        "intervention_type",
+    }
+)
 
 
 class SyntheticAdapterError(ValueError):
@@ -60,6 +75,7 @@ class TargetV2SyntheticAdapter:
     def adapt(self, request: dict[str, Any]) -> AdapterResult:
         """Construct one deterministic response without external side effects."""
 
+        self._validate_request_boundary(request)
         try:
             prepared = self._normalize_prepared_action(request["prepared_action"])
             created_at = normalize_timestamp(request["synthetic_record_created_at"])
@@ -80,8 +96,7 @@ class TargetV2SyntheticAdapter:
         conflicts = self._normalize_conflicts(
             request["evidence"].get("unresolved_source_conflicts", [])
         )
-        environments = {source["record_source_type"] for source in sources}
-        record_source_value = next(iter(environments)) if len(environments) == 1 else "mixed"
+        record_source_value = SYNTHETIC_ENVIRONMENT
         source_state = self._source_state(sources, conflicts)
         context_state, temporal_reasons = self._context_state(
             sources=sources,
@@ -223,8 +238,10 @@ class TargetV2SyntheticAdapter:
         normalized: list[dict[str, Any]] = []
         for raw in raw_sources:
             environment = raw["record_source_type"]
-            if environment not in PERMITTED_ENVIRONMENTS:
-                raise SyntheticAdapterError(f"invalid evidence environment: {environment}")
+            if environment != SYNTHETIC_ENVIRONMENT:
+                raise SyntheticAdapterError(
+                    "Gate 4 v0.1 accepts only record_source_type: synthetic"
+                )
             item = {
                 "source_id": raw["source_id"],
                 "source_version_or_digest": raw["source_version_or_digest"],
@@ -234,6 +251,26 @@ class TargetV2SyntheticAdapter:
             }
             normalized.append(item)
         return normalize_declared_set(normalized, tuple_fields=SOURCE_TUPLE)
+
+    @classmethod
+    def _validate_request_boundary(cls, value: Any, path: str = "request") -> None:
+        """Reject non-synthetic and Legacy-v1-only material before derivation."""
+
+        if isinstance(value, dict):
+            for key, child in value.items():
+                child_path = f"{path}.{key}"
+                if key in PROHIBITED_LEGACY_FIELDS:
+                    raise SyntheticAdapterError(
+                        f"prohibited Legacy v1 field at {child_path}: {key}"
+                    )
+                if key == "record_source_type" and child != SYNTHETIC_ENVIRONMENT:
+                    raise SyntheticAdapterError(
+                        "Gate 4 v0.1 accepts only record_source_type: synthetic"
+                    )
+                cls._validate_request_boundary(child, child_path)
+        elif isinstance(value, list):
+            for index, child in enumerate(value):
+                cls._validate_request_boundary(child, f"{path}[{index}]")
 
     @staticmethod
     def _normalize_constraints(raw_items: list[dict[str, Any]]) -> list[dict[str, Any]]:

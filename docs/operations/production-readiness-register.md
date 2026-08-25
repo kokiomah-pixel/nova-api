@@ -284,11 +284,14 @@ production_readiness:
     status: READY
 
   v2_field_derivation:
-    status: READY_FOR_DESIGN_REVIEW
-    limitation: canonical_derivation_rules_and_proof_canonicalization_not_yet_completed
+    status: READY
+    evidence:
+      - canonical_design_v2.1_contract_merged
+      - Gate_3_field_derivation_design_complete
 
   v2_adapter:
     status: NOT_STARTED
+    note: bounded_Gate_4_candidate_exists_only_on_draft_branch
 
   v2_public_endpoint:
     status: NOT_STARTED

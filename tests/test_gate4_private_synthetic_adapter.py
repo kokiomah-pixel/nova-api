@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 import pytest
+import scripts.validate_gate4_private_synthetic_adapter as gate4_validator
 
 from nova.harnesses.target_v2_private_synthetic_adapter import (
     CanonicalizationError,
@@ -38,7 +39,7 @@ def _adapter() -> TargetV2SyntheticAdapter:
     )
 
 
-def _add_second_source(request: dict, environment: str = "production_like") -> None:
+def _add_second_source(request: dict, environment: str = "synthetic") -> None:
     request["evidence"]["sources"].append(
         {
             "source_id": "source-b",
@@ -51,6 +52,14 @@ def _add_second_source(request: dict, environment: str = "production_like") -> N
 
 
 def test_gate4_boundary_validator_passes() -> None:
+    assert validate_repository() == []
+
+
+def test_gate4_safety_validator_does_not_require_git_history(monkeypatch: pytest.MonkeyPatch) -> None:
+    def inaccessible_history(*args: object, **kwargs: object) -> object:
+        raise AssertionError("CI-portable safety validation must not inspect git history")
+
+    monkeypatch.setattr(gate4_validator.subprocess, "run", inaccessible_history)
     assert validate_repository() == []
 
 
@@ -205,15 +214,35 @@ def test_null_and_absent_remain_distinct() -> None:
         _adapter().adapt(request)
 
 
-def test_source_environment_segmentation_is_authoritative_and_mixed() -> None:
+def test_synthetic_source_environment_is_preserved() -> None:
     request = _base()
     _add_second_source(request)
     result = _adapter().adapt(request).response
-    assert result["record_source_type"]["value"] == "mixed"
+    assert result["record_source_type"]["value"] == "synthetic"
     assert {item["record_source_type"] for item in result["record_source_type"]["source_segmentation"]} == {
         "synthetic",
-        "production_like",
     }
+
+
+@pytest.mark.parametrize("environment", ["production_like", "live", "mixed"])
+def test_gate4_rejects_non_synthetic_record_source_type(environment: str) -> None:
+    request = _base()
+    request["evidence"]["sources"][0]["record_source_type"] = environment
+    with pytest.raises(SyntheticAdapterError, match="accepts only record_source_type: synthetic"):
+        _adapter().adapt(request)
+
+
+def test_gate4_rejects_mixed_source_input() -> None:
+    request = _base()
+    _add_second_source(request, "production_like")
+    with pytest.raises(SyntheticAdapterError, match="accepts only record_source_type: synthetic"):
+        _adapter().adapt(request)
+
+
+def test_G3_R03_mixed_semantics_remain_canonical_outside_gate4() -> None:
+    contract = json.loads((ROOT / "specs/review_context_contract_v2.json").read_text(encoding="utf-8"))
+    permitted = contract["response_model"]["record_source_type"]["permitted_values"]
+    assert permitted == ["synthetic", "production_like", "live", "mixed"]
 
 
 def test_empty_sources_do_not_invent_a_synthetic_environment() -> None:
@@ -262,11 +291,40 @@ def test_authority_handoff_and_boundary_are_constants() -> None:
     }
 
 
-def test_Legacy_v1_outcome_perturbation_has_no_target_v2_semantic_effect() -> None:
-    baseline = _base()
-    perturbed = _base()
-    perturbed["legacy_v1_test_control"] = {"decision": "ALLOW", "admission": "accepted"}
-    assert _adapter().adapt(baseline).canonical_semantic_material == _adapter().adapt(perturbed).canonical_semantic_material
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("decision_status", "ALLOW"),
+        ("decision_admission_record", {"status": "admitted"}),
+        ("permission_budget", "fixture_value"),
+        ("permission_budget_class", "fixture_class"),
+        ("execution_posture", "fixture_posture"),
+        ("recommended_action", "fixture_action"),
+        ("adjusted_size", "10"),
+        ("conditioned_size", "10"),
+        ("halt_release_authority", "fixture_authority"),
+        ("prevented_action", "fixture_action"),
+        ("intervention_type", "fixture_intervention"),
+    ],
+)
+def test_Legacy_v1_derivation_fields_fail_closed(field: str, value: object) -> None:
+    request = _base()
+    request[field] = value
+    with pytest.raises(SyntheticAdapterError, match=f"prohibited Legacy v1 field.*{field}"):
+        _adapter().adapt(request)
+
+
+def test_Legacy_v1_outcome_changes_cannot_influence_target_v2_derivation() -> None:
+    baseline = _adapter().adapt(_base()).canonical_semantic_material
+    errors: list[str] = []
+    for outcome in ("ALLOW", "DENY"):
+        request = _base()
+        request["decision_status"] = outcome
+        with pytest.raises(SyntheticAdapterError) as caught:
+            _adapter().adapt(request)
+        errors.append(str(caught.value))
+    assert errors[0] == errors[1]
+    assert _adapter().adapt(_base()).canonical_semantic_material == baseline
 
 
 def test_proof_inputs_select_no_production_algorithm_or_security_claim() -> None:

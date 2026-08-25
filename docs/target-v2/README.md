@@ -10,12 +10,15 @@ target_v2:
   field_derivation_complete: true
   runtime_implemented: false
   private_adapter_implemented: false
-  Gate_4_status: not_authorized
+  Gate_4_status: authorized_for_bounded_branch_implementation
   production_active: false
   institutional_pilot_started: false
 ```
 
 Target v2 is the canonical future Sharpe Nova OS external contract.
+
+The bounded Gate 4 draft-branch candidate is not a canonical private adapter,
+a target-v2 runtime, or a production-active implementation.
 
 It is designed to structure governed review context around an agent-prepared
 financial action before local authority acts.

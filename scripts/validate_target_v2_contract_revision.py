@@ -312,7 +312,7 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
         "field_derivation_complete: true",
         "runtime_implemented: false",
         "private_adapter_implemented: false",
-        "Gate_4_status: not_authorized",
+        "Gate_4_status: authorized_for_bounded_branch_implementation",
         "Gate 3 design completion does not activate Gate 4.",
     ):
         _expect(errors, marker in readme, "target_v2.README", f"missing marker: {marker}")
