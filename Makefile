@@ -13,6 +13,7 @@ PYTHON ?= .venv/bin/python
 	verify-scenarios \
 	verify-tests \
 	verify-gate4-private-adapter \
+	verify-gate5-entry-design \
 	verify-chronology \
 	verify-public-surface \
 	verify-whitespace \
@@ -37,6 +38,7 @@ verify: \
 	verify-scenarios \
 	verify-tests \
 	verify-gate4-private-adapter \
+	verify-gate5-entry-design \
 	verify-chronology \
 	verify-public-surface \
 	verify-whitespace
@@ -74,6 +76,9 @@ verify-tests: require-venv
 
 verify-gate4-private-adapter: require-venv
 	$(PYTHON) scripts/validate_gate4_private_synthetic_adapter.py
+
+verify-gate5-entry-design: require-venv
+	$(PYTHON) scripts/validate_gate5_entry_design_review.py
 
 verify-chronology: require-venv
 	$(MAKE) chronology-verify PYTHON=$(PYTHON)

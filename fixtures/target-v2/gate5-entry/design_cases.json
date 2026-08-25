@@ -1,0 +1,250 @@
+{
+  "fixture_set": "Gate_5_Entry_Design_Review_v0.1",
+  "synthetic_only": true,
+  "institution": "synthetic-institution-g5e",
+  "tenant": "synthetic-tenant-g5e",
+  "action_class": "agent_prepared_stablecoin_treasury_action",
+  "scenarios": [
+    {
+      "id": "G5E-001",
+      "name": "normal bounded stablecoin treasury review",
+      "expected": "accept",
+      "input": {
+        "action_class": "agent_prepared_stablecoin_treasury_action",
+        "action_prepared_externally": true,
+        "profile_id": "synthetic-profile",
+        "profile_version": "1",
+        "record_source_type": "synthetic"
+      }
+    },
+    {
+      "id": "G5E-002",
+      "name": "local authority explicitly separated from Nova",
+      "expected": "accept",
+      "input": {
+        "local_authority": "synthetic-local-authority",
+        "local_authority_external_to_Nova": true,
+        "Nova_approval_authority": false
+      }
+    },
+    {
+      "id": "G5E-003",
+      "name": "review-profile version change",
+      "expected": "accept",
+      "input": {
+        "prior_profile_version": "1",
+        "current_profile_version": "2",
+        "revision_attributed_to": "synthetic-profile-owner",
+        "retroactive_rewrite": false
+      }
+    },
+    {
+      "id": "G5E-004",
+      "name": "conflicting evidence remains visible",
+      "expected": "accept",
+      "input": {
+        "source_state": "conflicted",
+        "variants": ["synthetic-source-a", "synthetic-source-b"],
+        "Nova_selected_winner": false
+      }
+    },
+    {
+      "id": "G5E-005",
+      "name": "stale required evidence",
+      "expected": "accept",
+      "input": {
+        "context_state": "stale",
+        "review_completeness": "partial",
+        "institutional_policy_consequence": "externally_determined"
+      }
+    },
+    {
+      "id": "G5E-006",
+      "name": "identity authentication without workflow authorization",
+      "expected": "accept",
+      "input": {
+        "authenticated": true,
+        "workflow_authorized": false,
+        "authorization_inferred": false
+      }
+    },
+    {
+      "id": "G5E-007",
+      "name": "attempted cross-tenant access",
+      "expected": "reject",
+      "attempt": {
+        "request_tenant": "synthetic-tenant-g5e",
+        "context_tenant": "synthetic-other-tenant",
+        "cross_tenant_access": true
+      },
+      "error": "cross_tenant_access_prohibited"
+    },
+    {
+      "id": "G5E-008",
+      "name": "support access requires explicit scope",
+      "expected": "accept",
+      "input": {
+        "support_access": true,
+        "scope": "synthetic-case-g5e-008",
+        "expires_at": "2030-01-01T00:15:00Z",
+        "attributable_to": "synthetic-support-user",
+        "revocable": true
+      }
+    },
+    {
+      "id": "G5E-009",
+      "name": "Nova unavailable means context unavailable and no Nova decision",
+      "expected": "accept",
+      "input": {
+        "Nova_available": false,
+        "context_state": "unavailable",
+        "Nova_decision": null,
+        "institution_owns_fallback": true
+      }
+    },
+    {
+      "id": "G5E-010",
+      "name": "source unavailable remains explicit unresolved state",
+      "expected": "accept",
+      "input": {
+        "required_source_available": false,
+        "source_state": "unavailable",
+        "review_completeness": "partial"
+      }
+    },
+    {
+      "id": "G5E-011",
+      "name": "machine and human semantic parity",
+      "expected": "accept",
+      "governed_state": {
+        "action_id": "synthetic-action-011",
+        "source_state": "conflicted",
+        "context_state": "stale",
+        "review_completeness": "partial",
+        "authority_effect": "none"
+      },
+      "expected_human_statements": [
+        {
+          "statement_id": "source_state",
+          "source_path": "source_state",
+          "template_id": "state-v0.1",
+          "rendered_text": "Source state: conflicted."
+        },
+        {
+          "statement_id": "context_state",
+          "source_path": "context_state",
+          "template_id": "state-v0.1",
+          "rendered_text": "Context state: stale."
+        },
+        {
+          "statement_id": "review_completeness",
+          "source_path": "review_completeness",
+          "template_id": "state-v0.1",
+          "rendered_text": "Review completeness: partial."
+        },
+        {
+          "statement_id": "authority_effect",
+          "source_path": "authority_effect",
+          "template_id": "authority-v0.1",
+          "rendered_text": "Nova authority effect: none."
+        }
+      ]
+    },
+    {
+      "id": "G5E-012",
+      "name": "human rendering attempts to add approval language",
+      "expected": "reject",
+      "attempt": {
+        "governed_state": {"authority_effect": "none"},
+        "additional_human_statement": "Nova approved this action."
+      },
+      "error": "human_presentation_adds_authority_meaning"
+    },
+    {
+      "id": "G5E-013",
+      "name": "execution integration attempt",
+      "expected": "reject",
+      "attempt": {
+        "Nova_execution_target": "synthetic-wallet",
+        "execution_call": true
+      },
+      "error": "execution_path_through_Nova_prohibited"
+    },
+    {
+      "id": "G5E-014",
+      "name": "production credential requirement",
+      "expected": "reject",
+      "attempt": {
+        "production_credential_required": true
+      },
+      "error": "production_credentials_prohibited"
+    },
+    {
+      "id": "G5E-015",
+      "name": "export request",
+      "expected": "accept",
+      "input": {
+        "requester": "synthetic-workflow-owner",
+        "export_format": "governed_state_plus_trace_manifest",
+        "includes_audit_manifest": true
+      }
+    },
+    {
+      "id": "G5E-016",
+      "name": "withdrawal and post-withdrawal disposition",
+      "expected": "accept",
+      "input": {
+        "withdrawal_requested_by": "synthetic-workflow-owner",
+        "sessions_revoked": true,
+        "new_context_stopped": true,
+        "export_completed": true,
+        "disposition_policy_applied": true,
+        "integration_detached": true,
+        "institution_can_continue_without_Nova": true
+      }
+    },
+    {
+      "id": "G5E-017",
+      "name": "pilot termination after falsification",
+      "expected": "accept",
+      "input": {
+        "falsification_condition": "machine_and_human_views_diverge_materially",
+        "advancement_stopped": true,
+        "termination_state": "pilot_failure",
+        "data_disposition_defined": true
+      }
+    },
+    {
+      "id": "G5E-018",
+      "name": "PR33 semantic dependency attempt",
+      "expected": "reject",
+      "attempt": {
+        "dependency": "PR_33",
+        "semantic": "governed_abstraction"
+      },
+      "error": "PR_33_dependency_prohibited"
+    },
+    {
+      "id": "G5E-019",
+      "name": "unapproved Gate 3 dependency attempt",
+      "expected": "reject",
+      "attempt": {
+        "dependency": "G3-R04",
+        "semantic": "authority_scope"
+      },
+      "error": "unapproved_Gate_3_dependency_prohibited"
+    },
+    {
+      "id": "G5E-020",
+      "name": "second action class introduced",
+      "expected": "reject",
+      "attempt": {
+        "action_classes": [
+          "agent_prepared_stablecoin_treasury_action",
+          "portfolio_trade"
+        ]
+      },
+      "error": "single_action_class_boundary_violated"
+    }
+  ]
+}

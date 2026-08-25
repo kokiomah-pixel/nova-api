@@ -178,6 +178,11 @@ current_state:
   proposed_v2:
     contract_approved: true
     private_synthetic_reference_adapter_implemented: true
+    Gate_5_Entry_Design_Review:
+      authorized: true
+      scope: institutional_exposure_contract_only
+      Gate_5_started: false
+      institutional_pilot_authorized: false
     runtime_implemented: false
     production_active: false
 ```
@@ -381,6 +386,12 @@ product_progression:
     target_v2_production: not_active
     system_wide_production_readiness: not_established
     production_activation_authority: false
+
+  Gate_5_Entry_Design_Review:
+    authorized: true
+    scope: institutional_exposure_contract_only
+    Gate_5_started: false
+    institutional_pilot_authorized: false
 
   Gate_5:
     name: bounded_institutional_pilot

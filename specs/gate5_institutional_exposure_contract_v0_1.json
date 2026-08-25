@@ -1,0 +1,403 @@
+{
+  "schema_version": "0.1",
+  "artifact": "Gate_5_Entry_institutional_exposure_contract",
+  "status": "authorized_design_workstream",
+  "canonical_target_contract": {
+    "version": "design-v2.1",
+    "mutation_permitted": false,
+    "incorporated_refinements": [
+      "G3-R01",
+      "G3-R03",
+      "G3-R08",
+      "G3-R11",
+      "G3-Q15"
+    ],
+    "unapproved_refinements_used": []
+  },
+  "workstream": {
+    "type": "Gate_5_Entry_Design_Review",
+    "authorized": true,
+    "Gate_5_started": false,
+    "institutional_pilot_authorized": false,
+    "institution_onboarded": false,
+    "tenant_created": false,
+    "runtime_activated": false,
+    "production_active": false
+  },
+  "action_boundary": {
+    "permitted_action_classes": [
+      "agent_prepared_stablecoin_treasury_action"
+    ],
+    "multiple_action_classes_permitted": false,
+    "action_prepared_externally": true,
+    "Nova_prepares_action": false,
+    "Nova_executes_action": false,
+    "material_inclusions": [
+      "externally_prepared_action_reference",
+      "exact_proposal_version_identity",
+      "stable_action_identity_when_externally_supplied",
+      "synthetic_or_future_institution_attributable_evidence",
+      "approved_versioned_review_profile",
+      "machine_review_context",
+      "deterministic_human_presentation"
+    ],
+    "material_exclusions": [
+      "general_treasury_operations",
+      "portfolio_management",
+      "trading",
+      "payments_generally",
+      "settlement_generally",
+      "wallet_operations_generally",
+      "action_origination_by_Nova",
+      "capital_movement"
+    ]
+  },
+  "authority_model": {
+    "Nova_authority_effect": "none",
+    "Nova_execution_effect": "none",
+    "local_authority_external_to_Nova": true,
+    "Nova_prohibited_roles": [
+      "approver",
+      "authorizer",
+      "veto_authority",
+      "signer",
+      "transaction_initiator",
+      "settlement_authority",
+      "execution_authority"
+    ],
+    "missing_context_consequence": {
+      "owner": "institutional_policy_and_local_authority",
+      "Nova_decision": false
+    }
+  },
+  "institutional_ownership": {
+    "workflow_owner_required": true,
+    "local_authority_required": true,
+    "review_profile_owner_required": true,
+    "roles": {
+      "institutional_workflow_owner": {
+        "external_to_Nova": true,
+        "responsibilities": [
+          "define_governed_workflow",
+          "designate_local_decision_authority",
+          "own_continuity_and_fallback_policy"
+        ]
+      },
+      "local_decision_authority": {
+        "external_to_Nova": true,
+        "responsibilities": [
+          "interpret_review_context_under_institutional_policy",
+          "make_institutional_workflow_decision"
+        ]
+      },
+      "Nova": {
+        "responsibilities": [
+          "structure_review_context",
+          "report_missing_stale_conflicting_and_unavailable_state",
+          "render_deterministic_human_presentation"
+        ],
+        "approval_authority": false,
+        "execution_authority": false
+      },
+      "external_execution_system": {
+        "institution_controlled": true,
+        "reachable_from_Nova": false
+      },
+      "support_operator": {
+        "authority_effect": "none",
+        "access_requires_explicit_scope": true,
+        "access_time_bounded": true,
+        "access_attributable": true,
+        "access_revocable": true
+      }
+    }
+  },
+  "review_profile_governance": {
+    "ownership": "explicit_institutional_owner_or_attributable_delegate",
+    "lifecycle_authorities": {
+      "author": "institution_or_attributable_delegate",
+      "approve": "institution",
+      "version": "institution_or_attributable_delegate",
+      "activate": "institution",
+      "replace": "institution",
+      "retire": "institution"
+    },
+    "Nova_structural_validation_only": true,
+    "Nova_may_invent_institutional_requirements": false,
+    "revision_attribution_required": true,
+    "revision_version_required": true,
+    "retroactive_rewrite_of_prior_context": false
+  },
+  "evidence_boundary": {
+    "state_dimensions": [
+      "source_state",
+      "context_state",
+      "review_completeness"
+    ],
+    "state_dimensions_remain_separate": true,
+    "source_authority_model": {
+      "classification_scope": "institutional_workflow_question_or_existing_evidence_reference",
+      "new_target_v2_semantic_field": false,
+      "global_source_ranking": false,
+      "Nova_selected_winner": false,
+      "institution_designation_erases_conflict": false
+    },
+    "evidence_categories": {
+      "institution_provided": "attributed_to_institution_without_implied_truth_or_global_rank",
+      "externally_attributable": "attributed_to_named_external_source",
+      "contextual_non_authoritative": "preserved_as_context_without_authority_inference",
+      "conflicting": "all_material_variants_remain_visible",
+      "stale": "explicit_stale_state",
+      "unavailable": "explicit_unavailable_state",
+      "unknown_authority": "remains_unknown"
+    }
+  },
+  "identity_access": {
+    "design_only": true,
+    "real_tenant_provisioning": false,
+    "identity_provider_connected": false,
+    "external_identity_authority_required_for_future_pilot": true,
+    "identity_domains": [
+      "institution_identity",
+      "tenant_identity",
+      "human_identity",
+      "service_identity",
+      "role_assignment"
+    ],
+    "least_privilege_required": true,
+    "cross_tenant_access": "prohibited",
+    "support_access": {
+      "explicit": true,
+      "scoped": true,
+      "time_bounded": true,
+      "attributable": true,
+      "revocable": true
+    },
+    "revocation_required": true,
+    "session_expiry_required": true,
+    "access_auditability_required": true,
+    "authentication_equals_workflow_authorization": false,
+    "payment_equals_institutional_identity": false,
+    "prohibited_identity_inferences": [
+      "payment",
+      "wallet_ownership",
+      "email_domain_alone",
+      "API_possession_alone",
+      "usage_history"
+    ]
+  },
+  "data_governance": {
+    "control_responsibilities": {
+      "institution_provided_data": "institution_controls_submission_use_and_authorized_access",
+      "derived_review_context": "access_governed_by_institution_approved_policy",
+      "retention_policy_authority": "institution_subject_to_applicable_law_and_agreement",
+      "Nova_role": "bounded_service_operator_without_institutional_decision_authority"
+    },
+    "legal_title_claim_made": false,
+    "retention_policy_required_before_pilot": true,
+    "retention_duration_configuration_required": true,
+    "deletion_triggers_required": true,
+    "termination_behavior_required": true,
+    "export_policy_required_before_pilot": true,
+    "export_format": "documented_machine_readable_governed_state_plus_trace_manifest",
+    "portability_expectation": "institution_can_reconstruct_and_continue_without_Nova",
+    "backup_treatment_required": true,
+    "withdrawal_disposition_required_before_pilot": true,
+    "active_pilot_with_undefined_retention_or_deletion": false,
+    "unresolved_legal_or_policy_dependencies": [
+      "legal_title_and_license_terms_require_counsel_or_Architect_decision",
+      "jurisdiction_specific_retention_duration_requires_institutional_configuration",
+      "backup_deletion_timing_requires_institutional_configuration"
+    ]
+  },
+  "failure_incident": {
+    "model": "fail_explicit_without_authority_creation",
+    "Nova_failure_creates_decision": false,
+    "institution_owns_fallback_and_continuity_policy": true,
+    "cases": {
+      "Nova_unavailable": "review_context_unavailable_no_Nova_decision",
+      "required_source_unavailable": "source_and_completeness_state_explicitly_unresolved",
+      "source_conflict": "all_material_variants_visible_no_selected_winner",
+      "stale_evidence": "context_reports_stale_state",
+      "identity_access_failure": "access_denied_or_context_unavailable_no_workflow_decision",
+      "tenant_isolation_concern": "Nova_access_disabled_pending_institutional_security_process",
+      "context_reconstruction_failure": "context_unavailable_and_integrity_incident_raised",
+      "suspected_integrity_failure": "context_quarantined_and_integrity_incident_raised",
+      "security_incident": "Nova_access_isolated_without_capital_authority",
+      "export_failure": "export_incomplete_and_incident_escalated",
+      "withdrawal_request": "withdrawal_state_machine_invoked_by_authorized_requester"
+    },
+    "prohibited_failure_results": [
+      "ALLOW",
+      "DENY",
+      "HALT",
+      "VETO"
+    ]
+  },
+  "integration": {
+    "conceptual_flow": [
+      "institution_or_orchestrator",
+      "prepared_action_evidence_and_approved_review_profile",
+      "Nova_review_context_layer",
+      "machine_context_and_deterministic_human_presentation",
+      "local_institutional_authority",
+      "institution_controlled_external_execution_path"
+    ],
+    "execution_path_through_Nova": "prohibited",
+    "execution_credentials_in_Nova": "prohibited",
+    "execution_calls_from_Nova": "prohibited",
+    "runtime_endpoint_activation": false,
+    "v2_context_activation": false,
+    "network_integration_added": false,
+    "prohibited_Nova_targets": [
+      "wallet",
+      "transaction_signer",
+      "payment_rail",
+      "settlement_provider",
+      "exchange",
+      "execution_agent",
+      "smart_contract_transaction",
+      "x402_payment",
+      "capital_movement"
+    ]
+  },
+  "presentation": {
+    "single_governed_state": true,
+    "machine_human_semantic_parity_required": true,
+    "human_statement_trace_required": true,
+    "hidden_human_judgment_layer": false,
+    "human_additions_prohibited": [
+      "approval_meaning",
+      "authority_meaning",
+      "policy_meaning",
+      "source_ranking",
+      "recommendation",
+      "execution_instruction"
+    ]
+  },
+  "measurement": {
+    "success_definition_required": true,
+    "falsification_definition_required": true,
+    "numerical_thresholds_fabricated": false,
+    "threshold_policy": "required_pilot_configuration_when_no_governing_basis_exists",
+    "metrics": [
+      {"metric_id": "context_reconstruction_success", "definition": "fraction_of_sampled_contexts_reconstructed_from_governed_inputs", "measurement_source": "synthetic_replay_and_future_pilot_audit", "numerator_denominator_or_method": "successful_reconstructions_over_attempted_reconstructions", "success_threshold": "required_pilot_configuration", "falsification_threshold": "required_pilot_configuration", "observation_window": "required_pilot_configuration", "owner": "institutional_workflow_owner_and_Architect"},
+      {"metric_id": "source_attribution_completeness", "definition": "required_source_references_with_attributable_origin", "measurement_source": "governed_context_trace", "numerator_denominator_or_method": "attributed_required_sources_over_required_sources", "success_threshold": "required_pilot_configuration", "falsification_threshold": "required_pilot_configuration", "observation_window": "required_pilot_configuration", "owner": "institutional_workflow_owner_and_Architect"},
+      {"metric_id": "profile_conformance_accuracy", "definition": "contexts_matching_the_attributable_active_profile_version", "measurement_source": "profile_and_context_replay", "numerator_denominator_or_method": "conformant_contexts_over_sampled_contexts", "success_threshold": "required_pilot_configuration", "falsification_threshold": "required_pilot_configuration", "observation_window": "required_pilot_configuration", "owner": "institutional_workflow_owner_and_Architect"},
+      {"metric_id": "machine_human_semantic_parity", "definition": "human_statements_traceable_without_new_semantic_meaning", "measurement_source": "presentation_trace", "numerator_denominator_or_method": "traceable_equivalent_statements_over_material_statements", "success_threshold": "required_pilot_configuration", "falsification_threshold": "required_pilot_configuration", "observation_window": "required_pilot_configuration", "owner": "institutional_workflow_owner_and_Architect"},
+      {"metric_id": "deterministic_replay", "definition": "identical_governed_inputs_produce_identical_context_and_presentation", "measurement_source": "replay_harness", "numerator_denominator_or_method": "identical_replays_over_attempted_replays", "success_threshold": "required_pilot_configuration", "falsification_threshold": "required_pilot_configuration", "observation_window": "required_pilot_configuration", "owner": "institutional_workflow_owner_and_Architect"},
+      {"metric_id": "change_explanation", "definition": "proposal_or_profile_revision_differences_have_attributable_explanations", "measurement_source": "revision_trace", "numerator_denominator_or_method": "explained_material_changes_over_material_changes", "success_threshold": "required_pilot_configuration", "falsification_threshold": "required_pilot_configuration", "observation_window": "required_pilot_configuration", "owner": "institutional_workflow_owner_and_Architect"},
+      {"metric_id": "time_to_locate_governing_evidence", "definition": "elapsed_time_for_local_authority_to_find_traced_governing_evidence", "measurement_source": "future_pilot_operator_observation", "numerator_denominator_or_method": "distribution_of_elapsed_lookup_time", "success_threshold": "required_pilot_configuration", "falsification_threshold": "required_pilot_configuration", "observation_window": "required_pilot_configuration", "owner": "institutional_workflow_owner_and_Architect"},
+      {"metric_id": "state_distinction_accuracy", "definition": "operators_correctly_distinguish_stale_conflicted_and_unavailable_context", "measurement_source": "future_pilot_comprehension_check", "numerator_denominator_or_method": "correct_distinctions_over_sampled_questions", "success_threshold": "required_pilot_configuration", "falsification_threshold": "required_pilot_configuration", "observation_window": "required_pilot_configuration", "owner": "institutional_workflow_owner_and_Architect"},
+      {"metric_id": "local_authority_non_authority_comprehension", "definition": "local_authority_understands_that_Nova_does_not_approve_or_execute", "measurement_source": "future_pilot_comprehension_check", "numerator_denominator_or_method": "correct_non_authority_responses_over_sampled_responses", "success_threshold": "required_pilot_configuration", "falsification_threshold": "required_pilot_configuration", "observation_window": "required_pilot_configuration", "owner": "institutional_workflow_owner_and_Architect"},
+      {"metric_id": "proposal_revision_workflow_continuity", "definition": "stable_lineage_when_supplied_and_exact_version_identity_remain_distinct_across_revisions", "measurement_source": "proposal_revision_trace", "numerator_denominator_or_method": "correctly_linked_or_explicitly_unavailable_lineages_over_revision_cases", "success_threshold": "required_pilot_configuration", "falsification_threshold": "required_pilot_configuration", "observation_window": "required_pilot_configuration", "owner": "institutional_workflow_owner_and_Architect"},
+      {"metric_id": "withdrawal_export_completeness", "definition": "required_governed_state_trace_and_audit_manifest_are_exported_at_withdrawal", "measurement_source": "withdrawal_rehearsal_manifest", "numerator_denominator_or_method": "exported_required_artifacts_over_required_artifacts", "success_threshold": "required_pilot_configuration", "falsification_threshold": "required_pilot_configuration", "observation_window": "required_pilot_configuration", "owner": "institutional_workflow_owner_and_Architect"}
+    ],
+    "required_metric_fields": [
+      "metric_id",
+      "definition",
+      "measurement_source",
+      "numerator_denominator_or_method",
+      "success_threshold",
+      "falsification_threshold",
+      "observation_window",
+      "owner"
+    ],
+    "prohibited_success_metrics": [
+      "more_approvals",
+      "fewer_denials",
+      "higher_transaction_volume",
+      "better_trading_performance",
+      "better_asset_returns",
+      "more_capital_deployed",
+      "execution_speed_alone"
+    ]
+  },
+  "falsification": {
+    "advancement_on_trigger": "prohibited",
+    "conditions": [
+      "operators_treat_Nova_as_approval_authority",
+      "machine_and_human_views_diverge_materially",
+      "context_not_deterministically_reconstructable",
+      "evidence_provenance_routinely_unclear",
+      "profile_rules_require_hidden_judgment",
+      "tenant_isolation_not_demonstrable",
+      "institution_cannot_export_context",
+      "withdrawal_not_cleanly_performable",
+      "Nova_requires_execution_credentials",
+      "Nova_becomes_hidden_workflow_authorization_dependency",
+      "context_does_not_materially_improve_decision_continuity"
+    ]
+  },
+  "withdrawal": {
+    "criteria_required": true,
+    "authorized_requesters": [
+      "institutional_workflow_owner",
+      "institution_designated_security_authority",
+      "Nova_safety_operator_for_service_isolation_only"
+    ],
+    "access_disablement_required": true,
+    "active_sessions_revoked": true,
+    "pending_contexts": "freeze_new_processing_and_export_existing_governed_state",
+    "export_contents": [
+      "governed_review_context",
+      "profile_and_version_references",
+      "source_and_trace_references",
+      "audit_evidence_manifest"
+    ],
+    "retention_and_deletion": "apply_pre_agreed_policy_and_preserve_only_required_audit_evidence",
+    "credentials_and_access_revoked": true,
+    "integrations_detached": true,
+    "institution_continuity_without_Nova_required": true,
+    "Nova_holds_institutional_authority": false
+  },
+  "termination": {
+    "matrix_fields": [
+      "access_behavior",
+      "context_creation_behavior",
+      "export_behavior",
+      "retention_behavior",
+      "deletion_disposition_behavior",
+      "audit_evidence_behavior",
+      "integration_detachment_behavior"
+    ],
+    "states": {
+      "temporary_suspension": ["suspend_access", "pause_new_context", "export_available", "retain_by_policy", "no_early_deletion", "preserve_audit", "integration_paused"],
+      "incident_isolation": ["revoke_or_isolate_access", "block_new_context", "export_if_safe", "preserve_under_incident_policy", "defer_deletion_for_evidence", "preserve_incident_audit", "integration_detached"],
+      "institution_initiated_withdrawal": ["revoke_access", "stop_new_context", "complete_required_export", "retain_by_agreement", "delete_or_dispose_by_policy", "preserve_required_audit", "integration_detached"],
+      "Nova_initiated_safety_withdrawal": ["isolate_Nova_access", "stop_new_context", "offer_safe_export", "retain_by_incident_policy", "dispose_after_incident_hold", "preserve_incident_audit", "integration_detached"],
+      "pilot_completion": ["close_pilot_access", "stop_new_context", "complete_final_export", "retain_by_completion_policy", "dispose_by_policy", "preserve_required_audit", "integration_detached"],
+      "pilot_failure": ["close_or_isolate_access", "stop_new_context", "complete_export_if_safe", "retain_by_failure_policy", "dispose_after_required_review", "preserve_failure_evidence", "integration_detached"],
+      "pilot_expiration": ["expire_access", "stop_new_context", "complete_expiration_export", "retain_by_expiration_policy", "dispose_by_policy", "preserve_required_audit", "integration_detached"]
+    }
+  },
+  "authorization_template": {
+    "template_only": true,
+    "current_authority": false,
+    "Gate_5_started": false,
+    "text": "Expose one institution-owned review context to one bounded workflow for the purpose of evaluating decision continuity, under explicit non-authority, data, retention, access, incident, measurement and withdrawal boundaries."
+  },
+  "dependencies": {
+    "PR_33": "none",
+    "unapproved_Gate_3_gaps": [],
+    "blocking_dependency": null
+  },
+  "mutation_boundaries": {
+    "Legacy_v1": false,
+    "design_v2_1": false,
+    "Gate_4_adapter": false,
+    "chronology": false,
+    "Reflex_Memory": false,
+    "runtime": false,
+    "HTTP_routes": false,
+    "production_crypto": false,
+    "x402": false,
+    "payment": false,
+    "settlement": false,
+    "execution": false
+  },
+  "Gate_5": {
+    "status": "not_started",
+    "authority": false
+  }
+}
