@@ -40,8 +40,10 @@ Nova does not approve, authorize, sign, settle, or move capital.
 
 * Legacy v1 is implemented but is not the canonical future external model.
 * New external integrations against Legacy v1 admission semantics are prohibited.
-* The target v2 non-authority review-context contract is approved in design.
-* The target v2 runtime and private adapter are not yet implemented.
+* The target v2 non-authority review-context contract is canonical at design-v2.1.
+* The private synthetic target-v2 reference adapter is implemented; it has no
+  runtime, public-endpoint, production, or authority effect.
+* The target v2 runtime is not implemented and target v2 is not production-active.
 * Phase 1 is an offline, repository-validated proof chain.
 * Production readiness, institutional use, buyer validation, and adoption are
   not established.

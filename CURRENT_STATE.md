@@ -52,12 +52,23 @@ current_product_state:
     historical_CDP_retention_complete: false
 
   target_v2:
-    contract_approved: true
+    canonical_contract: design-v2.1
+    Gate_3: complete
+
+    private_synthetic_reference_adapter:
+      implemented: true
+      scope: private_synthetic_reference_only
+      runtime_effect: none
+      public_endpoint_effect: none
+      production_effect: none
+      canonicality_source: authoritative_repository_main
+
+    Gate_4: complete
     runtime_implemented: false
-    private_adapter_implemented: false
     production_active: false
-    field_derivation_progression: ready_for_design_review
-    implementation_authority: false
+    runtime_implementation_authority: false
+    production_activation_authority: false
+    system_wide_production_readiness: not_established
 
   Phase_1:
     offline_proof_chain: completed
@@ -105,7 +116,9 @@ The repository and current evidence establish:
 * an external public-boundary check matching the repository-defined containment contract;
 * Architect approval of the final production/discovery incident disposition as `CONTAINED_HISTORICALLY_UNATTESTED`;
 * a closed Readiness Gate Baseline;
-* an initialized content operating system.
+* an initialized content operating system;
+* a canonical private synthetic target-v2 reference adapter with no runtime,
+  public-endpoint, production, or authority effect.
 
 ## What does not exist today
 
@@ -128,8 +141,9 @@ The available evidence does not establish:
 
 ## Current implementation priority
 
-The Readiness Gate Baseline is closed. The immediate product progression priority
-is Gate 3 target v2 field-derivation design review.
+The Readiness Gate Baseline is closed, Gate 3 is complete, and Gate 4 establishes
+only the canonical private synthetic reference adapter. Gate 5 remains not
+started and has no implementation or production-activation authority.
 
 ```yaml
 current_readiness_priority:
@@ -155,14 +169,35 @@ current_readiness_priority:
     status: closed
 
   Gate_3_v2_field_derivation:
-    status: ready_for_design_review
+    status: complete
+    implementation_authority: false
+    production_activation_authority: false
+
+  canonical_contract:
+    status: design-v2.1
+
+  Gate_4_private_synthetic_adapter:
+    status: complete
+    artifact: private_synthetic_reference_adapter
+    scope: private_synthetic_reference_only
+    canonicality_source: authoritative_repository_main
+    runtime_effect: none
+    public_endpoint_effect: none
+    production_effect: none
+    target_v2_runtime: not_implemented
+    target_v2_production: not_active
+    system_wide_production_readiness: not_established
+    production_activation_authority: false
+
+  Gate_5_bounded_institutional_pilot:
+    status: not_started
     implementation_authority: false
     production_activation_authority: false
 ```
 
-The future production candidate remains one bounded private target v2 review
-context for an agent-prepared stablecoin treasury action. Gate 3 design review
-must preserve:
+A future production progression would remain one bounded private target v2
+review context for an agent-prepared stablecoin treasury action. The Gate 4
+reference implementation preserves the completed Gate 3 design:
 
 * stable action identity;
 * proposal-version identity;

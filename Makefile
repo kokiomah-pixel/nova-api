@@ -12,6 +12,7 @@ PYTHON ?= .venv/bin/python
 	verify-market-signal-scan \
 	verify-scenarios \
 	verify-tests \
+	verify-gate4-private-adapter \
 	verify-chronology \
 	verify-public-surface \
 	verify-whitespace \
@@ -35,6 +36,7 @@ verify: \
 	verify-market-signal-scan \
 	verify-scenarios \
 	verify-tests \
+	verify-gate4-private-adapter \
 	verify-chronology \
 	verify-public-surface \
 	verify-whitespace
@@ -69,6 +71,9 @@ verify-scenarios: require-venv
 
 verify-tests: require-venv
 	$(PYTHON) -m pytest
+
+verify-gate4-private-adapter: require-venv
+	$(PYTHON) scripts/validate_gate4_private_synthetic_adapter.py
 
 verify-chronology: require-venv
 	$(MAKE) chronology-verify PYTHON=$(PYTHON)

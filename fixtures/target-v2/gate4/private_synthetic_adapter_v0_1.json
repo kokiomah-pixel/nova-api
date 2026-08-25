@@ -1,0 +1,105 @@
+{
+  "fixture_set": "gate4-private-synthetic-adapter-v0.1",
+  "synthetic_only": true,
+  "canonical_contract_version": "design-v2.1",
+  "base_request": {
+    "request_id": "fixture-request-001",
+    "synthetic_record_created_at": "2030-01-01T12:00:00Z",
+    "prepared_action": {
+      "reference_id": "opaque-action-reference-001",
+      "action_id": "external-action-lineage-001",
+      "proposal_version_id": "external-proposal-version-001.1",
+      "action_type": "synthetic_transfer_review",
+      "asset_or_resource": "fixture-USD",
+      "amount_or_scope": {
+        "value": "1.2300",
+        "asset_id": "fixture-USD",
+        "scale": 2,
+        "max_precision": 12,
+        "max_scale": 2,
+        "max_abs_exponent": 6,
+        "max_input_characters": 32
+      },
+      "destination_or_venue": "opaque-synthetic-venue",
+      "intended_time_window": {
+        "start": "2030-01-01T12:00:00-05:00",
+        "end": "2030-01-01T13:00:00-05:00"
+      }
+    },
+    "evidence": {
+      "sources": [
+        {
+          "source_id": "source-a",
+          "source_version_or_digest": "fixture-version-1",
+          "observed_at": "2030-01-01T11:59:30Z",
+          "received_at": "2030-01-01T11:59:45Z",
+          "record_source_type": "synthetic"
+        }
+      ],
+      "unresolved_source_conflicts": []
+    },
+    "institution_context": {
+      "institution_id_or_policy_profile": "fixture-institution",
+      "relevant_constraints": [
+        {
+          "constraint_id_or_digest": "constraint-001",
+          "source_id": "source-a"
+        }
+      ],
+      "prior_review_references": [
+        {
+          "reference_type": "prior_review",
+          "reference_id": "review-001",
+          "version_or_digest": "fixture-version-1"
+        }
+      ],
+      "accepted_memory_references": [
+        {
+          "reference_type": "accepted_memory",
+          "reference_id": "memory-001",
+          "version_or_digest": "fixture-version-1"
+        }
+      ]
+    },
+    "review_profile": {
+      "profile_id": "fixture-profile",
+      "profile_version": "1",
+      "profile_owner": "fixture-institution",
+      "profile_hash": "fixture-profile-hash-1",
+      "required_field_inventory_available": true,
+      "required_context_fields": [
+        "evidence.sources",
+        "institution_context.relevant_constraints"
+      ],
+      "source_max_age_seconds": 120
+    },
+    "requested_context": [
+      "source_state",
+      "contradiction_visibility",
+      "constraint_context",
+      "chronology_context",
+      "temporal_context",
+      "review_completeness"
+    ]
+  },
+  "coverage_cases": {
+    "identity_external": "base_request",
+    "identity_Nova_derived": "remove prepared_action.proposal_version_id",
+    "lineage_unavailable": "remove prepared_action.action_id",
+    "completeness_complete": "base_request",
+    "completeness_partial": "remove institution_context.relevant_constraints",
+    "completeness_conflicted": "add evidence.unresolved_source_conflicts",
+    "completeness_unavailable": "set review_profile.required_field_inventory_available false",
+    "temporal_current": "base_request",
+    "temporal_uncertain": "remove evidence.sources[0].observed_at",
+    "temporal_stale": "set evidence.sources[0].observed_at outside profile threshold",
+    "temporal_superseded": "add prepared_action.superseded_by_reference",
+    "production_like_environment_rejected": "set evidence.sources[0].record_source_type production_like",
+    "live_environment_rejected": "set evidence.sources[0].record_source_type live",
+    "mixed_environment_rejected": "add a non-synthetic source segment",
+    "Legacy_v1_decision_status_rejected": "add decision_status ALLOW",
+    "Legacy_v1_permission_budget_rejected": "add permission_budget fixture_value",
+    "profile_version_difference": "change review_profile.profile_version and profile_hash",
+    "Legacy_v1_outcome_independence": "all Legacy outcome variants fail before target-v2 derivation"
+  }
+}

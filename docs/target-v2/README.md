@@ -8,14 +8,18 @@ target_v2:
   contract_approved: true
   canonicality_source: authoritative_repository_main
   field_derivation_complete: true
+  private_synthetic_reference_adapter_implemented: true
+  Gate_4_status: complete
   runtime_implemented: false
-  private_adapter_implemented: false
-  Gate_4_status: not_authorized
   production_active: false
   institutional_pilot_started: false
 ```
 
 Target v2 is the canonical future Sharpe Nova OS external contract.
+
+Gate 4 completion establishes a canonical private synthetic reference
+implementation only. It does not establish target-v2 runtime implementation,
+public availability, production activation, or institutional readiness.
 
 It is designed to structure governed review context around an agent-prepared
 financial action before local authority acts.
@@ -81,9 +85,9 @@ A deployed target v2 workflow has not yet been established.
 
 No later gate becomes active merely because an earlier artifact exists.
 
-Gate 3 design completion does not activate Gate 4. The `design-v2.1` contract
-revision creates no runtime, private-adapter, endpoint, deployment,
-payment, settlement, or execution authority.
+Gate 4 completion does not activate Gate 5. The `design-v2.1` contract and its
+private synthetic reference implementation create no runtime, public endpoint,
+deployment, payment, settlement, or execution authority.
 
 ## References
 
