@@ -52,11 +52,12 @@ current_product_state:
     historical_CDP_retention_complete: false
 
   target_v2:
-    contract_approved: true
+    canonical_contract: design-v2.1
+    Gate_3: complete
+    Gate_4: authorized_for_bounded_branch_implementation
     runtime_implemented: false
     private_adapter_implemented: false
     production_active: false
-    field_derivation_progression: ready_for_design_review
     implementation_authority: false
 
   Phase_1:
@@ -128,8 +129,9 @@ The available evidence does not establish:
 
 ## Current implementation priority
 
-The Readiness Gate Baseline is closed. The immediate product progression priority
-is Gate 3 target v2 field-derivation design review.
+The Readiness Gate Baseline is closed and Gate 3 is complete. The immediate
+product progression priority is bounded Gate 4 private synthetic adapter
+implementation on a dedicated branch.
 
 ```yaml
 current_readiness_priority:
@@ -155,14 +157,24 @@ current_readiness_priority:
     status: closed
 
   Gate_3_v2_field_derivation:
-    status: ready_for_design_review
+    status: complete
     implementation_authority: false
+    production_activation_authority: false
+
+  canonical_contract:
+    status: design-v2.1
+
+  Gate_4_private_synthetic_adapter:
+    status: authorized_for_bounded_branch_implementation
+    target_v2_runtime: not_implemented
+    target_v2_production: not_active
+    system_wide_production_readiness: not_established
     production_activation_authority: false
 ```
 
 The future production candidate remains one bounded private target v2 review
-context for an agent-prepared stablecoin treasury action. Gate 3 design review
-must preserve:
+context for an agent-prepared stablecoin treasury action. Gate 4 synthetic
+implementation must preserve the completed Gate 3 design:
 
 * stable action identity;
 * proposal-version identity;

@@ -24,8 +24,9 @@ public_claim_summary:
   Legacy_v1_dependency: conditionally_ready_no_external_consumers_observed
   readiness_gate_baseline: closed
   production_incident: contained_historically_unattested
-  target_v2_contract: approved
-  target_v2_field_derivation: ready_for_design_review
+  Gate_3: complete
+  canonical_contract: design-v2.1
+  Gate_4: authorized_for_bounded_branch_implementation
   target_v2_runtime: not_implemented
   target_v2_production: not_active
   institutional_pilot: not_started
@@ -339,11 +340,11 @@ product_progression:
 
   Gate_3:
     name: v2_field_derivation_design
-    status: READY_FOR_DESIGN_REVIEW
+    status: COMPLETE
     entry_condition:
       - readiness_gate_baseline_closed
       - production_incident_disposition_approved
-    remaining_requirements:
+    completed_evidence:
       - canonical_derivation_rules_defined
       - proof_canonicalization_defined
     implementation_authority: false
@@ -351,12 +352,16 @@ product_progression:
 
   Gate_4:
     name: private_v2_adapter
-    status: NOT_STARTED
+    status: AUTHORIZED_FOR_BOUNDED_BRANCH_IMPLEMENTATION
     requirement:
       - design_approved
       - synthetic_only
       - no_public_endpoint
       - no_production_activation
+    target_v2_runtime: not_implemented
+    target_v2_production: not_active
+    system_wide_production_readiness: not_established
+    deployment_authority: false
 
   Gate_5:
     name: bounded_institutional_pilot
@@ -501,8 +506,9 @@ GTM_claim_controls:
     - production_incident_is_contained_historically_unattested
     - Legacy_v1_is_implemented
     - no_external_Legacy_v1_consumers_were_observed_in_the_reviewed_evidence
-    - v2_contract_design_is_approved
-    - Gate_3_design_review_may_begin
+    - canonical_target_v2_contract_is_design_v2.1
+    - Gate_3_is_complete
+    - Gate_4_is_authorized_only_for_bounded_branch_implementation
 
   must_not_claim_without_further_evidence:
     - full_production_control_plane_is_independently_attested
