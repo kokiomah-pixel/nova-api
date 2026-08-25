@@ -47,6 +47,12 @@ ALL_GAPS = {
     *(f"G3-Q{index:02d}" for index in range(1, 16)),
 }
 UNAPPROVED_REFINEMENTS = ALL_GAPS - INCORPORATED_REFINEMENTS
+UNAPPROVED_SORT_FIELD_DEPENDENCIES = {
+    "authority_scope": "G3-R04",
+    "treatment_status": "G3-R10",
+    "applicability_status": "G3-R10",
+    "applicability_scope": "not_independently_defined_in_canonical_target_v2",
+}
 EXPECTED_ARRAY_PATHS = {
     "review_context_response.record_source_type.source_segmentation",
     "review_context_response.context_state.reasons",
@@ -226,17 +232,24 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
     _expect(errors, set(array_rules) == EXPECTED_ARRAY_PATHS, "G3-R11.array_rules", "must classify every semantic response array")
     _expect(errors, all(rule.get("classification") == "set" for rule in array_rules.values()), "G3-R11.array_classification", "declared response arrays must have explicit set semantics")
     expected_sort_tuples = {
-        "source_reference_sort": ["source_id", "source_version_or_digest", "authority_scope", "observed_at", "received_at", "record_source_type"],
-        "constraint_reference_sort": ["constraint_id_or_digest", "source_id", "applicability_scope"],
-        "chronology_reference_sort": ["reference_type", "reference_id", "version_or_digest", "treatment_status", "applicability_status"],
+        "source_reference_sort": {"primary": ["source_id", "source_version_or_digest", "observed_at", "received_at", "record_source_type"], "final_tie_breaker": "normalized_item_JCS_bytes"},
+        "constraint_reference_sort": {"primary": ["constraint_id_or_digest", "source_id"], "final_tie_breaker": "normalized_item_JCS_bytes"},
+        "chronology_reference_sort": {"primary": ["reference_type", "reference_id", "version_or_digest"], "final_tie_breaker": "normalized_item_JCS_bytes"},
         "digest_record_sort": ["algorithm", "parameter_set", "output_encoding", "digest"],
     }
     sort_tuple_profiles = semantic_arrays.get("sort_tuple_profiles", {})
     for profile_name, expected_tuple in expected_sort_tuples.items():
         _expect(errors, sort_tuple_profiles.get(profile_name) == expected_tuple, f"G3-R11.sort_tuple_profiles.{profile_name}", f"must be {expected_tuple!r}")
-    _expect(errors, semantic_arrays.get("set_semantics", {}).get("deterministic_sort_key") == "declared_field_or_type_specific_tuple", "G3-R11.set_sort_key", "must use declared tuples")
-    _expect(errors, semantic_arrays.get("set_semantics", {}).get("JCS_role") == "serialize_after_declared_tuple_normalization", "G3-R11.JCS_role", "JCS must serialize only after tuple normalization")
-    _expect(errors, semantic_arrays.get("set_semantics", {}).get("same_declared_sort_tuple_different_content") == "conflict", "G3-R11.tuple_collision", "tuple collisions must fail as conflicts")
+    primary_sort_fields = {
+        field
+        for profile in sort_tuple_profiles.values()
+        for field in (profile.get("primary", []) if isinstance(profile, dict) else profile)
+    }
+    for field, defining_gap in UNAPPROVED_SORT_FIELD_DEPENDENCIES.items():
+        _expect(errors, field not in primary_sort_fields, f"G3-R11.unapproved_sort_field.{field}", f"must exclude field owned by {defining_gap}")
+    _expect(errors, semantic_arrays.get("set_semantics", {}).get("deterministic_sort_key") == "declared_field_or_type_specific_primary_tuple_then_declared_final_tie_breaker", "G3-R11.set_sort_key", "must use declared primary tuples before a declared tie-breaker")
+    _expect(errors, semantic_arrays.get("set_semantics", {}).get("JCS_role") == "serialize_after_declared_tuple_normalization_and_normalized_item_bytes_only_as_declared_final_tie_breaker", "G3-R11.JCS_role", "JCS must not replace the primary tuple")
+    _expect(errors, semantic_arrays.get("set_semantics", {}).get("primary_tuple_tie") == "normalized_item_JCS_bytes_only_when_profile_declares_final_tie_breaker", "G3-R11.tuple_tie", "JCS tie-breaking must be explicit and final")
     _expect(errors, all(rule.get("sort_tuple_profile") in sort_tuple_profiles for rule in array_rules.values()), "G3-R11.array_sort_profiles", "every set must name a declared tuple profile")
 
     continuity = contract.get("semantic_identity_continuity", {})

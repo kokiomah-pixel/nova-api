@@ -234,11 +234,13 @@ analogy.
 - Sets of source, constraint, conflict, unresolved-question, chronology,
   digest, and reference objects are normalized then sorted by a declared tuple.
 - Source references sort by `(source_id, source_version_or_digest,
-  authority_scope, observed_at, received_at, record_source_type)`.
-- Constraint references sort by `(constraint_id_or_digest, source_id,
-  applicability_scope)`.
+  observed_at, received_at, record_source_type)`.
+- Constraint references sort by `(constraint_id_or_digest, source_id)`.
 - Chronology/review/memory references sort by `(reference_type, reference_id,
-  version_or_digest, treatment_status, applicability_status)`.
+  version_or_digest)`.
+- Each of those three reference profiles uses the JCS bytes of the
+  already-normalized item only as its final tie-breaker. JCS does not replace
+  the field/type-specific primary tuple.
 - Digest records sort by normalized `(algorithm, parameter_set,
   output_encoding, digest)`.
 - Attestations sort by `(attestation_type_rank, cryptographic_profile_id,
@@ -253,9 +255,15 @@ declares set semantics. Same identity with different content is a conflict, not
 a duplicate; the reference canonicalizer rejects the unqualified set until the
 conflict is explicitly represented in the contract's conflict fields, where all
 variants remain visible. Distinct content with an identical declared sort tuple
-is rejected rather than falling back to input order or a universal JCS byte
-tie-breaker. Duplicate attestations remain separate only when their
+is rejected unless that profile explicitly declares normalized-item JCS bytes
+as its final tie-breaker. Duplicate attestations remain separate only when their
 IDs or signed scope differ; exact byte duplicates may be rejected.
+
+Canonical ordering does not incorporate unapproved refinement fields.
+`authority_scope` remains G3-R04, and `treatment_status` plus
+`applicability_status` remain G3-R10. `applicability_scope` is also excluded
+because the current canonical target-v2 contract does not define it
+independently.
 
 ## Algorithm and digest identity
 

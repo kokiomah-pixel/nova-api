@@ -83,6 +83,13 @@ EXPECTED_APPROVED_FOR_INCORPORATION = {
     "G3-Q15",
 }
 
+UNAPPROVED_SORT_FIELD_DEPENDENCIES = {
+    "authority_scope": "G3-R04",
+    "treatment_status": "G3-R10",
+    "applicability_status": "G3-R10",
+    "applicability_scope": "not_independently_defined_in_canonical_target_v2",
+}
+
 EXPECTED_FIXTURES = {
     "complete_source_coverage",
     "partial_source_coverage",
@@ -397,17 +404,25 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
 
         array_rules = numeric_profile.get("array_rules", {})
         expected_sort_tuples = {
-            "source_reference_sort": ["source_id", "source_version_or_digest", "authority_scope", "observed_at", "received_at", "record_source_type"],
-            "constraint_reference_sort": ["constraint_id_or_digest", "source_id", "applicability_scope"],
-            "chronology_reference_sort": ["reference_type", "reference_id", "version_or_digest", "treatment_status", "applicability_status"],
+            "source_reference_sort": {"primary": ["source_id", "source_version_or_digest", "observed_at", "received_at", "record_source_type"], "final_tie_breaker": "normalized_item_JCS_bytes"},
+            "constraint_reference_sort": {"primary": ["constraint_id_or_digest", "source_id"], "final_tie_breaker": "normalized_item_JCS_bytes"},
+            "chronology_reference_sort": {"primary": ["reference_type", "reference_id", "version_or_digest"], "final_tie_breaker": "normalized_item_JCS_bytes"},
             "digest_record_sort": ["algorithm", "parameter_set", "output_encoding", "digest"],
         }
         sort_tuple_profiles = numeric_profile.get("sort_tuple_profiles", {})
         for profile_name, expected_tuple in expected_sort_tuples.items():
             if sort_tuple_profiles.get(profile_name) != expected_tuple:
                 errors.append(ValidationError(f"canonical_profile.sort_tuple_profiles.{profile_name}", f"must be {expected_tuple!r}"))
-        if numeric_profile.get("declared_sort_tuple_collision") != "reject_until_conflict_is_explicitly_represented":
-            errors.append(ValidationError("canonical_profile.declared_sort_tuple_collision", "must reject ambiguous tuple collisions"))
+        primary_sort_fields = {
+            field
+            for profile in sort_tuple_profiles.values()
+            for field in (profile.get("primary", []) if isinstance(profile, dict) else profile)
+        }
+        for field, defining_gap in UNAPPROVED_SORT_FIELD_DEPENDENCIES.items():
+            if field in primary_sort_fields:
+                errors.append(ValidationError(f"canonical_profile.unapproved_sort_field.{field}", f"must exclude field owned by {defining_gap}"))
+        if numeric_profile.get("declared_primary_tuple_tie") != "use_normalized_item_JCS_bytes_only_when_profile_declares_final_tie_breaker_otherwise_reject":
+            errors.append(ValidationError("canonical_profile.declared_primary_tuple_tie", "must use JCS only as an explicitly declared final tie-breaker"))
         semantic_array_paths = set(numeric_profile.get("semantic_array_paths", []))
         if set(array_rules) != semantic_array_paths:
             errors.append(ValidationError("canonical_profile.array_rules", "every semantic array path must have exactly one explicit rule"))

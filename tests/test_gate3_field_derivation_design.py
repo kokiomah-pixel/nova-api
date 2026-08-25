@@ -508,12 +508,12 @@ def test_reference_ordering_exact_deduplication_and_identity_collision() -> None
     conflict = [{"source_id": "a", "value": 1}, {"source_id": "a", "value": 2}]
     with pytest.raises(ReferenceSemanticsError, match="conflicting duplicate reference identity"):
         normalize_reference_array(conflict, sort_tuple=source_sort, identity_key="source_id")
-    tuple_collision = [
+    primary_tuple_tie = [
         {"source_id": "a", "source_version_or_digest": "1", "extra": 1},
         {"source_id": "a", "source_version_or_digest": "1", "extra": 2},
     ]
-    with pytest.raises(ReferenceSemanticsError, match="conflicting duplicate declared sort tuple"):
-        normalize_reference_array(tuple_collision, sort_tuple=source_sort)
+    assert normalize_reference_array(primary_tuple_tie, sort_tuple=source_sort) == primary_tuple_tie
+    assert normalize_reference_array(list(reversed(primary_tuple_tie)), sort_tuple=source_sort) == primary_tuple_tie
     with pytest.raises(ReferenceSemanticsError, match="duplicate object member"):
         parse_json_no_duplicates('{"a":1,"a":1}')
 
@@ -553,10 +553,11 @@ def test_every_set_like_semantic_field_is_order_invariant_and_deduplicated() -> 
     for path in set_paths:
         identity_key = rules[path].get("identity_key")
         sort_tuple = profile["sort_tuple_profiles"][rules[path]["sort_tuple_profile"]]
-        if sort_tuple == ["$value"]:
+        primary_fields = sort_tuple["primary"] if isinstance(sort_tuple, dict) else sort_tuple
+        if primary_fields == ["$value"]:
             values = ["set-b", "set-a"]
         else:
-            first_field = sort_tuple[0]
+            first_field = primary_fields[0]
             values = [
                 {first_field: "set-b", **({identity_key: "set-b"} if identity_key else {}), "value": 2},
                 {first_field: "set-a", **({identity_key: "set-a"} if identity_key else {}), "value": 1},

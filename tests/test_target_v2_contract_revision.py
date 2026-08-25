@@ -29,6 +29,7 @@ from scripts.validate_target_v2_contract_revision import (
     INCORPORATED_REFINEMENTS,
     PERSISTENT_LIFECYCLE_ARTIFACTS,
     UNAPPROVED_REFINEMENTS,
+    UNAPPROVED_SORT_FIELD_DEPENDENCIES,
     validate_repository,
 )
 
@@ -288,6 +289,22 @@ def test_r11_declared_type_tuples_drive_order_before_jcs_serialization() -> None
         identity_key="reference_id",
     )] == ["memory", "review"]
 
+    tied_vector = _load(REPO_ROOT / "fixtures/target-v2/gate3/design_cases.json")["reference_vectors"]["constraint_reference_primary_tie"]
+    tied_constraints = tied_vector["input"]
+    tied_normalized = normalize_semantic_array(
+        tied_constraints,
+        semantics="set",
+        sort_tuple=profiles["constraint_reference_sort"],
+        identity_key="reference_id",
+    )
+    assert tied_normalized == tied_vector["expected"]
+    assert tied_normalized == normalize_semantic_array(
+        list(reversed(tied_constraints)),
+        semantics="set",
+        sort_tuple=profiles["constraint_reference_sort"],
+        identity_key="reference_id",
+    )
+
     digest_values = [
         {"algorithm": "fixture-z", "parameter_set": "1", "output_encoding": "hex", "digest": "00"},
         {"algorithm": "fixture-a", "parameter_set": "1", "output_encoding": "hex", "digest": "ff"},
@@ -304,6 +321,37 @@ def test_r11_declared_type_tuples_drive_order_before_jcs_serialization() -> None
             semantics="set",
             sort_tuple=profiles["digest_record_sort"],
         )
+
+
+def test_r11_sort_profiles_exclude_fields_owned_by_unapproved_refinements() -> None:
+    machine_profiles = _load(MACHINE_CONTRACT)["canonicalization_semantics"]["semantic_arrays"]["sort_tuple_profiles"]
+    derivation_profiles = _load(DERIVATION_SPEC)["canonical_numeric_and_interoperability_profile"]["sort_tuple_profiles"]
+
+    expected = {
+        "source_reference_sort": {
+            "primary": ["source_id", "source_version_or_digest", "observed_at", "received_at", "record_source_type"],
+            "final_tie_breaker": "normalized_item_JCS_bytes",
+        },
+        "constraint_reference_sort": {
+            "primary": ["constraint_id_or_digest", "source_id"],
+            "final_tie_breaker": "normalized_item_JCS_bytes",
+        },
+        "chronology_reference_sort": {
+            "primary": ["reference_type", "reference_id", "version_or_digest"],
+            "final_tie_breaker": "normalized_item_JCS_bytes",
+        },
+    }
+    for name, rule in expected.items():
+        assert machine_profiles[name] == rule
+        assert derivation_profiles[name] == rule
+
+    for profiles in (machine_profiles, derivation_profiles):
+        primary_fields = {
+            field
+            for profile in profiles.values()
+            for field in (profile["primary"] if isinstance(profile, dict) else profile)
+        }
+        assert primary_fields.isdisjoint(UNAPPROVED_SORT_FIELD_DEPENDENCIES)
 
 
 def test_r01_response_genesis_is_machine_visible_for_both_origins() -> None:

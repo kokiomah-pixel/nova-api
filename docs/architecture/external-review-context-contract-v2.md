@@ -638,28 +638,31 @@ reproducibility.source_segmentation
 
 Set values normalize and sort by declared field/type-specific tuples before JCS
 serializes the normalized result. JCS canonical bytes are not a universal
-semantic set-order key:
+semantic set-order key; the three reference profiles below use them only as a
+final tie-breaker after their approved primary tuple:
 
 ```yaml
 source_reference_sort:
-  - source_id
-  - source_version_or_digest
-  - authority_scope
-  - observed_at
-  - received_at
-  - record_source_type
+  primary:
+    - source_id
+    - source_version_or_digest
+    - observed_at
+    - received_at
+    - record_source_type
+  final_tie_breaker: normalized_item_JCS_bytes
 
 constraint_reference_sort:
-  - constraint_id_or_digest
-  - source_id
-  - applicability_scope
+  primary:
+    - constraint_id_or_digest
+    - source_id
+  final_tie_breaker: normalized_item_JCS_bytes
 
 chronology_reference_sort:
-  - reference_type
-  - reference_id
-  - version_or_digest
-  - treatment_status
-  - applicability_status
+  primary:
+    - reference_type
+    - reference_id
+    - version_or_digest
+  final_tie_breaker: normalized_item_JCS_bytes
 
 digest_record_sort:
   - algorithm
@@ -673,9 +676,14 @@ references use `constraint_reference_sort`; chronology, prior-review, and
 accepted-memory references use `chronology_reference_sort`; digest records use
 `digest_record_sort`. Other set-like fields declare their own stable scalar or
 identity tuple. Byte-identical duplicates collapse only for a declared set. The
-same identity with different content is a conflict, not a duplicate. Distinct
-content with the same declared sort tuple is likewise rejected as an unresolved
-conflict; input iteration order is never used as a tie-breaker.
+same identity with different content is a conflict, not a duplicate. A tie on
+one of the three primary reference tuples is resolved only by the JCS bytes of
+the already-normalized item; input iteration order is never a tie-breaker.
+
+`authority_scope` remains governed by unapproved G3-R04, while
+`treatment_status` and `applicability_status` remain governed by unapproved
+G3-R10. `applicability_scope` has no independent canonical target-v2 definition.
+None of those fields participates in design-v2.1 canonical ordering.
 
 ## Semantic Identity Continuity Across Digest Migration
 

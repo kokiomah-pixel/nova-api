@@ -50,7 +50,8 @@
     "timestamp_unknown_offset": {"input": "2026-08-24T12:00:00-00:00", "expected_error": "unknown_offset_rejected"},
     "intended_action_window": {"input": {"start": "2026-08-24T08:00:00-05:00", "end": "2026-08-24T14:00:00.1Z"}, "expected": {"start": "2026-08-24T13:00:00.000000Z", "end": "2026-08-24T14:00:00.100000Z"}, "explicit_unresolved": {"start": {"state": "unresolved", "reason": "start_time_unavailable"}, "end": "2026-08-24T14:00:00Z"}},
     "prepared_action_versions": {"v1": {"action_type": "synthetic-transfer", "asset_or_resource": "SYNTH-USD", "amount_or_scope": {"coefficient": "100", "scale": 2}}, "v2": {"action_type": "synthetic-transfer", "asset_or_resource": "SYNTH-USD", "amount_or_scope": {"coefficient": "200", "scale": 2}}},
-    "references": {"input": [{"source_id": "b", "value": 2}, {"source_id": "a", "value": 1}, {"source_id": "a", "value": 1}], "expected": [{"source_id": "a", "value": 1}, {"source_id": "b", "value": 2}]}
+    "references": {"input": [{"source_id": "b", "value": 2}, {"source_id": "a", "value": 1}, {"source_id": "a", "value": 1}], "expected": [{"source_id": "a", "value": 1}, {"source_id": "b", "value": 2}]},
+    "constraint_reference_primary_tie": {"input": [{"constraint_id_or_digest": "same", "source_id": "same", "reference_id": "b"}, {"constraint_id_or_digest": "same", "source_id": "same", "reference_id": "a"}], "expected": [{"constraint_id_or_digest": "same", "source_id": "same", "reference_id": "a"}, {"constraint_id_or_digest": "same", "source_id": "same", "reference_id": "b"}]}
   },
   "cases": [
     {"id": "complete_source_coverage", "category": "core", "inputs": {"required": ["balance", "constraint"], "observed": ["balance", "constraint"], "unavailable": [], "conflicts": []}, "expected": {"source_state": "complete", "scope_limited": true}},
