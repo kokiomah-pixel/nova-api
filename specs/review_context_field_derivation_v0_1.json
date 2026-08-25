@@ -1,26 +1,28 @@
 {
   "name": "review_context_field_derivation",
   "version": "design-v0.1",
-  "status": "approved_for_incorporation_not_yet_canonical",
+  "status": "design_review_complete_contract_revision_incorporated",
   "design_only": true,
   "runtime_implementation_authority": false,
   "authority_effect": "none",
   "execution_effect": "none",
   "design_review": {
-    "status": "design_review_complete_pending_contract_revision",
+    "status": "complete",
     "CCO": "complete",
     "Architect": "complete",
     "approved_for_incorporation": ["G3-R01", "G3-R03", "G3-R08", "G3-R11", "G3-Q15"],
-    "canonical_contract_revision": {"status": "not_started"},
+    "canonical_contract_revision": {"status": "incorporated", "target": "design-v2.1", "canonicality_source": "authoritative_repository_main"},
     "merge_authority": false,
     "deployment_authority": false,
     "implementation_authority": false
   },
   "approved_contract": {
     "path": "specs/review_context_contract_v2.json",
-    "version": "design-v2",
-    "sha256": "873c4183a43930b858e2d53f6499421ed87e79e96944ab4c2c3d2a9fc1dd847e",
-    "modified_by_this_design": false
+    "version": "design-v2.1",
+    "sha256": "2204b622643f4c88d4112099d66d46a2e4c5e28b4e84ffc70a71eafa32c2e6d9",
+    "modified_by_this_design": true,
+    "incorporation_status": "incorporated_in_design_v2.1_contract",
+    "canonicality_source": "authoritative_repository_main"
   },
   "design_authorities": [
     "docs/architecture/external-review-context-contract-v2.md",
@@ -37,7 +39,7 @@
     "Nova does not execute."
   ],
   "identity_model": {
-    "status": "approved_for_incorporation_not_yet_canonical",
+    "status": "incorporated_in_design_v2.1_contract",
     "scope": ["review_context_request", "review_context_response.prepared_action_reference"],
     "action_id": {
       "meaning": "stable_identity_across_revisions",
@@ -60,8 +62,8 @@
     },
     "identities_collapsed": false,
     "Nova_fingerprint_fallback": "labeled_Nova_derived_proposal_fingerprint_only_when_external_version_id_absent",
-    "request_side_proposal": "add_explicit_action_id_and_proposal_version_id_inputs_in_a_future_reviewed_target_v2_contract_revision",
-    "response_side_proposal": "bind_the_response_reference_to_the_resolved_request_identity_pair_without_reconstructing_lineage_from_content",
+    "request_side_contract": "explicit_optional_action_id_and_proposal_version_id_inputs_with_external_lineage_only",
+    "response_side_contract": "bind_exact_proposal_version_and_external_action_lineage_when_available_without_content_lineage_inference",
     "contract_gap_reference": "G3-R01"
   },
   "review_profile_model": {
@@ -73,7 +75,7 @@
     "contract_gap_reference": "G3-R02"
   },
   "record_source_type_proposal": {
-    "status": "approved_for_incorporation_not_yet_canonical",
+    "status": "incorporated_in_design_v2.1_contract",
     "contract_gap_reference": "G3-R03",
     "permitted_values": ["synthetic", "production_like", "live", "mixed"],
     "mixed_meaning": "more_than_one_evidence_environment_class_is_represented",
@@ -83,7 +85,7 @@
     "mixed_reduction_to_strongest_or_weakest": false
   },
   "review_completeness_proposal": {
-    "status": "approved_for_incorporation_not_yet_canonical",
+    "status": "incorporated_in_design_v2.1_contract",
     "contract_gap_reference": "G3-R08",
     "semantic_owner_after_contract_adoption": "target_v2_contract",
     "precedence": ["unavailable", "conflicted", "partial", "complete"],
@@ -108,15 +110,16 @@
     "proof_state_changes_other_dimensions_automatically": false
   },
   "semantic_completion": {
-    "status": "design_review_complete_pending_contract_revision",
+    "status": "complete_for_design_v2.1_contract",
     "active_review_blockers": [],
     "historical_review_blockers": ["G3-R01", "G3-R03", "G3-R08", "G3-R11", "G3-Q15"],
     "approved_for_incorporation": ["G3-R01", "G3-R03", "G3-R08", "G3-R11", "G3-Q15"],
-    "canonical_contract_status": "pending_contract_revision",
+    "canonical_contract_status": "incorporated_in_design_v2.1_contract",
+    "canonicality_source": "authoritative_repository_main",
     "implementation_authority_created": false
   },
   "canonical_numeric_and_interoperability_profile": {
-    "status": "approved_for_incorporation_not_yet_canonical",
+    "status": "incorporated_in_design_v2.1_contract",
     "contract_gap_reference": "G3-R11",
     "profile_id": "nova-jcs-exact-financial-json",
     "profile_version": "design-v0.1",
@@ -211,28 +214,41 @@
       "review_context_response.reproducibility.source_versions",
       "review_context_response.reproducibility.source_segmentation"
     ],
+    "sort_tuple_profiles": {
+      "source_reference_sort": ["source_id", "source_version_or_digest", "observed_at", "received_at", "record_source_type"],
+      "constraint_reference_sort": ["constraint_id_or_digest", "source_id"],
+      "chronology_reference_sort": ["reference_type", "reference_id", "version_or_digest"],
+      "digest_record_sort": ["algorithm", "parameter_set", "output_encoding", "digest"],
+      "conflict_reference_sort": ["conflict_id"],
+      "question_reference_sort": ["question_id"],
+      "condition_reference_sort": ["condition_id"],
+      "change_reference_sort": ["change_id"],
+      "stable_scalar_sort": ["$value"]
+    },
+    "primary_tuple_collision": {"identical_normalized_item": {"behavior": "collapse_when_field_is_declared_set"}, "different_normalized_item": {"behavior": "reject_as_conflict_until_explicitly_represented"}},
+    "whole_item_JCS_tie_breaker": "prohibited_without_future_separately_approved_complete_canonical_item_schema",
     "array_rules": {
-      "review_context_response.record_source_type.source_segmentation": {"semantics": "set", "identity_key": "source_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
-      "review_context_response.context_state.reasons": {"semantics": "set", "exact_duplicate": "collapse"},
-      "review_context_response.source_state.sources": {"semantics": "set", "identity_key": "source_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
-      "review_context_response.source_state.unresolved_source_conflicts": {"semantics": "set", "identity_key": "conflict_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
-      "review_context_response.constraint_context.observed_constraints": {"semantics": "set", "identity_key": "reference_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
-      "review_context_response.constraint_context.constraint_sources": {"semantics": "set", "identity_key": "source_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
-      "review_context_response.constraint_context.unresolved_constraint_questions": {"semantics": "set", "identity_key": "question_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
-      "review_context_response.temporal_context.temporal_conflicts": {"semantics": "set", "identity_key": "conflict_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
-      "review_context_response.temporal_context.pending_state": {"semantics": "set", "identity_key": "condition_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
-      "review_context_response.contradiction_context.source_conflicts": {"semantics": "set", "identity_key": "conflict_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
-      "review_context_response.contradiction_context.constraint_conflicts": {"semantics": "set", "identity_key": "conflict_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
-      "review_context_response.contradiction_context.temporal_conflicts": {"semantics": "set", "identity_key": "conflict_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
-      "review_context_response.contradiction_context.chronology_conflicts": {"semantics": "set", "identity_key": "conflict_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
-      "review_context_response.contradiction_context.unresolved_questions": {"semantics": "set", "identity_key": "question_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
-      "review_context_response.review_completeness.missing_context": {"semantics": "set", "exact_duplicate": "collapse"},
-      "review_context_response.review_completeness.unresolved_conditions": {"semantics": "set", "identity_key": "condition_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
-      "review_context_response.chronology_context.prior_review_references": {"semantics": "set", "identity_key": "reference_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
-      "review_context_response.chronology_context.accepted_memory_references": {"semantics": "set", "identity_key": "reference_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
-      "review_context_response.chronology_context.relevant_changes_since_prior_review": {"semantics": "set", "identity_key": "change_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
-      "review_context_response.reproducibility.source_versions": {"semantics": "set", "exact_duplicate": "collapse"},
-      "review_context_response.reproducibility.source_segmentation": {"semantics": "set", "identity_key": "source_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"}
+      "review_context_response.record_source_type.source_segmentation": {"semantics": "set", "sort_tuple_profile": "source_reference_sort", "identity_key": "source_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.context_state.reasons": {"semantics": "set", "sort_tuple_profile": "stable_scalar_sort", "exact_duplicate": "collapse"},
+      "review_context_response.source_state.sources": {"semantics": "set", "sort_tuple_profile": "source_reference_sort", "identity_key": "source_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.source_state.unresolved_source_conflicts": {"semantics": "set", "sort_tuple_profile": "conflict_reference_sort", "identity_key": "conflict_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.constraint_context.observed_constraints": {"semantics": "set", "sort_tuple_profile": "constraint_reference_sort", "identity_key": "reference_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.constraint_context.constraint_sources": {"semantics": "set", "sort_tuple_profile": "source_reference_sort", "identity_key": "source_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.constraint_context.unresolved_constraint_questions": {"semantics": "set", "sort_tuple_profile": "question_reference_sort", "identity_key": "question_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.temporal_context.temporal_conflicts": {"semantics": "set", "sort_tuple_profile": "conflict_reference_sort", "identity_key": "conflict_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.temporal_context.pending_state": {"semantics": "set", "sort_tuple_profile": "condition_reference_sort", "identity_key": "condition_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.contradiction_context.source_conflicts": {"semantics": "set", "sort_tuple_profile": "conflict_reference_sort", "identity_key": "conflict_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.contradiction_context.constraint_conflicts": {"semantics": "set", "sort_tuple_profile": "conflict_reference_sort", "identity_key": "conflict_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.contradiction_context.temporal_conflicts": {"semantics": "set", "sort_tuple_profile": "conflict_reference_sort", "identity_key": "conflict_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.contradiction_context.chronology_conflicts": {"semantics": "set", "sort_tuple_profile": "conflict_reference_sort", "identity_key": "conflict_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.contradiction_context.unresolved_questions": {"semantics": "set", "sort_tuple_profile": "question_reference_sort", "identity_key": "question_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.review_completeness.missing_context": {"semantics": "set", "sort_tuple_profile": "stable_scalar_sort", "exact_duplicate": "collapse"},
+      "review_context_response.review_completeness.unresolved_conditions": {"semantics": "set", "sort_tuple_profile": "condition_reference_sort", "identity_key": "condition_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.chronology_context.prior_review_references": {"semantics": "set", "sort_tuple_profile": "chronology_reference_sort", "identity_key": "reference_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.chronology_context.accepted_memory_references": {"semantics": "set", "sort_tuple_profile": "chronology_reference_sort", "identity_key": "reference_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.chronology_context.relevant_changes_since_prior_review": {"semantics": "set", "sort_tuple_profile": "change_reference_sort", "identity_key": "change_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"},
+      "review_context_response.reproducibility.source_versions": {"semantics": "set", "sort_tuple_profile": "stable_scalar_sort", "exact_duplicate": "collapse"},
+      "review_context_response.reproducibility.source_segmentation": {"semantics": "set", "sort_tuple_profile": "source_reference_sort", "identity_key": "source_id", "exact_duplicate": "collapse", "identity_collision": "reject_until_conflict_is_explicitly_represented"}
     }
   },
   "cryptographic_profile_proposal": {
@@ -263,7 +279,7 @@
     "continuity_contract_gap_reference": "G3-Q15"
   },
   "semantic_identity_continuity_proposal": {
-    "status": "approved_for_incorporation_not_yet_canonical",
+    "status": "incorporated_in_design_v2.1_contract",
     "contract_gap_reference": "G3-Q15",
     "semantic_identity_basis": "identical_canonical_semantic_byte_sequence_under_the_same_canonicalization_derivation_and_profile_identity",
     "individual_algorithm_qualified_digest_is_semantic_identity": false,
@@ -358,7 +374,8 @@
     "review_context_response.request_id": {"template": "external_reference", "rule_version": "0.1.0", "required_inputs": ["review_context_request.request_id"], "derivation_rule": "Preserve the opaque request identifier in the envelope while excluding it from semantic hash material.", "semantic_hash_inclusion": false, "contract_gap_references": []},
     "review_context_response.created_at": {"template": "generated_envelope_metadata", "rule_version": "0.1.0", "required_inputs": ["Nova_clock_observation"], "derivation_rule": "Record construction time; normalize under G3-R11 for the envelope and do not claim independently trusted time.", "contract_gap_references": ["G3-R11", "G3-Q08"]},
 
-    "review_context_response.prepared_action_reference.reference_id": {"template": "external_reference", "rule_version": "0.1.0", "required_inputs": ["request.action_id_if_externally_supplied", "request.proposal_version_id_or_algorithm_qualified_labeled_Nova_fingerprint"], "derivation_rule": "Bind the response to distinct request-side identities: action_id is externally supplied and never content-derived; prefer an external proposal_version_id, else label a Nova-derived fingerprint over canonical prepared-action material only; absent action_id leaves lineage unavailable and forbids same-action inference.", "sensitivity_class": "opaque_action_reference", "contract_gap_references": ["G3-R01", "G3-R09"]},
+    "review_context_response.prepared_action_reference.reference_id": {"template": "external_reference", "rule_version": "0.1.0", "required_inputs": ["request.compatibility_reference_if_supplied"], "derivation_rule": "Preserve the compatibility reference without treating it as both stable action lineage and exact proposal-version identity.", "sensitivity_class": "opaque_action_reference", "contract_gap_references": ["G3-R09"]},
+    "review_context_response.prepared_action_reference.proposal_version_identity": {"template": "external_reference", "rule_version": "0.1.0", "required_inputs": ["request.proposal_version_id_or_algorithm_qualified_labeled_Nova_fingerprint"], "derivation_rule": "Emit structured exact-proposal identity with value and machine-visible source_type. Preserve an external value as opaque; for Nova_derived_proposal_fingerprint require algorithm_qualification and material_scope=canonical_prepared_action_material_only. Neither origin establishes action lineage.", "sensitivity_class": "opaque_action_reference", "contract_gap_references": ["G3-R01"]},
     "review_context_response.prepared_action_reference.reference_type": {"template": "contract_constant", "rule_version": "0.1.0", "required_inputs": ["approved_contract.prepared_action_reference.reference_type"], "derivation_rule": "Emit opaque_external_reference.", "contract_gap_references": ["G3-R01"]},
     "review_context_response.prepared_action_reference.payload_embedded": {"template": "contract_constant", "rule_version": "0.1.0", "required_inputs": ["approved_contract.prepared_action_reference.payload_embedded"], "derivation_rule": "Emit false; sensitive action payload is reference-only by default.", "contract_gap_references": []},
 

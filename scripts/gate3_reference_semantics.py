@@ -277,15 +277,38 @@ def normalize_timestamp_window(
     }
 
 
+def _declared_sort_key(
+    value: Any,
+    tuple_fields: Iterable[str],
+) -> tuple[tuple[int, bytes], ...]:
+    """Build the declared primary-tuple key while preserving missing and null."""
+
+    fields = list(tuple_fields)
+    if not fields:
+        raise ReferenceSemanticsError("set-like reference requires a declared sort tuple")
+    components: list[tuple[int, bytes]] = []
+    for field in fields:
+        if field == "$value":
+            components.append((1, canonicalize_jcs_profile(value)))
+        elif isinstance(value, dict) and field in value:
+            components.append((1, canonicalize_jcs_profile(value[field])))
+        else:
+            components.append((0, b""))
+    return tuple(components)
+
+
 def normalize_reference_array(
     values: Iterable[Any],
     *,
+    sort_tuple: Iterable[str],
     identity_key: str | None = None,
 ) -> list[Any]:
-    """Canonical-sort set-like references, dedupe exact copies, reject collisions."""
+    """Tuple-sort references, dedupe exact copies, and reject tuple conflicts."""
 
     unique: dict[bytes, Any] = {}
     identities: dict[Any, bytes] = {}
+    tuple_fields = list(sort_tuple)
+
     for value in values:
         encoded = canonicalize_jcs_profile(value)
         if identity_key and isinstance(value, dict):
@@ -297,13 +320,21 @@ def normalize_reference_array(
                 raise ReferenceSemanticsError(f"conflicting duplicate reference identity: {identity}")
             identities[identity] = encoded
         unique.setdefault(encoded, copy.deepcopy(value))
-    return [unique[key] for key in sorted(unique)]
+    tuple_identities: dict[tuple[tuple[int, bytes], ...], bytes] = {}
+    for encoded, value in unique.items():
+        tuple_identity = _declared_sort_key(value, tuple_fields)
+        existing = tuple_identities.get(tuple_identity)
+        if existing is not None and existing != encoded:
+            raise ReferenceSemanticsError("conflicting duplicate declared primary tuple")
+        tuple_identities[tuple_identity] = encoded
+    return sorted(unique.values(), key=lambda value: _declared_sort_key(value, tuple_fields))
 
 
 def normalize_semantic_array(
     values: Iterable[Any],
     *,
     semantics: str,
+    sort_tuple: Iterable[str] | None = None,
     identity_key: str | None = None,
 ) -> list[Any]:
     """Apply one explicitly declared array semantic class."""
@@ -311,10 +342,20 @@ def normalize_semantic_array(
     materialized = [copy.deepcopy(value) for value in values]
     if semantics == "ordered_sequence":
         return materialized
+    if sort_tuple is None:
+        raise ReferenceSemanticsError("set or multiset requires a declared field/type-specific sort tuple")
     if semantics == "set":
-        return normalize_reference_array(materialized, identity_key=identity_key)
+        return normalize_reference_array(materialized, sort_tuple=sort_tuple, identity_key=identity_key)
     if semantics == "multiset":
-        return sorted(materialized, key=canonicalize_jcs_profile)
+        tuple_identities: dict[tuple[tuple[int, bytes], ...], bytes] = {}
+        for value in materialized:
+            encoded = canonicalize_jcs_profile(value)
+            tuple_identity = _declared_sort_key(value, sort_tuple)
+            existing = tuple_identities.get(tuple_identity)
+            if existing is not None and existing != encoded:
+                raise ReferenceSemanticsError("conflicting duplicate declared primary tuple")
+            tuple_identities[tuple_identity] = encoded
+        return sorted(materialized, key=lambda value: _declared_sort_key(value, sort_tuple))
     raise ReferenceSemanticsError(f"undeclared array semantics: {semantics}")
 
 
@@ -383,7 +424,8 @@ def resolve_prepared_action_identity(
     if external_proposal_version_id:
         proposal = {
             "value": external_proposal_version_id,
-            "source": "external_institution_or_orchestrator",
+            "source_type": "external_institution_or_orchestrator",
+            "establishes_action_lineage": False,
         }
     else:
         if not fingerprint_algorithm or fingerprint_function is None:
@@ -391,13 +433,14 @@ def resolve_prepared_action_identity(
         material = canonicalize_jcs_profile({"prepared_action": copy.deepcopy(prepared_action)})
         proposal = {
             "value": fingerprint_function(material),
-            "source": "Nova_derived_proposal_fingerprint",
-            "algorithm": fingerprint_algorithm,
+            "source_type": "Nova_derived_proposal_fingerprint",
+            "algorithm_qualification": fingerprint_algorithm,
             "material_scope": "canonical_prepared_action_material_only",
+            "establishes_action_lineage": False,
         }
     return {
         "action_id": lineage,
-        "proposal_version_id": proposal,
+        "proposal_version_identity": proposal,
         "same_action_inference_permitted": action_id is not None,
     }
 
@@ -438,6 +481,7 @@ def _normalize_field_value(path: str, value: Any, profile: dict[str, Any]) -> An
         value = normalize_semantic_array(
             value,
             semantics=rule.get("semantics", ""),
+            sort_tuple=profile.get("sort_tuple_profiles", {}).get(rule.get("sort_tuple_profile")),
             identity_key=rule.get("identity_key"),
         )
     return value
@@ -641,8 +685,16 @@ def reference_self_check(spec: dict[str, Any], fixtures: dict[str, Any]) -> list
         ) != window_vector["expected"]:
             errors.append("intended action window boundary normalization failed")
         reference_vector = fixtures["reference_vectors"]["references"]
-        if normalize_reference_array(reference_vector["input"], identity_key="source_id") != reference_vector["expected"]:
+        source_sort = spec["canonical_numeric_and_interoperability_profile"]["sort_tuple_profiles"]["source_reference_sort"]
+        if normalize_reference_array(reference_vector["input"], sort_tuple=source_sort, identity_key="source_id") != reference_vector["expected"]:
             errors.append("reference ordering/deduplication vector failed")
+        collision_vector = fixtures["reference_vectors"]["source_reference_unapproved_field_collision"]
+        try:
+            normalize_reference_array(collision_vector["input"], sort_tuple=source_sort)
+            errors.append("unapproved source field resolved a primary-tuple collision")
+        except ReferenceSemanticsError as exc:
+            if "conflicting duplicate declared primary tuple" not in str(exc):
+                errors.append("unapproved source field collision failed for an unexpected reason")
         if canonicalize_jcs_profile({"value": None}) == canonicalize_jcs_profile({}):
             errors.append("null and absent canonicalized identically")
         if derive_record_source_type(["production_like", "live"]) != "mixed":
@@ -675,7 +727,7 @@ def reference_self_check(spec: dict[str, Any], fixtures: dict[str, Any]) -> list
         )
         if identity_v1["same_action_inference_permitted"] or identity_v2["same_action_inference_permitted"]:
             errors.append("missing action_id permitted cross-revision lineage inference")
-        if identity_v1["proposal_version_id"]["value"] == identity_v2["proposal_version_id"]["value"]:
+        if identity_v1["proposal_version_identity"]["value"] == identity_v2["proposal_version_identity"]["value"]:
             errors.append("prepared-action revisions did not produce distinct proposal fingerprints")
         response = fixtures["reference_response"]
         before = canonical_semantic_bytes(response, spec)
@@ -695,14 +747,28 @@ def reference_self_check(spec: dict[str, Any], fixtures: dict[str, Any]) -> list
             if rule["semantics"] != "set":
                 continue
             identity_key = rule.get("identity_key")
-            values = (
-                [{identity_key: "b", "value": 2}, {identity_key: "a", "value": 1}]
-                if identity_key
-                else ["b", "a"]
+            sort_tuple = profile["sort_tuple_profiles"][rule["sort_tuple_profile"]]
+            if sort_tuple == ["$value"]:
+                values = ["b", "a"]
+            else:
+                first_field = sort_tuple[0]
+                values = [
+                    {first_field: "b", **({identity_key: "b"} if identity_key else {}), "value": 2},
+                    {first_field: "a", **({identity_key: "a"} if identity_key else {}), "value": 1},
+                ]
+            normalized = normalize_semantic_array(
+                values,
+                semantics="set",
+                sort_tuple=sort_tuple,
+                identity_key=identity_key,
             )
-            normalized = normalize_semantic_array(values, semantics="set", identity_key=identity_key)
             reordered_values = list(reversed(values)) + [copy.deepcopy(values[0])]
-            if normalize_semantic_array(reordered_values, semantics="set", identity_key=identity_key) != normalized:
+            if normalize_semantic_array(
+                reordered_values,
+                semantics="set",
+                sort_tuple=sort_tuple,
+                identity_key=identity_key,
+            ) != normalized:
                 errors.append(f"set order/duplicate invariance failed: {path}")
         digesters = {
             "fixture-digest-a": lambda value: f"a:{sum(value) % 1_000_003}",

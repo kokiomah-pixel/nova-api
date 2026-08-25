@@ -3,15 +3,17 @@
 ## Status and boundary
 
 ```yaml
-status: approved_for_incorporation_not_yet_canonical
+status: incorporated_in_design_v2.1_contract
 design_only: true
 canonicalization_design_defined: true
-semantic_completion: design_review_complete_pending_contract_revision
+semantic_completion: complete_for_design_v2.1_contract
 active_review_blockers: []
 historical_review_blockers: [G3-R01, G3-R03, G3-R08, G3-R11, G3-Q15]
 CCO_review: approved
 Architect_review: approved
-canonical_contract_revision: not_started
+canonical_contract_revision: incorporated
+contract_revision_target: design-v2.1
+canonicality_source: authoritative_repository_main
 canonicalization_version: nova-jcs-exact-financial-json-design-v0.1
 derivation_version: gate3-field-derivation-v0.1
 production_algorithm_selected: false
@@ -20,9 +22,10 @@ authority_effect: none
 execution_effect: none
 ```
 
-This draft defines deterministic material boundaries for design review. It does
-not implement target v2, select a production signature/hash suite, alter the
-approved contract, or authorize production cryptography.
+This design artifact supplies the G3-R11 and G3-Q15 semantics incorporated in
+the `design-v2.1` contract. Canonicality is determined by authoritative
+repository `main`. It does not implement target v2,
+select a production signature/hash suite, or authorize production cryptography.
 
 ## Two identities and two scopes
 
@@ -43,7 +46,7 @@ metadata changes. Cryptographic attestation identity may change independently.
 
 - exact schema, derivation, and canonicalization identities;
 - externally supplied stable action identity when lineage is claimed, plus the
-  exact proposal-version identity once G3-R01 is approved. If action identity
+  exact proposal-version identity as incorporated through G3-R01. If action identity
   is absent, lineage is explicitly unavailable; a proposal-version fallback is
   algorithm-qualified, labeled `Nova_derived_proposal_fingerprint`, and limited
   to canonical prepared-action material;
@@ -104,11 +107,12 @@ resulting document remains valid JCS/I-JSON.
 ```yaml
 G3-R11:
   name: canonical_numeric_and_interoperability_profile
-  status: approved_for_incorporation_not_yet_canonical
+  status: incorporated_in_design_v2.1_contract
   CCO_review: approved
   Architect_review: approved
   design_disposition: approved_for_incorporation
-  canonical_contract_status: pending_contract_revision
+  canonical_contract_status: incorporated_in_design_v2.1_contract
+  canonicality_source: authoritative_repository_main
   silently_canonical: false
   implementation_authority: false
   base_standard: RFC_8785_JCS
@@ -202,8 +206,8 @@ Whole seconds are padded with `.000000`; shorter fractions are right-padded.
 Sub-microsecond input is rejected rather than rounded. RFC 3339 `-00:00` denotes
 an unknown local offset and is rejected by this proposed profile; it is never
 silently normalized to UTC `Z`. Leap-second or invalid calendar input fails.
-This fixed precision is part of the reviewed G3-R11 design, approved for
-incorporation but not canonical until contract revision. Normalization does not
+This fixed precision is part of G3-R11 as incorporated in `design-v2.1`.
+Normalization does not
 turn a Nova clock value into independently trusted time.
 
 ## Array ordering and duplicate references
@@ -230,11 +234,10 @@ analogy.
 - Sets of source, constraint, conflict, unresolved-question, chronology,
   digest, and reference objects are normalized then sorted by a declared tuple.
 - Source references sort by `(source_id, source_version_or_digest,
-  authority_scope, observed_at, received_at, record_source_type)`.
-- Constraint references sort by `(constraint_id_or_digest, source_id,
-  applicability_scope)`.
+  observed_at, received_at, record_source_type)`.
+- Constraint references sort by `(constraint_id_or_digest, source_id)`.
 - Chronology/review/memory references sort by `(reference_type, reference_id,
-  version_or_digest, treatment_status, applicability_status)`.
+  version_or_digest)`.
 - Digest records sort by normalized `(algorithm, parameter_set,
   output_encoding, digest)`.
 - Attestations sort by `(attestation_type_rank, cryptographic_profile_id,
@@ -248,8 +251,20 @@ Byte-identical duplicate references collapse to one only when the field rule
 declares set semantics. Same identity with different content is a conflict, not
 a duplicate; the reference canonicalizer rejects the unqualified set until the
 conflict is explicitly represented in the contract's conflict fields, where all
-variants remain visible. Duplicate attestations remain separate only when their
+variants remain visible. Distinct content with an identical declared sort tuple
+is rejected as a conflict until explicitly represented. JCS serializes only
+after declared type-specific ordering and never resolves a primary-tuple
+collision. Duplicate attestations remain separate only when their
 IDs or signed scope differ; exact byte duplicates may be rejected.
+
+Canonical ordering does not incorporate unapproved refinement fields.
+`authority_scope` remains G3-R04, and `treatment_status` plus
+`applicability_status` remain G3-R10. `applicability_scope` is also excluded
+because the current canonical target-v2 contract does not define it
+independently.
+
+Whole-item JCS bytes are prohibited as a canonical sort tie-breaker unless a
+future separately approved contract defines the complete canonical item schema.
 
 ## Algorithm and digest identity
 
@@ -277,11 +292,12 @@ referenced verifiably, continuity is `unresolved`.
 
 ```yaml
 G3-Q15:
-  status: approved_for_incorporation_not_yet_canonical
+  status: incorporated_in_design_v2.1_contract
   CCO_review: approved
   Architect_review: approved
   design_disposition: approved_for_incorporation
-  canonical_contract_status: pending_contract_revision
+  canonical_contract_status: incorporated_in_design_v2.1_contract
+  canonicality_source: authoritative_repository_main
   silently_canonical: false
   implementation_authority: false
   semantic_identity_is_individual_digest: false

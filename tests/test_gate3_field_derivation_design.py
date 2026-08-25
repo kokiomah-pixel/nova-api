@@ -29,7 +29,6 @@ from scripts.gate3_reference_semantics import (
     verify_semantic_identity_continuity,
 )
 from scripts.validate_gate3_field_derivation import (
-    APPROVED_AUTHORITY_HASHES,
     EXPECTED_APPROVED_FOR_INCORPORATION,
     EXPECTED_GAPS,
     EXPECTED_FIXTURES,
@@ -85,17 +84,22 @@ def test_every_required_contract_leaf_has_exactly_one_rule() -> None:
     rules = _load(SPEC_PATH)["field_rules"]
     required = _required_response_leaf_paths(contract)
 
-    assert len(required) == 54
+    assert len(required) == 55
     assert set(rules) == required
     assert all(rule["rule_version"] == "0.1.0" for rule in rules.values())
 
 
-def test_approved_contract_authorities_are_unchanged() -> None:
-    for relative, expected in APPROVED_AUTHORITY_HASHES.items():
-        assert hashlib.sha256((REPO_ROOT / relative).read_bytes()).hexdigest() == expected
+def test_design_v2_1_contract_digest_and_merge_stable_canonicality_are_recorded() -> None:
+    spec = _load(SPEC_PATH)
+    contract_reference = spec["approved_contract"]
+
+    assert contract_reference["version"] == "design-v2.1"
+    assert contract_reference["incorporation_status"] == "incorporated_in_design_v2.1_contract"
+    assert contract_reference["canonicality_source"] == "authoritative_repository_main"
+    assert hashlib.sha256((REPO_ROOT / contract_reference["path"]).read_bytes()).hexdigest() == contract_reference["sha256"]
 
 
-def test_reviewed_refinements_are_approved_pending_contract_revision_without_authority() -> None:
+def test_reviewed_refinements_are_in_design_v2_1_without_authority() -> None:
     register = _load(GAPS_PATH)
     records = register["contract_refinements"]
 
@@ -103,12 +107,13 @@ def test_reviewed_refinements_are_approved_pending_contract_revision_without_aut
     assert all(record["silently_canonical"] is False for record in records)
     assert all(record["authority_effect"] == "none" for record in records)
     assert all(record["execution_effect"] == "none" for record in records)
-    assert register["status"] == "approved_for_incorporation_not_yet_canonical"
-    assert register["design_review_status"] == "design_review_complete_pending_contract_revision"
+    assert register["status"] == "design_review_complete_contract_revision_incorporated"
+    assert register["design_review_status"] == "complete"
     assert register["active_semantic_completion_blockers"] == []
     assert set(register["historical_semantic_completion_blockers"]) == EXPECTED_APPROVED_FOR_INCORPORATION
     assert set(register["approved_for_incorporation"]) == EXPECTED_APPROVED_FOR_INCORPORATION
-    assert register["canonical_contract_revision"] == {"status": "not_started"}
+    expected_revision = {"status": "incorporated", "target": "design-v2.1", "canonicality_source": "authoritative_repository_main"}
+    assert register["canonical_contract_revision"] == expected_revision
     assert register["implementation_authority"] is False
     assert set(register["additional_gaps_discovered"]) == {"G3-R11", "G3-Q15"}
     by_id = {record["id"]: record for record in records}
@@ -119,7 +124,9 @@ def test_reviewed_refinements_are_approved_pending_contract_revision_without_aut
         assert record["CCO_review"] == "approved"
         assert record["Architect_review"] == "approved"
         assert record["design_disposition"] == "approved_for_incorporation"
-        assert record["canonical_contract_status"] == "pending_contract_revision"
+        assert record["contract_revision_target"] == "design-v2.1"
+        assert record["canonical_contract_status"] == "incorporated_in_design_v2.1_contract"
+        assert record["canonicality_source"] == "authoritative_repository_main"
         assert record["implementation_authority"] is False
         assert record["requires_CCO_review"] is False
         assert record["requires_Architect_review"] is False
@@ -131,11 +138,11 @@ def test_reviewed_refinements_are_approved_pending_contract_revision_without_aut
     assert by_id["G3-Q15"]["name"] == "semantic_identity_continuity_across_digest_migration"
 
     spec = _load(SPEC_PATH)
-    assert spec["status"] == "approved_for_incorporation_not_yet_canonical"
-    assert spec["semantic_completion"]["status"] == "design_review_complete_pending_contract_revision"
+    assert spec["status"] == "design_review_complete_contract_revision_incorporated"
+    assert spec["semantic_completion"]["status"] == "complete_for_design_v2.1_contract"
     assert spec["semantic_completion"]["active_review_blockers"] == []
     assert set(spec["semantic_completion"]["historical_review_blockers"]) == EXPECTED_APPROVED_FOR_INCORPORATION
-    assert spec["design_review"]["canonical_contract_revision"] == {"status": "not_started"}
+    assert spec["design_review"]["canonical_contract_revision"] == expected_revision
     assert spec["design_review"]["merge_authority"] is False
     assert spec["design_review"]["deployment_authority"] is False
     assert spec["design_review"]["implementation_authority"] is False
@@ -204,9 +211,11 @@ def test_request_and_response_identity_never_infer_lineage_from_mutable_content(
     }
     assert absent_v1["same_action_inference_permitted"] is False
     assert absent_v2["same_action_inference_permitted"] is False
-    assert absent_v1["proposal_version_id"]["value"] != absent_v2["proposal_version_id"]["value"]
-    assert absent_v1["proposal_version_id"]["source"] == "Nova_derived_proposal_fingerprint"
-    assert absent_v1["proposal_version_id"]["material_scope"] == "canonical_prepared_action_material_only"
+    assert absent_v1["proposal_version_identity"]["value"] != absent_v2["proposal_version_identity"]["value"]
+    assert absent_v1["proposal_version_identity"]["source_type"] == "Nova_derived_proposal_fingerprint"
+    assert absent_v1["proposal_version_identity"]["algorithm_qualification"] == "fixture-only"
+    assert absent_v1["proposal_version_identity"]["material_scope"] == "canonical_prepared_action_material_only"
+    assert absent_v1["proposal_version_identity"]["establishes_action_lineage"] is False
 
     external = resolve_prepared_action_identity(
         prepared_action=vectors["v1"],
@@ -214,9 +223,10 @@ def test_request_and_response_identity_never_infer_lineage_from_mutable_content(
         external_proposal_version_id="external-proposal-v1",
     )
     assert external["action_id"]["source"] == "external_institution_or_orchestrator"
-    assert external["proposal_version_id"] == {
+    assert external["proposal_version_identity"] == {
         "value": "external-proposal-v1",
-        "source": "external_institution_or_orchestrator",
+        "source_type": "external_institution_or_orchestrator",
+        "establishes_action_lineage": False,
     }
     assert external["same_action_inference_permitted"] is True
 
@@ -492,11 +502,18 @@ def test_intended_action_window_normalizes_each_boundary_and_fails_closed() -> N
 
 def test_reference_ordering_exact_deduplication_and_identity_collision() -> None:
     vector = _load(FIXTURE_PATH)["reference_vectors"]["references"]
+    source_sort = _load(SPEC_PATH)["canonical_numeric_and_interoperability_profile"]["sort_tuple_profiles"]["source_reference_sort"]
 
-    assert normalize_reference_array(vector["input"], identity_key="source_id") == vector["expected"]
+    assert normalize_reference_array(vector["input"], sort_tuple=source_sort, identity_key="source_id") == vector["expected"]
     conflict = [{"source_id": "a", "value": 1}, {"source_id": "a", "value": 2}]
     with pytest.raises(ReferenceSemanticsError, match="conflicting duplicate reference identity"):
-        normalize_reference_array(conflict, identity_key="source_id")
+        normalize_reference_array(conflict, sort_tuple=source_sort, identity_key="source_id")
+    primary_tuple_tie = [
+        {"source_id": "a", "source_version_or_digest": "1", "extra": 1},
+        {"source_id": "a", "source_version_or_digest": "1", "extra": 2},
+    ]
+    with pytest.raises(ReferenceSemanticsError, match="conflicting duplicate declared primary tuple"):
+        normalize_reference_array(primary_tuple_tie, sort_tuple=source_sort)
     with pytest.raises(ReferenceSemanticsError, match="duplicate object member"):
         parse_json_no_duplicates('{"a":1,"a":1}')
 
@@ -535,11 +552,16 @@ def test_every_set_like_semantic_field_is_order_invariant_and_deduplicated() -> 
     assert set_paths
     for path in set_paths:
         identity_key = rules[path].get("identity_key")
-        values = (
-            [{identity_key: "set-b", "value": 2}, {identity_key: "set-a", "value": 1}]
-            if identity_key
-            else ["set-b", "set-a"]
-        )
+        sort_tuple = profile["sort_tuple_profiles"][rules[path]["sort_tuple_profile"]]
+        primary_fields = sort_tuple["primary"] if isinstance(sort_tuple, dict) else sort_tuple
+        if primary_fields == ["$value"]:
+            values = ["set-b", "set-a"]
+        else:
+            first_field = primary_fields[0]
+            values = [
+                {first_field: "set-b", **({identity_key: "set-b"} if identity_key else {}), "value": 2},
+                {first_field: "set-a", **({identity_key: "set-a"} if identity_key else {}), "value": 1},
+            ]
         left = copy.deepcopy(fixtures["reference_response"])
         right = copy.deepcopy(fixtures["reference_response"])
         relative_path = path.removeprefix("review_context_response.")
@@ -548,7 +570,7 @@ def test_every_set_like_semantic_field_is_order_invariant_and_deduplicated() -> 
         assert canonical_semantic_bytes(left, spec) == canonical_semantic_bytes(right, spec), path
 
     assert normalize_semantic_array(["b", "a"], semantics="ordered_sequence") == ["b", "a"]
-    assert normalize_semantic_array(["b", "a", "a"], semantics="multiset") == ["a", "a", "b"]
+    assert normalize_semantic_array(["b", "a", "a"], semantics="multiset", sort_tuple=["$value"]) == ["a", "a", "b"]
 
 
 def test_time_reconstruction_and_redaction_fail_closed() -> None:

@@ -4,12 +4,14 @@
 
 ```yaml
 gate: Gate_3_v2_field_derivation_design
-status: design_review_complete_pending_contract_revision
-artifact_status: approved_for_incorporation_not_yet_canonical
+status: complete_for_design_v2.1_contract
+artifact_status: design_review_complete_contract_revision_incorporated
 CCO_review: approved
 Architect_review: approved
 approved_for_incorporation: [G3-R01, G3-R03, G3-R08, G3-R11, G3-Q15]
-canonical_contract_revision: not_started
+canonical_contract_revision: incorporated
+contract_revision_target: design-v2.1
+canonicality_source: authoritative_repository_main
 design_only: true
 target_v2_runtime_implemented: false
 private_adapter_implemented: false
@@ -22,8 +24,9 @@ authority_effect: none
 execution_effect: none
 ```
 
-This ledger uses the approved target-v2 contract and its machine specification as
-semantic authorities. The approved Gate 3A cryptographic-agility and
+This ledger uses the `design-v2.1` target-v2 contract and its machine
+specification as semantic authorities. Canonicality is determined by
+authoritative repository `main`. The approved Gate 3A cryptographic-agility and
 post-quantum threat-model invariants are design input. Legacy v1 is migration
 reference only and is never target-v2 semantic authority.
 
@@ -37,8 +40,8 @@ Nova does not execute.
 
 Every required field in the approved response contract has one rule in
 [`review_context_field_derivation_v0_1.json`](../../specs/review_context_field_derivation_v0_1.json).
-The machine spec is normative only for this design proposal. It does not amend
-the approved contract or authorize implementation.
+The machine spec remains design-only. The contract revision creates
+no runtime or implementation authority.
 
 ## Governing derivation rule
 
@@ -76,11 +79,12 @@ prepared-action material alone. That fallback distinguishes proposal content;
 it cannot establish action lineage. A proposal revision changes semantic
 context and cannot replay under the proof of an earlier proposal.
 
-The approved request has action content but no `action_id` or
-`proposal_version_id`, and the approved response has one
-`prepared_action_reference.reference_id`. Proposed refinement `G3-R01` covers
-both request input and response reference binding; this ledger does not add the
-fields to the approved contract.
+The `design-v2.1` request now accepts optional `action_id` and
+`proposal_version_id` inputs. The response binds the exact
+`prepared_action_reference.proposal_version_identity` and an external `action_id`
+when available; its existing `reference_id` remains a compatibility reference
+and never substitutes for both identities. This is the incorporated `G3-R01`
+contract revision, not runtime implementation.
 
 ## Profile-driven requirements
 
@@ -90,16 +94,16 @@ applicability, required fields, and revalidation conditions. Its ID, version,
 owner, and hash are preserved. A profile change may explain a completeness or
 semantic-hash change even when evidence is unchanged.
 
-Missing or conflicting profile rules remain unresolved. Proposed `G3-R08`
-places public enum meaning and precedence in the target-v2 contract rather than
+Missing or conflicting profile rules remain unresolved. Incorporated `G3-R08`
+places public enum meaning and precedence in the `design-v2.1` target-v2 contract rather than
 institution profiles: `unavailable`, `conflicted`, `partial`, then `complete`.
 `unavailable` means the profile or required-field inventory prevents evaluation;
 `conflicted` means required context has unresolved material conflict; `partial`
 means required context is missing/unavailable without a higher-priority
 conflict; `complete` means every required dimension is represented, including
 allowed explicit unresolved states, with no material conflict. This remains a
-proposal because the approved contract is unchanged. Complete never means
-policy satisfied, safe, permitted, approved, or executable.
+contract. Complete never means policy satisfied, safe, permitted, approved, or
+executable.
 
 ## Scoped source authority
 
@@ -136,7 +140,7 @@ state change does not automatically change source, context, or completeness.
 ## Evidence-environment segmentation
 
 `synthetic`, `production_like`, and `live` remain visible at field or source
-reference level. Proposed `G3-R03` adds aggregate value `mixed`, meaning that
+reference level. Incorporated `G3-R03` adds aggregate value `mixed`, meaning that
 more than one evidence-environment class is represented. `source_segmentation`
 remains authoritative component provenance. No strongest/weakest heuristic is
 used, `production_like` is never promoted to `live`, and `live` never means
@@ -144,7 +148,7 @@ true, accepted, or approved.
 
 ## Required response-field ledger
 
-The table enumerates all 54 required leaf fields. Detailed missing,
+The table enumerates all 55 required leaf fields. Detailed missing,
 unavailable, conflict, temporal, sensitivity, proof, and reconstruction metadata
 is machine-readable in the companion spec.
 
@@ -154,14 +158,15 @@ is machine-readable in the companion spec.
 | 2 | `review_context_response.context_id` | Generated envelope ID; excluded from semantic identity. |
 | 3 | `review_context_response.request_id` | Opaque request reference; excluded from semantic identity. |
 | 4 | `review_context_response.created_at` | Nova record time; not independently trusted time. |
-| 5 | `review_context_response.prepared_action_reference.reference_id` | Compatibility reference binding proposed request-side external lineage and exact proposal identity under G3-R01; missing action lineage stays unavailable. |
+| 5 | `review_context_response.prepared_action_reference.reference_id` | Compatibility reference only; it is not both stable lineage and exact proposal identity. |
+| 5a | `review_context_response.prepared_action_reference.proposal_version_identity` | Structured exact-proposal identity with visible external or Nova-derived genesis; Nova derivation carries algorithm qualification and prepared-action-only scope. |
 | 6 | `review_context_response.prepared_action_reference.reference_type` | Contract constant `opaque_external_reference`. |
 | 7 | `review_context_response.prepared_action_reference.payload_embedded` | Contract constant `false`. |
 | 8 | `review_context_response.review_profile_reference.profile_id` | Exact institution profile ID. |
 | 9 | `review_context_response.review_profile_reference.profile_version` | Exact version; never inferred latest. |
 | 10 | `review_context_response.review_profile_reference.profile_owner` | Declared owner; no Nova policy authority. |
 | 11 | `review_context_response.review_profile_reference.profile_hash` | Supplied digest; algorithm qualification proposed. |
-| 12 | `review_context_response.record_source_type.value` | Proposed G3-R03 aggregate: homogeneous environment or `mixed`; segmentation remains authoritative. |
+| 12 | `review_context_response.record_source_type.value` | Incorporated G3-R03 aggregate: homogeneous environment or `mixed`; segmentation remains authoritative. |
 | 13 | `review_context_response.record_source_type.source_segmentation` | Stable source/field environment segments without promotion. |
 | 14 | `review_context_response.context_state.value` | Profile-temporal and supersession evaluation. |
 | 15 | `review_context_response.context_state.reasons` | Stable reason codes, not generated prose. |
@@ -182,7 +187,7 @@ is machine-readable in the companion spec.
 | 30 | `review_context_response.contradiction_context.temporal_conflicts` | Normalized temporal conflicts. |
 | 31 | `review_context_response.contradiction_context.chronology_conflicts` | Existing-reference conflicts; no chronology write. |
 | 32 | `review_context_response.contradiction_context.unresolved_questions` | Stable union of unresolved questions. |
-| 33 | `review_context_response.review_completeness.value` | Proposed target-v2 contract precedence is `unavailable > conflicted > partial > complete`; profiles define requirements, evidence, thresholds, applicability, and revalidation, not enum meaning or precedence. |
+| 33 | `review_context_response.review_completeness.value` | Target-v2 contract precedence is `unavailable > conflicted > partial > complete`; profiles define requirements, evidence, thresholds, applicability, and revalidation, not enum meaning or precedence. |
 | 34 | `review_context_response.review_completeness.missing_context` | Stable list of missing profile-required fields. |
 | 35 | `review_context_response.review_completeness.unresolved_conditions` | Unresolved evaluation conditions and precedence. |
 | 36 | `review_context_response.chronology_context.prior_review_references` | Existing references only. |
@@ -230,11 +235,12 @@ Parallel digest migration binds all algorithm-qualified digest records to the
 identical canonical semantic byte sequence. Semantic identity is not any one
 digest. Historical evidence is preserved, successor digests do not replace it,
 and different algorithms are never described as producing the same hash value.
-This continuity rule is proposed refinement `G3-Q15`.
+This continuity rule is incorporated refinement `G3-Q15` in the contract
+revision; it does not add the unapproved G3-Q13 plural transport.
 
 ## Canonical numeric and interoperability model
 
-Proposed refinement `G3-R11` adopts RFC 8785/JCS as the I-JSON structural
+Incorporated refinement `G3-R11` adopts RFC 8785/JCS as the I-JSON structural
 canonicalization baseline and adds a versioned application profile for exact
 financial semantics. JCS's IEEE-754 number model is not used for semantic
 financial values. Binary floats, NaN, and infinity are prohibited.
@@ -277,17 +283,16 @@ status.
 ## Contract and implementation boundary
 
 CCO and Architect design review is complete for `G3-R01`, `G3-R03`, `G3-R08`,
-`G3-R11`, and `G3-Q15`. Their disposition is
-`approved_for_incorporation_not_yet_canonical`; each remains
-`pending_contract_revision`. They remain in the historical contract-gap
-inventory with their prior blocker provenance, but they are no longer active
-design-review blockers. Other inventory records retain their existing lifecycle
-state.
+`G3-R11`, and `G3-Q15`. Their disposition is `approved_for_incorporation`, and
+each is incorporated in the `design-v2.1` contract. Canonicality is determined
+by authoritative repository `main`. They remain in the historical contract-gap
+inventory with their prior blocker provenance. Other inventory records retain
+their unapproved, review-required lifecycle state.
 
-The canonical contract revision has not started, and the approved contract files
-are unchanged. Design approval creates no implementation, merge, deployment,
+The contract revision creates no implementation, merge, deployment,
 runtime, adapter, endpoint, production-crypto, chronology, Reflex Memory,
-settlement, or capital-movement authority.
+settlement, or capital-movement authority. Gate 3 design completion on revision
+merge does not activate Gate 4.
 
 This design does not establish that any system is quantum safe, quantum proof,
 post-quantum secure, or future proof. Such a claim would require exact

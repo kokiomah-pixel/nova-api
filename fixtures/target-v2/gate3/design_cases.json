@@ -23,12 +23,12 @@
     "context_id": "generated-context-reference",
     "request_id": "generated-request-reference",
     "created_at": "2026-08-24T12:00:00Z",
-    "prepared_action_reference": {"reference_id": "synthetic-action-001:proposal-v1", "reference_type": "opaque_external_reference", "payload_embedded": false},
+    "prepared_action_reference": {"reference_id": "synthetic-action-001:proposal-v1", "proposal_version_identity": {"value": "synthetic-proposal-001-v1", "source_type": "external_institution_or_orchestrator"}, "reference_type": "opaque_external_reference", "payload_embedded": false},
     "review_profile_reference": {"profile_id": "synthetic-treasury-review", "profile_version": "1", "profile_owner": "synthetic-institution", "profile_hash": "fixture-profile-digest"},
     "record_source_type": {"value": "synthetic", "source_segmentation": [{"source_id": "source-b", "record_source_type": "synthetic"}, {"source_id": "source-a", "record_source_type": "synthetic"}]},
     "context_state": {"value": "current", "reasons": ["profile_temporal_conditions_satisfied"]},
     "source_state": {"value": "complete", "sources": [{"source_id": "source-b", "source_version_or_digest": "v1"}, {"source_id": "source-a", "source_version_or_digest": "v1"}], "unresolved_source_conflicts": []},
-    "constraint_context": {"observed_constraints": [{"reference_id": "constraint-b"}, {"reference_id": "constraint-a"}], "constraint_sources": [{"source_id": "constraint-source-a"}], "unresolved_constraint_questions": []},
+    "constraint_context": {"observed_constraints": [{"reference_id": "constraint-b", "constraint_id_or_digest": "constraint-b"}, {"reference_id": "constraint-a", "constraint_id_or_digest": "constraint-a"}], "constraint_sources": [{"source_id": "constraint-source-a"}], "unresolved_constraint_questions": []},
     "temporal_context": {"source_observed_at": "2026-08-24T07:00:00-05:00", "source_received_at": "2026-08-24T12:00:01Z", "review_context_created_at": "2026-08-24T12:00:02Z", "intended_action_window": {"start": "2026-08-24T13:00:00Z", "end": "2026-08-24T14:00:00Z"}, "temporal_conflicts": [], "pending_state": []},
     "contradiction_context": {"source_conflicts": [], "constraint_conflicts": [], "temporal_conflicts": [], "chronology_conflicts": [], "unresolved_questions": []},
     "review_completeness": {"value": "complete", "missing_context": [], "unresolved_conditions": []},
@@ -50,7 +50,8 @@
     "timestamp_unknown_offset": {"input": "2026-08-24T12:00:00-00:00", "expected_error": "unknown_offset_rejected"},
     "intended_action_window": {"input": {"start": "2026-08-24T08:00:00-05:00", "end": "2026-08-24T14:00:00.1Z"}, "expected": {"start": "2026-08-24T13:00:00.000000Z", "end": "2026-08-24T14:00:00.100000Z"}, "explicit_unresolved": {"start": {"state": "unresolved", "reason": "start_time_unavailable"}, "end": "2026-08-24T14:00:00Z"}},
     "prepared_action_versions": {"v1": {"action_type": "synthetic-transfer", "asset_or_resource": "SYNTH-USD", "amount_or_scope": {"coefficient": "100", "scale": 2}}, "v2": {"action_type": "synthetic-transfer", "asset_or_resource": "SYNTH-USD", "amount_or_scope": {"coefficient": "200", "scale": 2}}},
-    "references": {"input": [{"source_id": "b", "value": 2}, {"source_id": "a", "value": 1}, {"source_id": "a", "value": 1}], "expected": [{"source_id": "a", "value": 1}, {"source_id": "b", "value": 2}]}
+    "references": {"input": [{"source_id": "b", "value": 2}, {"source_id": "a", "value": 1}, {"source_id": "a", "value": 1}], "expected": [{"source_id": "a", "value": 1}, {"source_id": "b", "value": 2}]},
+    "source_reference_unapproved_field_collision": {"input": [{"source_id": "same", "source_version_or_digest": "v1", "observed_at": "2026-08-25T00:00:00Z", "received_at": "2026-08-25T00:00:01Z", "record_source_type": "synthetic", "authority_scope": "a"}, {"source_id": "same", "source_version_or_digest": "v1", "observed_at": "2026-08-25T00:00:00Z", "received_at": "2026-08-25T00:00:01Z", "record_source_type": "synthetic", "authority_scope": "b"}], "expected_error": "conflicting_duplicate_declared_primary_tuple"}
   },
   "cases": [
     {"id": "complete_source_coverage", "category": "core", "inputs": {"required": ["balance", "constraint"], "observed": ["balance", "constraint"], "unavailable": [], "conflicts": []}, "expected": {"source_state": "complete", "scope_limited": true}},

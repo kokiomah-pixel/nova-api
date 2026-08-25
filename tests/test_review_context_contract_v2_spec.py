@@ -17,11 +17,25 @@ def _serialized(value: Any) -> str:
     return json.dumps(value, sort_keys=True)
 
 
+def _permitted_domain_values(value: Any) -> set[str]:
+    values: set[str] = set()
+    if isinstance(value, dict):
+        permitted = value.get("permitted_values")
+        if isinstance(permitted, list):
+            values.update(item for item in permitted if isinstance(item, str))
+        for child in value.values():
+            values.update(_permitted_domain_values(child))
+    elif isinstance(value, list):
+        for child in value:
+            values.update(_permitted_domain_values(child))
+    return values
+
+
 def test_specification_parses_and_is_design_only():
     spec = _load_spec()
 
     assert spec["name"] == "review_context_contract"
-    assert spec["version"] == "design-v2"
+    assert spec["version"] == "design-v2.1"
     assert spec["interface_type"] == "proposed_response_contract"
     assert spec["implementation_status"] == "not_implemented"
     assert spec["implementation_gate"]["endpoint_exists"] is False
@@ -57,10 +71,10 @@ def test_legacy_authority_fields_are_absent_from_response_model():
 
 def test_prohibited_status_values_are_absent_from_response_domain_enums():
     spec = _load_spec()
-    response_text = _serialized(spec["response_model"])
+    domain_values = _permitted_domain_values(spec["response_model"])
 
     for value in spec["prohibited_external_values"]:
-        assert f'"{value}"' not in response_text
+        assert value not in domain_values
 
 
 def test_response_uses_descriptive_context_objects():
@@ -131,10 +145,14 @@ def test_versioned_review_profile_is_required_in_request_response_and_proof():
 def test_review_completeness_is_profile_relative_not_policy_satisfaction():
     completeness = _load_spec()["response_model"]["review_completeness"]
 
-    assert completeness["meaning"] == (
-        "fields_required_by_identified_and_versioned_review_profile_are_"
-        "present_or_explicitly_unresolved"
-    )
+    assert completeness["semantic_owner"] == "target_v2_contract"
+    assert completeness["precedence"] == [
+        "unavailable",
+        "conflicted",
+        "partial",
+        "complete",
+    ]
+    assert completeness["profile_may_redefine_enum_meaning_or_precedence"] is False
     assert "institutional_policy_satisfied" in completeness["does_not_mean"]
 
 
@@ -172,7 +190,11 @@ def test_record_source_type_is_exact_and_proof_preserves_segmentation():
         "synthetic",
         "production_like",
         "live",
+        "mixed",
     ]
+    assert source_type["semantics"]["mixed"] == (
+        "more_than_one_evidence_environment_class_is_represented"
+    )
     assert source_type["production_like_may_be_represented_as_live"] is False
     assert source_type["mixed_source_packet_segmentation_level"] == (
         "field_or_source_reference"
@@ -190,17 +212,27 @@ def test_prepared_action_reference_is_opaque_and_does_not_embed_payload():
 
     assert reference["required_fields"] == [
         "reference_id",
+        "proposal_version_identity",
         "reference_type",
         "payload_embedded",
     ]
+    assert reference["optional_fields"] == ["action_id"]
     assert reference["reference_type"] == "opaque_external_reference"
     assert reference["payload_embedded"] is False
-    assert reference["semantics"] == {
-        "action_origin": "external_to_Nova",
-        "Nova_owns_action": False,
-        "full_action_payload_required_in_response": False,
-        "sensitive_action_data_embedded_by_default": False,
-        "reference_grants_execution_authority": False,
+    assert reference["semantics"]["action_origin"] == "external_to_Nova"
+    assert reference["semantics"]["Nova_owns_action"] is False
+    assert reference["semantics"]["full_action_payload_required_in_response"] is False
+    assert reference["semantics"]["sensitive_action_data_embedded_by_default"] is False
+    assert reference["semantics"]["reference_grants_execution_authority"] is False
+    identity = reference["semantics"]["identity_semantics"]
+    assert identity["action_and_proposal_identity_distinct"] is True
+    assert identity["proposal_version_identity"]["source_genesis_machine_visible"] is True
+    assert identity["proposal_version_identity"]["establishes_action_lineage"] is False
+    proposal_identity = reference["proposal_version_identity"]
+    assert proposal_identity["required_fields"] == ["value", "source_type"]
+    assert proposal_identity["conditional_fields"]["when_source_type_is_Nova_derived_proposal_fingerprint"] == {
+        "algorithm_qualification": "required",
+        "material_scope": "canonical_prepared_action_material_only",
     }
 
 

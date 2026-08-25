@@ -1,8 +1,21 @@
 {
   "name": "review_context_contract",
-  "version": "design-v2",
+  "version": "design-v2.1",
   "interface_type": "proposed_response_contract",
   "implementation_status": "not_implemented",
+  "canonicality_source": "authoritative_repository_main",
+  "incorporated_Gate_3_refinements": [
+    "G3-R01",
+    "G3-R03",
+    "G3-R08",
+    "G3-R11",
+    "G3-Q15"
+  ],
+  "runtime_implemented": false,
+  "approved_for_runtime_implementation": false,
+  "endpoint_exists": false,
+  "private_adapter_started": false,
+  "Gate_4_authority": false,
   "authority_model": "non_authority",
   "authority_effect": "none",
   "execution_effect": "none",
@@ -36,6 +49,33 @@
       "destination_or_venue",
       "intended_time_window"
     ],
+    "prepared_action_optional_identity_fields": [
+      "action_id",
+      "proposal_version_id"
+    ],
+    "prepared_action_identity_semantics": {
+      "identities_distinct": true,
+      "action_id": {
+        "purpose": "stable_identity_across_revisions",
+        "authority": "external_institution_or_orchestrator_only",
+        "required_when_cross_revision_lineage_is_claimed": true,
+        "Nova_content_derivation_permitted": false,
+        "missing_behavior": "lineage_unavailable_and_no_same_action_inference",
+        "opaque_external_reference": true
+      },
+      "proposal_version_id": {
+        "purpose": "identity_of_exact_proposal_reviewed",
+        "preferred_source": "external_institution_or_orchestrator",
+        "external_request_field_optional": true,
+        "fallback": {
+          "source": "Nova_derived_proposal_fingerprint",
+          "explicit_label_required": true,
+          "material_scope": "canonical_prepared_action_material_only",
+          "algorithm_qualified": true,
+          "establishes_action_lineage": false
+        }
+      }
+    },
     "evidence_fields": [
       "sources",
       "observed_at",
@@ -96,17 +136,61 @@
     "prepared_action_reference": {
       "required_fields": [
         "reference_id",
+        "proposal_version_identity",
         "reference_type",
         "payload_embedded"
       ],
+      "optional_fields": [
+        "action_id"
+      ],
       "reference_type": "opaque_external_reference",
       "payload_embedded": false,
+      "proposal_version_identity": {
+        "required_fields": [
+          "value",
+          "source_type"
+        ],
+        "source_type_permitted_values": [
+          "external_institution_or_orchestrator",
+          "Nova_derived_proposal_fingerprint"
+        ],
+        "conditional_fields": {
+          "when_source_type_is_Nova_derived_proposal_fingerprint": {
+            "algorithm_qualification": "required",
+            "material_scope": "canonical_prepared_action_material_only"
+          },
+          "when_source_type_is_external_institution_or_orchestrator": {
+            "algorithm_qualification": "absent",
+            "material_scope": "absent",
+            "value_treatment": "preserve_opaque_external_value"
+          }
+        },
+        "establishes_action_lineage": false
+      },
       "semantics": {
         "action_origin": "external_to_Nova",
         "Nova_owns_action": false,
         "full_action_payload_required_in_response": false,
         "sensitive_action_data_embedded_by_default": false,
-        "reference_grants_execution_authority": false
+        "reference_grants_execution_authority": false,
+        "identity_semantics": {
+          "action_and_proposal_identity_distinct": true,
+          "action_id": {
+            "meaning": "stable_action_lineage_identity_when_externally_supplied",
+            "required_when_cross_revision_lineage_is_claimed": true,
+            "missing_behavior": "lineage_unavailable_and_no_same_action_inference"
+          },
+          "proposal_version_identity": {
+            "meaning": "identity_of_exact_proposal_reviewed",
+            "required": true,
+            "source_genesis_machine_visible": true,
+            "Nova_fallback_must_be_explicitly_labeled": true,
+            "Nova_fallback_material_scope": "canonical_prepared_action_material_only",
+            "Nova_fallback_algorithm_qualified": true,
+            "establishes_action_lineage": false
+          },
+          "reference_id": "compatibility_reference_not_a_substitute_for_both_identities"
+        }
       },
       "sensitive_fields_prohibited_by_default": [
         "destination_addresses",
@@ -129,7 +213,8 @@
       "permitted_values": [
         "synthetic",
         "production_like",
-        "live"
+        "live",
+        "mixed"
       ],
       "required_fields": [
         "value",
@@ -138,15 +223,24 @@
       "semantics": {
         "synthetic": "generated_or_constructed_for_testing",
         "production_like": "realistic_but_not_verified_live_institutional_evidence",
-        "live": "observed_from_an_authorized_live_source_under_declared_scope"
+        "live": "observed_from_an_authorized_live_source_under_declared_scope",
+        "mixed": "more_than_one_evidence_environment_class_is_represented"
       },
       "production_like_may_be_represented_as_live": false,
+      "source_segmentation_authoritative_for_component_provenance": true,
+      "aggregate_environment_ranking": "prohibited",
+      "mixed_reduction_to_strongest_or_weakest": false,
       "live_does_not_mean": [
         "truth",
         "correctness",
         "approval",
-        "acceptance"
+        "acceptance",
+        "executable"
       ],
+      "aggregate_derivation": {
+        "homogeneous_packet": "emit_the_single_environment_class",
+        "more_than_one_environment_class": "mixed"
+      },
       "mixed_source_packet_segmentation_level": "field_or_source_reference",
       "proof_preserves_source_segmentation": true,
       "signature_upgrades_evidence": false
@@ -209,17 +303,45 @@
     },
     "review_completeness": {
       "permitted_values": [
-        "complete",
-        "partial",
+        "unavailable",
         "conflicted",
-        "unavailable"
+        "partial",
+        "complete"
       ],
       "required_fields": [
         "value",
         "missing_context",
         "unresolved_conditions"
       ],
-      "meaning": "fields_required_by_identified_and_versioned_review_profile_are_present_or_explicitly_unresolved",
+      "semantic_owner": "target_v2_contract",
+      "precedence": [
+        "unavailable",
+        "conflicted",
+        "partial",
+        "complete"
+      ],
+      "meanings": {
+        "unavailable": "completeness_cannot_be_evaluated_because_the_applicable_profile_or_required_field_inventory_is_unavailable",
+        "conflicted": "required_context_contains_unresolved_material_conflict",
+        "partial": "required_context_is_missing_or_unavailable_without_a_higher_priority_material_conflict",
+        "complete": "all_required_dimensions_are_represented_including_allowed_explicit_unresolved_states_and_no_material_conflict_exists"
+      },
+      "profile_defines": [
+        "required_fields",
+        "required_evidence",
+        "thresholds_and_maximum_age",
+        "source_hierarchy",
+        "constraint_applicability",
+        "revalidation_conditions"
+      ],
+      "profile_may_redefine_enum_meaning_or_precedence": false,
+      "complete_does_not_mean": [
+        "policy_satisfied",
+        "safe",
+        "permitted",
+        "approved",
+        "executable"
+      ],
       "does_not_mean": [
         "institutional_policy_satisfied",
         "transaction_permitted",
@@ -261,6 +383,209 @@
       "authorization_effect": "none",
       "execution_effect": "none"
     }
+  },
+  "canonicalization_semantics": {
+    "incorporated_refinement": "G3-R11",
+    "profile_id": "nova-jcs-exact-financial-json",
+    "profile_version": "design-v0.1",
+    "structural_baseline": "RFC_8785_JCS",
+    "JCS_deviation": false,
+    "application_profile_applied_before_JCS_serialization": true,
+    "production_hash_algorithm_selected": false,
+    "unicode": {
+      "preserve_code_points_as_supplied": true,
+      "silent_normalization": false,
+      "invalid_Unicode_or_lone_surrogates": "reject",
+      "object_key_order": "RFC_8785_UTF16_code_unit_lexicographic",
+      "enum_alias_or_case_coercion": "prohibited"
+    },
+    "null_and_absence": {
+      "distinct": true,
+      "missing_to_null_coercion": "prohibited",
+      "required_absence": "projection_failure_or_explicit_unresolved_state_under_declared_field_rule"
+    },
+    "numeric": {
+      "binary_floating_point_financial_values": "prohibited",
+      "NaN_and_infinity": "prohibited",
+      "rounding_or_truncation": "prohibited",
+      "exact_integer": {
+        "representation": {
+          "numeric_type": "integer",
+          "value": "canonical_base10_string"
+        },
+        "exponent": "prohibited",
+        "leading_zeros": "prohibited_except_zero",
+        "plus_sign": "prohibited",
+        "decimal_point": "prohibited",
+        "negative_zero": "normalize_to_zero",
+        "precision": "field_profile_max_digits"
+      },
+      "exact_decimal": {
+        "representation": {
+          "numeric_type": "decimal",
+          "coefficient": "signed_base10_string",
+          "scale": "nonnegative_integer"
+        },
+        "value_definition": "coefficient_times_10_to_negative_scale",
+        "exponent_input": "normalization_boundary_only_and_eliminated_from_canonical_material",
+        "negative_zero": "coefficient_zero_without_sign",
+        "generic_trailing_zeros": "trim_before_canonical_resulting_scale_validation",
+        "fixed_scale_trailing_zeros": "preserve_profile_declared_scale",
+        "required_limits": [
+          "max_precision",
+          "max_scale",
+          "max_abs_exponent",
+          "max_input_characters"
+        ],
+        "max_abs_exponent_check": "before_coefficient_expansion",
+        "max_input_characters_check": "before_numeric_parsing",
+        "rounding": "prohibited"
+      },
+      "monetary_amount": {
+        "representation": {
+          "numeric_type": "monetary_amount",
+          "asset_id": "explicit_opaque_asset_or_unit",
+          "coefficient": "signed_base10_string",
+          "scale": "profile_declared_nonnegative_integer"
+        },
+        "asset_or_unit_inference": "prohibited",
+        "scale_inference": "prohibited",
+        "missing_asset_or_scale": "unresolved_not_canonicalizable",
+        "required_limits": [
+          "max_precision",
+          "max_scale",
+          "max_abs_exponent",
+          "max_input_characters"
+        ],
+        "rounding": "prohibited",
+        "authority_effect": "none",
+        "execution_effect": "none"
+      }
+    },
+    "timestamp": {
+      "input": "RFC_3339_with_explicit_offset",
+      "output_timezone": "UTC_Z",
+      "fractional_second_digits": 6,
+      "whole_seconds": "append_.000000",
+      "shorter_fraction": "right_pad_to_six_digits",
+      "sub_microsecond": "reject_without_rounding",
+      "unknown_offset_minus_00_00": "reject_not_UTC_equivalent",
+      "invalid_calendar_or_leap_second": "reject",
+      "intended_action_window": {
+        "boundary_fields": [
+          "start",
+          "end"
+        ],
+        "normalization": "same_RFC3339_UTC_fixed_precision_rules",
+        "invalid_or_missing": "projection_failure_or_explicit_unresolved_state_under_declared_field_rule",
+        "silent_normalization": false
+      },
+      "normalization_creates_trusted_time": false
+    },
+    "semantic_arrays": {
+      "classification_required": true,
+      "permitted_classifications": [
+        "ordered_sequence",
+        "set",
+        "multiset"
+      ],
+      "undeclared_array_behavior": "projection_failure",
+      "set_semantics": {
+        "deterministic_normalization": true,
+        "deterministic_sort_key": "declared_field_or_type_specific_primary_tuple",
+        "JCS_role": "serialize_normalized_result_after_declared_type_specific_ordering_not_a_semantic_tie_breaker",
+        "byte_identical_duplicate": "collapse_only_for_declared_set",
+        "same_identity_different_content": "conflict",
+        "primary_tuple_collision": {
+          "identical_normalized_item": {
+            "behavior": "collapse_when_field_is_declared_set"
+          },
+          "different_normalized_item": {
+            "behavior": "reject_as_conflict_until_explicitly_represented"
+          }
+        },
+        "whole_item_JCS_tie_breaker": "prohibited_without_future_separately_approved_complete_canonical_item_schema"
+      },
+      "sort_tuple_profiles": {
+        "source_reference_sort": [
+          "source_id",
+          "source_version_or_digest",
+          "observed_at",
+          "received_at",
+          "record_source_type"
+        ],
+        "constraint_reference_sort": [
+          "constraint_id_or_digest",
+          "source_id"
+        ],
+        "chronology_reference_sort": [
+          "reference_type",
+          "reference_id",
+          "version_or_digest"
+        ],
+        "digest_record_sort": [
+          "algorithm",
+          "parameter_set",
+          "output_encoding",
+          "digest"
+        ],
+        "conflict_reference_sort": [
+          "conflict_id"
+        ],
+        "question_reference_sort": [
+          "question_id"
+        ],
+        "condition_reference_sort": [
+          "condition_id"
+        ],
+        "change_reference_sort": [
+          "change_id"
+        ],
+        "stable_scalar_sort": [
+          "$value"
+        ]
+      },
+      "array_rules": {
+        "review_context_response.record_source_type.source_segmentation": {"classification": "set", "sort_tuple_profile": "source_reference_sort"},
+        "review_context_response.context_state.reasons": {"classification": "set", "sort_tuple_profile": "stable_scalar_sort"},
+        "review_context_response.source_state.sources": {"classification": "set", "sort_tuple_profile": "source_reference_sort"},
+        "review_context_response.source_state.unresolved_source_conflicts": {"classification": "set", "sort_tuple_profile": "conflict_reference_sort"},
+        "review_context_response.constraint_context.observed_constraints": {"classification": "set", "sort_tuple_profile": "constraint_reference_sort"},
+        "review_context_response.constraint_context.constraint_sources": {"classification": "set", "sort_tuple_profile": "source_reference_sort"},
+        "review_context_response.constraint_context.unresolved_constraint_questions": {"classification": "set", "sort_tuple_profile": "question_reference_sort"},
+        "review_context_response.temporal_context.temporal_conflicts": {"classification": "set", "sort_tuple_profile": "conflict_reference_sort"},
+        "review_context_response.temporal_context.pending_state": {"classification": "set", "sort_tuple_profile": "condition_reference_sort"},
+        "review_context_response.contradiction_context.source_conflicts": {"classification": "set", "sort_tuple_profile": "conflict_reference_sort"},
+        "review_context_response.contradiction_context.constraint_conflicts": {"classification": "set", "sort_tuple_profile": "conflict_reference_sort"},
+        "review_context_response.contradiction_context.temporal_conflicts": {"classification": "set", "sort_tuple_profile": "conflict_reference_sort"},
+        "review_context_response.contradiction_context.chronology_conflicts": {"classification": "set", "sort_tuple_profile": "conflict_reference_sort"},
+        "review_context_response.contradiction_context.unresolved_questions": {"classification": "set", "sort_tuple_profile": "question_reference_sort"},
+        "review_context_response.review_completeness.missing_context": {"classification": "set", "sort_tuple_profile": "stable_scalar_sort"},
+        "review_context_response.review_completeness.unresolved_conditions": {"classification": "set", "sort_tuple_profile": "condition_reference_sort"},
+        "review_context_response.chronology_context.prior_review_references": {"classification": "set", "sort_tuple_profile": "chronology_reference_sort"},
+        "review_context_response.chronology_context.accepted_memory_references": {"classification": "set", "sort_tuple_profile": "chronology_reference_sort"},
+        "review_context_response.chronology_context.relevant_changes_since_prior_review": {"classification": "set", "sort_tuple_profile": "change_reference_sort"},
+        "review_context_response.reproducibility.source_versions": {"classification": "set", "sort_tuple_profile": "stable_scalar_sort"},
+        "review_context_response.reproducibility.source_segmentation": {"classification": "set", "sort_tuple_profile": "source_reference_sort"}
+      }
+    }
+  },
+  "semantic_identity_continuity": {
+    "incorporated_refinement": "G3-Q15",
+    "semantic_identity_is_individual_digest": false,
+    "semantic_identity_basis": "identical_canonical_semantic_byte_sequence_under_the_governing_contract_and_canonicalization_context",
+    "algorithm_qualified_digest_role": "evidence_about_canonical_semantic_bytes",
+    "historical_digest_evidence_preserved": true,
+    "successor_or_parallel_digest_overwrites_history": false,
+    "successor_or_parallel_digest_binding": "identical_canonical_semantic_bytes_or_verifiable_preserved_reference",
+    "same_hash_value_claim_across_algorithms": "prohibited",
+    "unverifiable_semantic_bytes_behavior": "continuity_unresolved",
+    "transport_shape": {
+      "current_compatibility_context_hash": "singular",
+      "plural_digest_response_shape_incorporated": false,
+      "G3_Q13_status": "not_incorporated"
+    },
+    "production_hash_algorithm_selected": false
   },
   "prohibited_external_fields": [
     "decision_status",
@@ -408,6 +733,15 @@
     "approved_for_runtime_implementation": false,
     "accepted_state_review_required": true,
     "chronology_review_required": true,
-    "consumer_inventory_required": true
+    "consumer_inventory_required": true,
+    "Gate_3_field_derivation_design": "complete_for_design_v2.1_contract",
+    "Gate_4_private_synthetic_adapter": {
+      "status": "not_authorized",
+      "implementation_started": false
+    },
+    "target_v2_runtime": {
+      "status": "not_implemented",
+      "implementation_authority": false
+    }
   }
 }
