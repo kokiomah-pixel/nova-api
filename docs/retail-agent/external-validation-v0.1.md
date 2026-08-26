@@ -1,14 +1,14 @@
-# Nova Context Network — External Validation v0.1
+# Nova Context Network — Production Validation v0.2
 
 ## Purpose
 
-This document defines the bounded external-validation surface for agent-native retail monetization.
+This document defines the production-preparation and live-market-validation surface for agent-native retail monetization.
 
-The build objective is singular:
+The build objective is now:
 
-> Determine whether independent autonomous agents repeatedly decide that Nova context is worth purchasing when they are free to proceed without it.
+> Put the minimum coherent Nova retail-agent economic loop into production, then determine whether independent autonomous agents repeatedly decide that Nova context is worth purchasing when they are free to proceed without it.
 
-The validation surface is not a broad retail launch and is not an institutional pilot.
+This is a retail production surface with live external validation. It is not an institutional pilot and does not activate institutional target-v2 production.
 
 ## Canonical retail boundary
 
@@ -22,9 +22,24 @@ The consuming agent reasons independently.
 Nova does not execute a financial action.
 ```
 
+## Production target
+
+```yaml
+production_target:
+  Nova_controlled_live_target: 2026-09-09
+  primary_launch_network: Base
+  primary_asset: USDC
+  Arc_launch_dependency: false
+  marketplace_publication_dependency: false
+```
+
+The September 9 target applies to Nova-controlled production surfaces. Third-party marketplace approval or indexing is provider-controlled and may complete later.
+
+Arc should be integrated after its public mainnet and relevant product support are independently verified. Arc must not delay the first Nova retail launch.
+
 ## Retail plane isolation
 
-The retail-agent validation plane must be physically and logically separable from institution-owned review context.
+The retail-agent production plane must be physically and logically separable from institution-owned review context.
 
 It must not read or reuse:
 
@@ -36,11 +51,11 @@ It must not read or reuse:
 - accepted institutional Reflex Memory;
 - institutional action proposals.
 
-## Resource catalog
+## Launch resource catalog
 
 ### State Ping
 
-Candidate price: `0.002 USDC`
+Production test price: `0.002 USDC`
 
 Question answered:
 
@@ -63,7 +78,7 @@ State Ping must not simply report raw price movement.
 
 ### Context Delta
 
-Candidate price: `0.02 USDC`
+Production test price: `0.02 USDC`
 
 Question answered:
 
@@ -86,29 +101,17 @@ generated_at:
 schema_version:
 ```
 
+State Ping and Context Delta are the minimum required paid resources for initial production activation.
+
+## Post-launch candidate resources
+
 ### Evidence / Contradiction Pack
 
-Candidate price: `0.02 USDC`
+Production test price when activated: `0.02 USDC`
 
 Question answered:
 
 > Why can the available evidence not currently be reconciled?
-
-Required output fields:
-
-```yaml
-resource_type: evidence_contradiction_pack
-subject:
-context_status:
-source_conflicts:
-stale_sources:
-unavailable_sources:
-missing_evidence:
-confidence:
-provenance_summary:
-generated_at:
-schema_version:
-```
 
 Allowed `context_status` values:
 
@@ -121,57 +124,21 @@ insufficient_evidence
 
 ### Reflex Compare
 
-Candidate price: `0.05 USDC`
+Production test price when activated: `0.05 USDC`
 
 Question answered:
 
 > How does the current state compare with genuinely similar prior contexts?
 
-Required output fields:
-
-```yaml
-resource_type: reflex_compare
-subject:
-current_context:
-similar_historical_contexts:
-similarities:
-differences:
-subsequent_conditions:
-confidence:
-limitations:
-corpus_version:
-generated_at:
-schema_version:
-```
-
 Reflex Compare must not emit buy, sell, long, short, expected-return, or trade recommendation language.
 
 ### Full Context
 
-Candidate price: `0.20 USDC`
+Production test price when activated: `0.20 USDC`
 
 Question answered:
 
 > What is the deepest responsible reconciliation of the current state warranted by available evidence?
-
-Required output fields:
-
-```yaml
-resource_type: full_context
-subject:
-context_status:
-state:
-material_change:
-confidence:
-freshness:
-contradictions:
-missing_evidence:
-provenance_summary:
-historical_context:
-limitations:
-generated_at:
-schema_version:
-```
 
 ## Common response rules
 
@@ -187,7 +154,7 @@ Every resource must:
 
 ## Pricing contract
 
-Candidate prices are deterministic during each experimental cohort.
+Prices are deterministic during each live experimental cohort.
 
 Do not dynamically price based on:
 
@@ -197,43 +164,52 @@ Do not dynamically price based on:
 - token holdings;
 - identity inference.
 
-Price experiments must preserve cohort attribution so elasticity can be measured without silently changing price mid-observation.
+Every price change must carry pricing/cohort attribution so actual elasticity can be measured.
 
 ## Payment architecture
 
-### Standard x402
+### Base standard x402
 
-Base is the preferred default standard x402 settlement environment for Delta, Contradiction Pack, Reflex Compare, and Full Context.
+Base is the first production settlement environment and the required launch path for the initial Nova-controlled live surface.
 
-### Nanopayments
+### Circle Gateway Nanopayments
 
-State Ping should preferentially use a batched nanopayment path when that path is independently verified and cost-effective.
+Gateway Nanopayments should be integrated for State Ping when seller-side availability, cost, operational behavior, and reconciliation are verified.
+
+Gateway is an optimization and expansion path, not a blocker for first production activation.
 
 ### Arc
 
-Arc is optional and conditional. No resource is Arc-dependent.
+Arc is a post-launch optional rail.
 
-Arc may be enabled only after verification of:
+It may be enabled only after verification of:
 
-- mainnet availability;
+- public mainnet availability;
 - required USDC support;
 - required x402/payment support;
 - acceptable settlement cost;
 - operational reliability.
 
+No Nova resource is Arc-dependent.
+
 ### Consumer abstraction
 
-The consumer purchases a Nova resource. Internal routing must not require the consumer to understand Nova's settlement decision unless the payment protocol requires disclosure.
+The consumer purchases a Nova resource. Internal payment routing must not redefine the resource or Nova category.
 
 ## Discovery architecture
 
-Prepare nonexclusive machine-readable discovery for:
+Production discovery is nonexclusive:
 
+- direct Nova x402 discovery;
 - Circle Agent Marketplace;
 - Coinbase Bazaar;
-- direct Nova discovery.
+- future compatible x402 discovery surfaces.
 
-For every first encounter, capture:
+Direct Nova discovery is required for launch.
+
+Marketplace manifests and submission are authorized, but marketplace approval and indexing are not prerequisites for the Nova-controlled launch date.
+
+For every first encounter, capture when technically supportable:
 
 ```yaml
 agent_acquisition:
@@ -245,11 +221,11 @@ agent_acquisition:
   direct_return_count:
 ```
 
-Do not infer durable identity when the payment or discovery layer does not support it. Use bounded pseudonymous identifiers where necessary.
+Do not infer durable identity when the payment or discovery layer does not support it.
 
-## Commercial telemetry
+## Production telemetry
 
-Track only what is required to answer the validation thesis.
+Track only what is required for economics, quality, integrity, and validation.
 
 ```yaml
 discovery:
@@ -266,9 +242,9 @@ conversion:
 
 economics:
   gross_USDC:
-  data_cost:
-  compute_cost:
-  payment_cost:
+  actual_data_cost:
+  actual_compute_cost:
+  actual_payment_cost:
   gross_margin:
   revenue_per_agent:
 
@@ -294,71 +270,116 @@ dependency_evidence:
 
 Commercial telemetry is observation state, not accepted buyer-demand state by itself.
 
-## Validation sequence
+## Pre-launch production gates
 
-### Gate R1 — Technical commercial loop
+### Gate P1 — Retail/institutional isolation
 
-Completion evidence:
+Evidence required:
 
-- an unaffiliated external agent discovers a Nova resource;
-- receives a valid payment requirement;
-- completes payment without manual Nova intervention;
-- receives a parseable response conforming to the published schema.
+- separate retail data-access configuration;
+- no institution-owned data path;
+- no shared institutional credentials;
+- no institutional Reflex Memory or chronology access.
 
-### Gate R2 — Independent willingness to pay
+### Gate P2 — Resource contract
 
-Completion evidence:
+Evidence required:
 
-- at least one non-internal, non-subsidized external agent voluntarily purchases a resource.
+- State Ping and Context Delta schemas validate deterministically;
+- unresolved and insufficient-evidence behavior is tested;
+- prohibited execution/recommendation semantics are absent.
 
-Do not count:
+### Gate P3 — Paid delivery loop
 
-- founder wallets;
-- Nova-controlled agents;
-- internal QA agents;
-- incentive-funded purchases where Nova directly reimburses the buyer.
+Evidence required:
 
-### Gate R3 — Repeat behavior
+- valid x402 challenge;
+- successful controlled USDC payment on the configured production path;
+- payment verification;
+- context delivery;
+- settlement/reconciliation record;
+- failed-payment behavior fails closed.
 
-Completion evidence:
+### Gate P4 — Production controls
 
-- the same bounded external agent identifier makes a later independent paid purchase arising from a later context need.
+Evidence required:
 
-### Gate R4 — Delta centrality
+- rate limiting;
+- abuse control;
+- endpoint disable/rollback control;
+- payment and delivery observability;
+- latency/error monitoring;
+- incident owner and evidence path.
 
-Evaluate whether Context Delta becomes a recurring machine unit.
+### Gate P5 — Public discovery
 
-No pass threshold is predeclared. Report actual behavior.
+Evidence required:
 
-### Gate R5 — Commodity survival
+- direct Nova machine-readable discovery is available;
+- prices and resource schemas are inspectable by agents;
+- marketplace manifests are prepared or submitted without making marketplace availability a launch blocker.
 
-Agents must remain free to use cheap or free alternatives. Nova must not block substitution.
+## Live-market validation gates
 
-### Gate R6 — Marketplace to direct
+After production activation:
 
-Measure whether an agent first discovered in a marketplace subsequently calls Nova directly.
+### R1 — Independent willingness to pay
 
-### Gate R7 — Trust under uncertainty
+At least one non-internal, non-subsidized agent voluntarily purchases context.
 
-Deliberately preserve real unresolved states when they occur. Do not manufacture failures.
+Do not count founder wallets, Nova-controlled agents, internal QA agents, or reimbursed transactions as buyer demand.
 
-Measure whether external agents return after receiving low-confidence or unresolved context.
+### R2 — Repeat behavior
 
-### Gate R8 — Reflex premium
+The same bounded external identifier makes a later paid purchase arising from a later context need.
 
-Measure whether external agents voluntarily pay separately for Reflex Compare.
+### R3 — Delta centrality
 
-### Gate R9 — Removal cost
+Observe whether Context Delta becomes a recurring machine unit.
 
-Do not run until recurring external usage exists.
+### R4 — Commodity survival
 
-Measure normal operational outages or bounded approved availability tests without manipulating financial outcomes.
+Agents remain free to use cheap/free alternatives.
 
-Dependency remains unproven unless external evidence shows recurring reconciliation burden when Nova is absent.
+### R5 — Marketplace to direct
+
+Measure whether agents discovered through marketplaces later invoke Nova directly.
+
+### R6 — Trust under uncertainty
+
+Preserve real unresolved states. Measure whether agents return after low-confidence or unresolved outputs.
+
+### R7 — Reflex premium
+
+After Reflex Compare is activated, measure whether agents separately pay for historical comparison.
+
+### R8 — Removal cost
+
+Only after recurring real usage exists, measure whether normal outages or bounded approved availability tests create additional reconciliation burden.
+
+## Production implementation order
+
+1. freeze retail/institutional isolation contract;
+2. implement common context-object schema;
+3. implement production State Ping;
+4. implement production Context Delta;
+5. implement Base x402 challenge/payment/delivery;
+6. configure and verify settlement destination and reconciliation;
+7. implement observability, rate limits, kill switches, rollback, and incident path;
+8. publish direct machine-readable Nova discovery;
+9. deploy the minimum live surface;
+10. submit Circle Agent Marketplace and Coinbase Bazaar manifests;
+11. integrate Gateway Nanopayments when verified useful;
+12. add Contradiction Pack;
+13. add read-only Reflex Compare against approved retail corpus;
+14. add Full Context;
+15. evaluate Arc after verified public-mainnet readiness.
+
+No later resource should delay the minimum first live economic loop unless its absence creates a safety or integrity defect.
 
 ## Kill conditions
 
-Escalate for Architect review if any of these become supported by external evidence:
+Escalate for Architect review if external evidence shows:
 
 1. purchasing occurs only with subsidies;
 2. Delta is not recurring;
@@ -369,11 +390,13 @@ Escalate for Architect review if any of these become supported by external evide
 7. licensed-data costs destroy viable gross margin;
 8. payment friction exceeds useful context value;
 9. unresolved responses destroy trust rather than preserve it;
-10. Nova removal creates no meaningful reconciliation burden after genuine recurring use.
+10. after genuine recurring use, Nova removal creates no meaningful reconciliation burden.
+
+Operational safety, integrity, legal, or uncontrolled-loss conditions may require immediate resource disablement. Commercial kill conditions require Architect review rather than automatic shutdown.
 
 ## Prohibited claims
 
-Do not label the validation state as:
+Production deployment does not permit the system to claim:
 
 - product-market fit;
 - adoption;
@@ -381,28 +404,13 @@ Do not label the validation state as:
 - buyer pull;
 - dependency;
 - recurring revenue quality;
-- production-grade institutional readiness.
+- institutional production readiness.
 
-until separately supported and accepted through the appropriate evidence process.
-
-## Implementation order
-
-1. freeze retail/institutional isolation contract;
-2. implement common context-object schema;
-3. implement State Ping and Context Delta first;
-4. implement bounded x402 challenge/payment/delivery instrumentation;
-5. verify actual payment economics;
-6. add Contradiction Pack;
-7. add read-only Reflex Compare against approved retail corpus;
-8. add Full Context;
-9. prepare nonexclusive marketplace manifests;
-10. conduct external validation gates sequentially.
-
-No later step should be used to excuse failure of an earlier gate.
+Those require separate real evidence and acceptance.
 
 ## Success condition
 
-The validation effort is successful enough to continue when external evidence begins showing the following loop without subsidy or coercion:
+The first meaningful market sequence is:
 
 ```text
 real agent encounters uncertainty
@@ -418,6 +426,6 @@ Nova reduces reconciliation burden
 agent returns on a later independent task
 ```
 
-The strategic question is not whether Nova can generate API traffic.
+The strategic question is not whether Nova can put an API in production.
 
-It is whether decision context becomes an economic dependency because repeated reasoning is more costly without it.
+It is whether decision context becomes a recurring economic dependency because repeated reasoning is more costly without it.
