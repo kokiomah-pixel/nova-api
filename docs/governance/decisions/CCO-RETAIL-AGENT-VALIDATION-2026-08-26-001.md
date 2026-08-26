@@ -1,4 +1,4 @@
-# CCO Decision — Retail Agent External Validation v0.1
+# CCO Decision — Retail Agent Production Preparation v0.2
 
 **Decision ID:** CCO-RETAIL-AGENT-VALIDATION-2026-08-26-001  
 **Date:** 2026-08-26  
@@ -7,113 +7,179 @@
 
 ## Decision
 
-The Architect authorizes a bounded external-validation build for a separate retail-agent monetization surface derived from the completed hypothetical Nova Context Network simulations.
+The Architect authorizes production preparation and live external validation for a separate retail-agent monetization surface derived from the completed Nova Context Network simulations.
 
-This decision supersedes the prior July 30, 2026 prohibition on retail runtime engineering only for the bounded retail validation scope defined here. It does not retroactively alter the earlier decision, and it does not authorize institutional Gate 5, institutional x402, institutional pilot activity, or target-v2 production activation.
+This decision explicitly supersedes the July 30, 2026 retail prohibitions, but only for the separately isolated retail-agent plane described here. The following are no longer prohibited for that retail plane:
+
+- retail Nova runtime engineering;
+- x402 payment for Nova retail context resources;
+- public retail-agent service activation;
+- public machine-readable service manifests;
+- Circle Agent Marketplace submission/listing;
+- Coinbase Bazaar submission/listing;
+- direct public Nova x402 discovery;
+- retail production deployment;
+- retail USDC settlement through approved external payment infrastructure.
+
+The July decision remains historically valid for the state that existed when it was made. It is not erased or retroactively rewritten. This decision is the later Architect authority that changes the retail operating posture.
+
+This decision does **not** advance institutional Gate 5, authorize an institutional pilot, activate target-v2 institutional production, or grant Nova capital authority.
+
+## Production objective
+
+Nova should now be built for real external use rather than another closed simulation.
+
+```yaml
+retail_agent_production_objective:
+  status: AUTHORIZED_FOR_PRODUCTION_PREPARATION
+  Nova_controlled_live_target: 2026-09-09
+  external_validation: live_in_production
+  market_validation_required_after_launch: true
+```
+
+The September 9 target applies to surfaces controlled by Nova. Marketplace approval, indexing, or publication controlled by third parties may occur later and must be reported as provider-dependent rather than treated as a Nova deployment failure.
+
+Arc is not a dependency for the September 9 launch. Arc may be activated only after public mainnet and required support are independently verified.
 
 ## Governing commercial thesis
 
 > Nova monetizes progressive reduction of decision-context uncertainty for autonomous agents.
 
-The bounded retail service may expose machine-purchasable context resources. It must not become a trading system, signal engine, portfolio manager, payment gateway, wallet authority, signing service, settlement authority, or transaction-execution layer.
+The retail service may expose machine-purchasable context resources. It must not become a trading system, signal engine, portfolio manager, wallet authority, signing service, settlement authority, or transaction-execution layer.
 
-## Authorized scope
+## Authorized production scope
 
-The following are authorized at design and bounded implementation level for the retail-agent validation plane:
+The following are authorized for the retail-agent plane:
 
-- a separate non-institutional retail-agent data plane;
-- machine-readable context-resource schemas;
-- bounded x402 payment gating for the retail validation resources;
-- USDC-denominated candidate test prices;
+- a physically and logically separate non-institutional retail-agent data plane;
+- production runtime engineering for retail context resources;
+- production machine-readable context-resource schemas;
+- production x402 payment gating;
+- USDC-denominated test prices used with real buyers;
 - Base as the default standard x402 settlement environment;
-- Circle Gateway Nanopayments research and integration for sub-cent retail context where technically and economically appropriate;
-- Circle Agent Marketplace discovery/listing preparation and submission only for the bounded retail-agent validation service after implementation checks pass;
-- Coinbase Bazaar discovery/listing preparation and submission only for the bounded retail-agent validation service after implementation checks pass;
-- direct Nova x402 discovery for the bounded retail-agent validation service;
-- attribution from first discovery channel to later direct Nova access;
-- bounded commercial telemetry required to measure voluntary purchase and repeat purchase behavior;
-- external unaffiliated autonomous-agent validation;
-- explicit unresolved/insufficient-evidence responses;
-- read-only historical comparison against an approved retail historical-context corpus.
+- Circle Gateway Nanopayments seller integration for sub-cent context where verified and cost-effective;
+- Circle Agent Marketplace submission and listing for approved retail resources;
+- Coinbase Bazaar submission and listing for approved retail resources;
+- direct Nova x402 discovery and paid invocation;
+- marketplace-to-direct attribution;
+- production commercial telemetry required to measure voluntary purchase and repeat behavior;
+- unaffiliated autonomous-agent access;
+- explicit unresolved and insufficient-evidence responses;
+- read-only historical comparison against an approved retail historical-context corpus;
+- production rollback, rate limiting, incident controls, and kill switches for the retail plane.
 
-## Initial candidate resources and test prices
+## Minimum launch scope
+
+The Nova-controlled production launch must not be delayed until every simulated resource is implemented.
+
+Minimum viable live surface:
 
 ```yaml
-retail_validation_resources:
+minimum_live_surface:
+  required:
+    - State_Ping
+    - Context_Delta
+    - direct_x402_discovery
+    - Base_USDC_payment_path
+    - payment_and_delivery_telemetry
+    - source_freshness_and_provenance
+    - unresolved_and_insufficient_evidence_states
+    - retail_institutional_isolation
+  optional_at_initial_launch:
+    - Evidence_Contradiction_Pack
+    - Reflex_Compare
+    - Full_Context
+    - Circle_Gateway_Nanopayments
+    - Circle_Agent_Marketplace_listing
+    - Coinbase_Bazaar_listing
+```
+
+Optional does not mean strategically unimportant. It means failure to complete a third-party integration or later resource must not unnecessarily block the first live economic loop.
+
+## Initial real-market test prices
+
+```yaml
+retail_production_test_prices:
   State_Ping:
-    candidate_price: 0.002_USDC
+    price: 0.002_USDC
     role: materiality_screen
 
   Context_Delta:
-    candidate_price: 0.02_USDC
+    price: 0.02_USDC
     role: core_recurring_unit
 
   Evidence_Contradiction_Pack:
-    candidate_price: 0.02_USDC
+    price: 0.02_USDC
     role: evidence_integrity
 
   Reflex_Compare:
-    candidate_price: 0.05_USDC
+    price: 0.05_USDC
     role: temporal_context
 
   Full_Context:
-    candidate_price: 0.20_USDC
+    price: 0.20_USDC
     role: deep_reconciliation
 ```
 
-These prices are test parameters, not accepted market prices or pricing-power evidence.
+These are authorized production test prices. They are not evidence of pricing power. Price changes require cohort/version attribution so willingness to pay can be measured honestly.
 
-## Payment-routing hypothesis
+## Payment architecture
 
 ```yaml
 retail_payment_routing:
+  standard_x402:
+    default_network: Base
+    asset: USDC
+
   State_Ping:
-    preferred: Circle_Gateway_Nanopayments
-    fallback: standard_x402_when_supported
+    preferred_long_term: Circle_Gateway_Nanopayments
+    launch_fallback: Base_x402
 
   Context_Delta:
     preferred: Base_x402
-    Gateway_supported: true
+    Gateway_supported_when_verified: true
 
   Evidence_Contradiction_Pack:
     preferred: Base_x402
-    Gateway_supported: true
+    Gateway_supported_when_verified: true
 
   Reflex_Compare:
     preferred: Base_x402
-    Gateway_supported: true
+    Gateway_supported_when_verified: true
 
   Full_Context:
     preferred: Base_x402
-    Gateway_supported: true
+    Gateway_supported_when_verified: true
 
   Arc:
-    status: conditional_optional_rail
-    default: false
-    activation_condition: independently_verified_mainnet_and_relevant_product_support
+    status: post_launch_optional_rail
+    launch_dependency: false
+    activation_condition: independently_verified_public_mainnet_and_required_support
 ```
 
-Nova sells the context object, not the rail. Distribution and settlement providers remain replaceable external dependencies.
+Nova sells the context object, not the rail. Circle, Coinbase, Base, Gateway, and Arc are external infrastructure or distribution dependencies and must remain replaceable where practical.
 
-## Distribution hypothesis
+## Distribution architecture
 
 ```text
-Circle Agent Marketplace + Coinbase Bazaar
-                ↓
-        discovery / acquisition
-                ↓
-         Nova proves useful
-                ↓
-        Direct Nova x402
-                ↓
-      recurring relationship
+Circle Agent Marketplace + Coinbase Bazaar + other compatible discovery
+                          ↓
+                    acquisition
+                          ↓
+                 Nova proves useful
+                          ↓
+                  Direct Nova x402
+                          ↓
+               recurring relationship
 ```
 
-Circle and Coinbase are nonexclusive channels. Direct Nova access must remain possible.
+Circle and Coinbase are nonexclusive channels. Direct Nova access must remain available.
 
-## Required access-class separation
+Marketplace submission is authorized. Marketplace acceptance or publication is not assumed until independently observed.
 
-The following must remain separate:
+## Retail / institutional separation
+
+The following remain separate:
 
 ```text
 public discovery
@@ -121,97 +187,125 @@ public discovery
 != institutional review context
 ```
 
-Retail validation must not share institutional tenant data, institutional credentials, institutional chronology, institution-owned Reflex Memory, or institution-specific constraints.
+Retail production must not share:
 
-Payment does not create:
+- institutional tenant data;
+- institutional credentials;
+- institution-specific constraints;
+- institutional chronology;
+- accepted institutional Reflex Memory;
+- institutional action proposals;
+- institution-owned data not separately licensed for retail use.
 
-- institutional identity;
-- enterprise tenancy;
-- workflow permission;
-- institutional authentication;
-- capital authority;
-- access to institution-owned information.
+Payment does not create institutional identity, enterprise tenancy, workflow permission, capital authority, or access to institution-owned information.
 
 ## Reflex boundary
 
-Retail payment events and retail usage telemetry must not automatically create or mutate canonical Reflex Memory.
+Retail payments and retail usage telemetry must not automatically create or mutate canonical institutional Reflex Memory.
 
-Reflex Compare is authorized only as a read-only historical-context comparison surface against an explicitly approved retail corpus.
+Reflex Compare is authorized only as read-only comparison against an explicitly approved retail historical corpus.
 
 ```text
 retail_usage_telemetry
-!= accepted Reflex Memory
+!= accepted institutional Reflex Memory
 
 historical comparison
 != prediction
 != trading signal
 ```
 
+## Production controls required before public activation
+
+Public activation requires evidence of:
+
+1. retail/institutional data-plane isolation;
+2. valid deterministic resource schemas;
+3. x402 challenge/payment/delivery success in controlled production tests;
+4. settlement destination configuration and reconciliation;
+5. source freshness and provenance treatment;
+6. rate limiting and abuse controls;
+7. observability for payment, delivery, latency, and resource failure;
+8. rollback or disable control for each paid resource;
+9. no buy/sell/long/short or execution semantics;
+10. no automatic chronology or institutional Reflex Memory mutation;
+11. pricing-version attribution;
+12. a production incident owner and evidence path.
+
+These are release-safety controls. They are not substitutes for market validation.
+
+## Live-market validation gates
+
+After public activation, observe sequentially:
+
+1. unaffiliated agents discover, understand, pay, receive, and parse a resource;
+2. non-subsidized willingness to pay occurs;
+3. repeat purchase occurs on a later independent need;
+4. Context Delta either becomes or fails to become a recurring unit;
+5. Nova survives free/cheap commodity substitution;
+6. marketplace-acquired agents either migrate or fail to migrate to direct Nova;
+7. unresolved/low-confidence responses either preserve or weaken trust;
+8. Reflex Compare either earns a real premium or remains internal capability;
+9. after genuine recurring use exists, Nova absence either creates or fails to create reconciliation cost.
+
+## Kill conditions
+
+Escalate for Architect review if external evidence shows:
+
+- purchases occur only with subsidy;
+- Context Delta does not recur;
+- commodity substitutes eliminate material Nova value;
+- only Full Context has willingness to pay;
+- Reflex Compare creates no incremental value;
+- marketplace-acquired agents never establish direct Nova access;
+- licensed-data economics destroy viable margin;
+- payment friction exceeds context value;
+- unresolved responses destroy trust;
+- after recurring use exists, Nova removal creates no meaningful reconciliation burden.
+
+A kill condition does not automatically take the service offline unless it is also a safety, legal, economic-loss, or integrity condition. Commercial kill conditions trigger Architect review.
+
 ## Explicit non-authorizations
 
-This decision does not authorize:
+This decision still does not authorize:
 
 - institutional Gate 5 progression;
 - institutional pilot activation;
-- target-v2 production activation;
-- shared institutional and retail endpoints;
-- retail access to institutional review context;
-- retail access to institution-owned data;
-- payment as identity or permission;
-- Nova-managed user wallets;
+- target-v2 institutional production activation;
+- shared institutional and retail endpoints or credentials;
+- retail access to institution-owned data or context;
+- payment as institutional identity or permission;
+- Nova-managed customer wallets;
 - Nova signing authority;
-- Nova settlement authority;
+- Nova settlement authority over customer capital;
 - transaction execution;
 - portfolio management;
 - buy/sell/long/short recommendations;
 - automatic chronology mutation;
-- automatic Reflex Memory mutation;
-- claims of buyer demand, adoption, pricing power, PMF, or dependency before external evidence;
-- broad retail launch;
-- large GTM spend;
+- automatic institutional Reflex Memory mutation;
+- claims of buyer demand, adoption, pricing power, PMF, or dependency before evidence;
 - marketplace exclusivity;
 - Arc-specific Nova identity.
 
-## External validation gates
-
-The bounded build exists to test these gates sequentially:
-
-1. **Technical commercial loop** — unaffiliated agents can discover, understand, pay, receive, and parse a resource without manual intervention.
-2. **Independent willingness to pay** — non-subsidized external agent purchases occur.
-3. **Repeat behavior** — independent agents purchase Nova again on a later context need.
-4. **Context Delta centrality** — determine whether Delta becomes a recurring commercial unit.
-5. **Commodity survival** — buyers may freely substitute cheap/free external sources.
-6. **Marketplace-to-direct migration** — determine whether marketplace-acquired agents later call Nova directly.
-7. **Trust under uncertainty** — unresolved and insufficient-evidence responses do not destroy repeat behavior.
-8. **Reflex premium** — determine whether agents separately pay for historical-context comparison.
-9. **Removal cost** — only after recurring usage exists, measure additional reconciliation burden when Nova is unavailable.
-
-## Kill conditions
-
-Materially reconsider the retail thesis if external evidence shows any of the following:
-
-- purchases require subsidy;
-- Context Delta fails to become recurring;
-- generic summaries substitute Nova at negligible reconciliation cost;
-- Full Context is the only meaningful paid resource;
-- Reflex Compare creates no incremental value;
-- marketplace-acquired agents never migrate direct;
-- licensed-data economics destroy viable margins;
-- x402/payment friction is materially worse than modeled;
-- disciplined low-confidence outputs materially destroy retention;
-- Nova removal creates no meaningful additional reconciliation burden.
-
 ## Evidence rule
 
-Simulation results remain `hypothetical_simulation_only` and are not accepted buyer, adoption, pricing, dependency, or revenue evidence.
+The completed simulation remains `hypothetical_simulation_only`.
 
-A real retail validation state must distinguish:
+Production availability is an implementation fact, not a market-success claim.
 
 ```text
+live endpoint
+!= buyer demand
+
 observed purchase
 != repeat purchase
+
+repeat purchase
 != recurring workflow use
+
+recurring workflow use
 != dependency
+
+revenue
 != product-market fit
 ```
 
@@ -219,15 +313,21 @@ observed purchase
 
 ```yaml
 effects:
-  retail_validation_design_authority: true
-  bounded_retail_runtime_implementation_authority: true
-  bounded_retail_external_validation_authority: true
+  retail_production_design_authority: true
+  retail_runtime_implementation_authority: true
+  retail_x402_payment_authority: true
+  retail_marketplace_submission_authority: true
+  retail_public_service_authority: true
+  retail_production_deployment_authority: true
+  retail_live_external_validation_authority: true
+
   institutional_Gate_5_effect: none
   institutional_pilot_effect: none
-  target_v2_production_effect: none
+  target_v2_institutional_production_effect: none
+  capital_authority_effect: none
   accepted_buyer_demand_effect: none
   adoption_effect: none
   pricing_power_effect: none
   chronology_effect: none
-  Reflex_Memory_effect: none
+  institutional_Reflex_Memory_effect: none
 ```
