@@ -1,0 +1,141 @@
+{
+  "single_verified_positive": {
+    "subject": {"subject_id": "ethereum-mainnet", "subject_type": "network"},
+    "generated_at": "2026-08-27T14:01:00Z",
+    "observations": [
+      {"fixture": "positive_observation.json"}
+    ]
+  },
+  "single_unverified": {
+    "subject": {"subject_id": "ETH-USD", "subject_type": "market_pair"},
+    "generated_at": "2026-08-27T14:01:00Z",
+    "observations": [
+      {"fixture": "unverified_observation.json"}
+    ]
+  },
+  "stale": {
+    "subject": {"subject_id": "ethereum-mainnet", "subject_type": "network"},
+    "generated_at": "2026-08-27T14:01:00Z",
+    "observations": [
+      {
+        "fixture": "positive_observation.json",
+        "overrides": {"source_status": "stale"}
+      }
+    ]
+  },
+  "unavailable_only": {
+    "subject": {"subject_id": "ethereum-mainnet", "subject_type": "network"},
+    "generated_at": "2026-08-27T14:01:00Z",
+    "observations": [
+      {"fixture": "unavailable_observation.json"}
+    ]
+  },
+  "unknown_only": {
+    "subject": {"subject_id": "ethereum-mainnet", "subject_type": "network"},
+    "generated_at": "2026-08-27T14:01:00Z",
+    "observations": [
+      {
+        "fixture": "unavailable_observation.json",
+        "overrides": {
+          "observation_id": "fixture-unknown-observation-001",
+          "source_status": "unknown"
+        }
+      }
+    ]
+  },
+  "multiple_positive": {
+    "subject": {"subject_id": "ethereum-mainnet", "subject_type": "network"},
+    "generated_at": "2026-08-27T14:01:00Z",
+    "observations": [
+      {
+        "fixture": "positive_observation.json",
+        "overrides": {
+          "limitations": [
+            {
+              "limitation_id": "fixture-bounded",
+              "description": "This is bounded fixture evidence only.",
+              "impact": "limited_scope"
+            }
+          ]
+        }
+      },
+      {
+        "fixture": "positive_observation.json",
+        "overrides": {
+          "observation_id": "fixture-network-observation-002",
+          "source_id": "fixture-public-network-b",
+          "provenance": {
+            "provider_observation_reference": "fixture:network:002",
+            "retrieval_mode": "fixture",
+            "verification_basis": "fixture_contract",
+            "normalization_version": "0.1.0"
+          },
+          "limitations": [
+            {
+              "limitation_id": "fixture-bounded",
+              "description": "This is bounded fixture evidence only.",
+              "impact": "limited_scope"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "contradictory": {
+    "subject": {"subject_id": "ethereum-mainnet", "subject_type": "network"},
+    "generated_at": "2026-08-27T14:01:00Z",
+    "observations": [
+      {
+        "fixture": "positive_observation.json",
+        "overrides": {
+          "claims": [
+            {
+              "claim_id": "claim-network-condition",
+              "claim_or_observation": "The fixture reports nominal network operation.",
+              "claim_status": "observed"
+            }
+          ],
+          "integrity": {
+            "algorithm": "sha256",
+            "digest": "4be76baefa96e4525ad856450aa991e8ed519291eacb8bb090c2042bbca02fae",
+            "scope": "normalized_claims",
+            "trust_semantics": "content_identity_only"
+          }
+        }
+      },
+      {
+        "fixture": "positive_observation.json",
+        "overrides": {
+          "observation_id": "fixture-network-observation-conflict",
+          "source_id": "fixture-public-network-conflict",
+          "claims": [
+            {
+              "claim_id": "claim-network-condition",
+              "claim_or_observation": "The fixture reports constrained network operation.",
+              "claim_status": "observed"
+            }
+          ],
+          "integrity": {
+            "algorithm": "sha256",
+            "digest": "803deca0989e6169e3bdc88a9756ba955dec928699848b70bb294abb6297fc90",
+            "scope": "normalized_claims",
+            "trust_semantics": "content_identity_only"
+          },
+          "provenance": {
+            "provider_observation_reference": "fixture:network:conflict",
+            "retrieval_mode": "fixture",
+            "verification_basis": "fixture_contract",
+            "normalization_version": "0.1.0"
+          }
+        }
+      }
+    ]
+  },
+  "subject_mismatch": {
+    "subject": {"subject_id": "different-network", "subject_type": "network"},
+    "generated_at": "2026-08-27T14:01:00Z",
+    "observations": [
+      {"fixture": "positive_observation.json"}
+    ]
+  }
+}
