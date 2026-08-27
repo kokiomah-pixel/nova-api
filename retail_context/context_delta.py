@@ -21,17 +21,18 @@ _MISSING = object()
 
 
 def _canonical_json(value: object) -> str:
-    return json.dumps(
-        value,
-        ensure_ascii=False,
-        separators=(",", ":"),
-        sort_keys=True,
-    )
+    return json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
 
 
 def _stable_id(prefix: str, *parts: object) -> str:
     digest = hashlib.sha256(_canonical_json(parts).encode("utf-8")).hexdigest()
     return f"{prefix}-{digest[:24]}"
+
+
+def _identity_value(value: object) -> dict[str, object]:
+    if value is _MISSING:
+        return {"present": False}
+    return {"present": True, "value": value}
 
 
 def load_context_delta_schema() -> dict[str, Any]:
@@ -40,10 +41,7 @@ def load_context_delta_schema() -> dict[str, Any]:
 
 
 def context_delta_validator() -> Draft202012Validator:
-    return Draft202012Validator(
-        load_context_delta_schema(),
-        format_checker=_FORMAT_CHECKER,
-    )
+    return Draft202012Validator(load_context_delta_schema(), format_checker=_FORMAT_CHECKER)
 
 
 def validate_context_delta(delta: Mapping[str, Any]) -> None:
@@ -51,9 +49,7 @@ def validate_context_delta(delta: Mapping[str, Any]) -> None:
 
 
 def _index_by_id(
-    items: Sequence[Mapping[str, Any]],
-    identity_field: str,
-    category: str,
+    items: Sequence[Mapping[str, Any]], identity_field: str, category: str
 ) -> dict[str, dict[str, Any]]:
     indexed: dict[str, dict[str, Any]] = {}
     for item in items:
@@ -119,7 +115,13 @@ def build_context_delta(
         current_value: object = _MISSING,
     ) -> None:
         change_id = _stable_id(
-            "material-change", category, change_type, item_id, field
+            "material-change",
+            category,
+            change_type,
+            item_id,
+            field,
+            _identity_value(previous_value),
+            _identity_value(current_value),
         )
         change = {
             "change_id": change_id,
@@ -149,14 +151,8 @@ def build_context_delta(
     for evidence_id in sorted(previous_evidence.keys() | current_evidence.keys()):
         before = previous_evidence.get(evidence_id)
         after = current_evidence.get(evidence_id)
-        if before is None:
-            change_type = "added"
-        elif after is None:
-            change_type = "removed"
-        else:
-            change_type = ""
-
-        if change_type:
+        if before is None or after is None:
+            change_type = "added" if before is None else "removed"
             item = after if after is not None else before
             evidence_changes.append(
                 {
@@ -172,21 +168,45 @@ def build_context_delta(
             continue
 
         if before["evidence_status"] != after["evidence_status"]:
+            before_status = before["evidence_status"]
+            after_status = after["evidence_status"]
             evidence_changes.append(
                 {
-                    "change_id": _stable_id("evidence-change", evidence_id, "status_changed"),
+                    "change_id": _stable_id(
+                        "evidence-change",
+                        evidence_id,
+                        "status_changed",
+                        before_status,
+                        after_status,
+                    ),
                     "evidence_id": evidence_id,
                     "source_id": after["source_id"],
                     "change_type": "status_changed",
-                    "previous_status": before["evidence_status"],
-                    "current_status": after["evidence_status"],
+                    "previous_status": before_status,
+                    "current_status": after_status,
                 }
             )
-            add_material("evidence", "status_changed", evidence_id, "evidence_status")
-        if _without(before, "evidence_status") != _without(after, "evidence_status"):
+            add_material(
+                "evidence",
+                "status_changed",
+                evidence_id,
+                "evidence_status",
+                before_status,
+                after_status,
+            )
+
+        before_content = _without(before, "evidence_status")
+        after_content = _without(after, "evidence_status")
+        if before_content != after_content:
             evidence_changes.append(
                 {
-                    "change_id": _stable_id("evidence-change", evidence_id, "content_changed"),
+                    "change_id": _stable_id(
+                        "evidence-change",
+                        evidence_id,
+                        "content_changed",
+                        before_content,
+                        after_content,
+                    ),
                     "evidence_id": evidence_id,
                     "source_id": after["source_id"],
                     "change_type": "content_changed",
@@ -194,7 +214,14 @@ def build_context_delta(
                     "current_status": after["evidence_status"],
                 }
             )
-            add_material("evidence", "content_changed", evidence_id, "content")
+            add_material(
+                "evidence",
+                "content_changed",
+                evidence_id,
+                "content",
+                _canonical_json(before_content),
+                _canonical_json(after_content),
+            )
 
     previous_contradictions = _index_by_id(
         previous["contradictions"], "contradiction_id", "contradiction"
@@ -218,9 +245,24 @@ def build_context_delta(
             if _normalized_contradiction_content(before) != _normalized_contradiction_content(after):
                 change_types.append("content_changed")
         for change_type in change_types:
+            if change_type == "status_changed":
+                before_identity = before["status"]
+                after_identity = after["status"]
+            elif change_type == "content_changed":
+                before_identity = _normalized_contradiction_content(before)
+                after_identity = _normalized_contradiction_content(after)
+            else:
+                before_identity = None
+                after_identity = None
             contradiction_changes.append(
                 {
-                    "change_id": _stable_id("contradiction-change", contradiction_id, change_type),
+                    "change_id": _stable_id(
+                        "contradiction-change",
+                        contradiction_id,
+                        change_type,
+                        before_identity,
+                        after_identity,
+                    ),
                     "contradiction_id": contradiction_id,
                     "change_type": change_type,
                     "previous_status": None if before is None else before["status"],
@@ -237,6 +279,20 @@ def build_context_delta(
                 change_type,
                 contradiction_id,
                 "status" if change_type == "status_changed" else "contradiction",
+                (
+                    before["status"]
+                    if change_type == "status_changed"
+                    else _canonical_json(_normalized_contradiction_content(before))
+                    if change_type == "content_changed"
+                    else _MISSING
+                ),
+                (
+                    after["status"]
+                    if change_type == "status_changed"
+                    else _canonical_json(_normalized_contradiction_content(after))
+                    if change_type == "content_changed"
+                    else _MISSING
+                ),
             )
 
     previous_unresolved = _index_by_id(
@@ -248,7 +304,7 @@ def build_context_delta(
     for issue_id in sorted(previous_unresolved.keys() | current_unresolved.keys()):
         before = previous_unresolved.get(issue_id)
         after = current_unresolved.get(issue_id)
-        change_types = []
+        change_types: list[str] = []
         if before is None:
             change_types.append("added")
         elif after is None:
@@ -259,9 +315,24 @@ def build_context_delta(
             if _normalized_unresolved_content(before) != _normalized_unresolved_content(after):
                 change_types.append("content_changed")
         for change_type in change_types:
+            if change_type == "status_changed":
+                before_identity = before["status"]
+                after_identity = after["status"]
+            elif change_type == "content_changed":
+                before_identity = _normalized_unresolved_content(before)
+                after_identity = _normalized_unresolved_content(after)
+            else:
+                before_identity = None
+                after_identity = None
             unresolved_changes.append(
                 {
-                    "change_id": _stable_id("unresolved-change", issue_id, change_type),
+                    "change_id": _stable_id(
+                        "unresolved-change",
+                        issue_id,
+                        change_type,
+                        before_identity,
+                        after_identity,
+                    ),
                     "issue_id": issue_id,
                     "change_type": change_type,
                     "previous_status": None if before is None else before["status"],
@@ -278,6 +349,20 @@ def build_context_delta(
                 change_type,
                 issue_id,
                 "status" if change_type == "status_changed" else "unresolved_evidence",
+                (
+                    before["status"]
+                    if change_type == "status_changed"
+                    else _canonical_json(_normalized_unresolved_content(before))
+                    if change_type == "content_changed"
+                    else _MISSING
+                ),
+                (
+                    after["status"]
+                    if change_type == "status_changed"
+                    else _canonical_json(_normalized_unresolved_content(after))
+                    if change_type == "content_changed"
+                    else _MISSING
+                ),
             )
 
     for field in ("freshness_status", "observed_at", "source_age_seconds"):
@@ -293,7 +378,7 @@ def build_context_delta(
                 "current_value": after,
             }
         )
-        add_material("freshness", "value_changed", None, field)
+        add_material("freshness", "value_changed", None, field, before, after)
 
     for field in ("level", "basis"):
         before = previous["confidence"][field]
@@ -308,17 +393,13 @@ def build_context_delta(
                 "current_value": after,
             }
         )
-        add_material("confidence", "value_changed", None, field)
+        add_material("confidence", "value_changed", None, field, before, after)
 
     previous_provenance = _index_by_id(previous["provenance"], "source_id", "provenance")
     current_provenance = _index_by_id(current["provenance"], "source_id", "provenance")
     provenance_fields = (
         ("source_status", "source_status_changed", "status_changed"),
-        (
-            "claim_reconciliation_status",
-            "claim_reconciliation_status_changed",
-            "status_changed",
-        ),
+        ("claim_reconciliation_status", "claim_reconciliation_status_changed", "status_changed"),
         ("contribution_scope", "contribution_scope_changed", "scope_changed"),
         ("source_type", "source_type_changed", "content_changed"),
         ("observed_at", "observed_at_changed", "value_changed"),
@@ -350,7 +431,9 @@ def build_context_delta(
                 continue
             provenance_changes.append(
                 {
-                    "change_id": _stable_id("provenance-change", source_id, field, before_value, after_value),
+                    "change_id": _stable_id(
+                        "provenance-change", source_id, field, before_value, after_value
+                    ),
                     "source_id": source_id,
                     "change_type": change_type,
                     "field": field,
@@ -358,7 +441,9 @@ def build_context_delta(
                     "current_value": after_value,
                 }
             )
-            add_material("provenance", material_type, source_id, field)
+            add_material(
+                "provenance", material_type, source_id, field, before_value, after_value
+            )
 
     previous_limitations = _index_by_id(
         previous["limitations"], "limitation_id", "limitation"
@@ -369,7 +454,7 @@ def build_context_delta(
     for limitation_id in sorted(previous_limitations.keys() | current_limitations.keys()):
         before = previous_limitations.get(limitation_id)
         after = current_limitations.get(limitation_id)
-        change_types = []
+        change_types: list[str] = []
         if before is None:
             change_types.append("added")
         elif after is None:
@@ -380,9 +465,24 @@ def build_context_delta(
             if before["description"] != after["description"]:
                 change_types.append("content_changed")
         for change_type in change_types:
+            if change_type == "impact_changed":
+                before_identity = before["impact"]
+                after_identity = after["impact"]
+            elif change_type == "content_changed":
+                before_identity = before["description"]
+                after_identity = after["description"]
+            else:
+                before_identity = None
+                after_identity = None
             limitation_changes.append(
                 {
-                    "change_id": _stable_id("limitation-change", limitation_id, change_type),
+                    "change_id": _stable_id(
+                        "limitation-change",
+                        limitation_id,
+                        change_type,
+                        before_identity,
+                        after_identity,
+                    ),
                     "limitation_id": limitation_id,
                     "change_type": change_type,
                     "previous_impact": None if before is None else before["impact"],
@@ -399,6 +499,20 @@ def build_context_delta(
                 "value_changed" if change_type == "impact_changed" else change_type,
                 limitation_id,
                 "impact" if change_type == "impact_changed" else "limitation",
+                (
+                    before["impact"]
+                    if change_type == "impact_changed"
+                    else before["description"]
+                    if change_type == "content_changed"
+                    else _MISSING
+                ),
+                (
+                    after["impact"]
+                    if change_type == "impact_changed"
+                    else after["description"]
+                    if change_type == "content_changed"
+                    else _MISSING
+                ),
             )
 
     for changes in (
