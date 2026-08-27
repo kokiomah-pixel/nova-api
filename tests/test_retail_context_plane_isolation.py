@@ -15,7 +15,7 @@ from retail_context.config import (
 )
 
 
-def test_retail_package_has_no_forbidden_institutional_imports():
+def test_retail_package_has_no_forbidden_non_retail_imports():
     package_dir = Path(__file__).resolve().parents[1] / "retail_context"
     assert validate_retail_package_imports(package_dir) == []
 
@@ -35,6 +35,23 @@ def test_institutional_state_modules_are_denied(module_name):
 
 
 @pytest.mark.parametrize(
+    "module_name",
+    [
+        "core.x402_config",
+        "core.x402_middleware",
+        "core.feed_pricing",
+        "core.feed_metering",
+        "core.bazaar_metadata",
+        "core.billing_config",
+        "core.billing_state",
+    ],
+)
+def test_legacy_runtime_modules_are_denied_as_direct_retail_dependencies(module_name):
+    with pytest.raises(RetailIsolationViolation):
+        assert_retail_module_allowed(module_name)
+
+
+@pytest.mark.parametrize(
     "path",
     [
         "agent_files/state/accepted-state-registry.yaml",
@@ -49,8 +66,8 @@ def test_institutional_state_paths_are_denied(path):
         assert_retail_path_allowed(path)
 
 
-def test_authority_neutral_core_module_is_not_denied():
-    assert_retail_module_allowed("core.x402_middleware")
+def test_unrelated_authority_neutral_module_is_not_denied():
+    assert_retail_module_allowed("core.environmental_state_engine")
 
 
 def test_retail_configuration_uses_separate_namespace(monkeypatch, tmp_path):
