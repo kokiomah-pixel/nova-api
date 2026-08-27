@@ -27,6 +27,25 @@ def _merge(base: dict, overrides: dict) -> dict:
     return result
 
 
+def _eligible_source_entry(source_id: str) -> dict:
+    return {
+        "source_id": source_id,
+        "source_type": "fixture_test_source",
+        "display_name": f"Eligible test source {source_id}",
+        "source_namespace": "retail_public_sources",
+        "access_class": "public",
+        "authorization_state": "authorized",
+        "licensing_state": "public",
+        "configuration_state": "configured",
+        "credential_requirement": "none",
+        "credential_namespace": "none",
+        "freshness_policy_reference": "fixture-policy:no-production-threshold",
+        "provenance_requirement": "required",
+        "enabled": True,
+        "authority_effect": "none",
+    }
+
+
 def load_case(name: str) -> dict:
     cases = json.loads(CASE_PATH.read_text(encoding="utf-8"))
     case = copy.deepcopy(cases[name])
@@ -39,6 +58,10 @@ def load_case(name: str) -> dict:
         )
         observations.append(_merge(observation, specification.get("overrides", {})))
     case["observations"] = observations
+    case["source_entries"] = [
+        _eligible_source_entry(source_id)
+        for source_id in sorted({item["source_id"] for item in observations})
+    ]
     return case
 
 
@@ -47,6 +70,7 @@ def build_case(name: str) -> dict:
     return build_state_ping(
         case["subject"],
         case["observations"],
+        case["source_entries"],
         generated_at=case["generated_at"],
     )
 
@@ -82,7 +106,10 @@ def test_insufficient_evidence_fabricates_no_positive_material() -> None:
 def test_source_id_provenance_is_preserved() -> None:
     case = load_case("single_verified_positive")
     result = build_state_ping(
-        case["subject"], case["observations"], generated_at=case["generated_at"]
+        case["subject"],
+        case["observations"],
+        case["source_entries"],
+        generated_at=case["generated_at"],
     )
     source_id = case["observations"][0]["source_id"]
     assert result["provenance"][0]["source_id"] == source_id
@@ -109,6 +136,7 @@ def test_subject_mismatch_fails() -> None:
         build_state_ping(
             case["subject"],
             case["observations"],
+            case["source_entries"],
             generated_at=case["generated_at"],
         )
 
@@ -120,6 +148,7 @@ def test_raw_provider_payload_is_never_accepted() -> None:
         build_state_ping(
             case["subject"],
             case["observations"],
+            case["source_entries"],
             generated_at=case["generated_at"],
         )
 
@@ -127,11 +156,15 @@ def test_raw_provider_payload_is_never_accepted() -> None:
 def test_deterministic_inputs_produce_byte_equivalent_output() -> None:
     case = load_case("multiple_positive")
     first = build_state_ping(
-        case["subject"], case["observations"], generated_at=case["generated_at"]
+        case["subject"],
+        case["observations"],
+        case["source_entries"],
+        generated_at=case["generated_at"],
     )
     second = build_state_ping(
         case["subject"],
         list(reversed(case["observations"])),
+        list(reversed(case["source_entries"])),
         generated_at=case["generated_at"],
     )
     canonical = lambda value: json.dumps(
@@ -143,7 +176,10 @@ def test_deterministic_inputs_produce_byte_equivalent_output() -> None:
 def test_generated_at_is_explicit_and_preserved() -> None:
     case = load_case("single_verified_positive")
     result = build_state_ping(
-        case["subject"], case["observations"], generated_at=case["generated_at"]
+        case["subject"],
+        case["observations"],
+        case["source_entries"],
+        generated_at=case["generated_at"],
     )
     assert result["generated_at"] == case["generated_at"]
 
@@ -193,6 +229,7 @@ def test_institutional_fields_cannot_enter_output(field: str) -> None:
         build_state_ping(
             case["subject"],
             case["observations"],
+            case["source_entries"],
             generated_at=case["generated_at"],
         )
 
@@ -225,7 +262,10 @@ def test_returned_object_is_validated_before_return(monkeypatch) -> None:
         validating_spy,
     )
     result = build_state_ping(
-        case["subject"], case["observations"], generated_at=case["generated_at"]
+        case["subject"],
+        case["observations"],
+        case["source_entries"],
+        generated_at=case["generated_at"],
     )
     assert calls == [result]
 
@@ -236,6 +276,7 @@ def test_duplicate_observation_identity_fails_closed() -> None:
         build_state_ping(
             case["subject"],
             case["observations"] * 2,
+            case["source_entries"],
             generated_at=case["generated_at"],
         )
 
@@ -245,5 +286,88 @@ def test_empty_observation_input_fails_closed() -> None:
         build_state_ping(
             {"subject_id": "ethereum-mainnet", "subject_type": "network"},
             [],
+            [],
             generated_at="2026-08-27T14:01:00Z",
+        )
+
+
+def test_eligible_public_source_can_contribute_positive_evidence() -> None:
+    result = build_case("single_verified_positive")
+    assert result["evidence"]
+    assert result["provenance"]
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("authorization_state", "unauthorized"),
+        ("configuration_state", "not_configured"),
+        ("licensing_state", "license_required"),
+    ],
+)
+def test_ineligible_source_is_excluded_from_positive_evidence(
+    field: str, value: object
+) -> None:
+    case = load_case("single_verified_positive")
+    case["source_entries"][0][field] = value
+    result = build_state_ping(
+        case["subject"],
+        case["observations"],
+        case["source_entries"],
+        generated_at=case["generated_at"],
+    )
+    assert result["context_status"] == "insufficient_evidence"
+    assert result["provenance"] == []
+    assert result["evidence"] == []
+    assert any(
+        item["claim_scope"] == "source eligibility"
+        for item in result["unresolved_evidence"]
+    )
+
+
+def test_fixture_namespace_source_is_excluded_even_when_structurally_valid() -> None:
+    case = load_case("single_verified_positive")
+    case["source_entries"][0]["source_namespace"] = "retail_fixture_sources"
+    result = build_state_ping(
+        case["subject"],
+        case["observations"],
+        case["source_entries"],
+        generated_at=case["generated_at"],
+    )
+    assert result["context_status"] == "insufficient_evidence"
+    assert result["provenance"] == []
+    assert result["evidence"] == []
+
+
+def test_missing_source_entry_is_excluded_fail_closed() -> None:
+    case = load_case("single_verified_positive")
+    result = build_state_ping(
+        case["subject"],
+        case["observations"],
+        [],
+        generated_at=case["generated_at"],
+    )
+    assert result["context_status"] == "insufficient_evidence"
+    assert result["provenance"] == []
+    assert result["evidence"] == []
+    assert any(
+        "no matching RP3 source entry" in item["reason"]
+        for item in result["unresolved_evidence"]
+    )
+
+
+def test_eligible_but_unverified_observation_remains_partial() -> None:
+    result = build_case("single_unverified")
+    assert result["context_status"] == "partially_resolved"
+    assert result["provenance"][0]["source_status"] == "present_unverified"
+
+
+def test_duplicate_source_entry_identity_fails_closed() -> None:
+    case = load_case("single_verified_positive")
+    with pytest.raises(ValueError, match="source_entry source_id values must be unique"):
+        build_state_ping(
+            case["subject"],
+            case["observations"],
+            case["source_entries"] * 2,
+            generated_at=case["generated_at"],
         )

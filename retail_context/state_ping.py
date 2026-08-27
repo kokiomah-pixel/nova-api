@@ -7,7 +7,7 @@ from collections import defaultdict
 from typing import Any, Mapping, Sequence
 
 from .schema import validate_retail_context_object
-from .sources import validate_source_observation
+from .sources import is_source_usable, validate_source_observation
 
 
 POSITIVE_SOURCE_STATUSES = frozenset({"observed", "stale"})
@@ -45,6 +45,7 @@ def _gap_status(source_status: str) -> str:
 def build_state_ping(
     subject: Mapping[str, Any],
     observations: Sequence[Mapping[str, Any]],
+    source_entries: Sequence[Mapping[str, Any]],
     *,
     generated_at: str,
 ) -> dict[str, Any]:
@@ -71,11 +72,34 @@ def build_state_ping(
     normalized_observations.sort(
         key=lambda item: (item["source_id"], item["observation_id"])
     )
-    positive = [
+
+    source_entries_by_id: dict[str, dict[str, Any]] = {}
+    normalized_source_entries: list[dict[str, Any]] = []
+    for source_entry in source_entries:
+        normalized_entry = copy.deepcopy(dict(source_entry))
+        source_id = normalized_entry.get("source_id")
+        if not isinstance(source_id, str) or not source_id:
+            continue
+        if source_id in source_entries_by_id:
+            raise ValueError("source_entry source_id values must be unique")
+        source_entries_by_id[source_id] = normalized_entry
+        normalized_source_entries.append(normalized_entry)
+    normalized_source_entries.sort(key=lambda item: item["source_id"])
+
+    positive_candidates = [
         item
         for item in normalized_observations
         if item["source_status"] in POSITIVE_SOURCE_STATUSES
     ]
+    positive: list[dict[str, Any]] = []
+    ineligible_positive: list[dict[str, Any]] = []
+    for observation in positive_candidates:
+        source_entry = source_entries_by_id.get(observation["source_id"])
+        if source_entry is not None and is_source_usable(source_entry):
+            positive.append(observation)
+        else:
+            ineligible_positive.append(observation)
+
     excluded = [
         item
         for item in normalized_observations
@@ -158,6 +182,29 @@ def build_state_ping(
             "current subject context",
             description,
             [observation["source_id"]],
+        )
+
+    for observation in ineligible_positive:
+        source_id = observation["source_id"]
+        source_entry = source_entries_by_id.get(source_id)
+        if source_entry is None:
+            reason = "no matching RP3 source entry was supplied"
+        else:
+            reason = "the matching RP3 source entry is not configuration-eligible"
+        description = (
+            f"Source {source_id} was excluded from positive evidence because {reason}."
+        )
+        add_limitation(
+            ("ineligible-source", observation["observation_id"]),
+            description,
+            "material",
+        )
+        add_gap(
+            ("ineligible-source", observation["observation_id"]),
+            "unresolved",
+            "source eligibility",
+            description,
+            [source_id],
         )
 
     for observation in positive:
@@ -319,7 +366,7 @@ def build_state_ping(
             "no-positive-observation",
             "missing",
             "current subject context",
-            "No usable positive retail source observation was available.",
+            "No eligible positive retail source observation was available.",
         )
         context_status = "insufficient_evidence"
         freshness = {
@@ -329,7 +376,7 @@ def build_state_ping(
         }
         confidence = {
             "level": "indeterminate",
-            "basis": "No positive normalized source observation was available.",
+            "basis": "No eligible positive normalized source observation was available.",
         }
     else:
         oldest = max(
@@ -377,6 +424,7 @@ def build_state_ping(
     resource_material = {
         "subject": requested_subject,
         "observations": normalized_observations,
+        "source_entries": normalized_source_entries,
         "generated_at": generated_at,
     }
     result = {
