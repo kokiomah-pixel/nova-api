@@ -1,0 +1,40 @@
+# Deployment-capable RP8A blueprint. This file is not deployment evidence and
+# auto-deploy is deliberately disabled. Provider-side storage must be attested
+# during RP8B before any persistence claim is advanced.
+services:
+  - type: web
+    name: nova-retail-controlled-proof
+    runtime: python
+    autoDeploy: false
+    buildCommand: python -m venv .venv && .venv/bin/pip install -r requirements.txt
+    startCommand: .venv/bin/uvicorn retail_context.service:create_retail_app_from_env --factory --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    disk:
+      name: nova-retail-controlled-proof-state
+      mountPath: /var/data/nova-retail
+      sizeGB: 1
+    envVars:
+      - key: NOVA_RETAIL_STATE_DIR
+        value: /var/data/nova-retail
+      - key: NOVA_RETAIL_CONTROL_DB_PATH
+        value: /var/data/nova-retail/production_controls.sqlite3
+      - key: NOVA_RETAIL_RATE_LIMIT_WINDOW_SECONDS
+        sync: false
+      - key: NOVA_RETAIL_STATE_PING_MAX_REQUESTS
+        sync: false
+      - key: NOVA_RETAIL_CONTEXT_DELTA_MAX_REQUESTS
+        sync: false
+      - key: NOVA_RETAIL_CONTROLLED_PROOF_ACCESS_TOKEN
+        sync: false
+      - key: NOVA_RETAIL_X402_FACILITATOR_URL
+        sync: false
+      - key: NOVA_RETAIL_X402_FACILITATOR_TIMEOUT_SECONDS
+        value: "10"
+      - key: NOVA_RETAIL_X402_SETTLEMENT_WALLET
+        sync: false
+      - key: NOVA_RETAIL_SOURCE_REGISTRY_PATH
+        value: /etc/secrets/retail-source-registry.json
+      - key: NOVA_RETAIL_MAX_REQUEST_BYTES
+        value: "1000000"
+      - key: NOVA_RETAIL_MAX_RESPONSE_BYTES
+        value: "2000000"
