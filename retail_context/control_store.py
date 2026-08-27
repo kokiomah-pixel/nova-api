@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterator, Mapping, Protocol
 
+from .production_telemetry import build_retail_incident, build_retail_telemetry_event
+
 
 SERVICE_MODES = frozenset({"disabled", "controlled_proof"})
 DELIVERY_STATUSES = frozenset({"pending", "delivered", "failed"})
@@ -273,6 +275,59 @@ class SQLiteRetailProductionControlStore:
     def _payment_row(row: sqlite3.Row | None) -> dict[str, Any] | None:
         return None if row is None else dict(row)
 
+    @staticmethod
+    def _insert_telemetry(
+        connection: sqlite3.Connection,
+        event: Mapping[str, Any],
+    ) -> None:
+        columns = (
+            "event_id",
+            "occurred_at",
+            "event_type",
+            "request_id",
+            "resource_type",
+            "subject_hash",
+            "payment_receipt_id",
+            "payment_requirement_id",
+            "transaction_reference_hash",
+            "duration_ms",
+            "response_bytes",
+            "failure_reason",
+            "retail_namespace",
+            "authority_effect",
+        )
+        connection.execute(
+            f"INSERT OR IGNORE INTO retail_operational_telemetry "
+            f"({', '.join(columns)}) VALUES ({', '.join('?' for _ in columns)})",
+            tuple(event[column] for column in columns),
+        )
+
+    @staticmethod
+    def _insert_incident(
+        connection: sqlite3.Connection,
+        incident: Mapping[str, Any],
+    ) -> None:
+        connection.execute(
+            "INSERT OR IGNORE INTO retail_operational_incidents "
+            "(incident_id, occurred_at, incident_type, request_id, resource_type, "
+            "payment_receipt_id, failure_reason, details_json, retail_namespace, "
+            "authority_effect) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                incident["incident_id"],
+                incident["occurred_at"],
+                incident["incident_type"],
+                incident["request_id"],
+                incident["resource_type"],
+                incident["payment_receipt_id"],
+                incident["failure_reason"],
+                json.dumps(
+                    incident["details"], separators=(",", ":"), sort_keys=True
+                ),
+                incident["retail_namespace"],
+                incident["authority_effect"],
+            ),
+        )
+
     def claim_payment(self, record: Mapping[str, Any]) -> PaymentClaimDecision:
         columns = (
             "claim_id",
@@ -335,11 +390,27 @@ class SQLiteRetailProductionControlStore:
                     failure_reason="payment_replay_conflict",
                     record=self._payment_row(existing),
                 )
-            connection.commit()
+
+            payment_event = build_retail_telemetry_event(
+                occurred_at=str(record["claimed_at"]),
+                event_type="payment_claimed",
+                request_id=str(record["request_id"]),
+                resource_type=str(record["resource_type"]),
+                payment_receipt_id=str(record["payment_receipt_id"]),
+                payment_requirement_id=str(record["payment_requirement_id"]),
+                transaction_reference=str(record["transaction_reference"]),
+            )
+            try:
+                self._insert_telemetry(connection, payment_event)
+            except sqlite3.Error:
+                connection.rollback()
+                raise
+
             row = connection.execute(
                 "SELECT * FROM retail_payment_consumption WHERE claim_id = ?",
                 (record["claim_id"],),
             ).fetchone()
+            connection.commit()
         return PaymentClaimDecision(
             claimed=True,
             failure_reason=None,
@@ -391,61 +462,54 @@ class SQLiteRetailProductionControlStore:
             if cursor.rowcount != 1:
                 connection.rollback()
                 raise ValueError("invalid_delivery_state")
-            connection.commit()
+
             row = connection.execute(
                 "SELECT * FROM retail_payment_consumption WHERE claim_id = ?",
                 (claim_id,),
             ).fetchone()
-        if row is None:
-            raise RuntimeError("control_store_unavailable")
+            if row is None:
+                connection.rollback()
+                raise RuntimeError("control_store_unavailable")
+
+            delivery_event = build_retail_telemetry_event(
+                occurred_at=occurred_at,
+                event_type=(
+                    "delivery_completed" if status == "delivered" else "delivery_failed"
+                ),
+                request_id=str(row["request_id"]),
+                resource_type=str(row["resource_type"]),
+                payment_receipt_id=str(row["payment_receipt_id"]),
+                payment_requirement_id=str(row["payment_requirement_id"]),
+                duration_ms=processing_duration_ms,
+                response_bytes=response_bytes if status == "delivered" else None,
+                failure_reason=failure_reason if status == "failed" else None,
+            )
+            try:
+                self._insert_telemetry(connection, delivery_event)
+                if status == "failed":
+                    delivery_incident = build_retail_incident(
+                        occurred_at=occurred_at,
+                        incident_type="delivery_failure",
+                        request_id=str(row["request_id"]),
+                        resource_type=str(row["resource_type"]),
+                        payment_receipt_id=str(row["payment_receipt_id"]),
+                        failure_reason=str(failure_reason),
+                    )
+                    self._insert_incident(connection, delivery_incident)
+            except sqlite3.Error:
+                connection.rollback()
+                raise
+
+            connection.commit()
         return dict(row)
 
     def record_telemetry(self, event: Mapping[str, Any]) -> None:
-        columns = (
-            "event_id",
-            "occurred_at",
-            "event_type",
-            "request_id",
-            "resource_type",
-            "subject_hash",
-            "payment_receipt_id",
-            "payment_requirement_id",
-            "transaction_reference_hash",
-            "duration_ms",
-            "response_bytes",
-            "failure_reason",
-            "retail_namespace",
-            "authority_effect",
-        )
         with self._connection() as connection:
-            connection.execute(
-                f"INSERT OR IGNORE INTO retail_operational_telemetry "
-                f"({', '.join(columns)}) VALUES ({', '.join('?' for _ in columns)})",
-                tuple(event[column] for column in columns),
-            )
+            self._insert_telemetry(connection, event)
 
     def record_incident(self, incident: Mapping[str, Any]) -> None:
         with self._connection() as connection:
-            connection.execute(
-                "INSERT OR IGNORE INTO retail_operational_incidents "
-                "(incident_id, occurred_at, incident_type, request_id, resource_type, "
-                "payment_receipt_id, failure_reason, details_json, retail_namespace, "
-                "authority_effect) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (
-                    incident["incident_id"],
-                    incident["occurred_at"],
-                    incident["incident_type"],
-                    incident["request_id"],
-                    incident["resource_type"],
-                    incident["payment_receipt_id"],
-                    incident["failure_reason"],
-                    json.dumps(
-                        incident["details"], separators=(",", ":"), sort_keys=True
-                    ),
-                    incident["retail_namespace"],
-                    incident["authority_effect"],
-                ),
-            )
+            self._insert_incident(connection, incident)
 
     def list_telemetry(self) -> list[dict[str, Any]]:
         with self._connection() as connection:
