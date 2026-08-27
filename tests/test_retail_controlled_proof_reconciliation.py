@@ -65,8 +65,8 @@ def positive_observation() -> dict[str, Any]:
     )
 
 
-def source_entry() -> dict[str, Any]:
-    return {
+def source_registry(*, configured: bool = True) -> dict[str, Any]:
+    entry = {
         "source_id": "fixture-public-network",
         "source_type": "public_network_status",
         "display_name": "Server-owned bounded network source",
@@ -74,7 +74,7 @@ def source_entry() -> dict[str, Any]:
         "access_class": "public",
         "authorization_state": "authorized",
         "licensing_state": "public",
-        "configuration_state": "configured",
+        "configuration_state": "configured" if configured else "not_configured",
         "credential_requirement": "none",
         "credential_namespace": "none",
         "freshness_policy_reference": "server-policy:controlled-proof",
@@ -82,11 +82,6 @@ def source_entry() -> dict[str, Any]:
         "enabled": True,
         "authority_effect": "none",
     }
-
-
-def source_registry(*, configured: bool = True) -> dict[str, Any]:
-    entry = source_entry()
-    entry["configuration_state"] = "configured" if configured else "unconfigured"
     return {
         "schema_version": "0.1.0",
         "registry_id": "server-owned-controlled-proof-registry",
@@ -105,7 +100,7 @@ def state_ping_envelope() -> dict[str, Any]:
     }
 
 
-def config(db_path: Path, *, retry_limit: int = 3) -> RetailRuntimeConfig:
+def runtime_config(db_path: Path, *, retry_limit: int = 3) -> RetailRuntimeConfig:
     return RetailRuntimeConfig(
         controlled_proof_access_token=PROOF_TOKEN,
         facilitator_url="https://facilitator.example.test",
@@ -124,7 +119,7 @@ def config(db_path: Path, *, retry_limit: int = 3) -> RetailRuntimeConfig:
     )
 
 
-def client_for(
+def build_client(
     db_path: Path,
     facilitator: FakeFacilitator,
     registry: dict[str, Any],
@@ -140,7 +135,7 @@ def client_for(
             changed_at=OBSERVED_AT,
         )
     app = create_retail_app(
-        config=config(db_path, retry_limit=retry_limit),
+        config=runtime_config(db_path, retry_limit=retry_limit),
         store=store,
         facilitator=facilitator,
         source_registry=registry,
@@ -149,7 +144,7 @@ def client_for(
     return TestClient(app), store
 
 
-def payment_payload_for(prepared) -> PaymentPayload:
+def payment_payload(prepared) -> PaymentPayload:
     requirement = build_retail_payment_requirement(
         resource_type="state_ping",
         resource_uri=prepared.resource_uri,
@@ -165,14 +160,33 @@ def payment_payload_for(prepared) -> PaymentPayload:
     )
 
 
-def post(client: TestClient, prepared, *, payment: PaymentPayload | None = None):
+def post(client: TestClient, prepared, *, payload: PaymentPayload | None = None):
     headers = {PROOF_HEADER: PROOF_TOKEN}
-    if payment is not None:
-        headers[PAYMENT_SIGNATURE_HEADER] = encode_payment_signature_header(payment)
+    if payload is not None:
+        headers[PAYMENT_SIGNATURE_HEADER] = encode_payment_signature_header(payload)
     return client.post(
         f"/retail/v1/context/state-ping/{prepared.request_digest}",
         json=prepared.request_envelope,
         headers=headers,
+    )
+
+
+def make_pending_claim(store, facilitator, prepared, payload):
+    requirement = build_retail_payment_requirement(
+        resource_type="state_ping",
+        resource_uri=prepared.resource_uri,
+        settlement_wallet=SETTLEMENT_WALLET,
+    )
+    outcome = process_retail_x402_payment(
+        requirement=requirement,
+        payment_payload=payload,
+        facilitator=facilitator,
+    )
+    return claim_or_resume_retail_delivery(
+        payment_outcome=outcome,
+        prepared=prepared,
+        store=store,
+        observed_at=OBSERVED_AT,
     )
 
 
@@ -187,108 +201,63 @@ def test_source_binding_changes_paid_resource_identity() -> None:
     assert first.resource_uri != changed.resource_uri
 
 
-def test_pending_paid_claim_cannot_resume_after_server_source_binding_drift(
-    tmp_path: Path,
-) -> None:
+def test_pending_claim_fails_closed_after_server_source_binding_drift(tmp_path: Path) -> None:
     db_path = tmp_path / "controls.sqlite3"
     facilitator = FakeFacilitator()
-    registry_v1 = source_registry()
-    client, store = client_for(db_path, facilitator, registry_v1)
-    prepared_v1 = prepare_state_ping_request(
-        state_ping_envelope(), source_registry=registry_v1
-    )
-
-    assert post(client, prepared_v1).status_code == 402
-    payload = payment_payload_for(prepared_v1)
-    requirement = build_retail_payment_requirement(
-        resource_type="state_ping",
-        resource_uri=prepared_v1.resource_uri,
-        settlement_wallet=SETTLEMENT_WALLET,
-    )
-    outcome = process_retail_x402_payment(
-        requirement=requirement,
-        payment_payload=payload,
-        facilitator=facilitator,
-    )
-    capability = claim_or_resume_retail_delivery(
-        payment_outcome=outcome,
-        prepared=prepared_v1,
-        store=store,
-        observed_at=OBSERVED_AT,
-    )
+    first_registry = source_registry()
+    client, store = build_client(db_path, facilitator, first_registry)
+    first = prepare_state_ping_request(state_ping_envelope(), source_registry=first_registry)
+    assert post(client, first).status_code == 402
+    payload = payment_payload(first)
+    capability = make_pending_claim(store, facilitator, first, payload)
     assert capability.delivery_status == "pending"
-    claim_before = store.get_payment_claim(capability.claim_id)
-    assert claim_before is not None and claim_before["delivery_status"] == "pending"
 
-    registry_v2 = source_registry(configured=False)
-    restarted, reopened = client_for(db_path, facilitator, registry_v2)
-    prepared_v2 = prepare_state_ping_request(
-        state_ping_envelope(), source_registry=registry_v2
+    changed_registry = source_registry(configured=False)
+    restarted, reopened = build_client(db_path, facilitator, changed_registry)
+    changed = prepare_state_ping_request(
+        state_ping_envelope(), source_registry=changed_registry
     )
-    response = post(restarted, prepared_v2, payment=payment_payload_for(prepared_v2))
+    response = post(restarted, changed, payload=payment_payload(changed))
     assert response.status_code == 400
     assert response.json()["error"] == "source_binding_reconciliation_failed"
-    claim_after = reopened.get_payment_claim(capability.claim_id)
-    assert claim_after is not None and claim_after["delivery_status"] == "pending"
+    claim = reopened.get_payment_claim(capability.claim_id)
+    assert claim is not None and claim["delivery_status"] == "pending"
 
 
-def test_unchanged_source_binding_resumes_pending_claim_after_restart(
-    tmp_path: Path,
-) -> None:
+def test_unchanged_source_binding_resumes_pending_claim_after_restart(tmp_path: Path) -> None:
     db_path = tmp_path / "controls.sqlite3"
     facilitator = FakeFacilitator()
     registry = source_registry()
-    client, store = client_for(db_path, facilitator, registry)
+    client, store = build_client(db_path, facilitator, registry)
     prepared = prepare_state_ping_request(state_ping_envelope(), source_registry=registry)
-
     assert post(client, prepared).status_code == 402
-    payload = payment_payload_for(prepared)
-    requirement = build_retail_payment_requirement(
-        resource_type="state_ping",
-        resource_uri=prepared.resource_uri,
-        settlement_wallet=SETTLEMENT_WALLET,
-    )
-    outcome = process_retail_x402_payment(
-        requirement=requirement,
-        payment_payload=payload,
-        facilitator=facilitator,
-    )
-    capability = claim_or_resume_retail_delivery(
-        payment_outcome=outcome,
-        prepared=prepared,
-        store=store,
-        observed_at=OBSERVED_AT,
-    )
+    payload = payment_payload(prepared)
+    capability = make_pending_claim(store, facilitator, prepared, payload)
     assert capability.delivery_status == "pending"
 
-    restarted, reopened = client_for(db_path, facilitator, copy.deepcopy(registry))
-    response = post(restarted, prepared, payment=payload)
+    restarted, reopened = build_client(db_path, facilitator, copy.deepcopy(registry))
+    response = post(restarted, prepared, payload=payload)
     assert response.status_code == 200
     claim = reopened.get_payment_claim(capability.claim_id)
     assert claim is not None and claim["delivery_status"] == "delivered"
 
 
-def test_same_request_retry_budget_is_bounded_before_facilitator_and_survives_restart(
-    tmp_path: Path,
-) -> None:
+def test_retry_budget_survives_restart_and_denies_before_facilitator(tmp_path: Path) -> None:
     db_path = tmp_path / "controls.sqlite3"
     facilitator = FakeFacilitator()
     registry = source_registry()
-    client, store = client_for(db_path, facilitator, registry, retry_limit=1)
+    client, store = build_client(db_path, facilitator, registry, retry_limit=1)
     prepared = prepare_state_ping_request(state_ping_envelope(), source_registry=registry)
-    payload = payment_payload_for(prepared)
+    payload = payment_payload(prepared)
 
     assert post(client, prepared).status_code == 402
-    first_paid = post(client, prepared, payment=payload)
-    assert first_paid.status_code == 200
+    assert post(client, prepared, payload=payload).status_code == 200
     assert facilitator.calls == ["verify", "settle"]
+    assert post(client, prepared, payload=payload).status_code == 200
+    assert facilitator.calls == ["verify", "settle", "verify", "settle"]
     claim_count = store.count_payment_claims()
 
-    first_retry = post(client, prepared, payment=payload)
-    assert first_retry.status_code == 200
-    assert facilitator.calls == ["verify", "settle", "verify", "settle"]
-
-    restarted, reopened = client_for(
+    restarted, reopened = build_client(
         db_path, facilitator, copy.deepcopy(registry), retry_limit=1
     )
     calls_before = list(facilitator.calls)
@@ -296,13 +265,12 @@ def test_same_request_retry_budget_is_bounded_before_facilitator_and_survives_re
         network=PAYMENT_NETWORK,
         transaction_reference=facilitator.transaction,
     )
-    denied = post(restarted, prepared, payment=payload)
+    denied = post(restarted, prepared, payload=payload)
     assert denied.status_code == 429
     assert denied.json()["error"] == "rate_limit_exceeded"
     assert facilitator.calls == calls_before
     assert reopened.count_payment_claims() == claim_count
-    claim_after = reopened.get_payment_claim_by_settlement(
+    assert reopened.get_payment_claim_by_settlement(
         network=PAYMENT_NETWORK,
         transaction_reference=facilitator.transaction,
-    )
-    assert claim_after == claim_before
+    ) == claim_before
