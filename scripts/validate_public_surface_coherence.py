@@ -20,6 +20,8 @@ REQUIRED_FILES = (
     "docs/go-to-market/system-class-comparator.md",
     "docs/go-to-market/commercialization-sequence.md",
     "docs/operations/public-surface-coherence-standard.md",
+    "docs/governance/public-private-repository-boundary-v0.1.md",
+    "docs/governance/public-exposure-inventory-v0.1.md",
 )
 
 BOUNDARY_LINES = (
@@ -183,6 +185,11 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
         errors,
     )
     reviewer_paths = _read(root, "docs/reviewer-paths.md", errors)
+    exposure_boundary = _read(
+        root,
+        "docs/governance/public-private-repository-boundary-v0.1.md",
+        errors,
+    )
 
     # Root README entry path.
     _require(errors, "CURRENT_STATE.md" in readme, "root_README.links_to_CURRENT_STATE", "missing CURRENT_STATE.md link")
@@ -237,11 +244,55 @@ def validate_repository(root: Path = REPO_ROOT) -> list[ValidationError]:
     _require(errors, _contains_yaml_value(readiness, "institutional_pilot", "not_started"), "production_claims.institutional_pilot_not_started", "institutional pilot must be not started")
     _require(errors, _contains_yaml_value(readiness, "production_custody_attestation", "not_complete"), "production_claims.custody_attestation_not_complete", "custody attestation must be incomplete")
 
-    # Commercialization authority.
-    _require(errors, _contains_yaml_value(commercialization, "new_pricing_expansion", "false"), "commercialization.new_pricing_expansion_false", "pricing expansion cannot be authorized")
-    _require(errors, _contains_yaml_value(commercialization, "marketplace_activation", "false"), "commercialization.marketplace_activation_false", "marketplace activation cannot be authorized")
-    _require(errors, _contains_yaml_value(commercialization, "x402_activation", "false"), "commercialization.x402_activation_false", "x402 activation cannot be authorized")
-    _require(errors, "bounded_pricing_research" in commercialization and "operator_discovery" in commercialization, "commercialization.bounded_research_permitted", "bounded research permissions are incomplete")
+    # Commercialization authority must be plane-specific.
+    _require(
+        errors,
+        "institutional:" in commercialization
+        and _contains_yaml_value(commercialization, "marketplace_activation", "false")
+        and _contains_yaml_value(commercialization, "x402_activation", "false"),
+        "commercialization.institutional_restrictions_preserved",
+        "institutional marketplace/x402 restrictions must remain explicit",
+    )
+    for marker in (
+        "retail_agent_plane:",
+        "x402_payment_authorized: true",
+        "public_service_authorized: true",
+        "marketplace_submission_authorized: true",
+        "marketplace_listing_authorized: true",
+        "live_external_validation_authorized: true",
+    ):
+        _require(
+            errors,
+            marker in commercialization,
+            f"commercialization.retail_authority.{marker.split(':', 1)[0]}",
+            f"missing retail commercialization marker: {marker}",
+        )
+    for boundary in (
+        "institutional Gate 5",
+        "payment as institutional identity or workflow authority",
+        "shared retail/institutional credentials",
+        "automatic chronology or Reflex Memory mutation",
+    ):
+        _require(
+            errors,
+            boundary in commercialization,
+            f"commercialization.retail_boundary.{boundary}",
+            f"retail non-authorization boundary missing: {boundary}",
+        )
+
+    # Public/private repository transition must fail closed on authority transfer.
+    for marker in (
+        "Public = contract, doctrine, interoperability, and approved proof.",
+        "Private = production machinery, proprietary derivation, corporate state, and operating evidence.",
+        "private repository created\n!= authority transferred",
+        "Architect explicitly accepts authority transfer",
+    ):
+        _require(
+            errors,
+            marker in exposure_boundary,
+            f"repository_exposure_boundary.{marker[:30]}",
+            f"repository exposure boundary missing marker: {marker}",
+        )
 
     # Existing system classes and hypothesis boundary.
     comparator_lower = comparator.lower()
@@ -293,7 +344,8 @@ def main() -> int:
     print("  Legacy_v1_isolated: true")
     print("  target_v2_status_explicit: true")
     print("  conflicting_current_readiness_claims: 0")
-    print("  commercialization_sequence_explicit: true")
+    print("  commercialization_authority_plane_specific: true")
+    print("  repository_exposure_transition_explicit: true")
     print("  public_comprehension_path_ready: true")
     return 0
 
