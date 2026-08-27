@@ -96,6 +96,44 @@ def test_authority_effect_other_than_none_fails() -> None:
     assert_invalid(context)
 
 
+def test_resolved_context_requires_provenance() -> None:
+    context = load_fixture("resolved.json")
+    context["provenance"] = []
+    assert_invalid(context)
+
+
+def test_resolved_context_requires_evidence() -> None:
+    context = load_fixture("resolved.json")
+    context["evidence"] = []
+    assert_invalid(context)
+
+
+@pytest.mark.parametrize("freshness_status", ["fresh", "aging", "stale"])
+def test_non_unknown_freshness_requires_observed_at(freshness_status: str) -> None:
+    context = load_fixture("resolved.json")
+    context["freshness"]["freshness_status"] = freshness_status
+    context["freshness"]["observed_at"] = None
+    assert_invalid(context)
+
+
+@pytest.mark.parametrize("freshness_status", ["fresh", "aging", "stale"])
+def test_non_unknown_freshness_requires_source_age_seconds(
+    freshness_status: str,
+) -> None:
+    context = load_fixture("resolved.json")
+    context["freshness"]["freshness_status"] = freshness_status
+    context["freshness"]["source_age_seconds"] = None
+    assert_invalid(context)
+
+
+def test_unknown_freshness_allows_null_observation_evidence() -> None:
+    context = load_fixture("insufficient_evidence.json")
+    assert context["freshness"]["freshness_status"] == "unknown"
+    assert context["freshness"]["observed_at"] is None
+    assert context["freshness"]["source_age_seconds"] is None
+    validate_retail_context_object(context)
+
+
 def test_object_with_unresolved_contradiction_passes() -> None:
     context = load_fixture("unresolved.json")
     assert context["contradictions"][0]["status"] == "unresolved"
