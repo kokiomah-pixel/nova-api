@@ -1,0 +1,44 @@
+{
+  "schema_version": "0.1.0",
+  "observation_id": "fixture-network-observation-001",
+  "source_id": "fixture-public-network",
+  "subject": {
+    "subject_id": "ethereum-mainnet",
+    "subject_type": "network"
+  },
+  "observed_at": "2026-08-27T14:00:00Z",
+  "received_at": "2026-08-27T14:00:05Z",
+  "source_status": "observed",
+  "verification_status": "verified",
+  "freshness_input": {
+    "source_age_seconds": 5,
+    "derivation_status": "derived_from_timestamps"
+  },
+  "integrity": {
+    "algorithm": "sha256",
+    "digest": "79f4c6d67bc700adf562b9e35aeaf6d6c53a6d45297e827e34282e99e5a6dd6d",
+    "scope": "normalized_claims",
+    "trust_semantics": "content_identity_only"
+  },
+  "claims": [
+    {
+      "claim_id": "claim-network-state",
+      "claim_or_observation": "The fixture reports nominal network operation.",
+      "claim_status": "observed"
+    }
+  ],
+  "provenance": {
+    "provider_observation_reference": "fixture:network:001",
+    "retrieval_mode": "fixture",
+    "verification_basis": "fixture_contract",
+    "normalization_version": "0.1.0"
+  },
+  "limitations": [
+    {
+      "limitation_id": "fixture-only",
+      "description": "This deterministic fixture does not represent a live provider.",
+      "impact": "material"
+    }
+  ],
+  "authority_effect": "none"
+}

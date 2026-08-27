@@ -1,0 +1,354 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sharpe-nova-os.local/specs/retail_source_observation_v0_1.schema.json",
+  "title": "Retail Source Observation v0.1",
+  "description": "Bounded normalized evidence emitted by a retail source adapter.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "observation_id",
+    "source_id",
+    "subject",
+    "observed_at",
+    "received_at",
+    "source_status",
+    "verification_status",
+    "freshness_input",
+    "integrity",
+    "claims",
+    "provenance",
+    "limitations",
+    "authority_effect"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": "0.1.0"},
+    "observation_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "source_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{0,127}$"
+    },
+    "subject": {"$ref": "#/$defs/subject"},
+    "observed_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "received_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source_status": {
+      "enum": ["observed", "unavailable", "stale", "rejected", "unknown"]
+    },
+    "verification_status": {
+      "enum": [
+        "verified",
+        "unverified",
+        "verification_failed",
+        "not_applicable"
+      ]
+    },
+    "freshness_input": {"$ref": "#/$defs/freshnessInput"},
+    "integrity": {"$ref": "#/$defs/integrity"},
+    "claims": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/claim"}
+    },
+    "provenance": {"$ref": "#/$defs/provenance"},
+    "limitations": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/limitation"}
+    },
+    "authority_effect": {"const": "none"}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "source_status": {"enum": ["observed", "stale"]}
+        },
+        "required": ["source_status"]
+      },
+      "then": {
+        "properties": {
+          "observed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "freshness_input": {
+            "properties": {
+              "source_age_seconds": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "derivation_status": {"const": "derived_from_timestamps"}
+            }
+          },
+          "claims": {"minItems": 1},
+          "integrity": {
+            "properties": {
+              "algorithm": {"const": "sha256"},
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "scope": {"const": "normalized_claims"}
+            }
+          },
+          "provenance": {
+            "properties": {
+              "provider_observation_reference": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "source_status": {
+            "enum": ["unavailable", "rejected", "unknown"]
+          }
+        },
+        "required": ["source_status"]
+      },
+      "then": {
+        "properties": {
+          "verification_status": {
+            "enum": ["unverified", "verification_failed", "not_applicable"]
+          },
+          "freshness_input": {
+            "properties": {
+              "source_age_seconds": {"type": "null"},
+              "derivation_status": {"const": "not_available"}
+            }
+          },
+          "claims": {"maxItems": 0},
+          "integrity": {
+            "properties": {
+              "algorithm": {"const": "none"},
+              "digest": {"type": "null"},
+              "scope": {"const": "no_content"}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "source_status": {"enum": ["unavailable", "unknown"]}
+        },
+        "required": ["source_status"]
+      },
+      "then": {
+        "properties": {
+          "observed_at": {"type": "null"},
+          "provenance": {
+            "properties": {
+              "provider_observation_reference": {"type": "null"}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "verification_status": {"const": "verified"}
+        },
+        "required": ["verification_status"]
+      },
+      "then": {
+        "properties": {
+          "provenance": {
+            "properties": {
+              "verification_basis": {
+                "enum": ["fixture_contract", "source_reference_check"]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "verification_status": {"const": "unverified"}
+        },
+        "required": ["verification_status"]
+      },
+      "then": {
+        "properties": {
+          "provenance": {
+            "properties": {
+              "verification_basis": {"const": "not_verified"}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "verification_status": {"const": "verification_failed"}
+        },
+        "required": ["verification_status"]
+      },
+      "then": {
+        "properties": {
+          "provenance": {
+            "properties": {
+              "verification_basis": {"const": "verification_failed"}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "verification_status": {"const": "not_applicable"}
+        },
+        "required": ["verification_status"]
+      },
+      "then": {
+        "properties": {
+          "provenance": {
+            "properties": {
+              "verification_basis": {"const": "not_applicable"}
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "subject": {
+      "type": "object",
+      "required": ["subject_id", "subject_type"],
+      "additionalProperties": false,
+      "properties": {
+        "subject_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "subject_type": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,63}$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      }
+    },
+    "freshnessInput": {
+      "type": "object",
+      "required": ["source_age_seconds", "derivation_status"],
+      "additionalProperties": false,
+      "properties": {
+        "source_age_seconds": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "derivation_status": {
+          "enum": ["derived_from_timestamps", "not_available"]
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "required": ["algorithm", "digest", "scope", "trust_semantics"],
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {"enum": ["sha256", "none"]},
+        "digest": {
+          "type": ["string", "null"],
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "scope": {"enum": ["normalized_claims", "no_content"]},
+        "trust_semantics": {"const": "content_identity_only"}
+      }
+    },
+    "claim": {
+      "type": "object",
+      "required": ["claim_id", "claim_or_observation", "claim_status"],
+      "additionalProperties": false,
+      "properties": {
+        "claim_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "claim_or_observation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "claim_status": {
+          "enum": ["observed", "unresolved", "rejected"]
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": [
+        "provider_observation_reference",
+        "retrieval_mode",
+        "verification_basis",
+        "normalization_version"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "provider_observation_reference": {
+          "type": ["string", "null"],
+          "maxLength": 500
+        },
+        "retrieval_mode": {
+          "enum": ["fixture", "synthetic", "provider_adapter"]
+        },
+        "verification_basis": {
+          "enum": [
+            "fixture_contract",
+            "source_reference_check",
+            "not_verified",
+            "verification_failed",
+            "not_applicable"
+          ]
+        },
+        "normalization_version": {"const": "0.1.0"}
+      }
+    },
+    "limitation": {
+      "type": "object",
+      "required": ["limitation_id", "description", "impact"],
+      "additionalProperties": false,
+      "properties": {
+        "limitation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "impact": {
+          "enum": ["none_known", "limited_scope", "material", "indeterminate"]
+        }
+      }
+    }
+  }
+}

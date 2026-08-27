@@ -1,0 +1,44 @@
+{
+  "schema_version": "0.1.0",
+  "observation_id": "fixture-market-observation-001",
+  "source_id": "candidate-public-market",
+  "subject": {
+    "subject_id": "ETH-USD",
+    "subject_type": "market_pair"
+  },
+  "observed_at": "2026-08-27T13:59:00Z",
+  "received_at": "2026-08-27T14:00:00Z",
+  "source_status": "observed",
+  "verification_status": "unverified",
+  "freshness_input": {
+    "source_age_seconds": 60,
+    "derivation_status": "derived_from_timestamps"
+  },
+  "integrity": {
+    "algorithm": "sha256",
+    "digest": "efca4ad553e3943d4204753529482a120d6c8430a62c7cf67e8a6a57b37a5d79",
+    "scope": "normalized_claims",
+    "trust_semantics": "content_identity_only"
+  },
+  "claims": [
+    {
+      "claim_id": "claim-market-activity",
+      "claim_or_observation": "The fixture reports elevated public market activity.",
+      "claim_status": "observed"
+    }
+  ],
+  "provenance": {
+    "provider_observation_reference": "fixture:market:001",
+    "retrieval_mode": "fixture",
+    "verification_basis": "not_verified",
+    "normalization_version": "0.1.0"
+  },
+  "limitations": [
+    {
+      "limitation_id": "unverified-fixture",
+      "description": "The fixture observation has not been verified.",
+      "impact": "material"
+    }
+  ],
+  "authority_effect": "none"
+}

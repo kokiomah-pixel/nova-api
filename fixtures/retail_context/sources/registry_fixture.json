@@ -1,0 +1,40 @@
+{
+  "schema_version": "0.1.0",
+  "registry_id": "retail-source-registry-fixture-v0-1",
+  "registry_status": "fixture",
+  "sources": [
+    {
+      "source_id": "fixture-public-network",
+      "source_type": "public_network_status",
+      "display_name": "Deterministic public network fixture",
+      "source_namespace": "retail_fixture_sources",
+      "access_class": "public",
+      "authorization_state": "authorized",
+      "licensing_state": "public",
+      "configuration_state": "configured",
+      "credential_requirement": "none",
+      "credential_namespace": "none",
+      "freshness_policy_reference": "fixture-policy:no-production-threshold",
+      "provenance_requirement": "required",
+      "enabled": true,
+      "authority_effect": "none"
+    },
+    {
+      "source_id": "candidate-public-market",
+      "source_type": "public_market_data",
+      "display_name": "Enabled but unauthorized public market candidate",
+      "source_namespace": "retail_fixture_sources",
+      "access_class": "public",
+      "authorization_state": "unauthorized",
+      "licensing_state": "unknown",
+      "configuration_state": "not_configured",
+      "credential_requirement": "none",
+      "credential_namespace": "none",
+      "freshness_policy_reference": "candidate-policy:not-established",
+      "provenance_requirement": "required",
+      "enabled": true,
+      "authority_effect": "none"
+    }
+  ],
+  "authority_effect": "none"
+}
