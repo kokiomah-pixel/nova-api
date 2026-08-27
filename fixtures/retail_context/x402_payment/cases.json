@@ -1,0 +1,14 @@
+{
+  "state_ping": {
+    "resource_type": "state_ping",
+    "resource_uri": "/retail/v1/context/state-ping",
+    "display_price_usdc": "0.002",
+    "amount_atomic": "2000"
+  },
+  "context_delta": {
+    "resource_type": "context_delta",
+    "resource_uri": "/retail/v1/context/context-delta",
+    "display_price_usdc": "0.02",
+    "amount_atomic": "20000"
+  }
+}

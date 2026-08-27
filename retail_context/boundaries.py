@@ -18,6 +18,7 @@ FORBIDDEN_IMPORT_PREFIXES = (
     "core.x402_middleware",
     "core.feed_pricing",
     "core.feed_metering",
+    "core.feed_identity",
     "core.bazaar_metadata",
     "core.billing_config",
     "core.billing_state",
