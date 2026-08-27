@@ -20,6 +20,7 @@ STATE_PING_REQUEST_FIELDS = frozenset({"subject", "observations", "generated_at"
 CONTEXT_DELTA_REQUEST_FIELDS = frozenset(
     {"previous_context", "current_context", "generated_at"}
 )
+NO_SOURCE_BINDING = "none"
 
 
 def canonical_json_bytes(value: object) -> bytes:
@@ -40,6 +41,20 @@ def retail_request_digest(value: object) -> str:
     return hashlib.sha256(canonical_json_bytes(value)).hexdigest()
 
 
+def retail_source_binding_digest(source_entries: object) -> str:
+    """Bind State Ping to the exact server-owned source entries used to build it."""
+
+    if not isinstance(source_entries, (list, tuple)):
+        raise ValueError("invalid_source_binding")
+    normalized: list[dict[str, Any]] = []
+    for entry in source_entries:
+        if not isinstance(entry, Mapping):
+            raise ValueError("invalid_source_binding")
+        normalized.append(copy.deepcopy(dict(entry)))
+    normalized.sort(key=lambda entry: str(entry.get("source_id", "")))
+    return hashlib.sha256(canonical_json_bytes(normalized)).hexdigest()
+
+
 def load_server_source_registry(path: str | Path) -> dict[str, Any]:
     with Path(path).open(encoding="utf-8") as registry_file:
         registry = json.load(registry_file)
@@ -53,12 +68,16 @@ class PreparedRetailRequest:
     request_envelope: Mapping[str, Any]
     request_digest: str
     subject_key: str
+    source_binding_digest: str = NO_SOURCE_BINDING
     source_entries: tuple[Mapping[str, Any], ...] = ()
 
     @property
     def resource_uri(self) -> str:
         slug = "state-ping" if self.resource_type == "state_ping" else "context-delta"
-        return f"/retail/v1/context/{slug}/{self.request_digest}"
+        base = f"/retail/v1/context/{slug}/{self.request_digest}"
+        if self.resource_type == "state_ping":
+            return f"{base}?source_binding={self.source_binding_digest}"
+        return base
 
     @property
     def request_id(self) -> str:
@@ -105,15 +124,21 @@ def prepare_state_ping_request(
         validate_source_observation(observation)
     source_ids = {item["source_id"] for item in request["observations"]}
     selected = tuple(
-        copy.deepcopy(item)
-        for item in source_registry["sources"]
-        if item["source_id"] in source_ids
+        sorted(
+            (
+                copy.deepcopy(item)
+                for item in source_registry["sources"]
+                if item["source_id"] in source_ids
+            ),
+            key=lambda item: item["source_id"],
+        )
     )
     prepared = PreparedRetailRequest(
         resource_type="state_ping",
         request_envelope=request,
         request_digest=retail_request_digest(request),
         subject_key=canonical_json_bytes(request["subject"]).decode("utf-8"),
+        source_binding_digest=retail_source_binding_digest(selected),
         source_entries=selected,
     )
     prepared.build_resource()
@@ -141,6 +166,7 @@ def prepare_context_delta_request(
         subject_key=canonical_json_bytes(request["current_context"]["subject"]).decode(
             "utf-8"
         ),
+        source_binding_digest=NO_SOURCE_BINDING,
     )
     prepared.build_resource()
     return prepared
