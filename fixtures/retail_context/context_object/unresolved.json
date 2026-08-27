@@ -1,0 +1,78 @@
+{
+  "resource_id": "ctx-network-condition-20260826T140000Z",
+  "resource_type": "state_ping",
+  "subject": {
+    "subject_id": "ethereum-mainnet",
+    "subject_type": "network"
+  },
+  "schema_version": "0.1.0",
+  "generated_at": "2026-08-26T14:00:00Z",
+  "context_status": "unresolved",
+  "freshness": {
+    "observed_at": "2026-08-26T13:55:00Z",
+    "source_age_seconds": 300,
+    "freshness_status": "aging"
+  },
+  "confidence": {
+    "level": "indeterminate",
+    "basis": "Available observations conflict and have not been reconciled."
+  },
+  "provenance": [
+    {
+      "source_id": "public-source-a",
+      "source_type": "public_network_status",
+      "observed_at": "2026-08-26T13:55:00Z",
+      "source_status": "verified",
+      "claim_reconciliation_status": "contradicted",
+      "contribution_scope": ["network congestion observation"]
+    },
+    {
+      "source_id": "public-source-b",
+      "source_type": "public_network_status",
+      "observed_at": "2026-08-26T13:54:50Z",
+      "source_status": "present_unverified",
+      "claim_reconciliation_status": "contradicted",
+      "contribution_scope": ["network congestion observation"]
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "ev-congestion-high",
+      "source_id": "public-source-a",
+      "claim_or_observation": "The source indicates elevated congestion.",
+      "evidence_status": "contradicted"
+    },
+    {
+      "evidence_id": "ev-congestion-normal",
+      "source_id": "public-source-b",
+      "claim_or_observation": "The source indicates normal congestion.",
+      "evidence_status": "contradicted"
+    }
+  ],
+  "contradictions": [
+    {
+      "contradiction_id": "conflict-congestion",
+      "evidence_ids": ["ev-congestion-high", "ev-congestion-normal"],
+      "summary": "The two sources report incompatible congestion states.",
+      "status": "unresolved",
+      "resolution_basis": null
+    }
+  ],
+  "unresolved_evidence": [
+    {
+      "issue_id": "gap-independent-corroboration",
+      "status": "unresolved",
+      "claim_scope": "current network congestion",
+      "reason": "No independent observation has reconciled the source conflict.",
+      "related_source_ids": ["public-source-a", "public-source-b"]
+    }
+  ],
+  "limitations": [
+    {
+      "limitation_id": "limit-source-conflict",
+      "description": "The source disagreement prevents a resolved context state.",
+      "impact": "material"
+    }
+  ],
+  "authority_effect": "none"
+}

@@ -1,0 +1,63 @@
+{
+  "resource_id": "ctx-eth-market-20260826T140000Z",
+  "resource_type": "full_context",
+  "subject": {
+    "subject_id": "ETH-USD",
+    "subject_type": "market_pair",
+    "label": "Ether / US dollar"
+  },
+  "schema_version": "0.1.0",
+  "generated_at": "2026-08-26T14:00:00Z",
+  "context_status": "resolved",
+  "freshness": {
+    "observed_at": "2026-08-26T13:59:30Z",
+    "source_age_seconds": 30,
+    "freshness_status": "fresh"
+  },
+  "confidence": {
+    "level": "high",
+    "basis": "Two verified sources independently report the same observation."
+  },
+  "provenance": [
+    {
+      "source_id": "public-source-a",
+      "source_type": "public_market_data",
+      "observed_at": "2026-08-26T13:59:30Z",
+      "source_status": "verified",
+      "claim_reconciliation_status": "reconciled",
+      "contribution_scope": ["reference price observation"]
+    },
+    {
+      "source_id": "public-source-b",
+      "source_type": "public_market_data",
+      "observed_at": "2026-08-26T13:59:28Z",
+      "source_status": "verified",
+      "claim_reconciliation_status": "reconciled",
+      "contribution_scope": ["reference price corroboration"]
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "ev-a",
+      "source_id": "public-source-a",
+      "claim_or_observation": "The source reported a reference price near 4,500 USD.",
+      "evidence_status": "corroborated"
+    },
+    {
+      "evidence_id": "ev-b",
+      "source_id": "public-source-b",
+      "claim_or_observation": "The source reported a matching reference price range.",
+      "evidence_status": "corroborated"
+    }
+  ],
+  "contradictions": [],
+  "unresolved_evidence": [],
+  "limitations": [
+    {
+      "limitation_id": "limit-public-scope",
+      "description": "The object reflects only the listed public sources and observation times.",
+      "impact": "limited_scope"
+    }
+  ],
+  "authority_effect": "none"
+}

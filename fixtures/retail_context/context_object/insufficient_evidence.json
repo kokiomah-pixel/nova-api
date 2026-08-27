@@ -1,0 +1,39 @@
+{
+  "resource_id": "ctx-unknown-subject-20260826T140000Z",
+  "resource_type": "full_context",
+  "subject": {
+    "subject_id": "unknown-market",
+    "subject_type": "market"
+  },
+  "schema_version": "0.1.0",
+  "generated_at": "2026-08-26T14:00:00Z",
+  "context_status": "insufficient_evidence",
+  "freshness": {
+    "observed_at": null,
+    "source_age_seconds": null,
+    "freshness_status": "unknown"
+  },
+  "confidence": {
+    "level": "indeterminate",
+    "basis": "No usable source observation was available."
+  },
+  "provenance": [],
+  "evidence": [],
+  "contradictions": [],
+  "unresolved_evidence": [
+    {
+      "issue_id": "gap-no-source-observation",
+      "status": "missing",
+      "claim_scope": "current subject context",
+      "reason": "No source observation was supplied."
+    }
+  ],
+  "limitations": [
+    {
+      "limitation_id": "limit-no-evidence",
+      "description": "No current evidence supports a positive context claim.",
+      "impact": "material"
+    }
+  ],
+  "authority_effect": "none"
+}
