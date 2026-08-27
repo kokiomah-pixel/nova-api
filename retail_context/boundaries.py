@@ -6,12 +6,21 @@ from typing import Iterable, List
 
 
 # Retail may reuse authority-neutral primitives, but it must not import or read
-# institutional state-bearing modules. Keep this deny-list narrow and explicit;
-# expand it only when a new institutional state surface is identified.
+# institutional state-bearing modules. Legacy v1 payment, pricing, metering, and
+# billing modules are also denied as direct dependencies because they carry the
+# wrong product contract or institutional semantics. Reuse requires extraction
+# into a new authority-neutral primitive first.
 FORBIDDEN_IMPORT_PREFIXES = (
     "core.accepted_state_synchronization",
     "core.reflex_governance_runtime",
     "core.governance_identity",
+    "core.x402_config",
+    "core.x402_middleware",
+    "core.feed_pricing",
+    "core.feed_metering",
+    "core.bazaar_metadata",
+    "core.billing_config",
+    "core.billing_state",
 )
 
 FORBIDDEN_PATH_FRAGMENTS = (
@@ -35,7 +44,7 @@ def assert_retail_module_allowed(module_name: str) -> None:
         for prefix in FORBIDDEN_IMPORT_PREFIXES
     ):
         raise RetailIsolationViolation(
-            f"retail context plane cannot import institutional module: {normalized}"
+            f"retail context plane cannot import non-retail module directly: {normalized}"
         )
 
 
