@@ -22,6 +22,7 @@ from .sources import (
     validate_source_observation,
     validate_source_registry,
 )
+from .state_ping import build_state_ping
 
 __all__ = [
     "RetailContextConfig",
@@ -29,6 +30,7 @@ __all__ = [
     "RetailSourceAdapter",
     "SCHEMA_VERSION",
     "assert_retail_module_allowed",
+    "build_state_ping",
     "is_source_usable",
     "load_retail_context_schema",
     "load_source_observation_schema",
