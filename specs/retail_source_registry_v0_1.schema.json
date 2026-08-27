@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sharpe-nova-os.local/specs/retail_source_registry_v0_1.schema.json",
+  "title": "Retail Source Registry v0.1",
+  "description": "Retail-only source configuration and eligibility state. Registry presence does not establish runtime availability.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "registry_id",
+    "registry_status",
+    "sources",
+    "authority_effect"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": "0.1.0"},
+    "registry_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "registry_status": {
+      "enum": ["fixture", "candidate", "active"]
+    },
+    "sources": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/sourceEntry"}
+    },
+    "authority_effect": {"const": "none"}
+  },
+  "$defs": {
+    "sourceEntry": {
+      "type": "object",
+      "required": [
+        "source_id",
+        "source_type",
+        "display_name",
+        "source_namespace",
+        "access_class",
+        "authorization_state",
+        "licensing_state",
+        "configuration_state",
+        "credential_requirement",
+        "credential_namespace",
+        "freshness_policy_reference",
+        "provenance_requirement",
+        "enabled",
+        "authority_effect"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]{0,127}$"
+        },
+        "source_type": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,63}$"
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "source_namespace": {
+          "enum": [
+            "retail_public_sources",
+            "retail_licensed_sources",
+            "retail_fixture_sources"
+          ]
+        },
+        "access_class": {
+          "enum": ["public", "retail_licensed"]
+        },
+        "authorization_state": {
+          "enum": ["authorized", "unauthorized", "pending_review"]
+        },
+        "licensing_state": {
+          "enum": ["public", "licensed", "license_required", "unknown"]
+        },
+        "configuration_state": {
+          "enum": ["configured", "not_configured"]
+        },
+        "credential_requirement": {
+          "enum": ["none", "retail_credential_required"]
+        },
+        "credential_namespace": {
+          "enum": ["none", "retail_context"]
+        },
+        "freshness_policy_reference": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "provenance_requirement": {"const": "required"},
+        "enabled": {"type": "boolean"},
+        "authority_effect": {"const": "none"}
+      }
+    }
+  }
+}
