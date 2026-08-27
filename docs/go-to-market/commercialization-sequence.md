@@ -7,13 +7,14 @@ Legacy v1 contains metering, quota, and pricing-related implementation artifacts
 Their existence does not establish:
 
 - current customer demand;
-- current pricing authority;
 - willingness to pay;
-- target v2 monetization readiness;
-- marketplace readiness;
-- production payment readiness.
+- target v2 institutional monetization readiness;
+- institutional marketplace readiness;
+- institutional production payment readiness.
 
-## Sequence
+A later Architect decision separately authorized production preparation and live external validation for the isolated retail-agent plane. That authorization supersedes the earlier retail prohibitions only for that isolated retail plane.
+
+## Institutional sequence
 
 ```text
 Product-generation coherence
@@ -24,31 +25,76 @@ Product-generation coherence
 → bounded operator rehearsal
 → controlled production candidate
 → institutional pilot evidence
-→ pricing validation
-→ distribution-channel validation
+→ institutional pricing validation
+→ institutional distribution-channel validation
 ```
 
-## Current authorization
+## Retail sequence
+
+```text
+Retail/institutional isolation
+→ public resource contract
+→ retail data foundation
+→ State Ping / Context Delta
+→ x402 paid-delivery loop
+→ production controls
+→ controlled production proof
+→ public activation
+→ live external validation
+```
+
+## Current authorization by plane
 
 ```yaml
 commercialization_authority:
-  new_pricing_expansion: false
-  public_marketplace_listing: false
-  marketplace_activation: false
-  x402_activation: false
-  payment_activation: false
-  customer_contracting: false
+  institutional:
+    new_pricing_expansion: false
+    public_marketplace_listing: false
+    marketplace_activation: false
+    x402_activation: false
+    payment_activation: false
+    customer_contracting: false
 
-  permitted:
-    - bounded_pricing_research
-    - internal_marketplace_preflight
-    - operator_discovery
-    - cost_and_metering_architecture_review
+    permitted:
+      - bounded_pricing_research
+      - operator_discovery
+      - cost_and_metering_architecture_review
+
+  retail_agent_plane:
+    production_preparation_authorized: true
+    runtime_engineering_authorized: true
+    x402_payment_authorized: true
+    public_service_authorized: true
+    marketplace_submission_authorized: true
+    marketplace_listing_authorized: true
+    direct_x402_discovery_authorized: true
+    Base_USDC_authorized: true
+    live_external_validation_authorized: true
+
+    evidence_limits:
+      - authorization_does_not_establish_implementation
+      - implementation_does_not_establish_deployment
+      - deployment_does_not_establish_buyer_demand
+      - payment_does_not_establish_adoption
+      - usage_does_not_establish_pricing_power_or_product_market_fit
 ```
 
-## Unfreeze conditions
+## Retail boundary
 
-New commercialization implementation requires evidence of:
+Retail commercialization does not authorize:
+
+- institutional Gate 5;
+- institutional pilot activation;
+- target-v2 institutional production;
+- payment as institutional identity or workflow authority;
+- shared retail/institutional credentials, data plane, chronology, or Reflex Memory;
+- Nova-managed wallets, signing authority, or customer-capital settlement authority;
+- execution, portfolio management, or buy/sell recommendations;
+- automatic chronology or Reflex Memory mutation.
+
+## Institutional unfreeze conditions
+
+New institutional commercialization implementation requires evidence of:
 
 * a clearly defined buyer and operator;
 * repeated workflow need;
