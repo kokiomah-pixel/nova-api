@@ -43,10 +43,17 @@ def assert_invalid_observation(observation: dict) -> None:
         validate_source_observation(observation)
 
 
-def test_valid_authorized_public_source_registry_entry_passes() -> None:
+def test_valid_authorized_public_source_registry_entry_passes_schema_but_fixture_is_not_usable() -> None:
     registry = load_fixture("registry_fixture.json")
     validate_source_registry(registry)
-    assert is_source_usable(registry["sources"][0]) is True
+    assert registry["sources"][0]["source_namespace"] == "retail_fixture_sources"
+    assert is_source_usable(registry["sources"][0]) is False
+
+
+def test_authorized_public_source_in_public_namespace_is_configuration_eligible() -> None:
+    source = source_entry()
+    source["source_namespace"] = "retail_public_sources"
+    assert is_source_usable(source) is True
 
 
 def test_unauthorized_source_is_valid_but_not_usable() -> None:
@@ -68,6 +75,26 @@ def test_valid_retail_licensed_source_is_configuration_eligible() -> None:
         }
     )
     assert is_source_usable(source) is True
+
+
+def test_public_source_with_licensed_namespace_is_not_usable() -> None:
+    source = source_entry()
+    source["source_namespace"] = "retail_licensed_sources"
+    assert is_source_usable(source) is False
+
+
+def test_retail_licensed_source_with_public_namespace_is_not_usable() -> None:
+    source = source_entry()
+    source.update(
+        {
+            "source_namespace": "retail_public_sources",
+            "access_class": "retail_licensed",
+            "licensing_state": "licensed",
+            "credential_requirement": "retail_credential_required",
+            "credential_namespace": "retail_context",
+        }
+    )
+    assert is_source_usable(source) is False
 
 
 def test_institutional_access_class_is_rejected() -> None:
@@ -117,6 +144,7 @@ def test_unsupported_authorization_state_fails() -> None:
 )
 def test_source_usability_fails_closed(field: str, value: object) -> None:
     source = source_entry()
+    source["source_namespace"] = "retail_public_sources"
     source[field] = value
     assert is_source_usable(source) is False
 
@@ -129,6 +157,24 @@ def test_valid_normalized_positive_observation_passes() -> None:
 def test_positive_observation_requires_identity_and_time(field: str) -> None:
     observation = load_fixture("positive_observation.json")
     del observation[field]
+    assert_invalid_observation(observation)
+
+
+def test_timestamp_derived_age_matches_observation_and_receipt_times() -> None:
+    observation = load_fixture("positive_observation.json")
+    assert observation["freshness_input"]["source_age_seconds"] == 5
+    validate_source_observation(observation)
+
+
+def test_mismatched_timestamp_derived_age_fails() -> None:
+    observation = load_fixture("positive_observation.json")
+    observation["freshness_input"]["source_age_seconds"] = 6
+    assert_invalid_observation(observation)
+
+
+def test_received_at_before_observed_at_fails() -> None:
+    observation = load_fixture("positive_observation.json")
+    observation["received_at"] = "2026-08-27T13:59:59Z"
     assert_invalid_observation(observation)
 
 
@@ -189,6 +235,7 @@ def test_institutional_state_fields_are_rejected(field: str) -> None:
 
 def test_registry_presence_does_not_imply_runtime_availability() -> None:
     source = source_entry()
+    source["source_namespace"] = "retail_public_sources"
     assert is_source_usable(source) is True
     assert "source_status" not in source
     assert "observed_at" not in source
