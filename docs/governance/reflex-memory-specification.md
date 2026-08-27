@@ -300,11 +300,9 @@ chronology_event
 The governed-abstraction extension does not change Reflex Memory v0.1 runtime
 behavior.
 
-It introduces versioned specification objects for:
-
-- proposed abstraction candidates;
-- accepted v0.2 Reflex Memory entries;
-- retrieval relevance explanations.
+This public extension defines the doctrine and external trust boundary for
+governed abstraction. Versioned accepted-entry structures, retrieval mechanics,
+and cross-object lineage validation are private-target implementation material.
 
 ### Governing transition
 
@@ -340,9 +338,8 @@ authority treatment.
 
 ### Runtime boundary
 
-The v0.2 schemas and fixtures are specification artifacts.
-
-They do not authorize:
+This public doctrine does not define or publish the internal accepted-entry,
+retrieval, or promotion implementation. It does not authorize:
 
 * runtime extraction;
 * runtime candidate creation;
@@ -352,19 +349,12 @@ They do not authorize:
 * constraint mutation;
 * authority-map mutation.
 
-Versioned references:
+Public boundary reference:
 
 - `docs/governance/governed-abstraction-boundary.md`
-- `schemas/reflex_memory/reflex_memory_candidate_v0_2.schema.json`
-- `schemas/reflex_memory/reflex_memory_entry_v0_2.schema.json`
-- `schemas/reflex_memory/reflex_memory_retrieval_explanation_v0_1.schema.json`
-- `fixtures/reflex_memory/reflex_memory_candidate_implicit_policy_conversion.json`
-- `fixtures/reflex_memory/reflex_memory_candidate_exception_only.json`
-- `fixtures/reflex_memory/reflex_memory_entry_governed_abstraction_v0_2.json`
-- `fixtures/reflex_memory/reflex_memory_retrieval_comparison_limits.json`
 
-These artifacts are synthetic specification evidence, not production-ready
-runtime objects.
+Publication of doctrine does not establish that any internal versioned object,
+runtime, accepted memory, or retrieval system exists or is active.
 
 ## Failure Modes
 

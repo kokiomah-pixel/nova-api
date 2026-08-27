@@ -135,20 +135,15 @@ governed_abstraction_evidence:
     - docs/governance/reflex-memory-specification.md
     - docs/architecture/reflex-memory-vs-agent-memory.md
 
-  schemas:
-    - schemas/reflex_memory/reflex_memory_candidate_v0_2.schema.json
-    - schemas/reflex_memory/reflex_memory_entry_v0_2.schema.json
-    - schemas/reflex_memory/reflex_memory_retrieval_explanation_v0_1.schema.json
+  public_evidence_scope:
+    - doctrine
+    - non_authority_boundary
+    - lineage_principles
 
-  fixtures:
-    - fixtures/reflex_memory/reflex_memory_candidate_implicit_policy_conversion.json
-    - fixtures/reflex_memory/reflex_memory_candidate_exception_only.json
-    - fixtures/reflex_memory/reflex_memory_entry_governed_abstraction_v0_2.json
-    - fixtures/reflex_memory/reflex_memory_retrieval_comparison_limits.json
-
-  validation:
-    - scripts/validate_reflex_memory_abstraction.py
-    - tests/test_reflex_memory_abstraction.py
+  intentionally_not_public:
+    - accepted_entry_structure
+    - retrieval_mechanics
+    - cross_object_lineage_implementation
 
   claim_boundary:
     production_runtime: not_established

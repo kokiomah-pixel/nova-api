@@ -176,30 +176,13 @@ It does not claim production persistence, dynamic storage, autonomous memory mut
 
 The v0.1 fixture continues to demonstrate the existing accepted-memory lifecycle.
 
-Additional versioned fixtures demonstrate:
+The public repository documents the governed-abstraction and implicit-policy-
+conversion boundaries without publishing internal accepted-entry, promotion,
+retrieval, or cross-object lineage fixtures.
 
-- an unaccepted implicit-policy-conversion candidate;
-- an exception-only candidate;
-- an accepted governed-abstraction v0.2 entry;
-- a retrieval explanation with material comparison limits.
-
-These fixtures are synthetic specification evidence.
-
-They do not create accepted Reflex Memory, chronology, production state, or
-runtime behavior.
-
-Schemas:
-
-- `schemas/reflex_memory/reflex_memory_candidate_v0_2.schema.json`
-- `schemas/reflex_memory/reflex_memory_entry_v0_2.schema.json`
-- `schemas/reflex_memory/reflex_memory_retrieval_explanation_v0_1.schema.json`
-
-Fixtures:
-
-- `fixtures/reflex_memory/reflex_memory_candidate_implicit_policy_conversion.json`
-- `fixtures/reflex_memory/reflex_memory_candidate_exception_only.json`
-- `fixtures/reflex_memory/reflex_memory_entry_governed_abstraction_v0_2.json`
-- `fixtures/reflex_memory/reflex_memory_retrieval_comparison_limits.json`
+Future public synthetic vectors may illustrate candidate/non-authority behavior
+only after separate exposure review. They would not create accepted Reflex
+Memory, chronology, production state, or runtime behavior.
 
 ## Replayability
 

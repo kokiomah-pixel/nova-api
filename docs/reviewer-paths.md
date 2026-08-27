@@ -221,10 +221,10 @@ public reader path:
 1. Reflex Memory specification: `docs/governance/reflex-memory-specification.md`
 2. Governed abstraction boundary: `docs/governance/governed-abstraction-boundary.md`
 3. Agent-memory comparison: `docs/architecture/reflex-memory-vs-agent-memory.md`
-4. Synthetic candidate fixtures: `fixtures/reflex_memory/reflex_memory_candidate_*.json`
-5. v0.2 accepted-entry fixture: `fixtures/reflex_memory/reflex_memory_entry_governed_abstraction_v0_2.json`
-6. Retrieval comparison-limit fixture: `fixtures/reflex_memory/reflex_memory_retrieval_comparison_limits.json`
-7. Validator and tests: `scripts/validate_reflex_memory_abstraction.py`, `tests/test_reflex_memory_abstraction.py`
+4. Market-signal record: `docs/market/signals/2026/MSE-2026-08-06-038-plugmem-governed-abstraction.md`
+
+Internal accepted-entry structures, retrieval mechanics, lineage fixtures, and
+their implementation validators are intentionally outside the public path.
 
 ---
 
