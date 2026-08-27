@@ -17,11 +17,13 @@ SETTLEMENT_WALLET_ENV = "NOVA_RETAIL_X402_SETTLEMENT_WALLET"
 SOURCE_REGISTRY_PATH_ENV = "NOVA_RETAIL_SOURCE_REGISTRY_PATH"
 MAX_REQUEST_BYTES_ENV = "NOVA_RETAIL_MAX_REQUEST_BYTES"
 MAX_RESPONSE_BYTES_ENV = "NOVA_RETAIL_MAX_RESPONSE_BYTES"
+RETRY_MAX_REQUESTS_ENV = "NOVA_RETAIL_RETRY_MAX_REQUESTS"
 PROOF_ACCESS_HEADER = "X-Nova-Retail-Controlled-Proof"
 DEFAULT_FACILITATOR_TIMEOUT_SECONDS = 10.0
 MAX_FACILITATOR_TIMEOUT_SECONDS = 30.0
 DEFAULT_MAX_REQUEST_BYTES = 1_000_000
 DEFAULT_MAX_RESPONSE_BYTES = 2_000_000
+DEFAULT_RETRY_MAX_REQUESTS = 3
 
 
 class RetailRuntimeConfigError(ValueError):
@@ -64,6 +66,7 @@ class RetailRuntimeConfig:
     max_request_bytes: int
     max_response_bytes: int
     production_controls: RetailProductionControlConfig
+    retry_max_requests: int = DEFAULT_RETRY_MAX_REQUESTS
 
     def __post_init__(self) -> None:
         if not isinstance(self.production_controls, RetailProductionControlConfig):
@@ -96,6 +99,11 @@ class RetailRuntimeConfig:
             self,
             "max_response_bytes",
             _positive_int(self.max_response_bytes, maximum=10_000_000),
+        )
+        object.__setattr__(
+            self,
+            "retry_max_requests",
+            _positive_int(self.retry_max_requests, maximum=100),
         )
 
     @classmethod
@@ -131,4 +139,8 @@ class RetailRuntimeConfig:
                 maximum=10_000_000,
             ),
             production_controls=RetailProductionControlConfig.from_env(source),
+            retry_max_requests=_positive_int(
+                source.get(RETRY_MAX_REQUESTS_ENV, DEFAULT_RETRY_MAX_REQUESTS),
+                maximum=100,
+            ),
         )
