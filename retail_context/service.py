@@ -103,6 +103,13 @@ def _ensure_runtime_admission(
                 else "request_reconciliation_failed"
             )
         try:
+            if guard.get_request_guard(prepared.request_id) is None:
+                guard.initialize_request(
+                    request_id=prepared.request_id,
+                    source_binding_digest=prepared.source_binding_digest,
+                    observed_at=observed_at,
+                    payment_already_present=payment_present,
+                )
             retry = guard.consume_existing_attempt(
                 request_id=prepared.request_id,
                 source_binding_digest=prepared.source_binding_digest,
