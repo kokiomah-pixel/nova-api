@@ -4,6 +4,7 @@ import copy
 import hashlib
 import json
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Mapping, Protocol, runtime_checkable
 
@@ -64,8 +65,25 @@ def normalized_claims_digest(claims: object) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
+def _parse_rfc3339(value: str) -> datetime:
+    return datetime.fromisoformat(value.replace("Z", "+00:00"))
+
+
 def validate_source_observation(observation: Mapping[str, Any]) -> None:
     source_observation_validator().validate(observation)
+
+    freshness = observation["freshness_input"]
+    if freshness["derivation_status"] == "derived_from_timestamps":
+        observed_at = _parse_rfc3339(observation["observed_at"])
+        received_at = _parse_rfc3339(observation["received_at"])
+        if received_at < observed_at:
+            raise ValidationError("received_at must not precede observed_at")
+        expected_age = (received_at - observed_at).total_seconds()
+        if freshness["source_age_seconds"] != expected_age:
+            raise ValidationError(
+                "freshness_input.source_age_seconds must equal received_at - observed_at"
+            )
+
     integrity = observation["integrity"]
     if integrity["scope"] != "normalized_claims":
         return
@@ -99,16 +117,21 @@ def is_source_usable(source: Mapping[str, Any]) -> bool:
     if not common_eligible:
         return False
 
+    if source["source_namespace"] == "retail_fixture_sources":
+        return False
+
     if source["access_class"] == "public":
         return (
-            source["licensing_state"] == "public"
+            source["source_namespace"] == "retail_public_sources"
+            and source["licensing_state"] == "public"
             and source["credential_requirement"] == "none"
             and source["credential_namespace"] == "none"
         )
 
     if source["access_class"] == "retail_licensed":
         return (
-            source["licensing_state"] == "licensed"
+            source["source_namespace"] == "retail_licensed_sources"
+            and source["licensing_state"] == "licensed"
             and source["credential_requirement"] == "retail_credential_required"
             and source["credential_namespace"] == "retail_context"
         )
