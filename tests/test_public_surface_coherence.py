@@ -23,6 +23,8 @@ FIXTURE_FILES = (
     "docs/go-to-market/commercialization-sequence.md",
     "docs/operations/public-surface-coherence-standard.md",
     "docs/operations/production-readiness-register.md",
+    "docs/governance/public-private-repository-boundary-v0.1.md",
+    "docs/governance/public-exposure-inventory-v0.1.md",
 )
 
 
@@ -151,34 +153,49 @@ def test_repository_governance_ready_claim_passes(coherent_repo: Path) -> None:
     assert not {field for field in _fields(coherent_repo) if field.startswith("production_claims.")}
 
 
-def test_pricing_expansion_authorized_fails(coherent_repo: Path) -> None:
+def test_institutional_marketplace_activation_authorized_fails(coherent_repo: Path) -> None:
     _replace(
         coherent_repo,
         "docs/go-to-market/commercialization-sequence.md",
-        "new_pricing_expansion: false",
-        "new_pricing_expansion: true",
+        "    marketplace_activation: false",
+        "    marketplace_activation: true",
     )
-    assert "commercialization.new_pricing_expansion_false" in _fields(coherent_repo)
+    assert "commercialization.institutional_restrictions_preserved" in _fields(coherent_repo)
 
 
-def test_marketplace_activation_authorized_fails(coherent_repo: Path) -> None:
+def test_institutional_x402_activation_authorized_fails(coherent_repo: Path) -> None:
     _replace(
         coherent_repo,
         "docs/go-to-market/commercialization-sequence.md",
-        "marketplace_activation: false",
-        "marketplace_activation: true",
+        "    x402_activation: false",
+        "    x402_activation: true",
     )
-    assert "commercialization.marketplace_activation_false" in _fields(coherent_repo)
+    assert "commercialization.institutional_restrictions_preserved" in _fields(coherent_repo)
 
 
-def test_x402_activation_authorized_fails(coherent_repo: Path) -> None:
+def test_missing_retail_x402_authority_fails(coherent_repo: Path) -> None:
     _replace(
         coherent_repo,
         "docs/go-to-market/commercialization-sequence.md",
-        "x402_activation: false",
-        "x402_activation: true",
+        "    x402_payment_authorized: true",
+        "    x402_payment_authorized: false",
     )
-    assert "commercialization.x402_activation_false" in _fields(coherent_repo)
+    assert "commercialization.retail_authority.x402_payment_authorized" in _fields(coherent_repo)
+
+
+def test_missing_retail_marketplace_submission_authority_fails(coherent_repo: Path) -> None:
+    _replace(
+        coherent_repo,
+        "docs/go-to-market/commercialization-sequence.md",
+        "    marketplace_submission_authorized: true",
+        "    marketplace_submission_authorized: false",
+    )
+    assert "commercialization.retail_authority.marketplace_submission_authorized" in _fields(coherent_repo)
+
+
+def test_missing_repository_exposure_boundary_fails(coherent_repo: Path) -> None:
+    (coherent_repo / "docs/governance/public-private-repository-boundary-v0.1.md").unlink()
+    assert "canonical_files.docs/governance/public-private-repository-boundary-v0.1.md" in _fields(coherent_repo)
 
 
 def test_comparator_without_hypothesis_boundary_fails(coherent_repo: Path) -> None:
