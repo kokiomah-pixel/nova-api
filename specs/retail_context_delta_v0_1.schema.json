@@ -1,0 +1,265 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sharpe-nova-os.local/specs/retail_context_delta_v0_1.schema.json",
+  "title": "Retail Context Delta v0.1",
+  "description": "Authority-neutral structural comparison of two retail context objects.",
+  "type": "object",
+  "required": [
+    "resource_id",
+    "resource_type",
+    "schema_version",
+    "subject",
+    "generated_at",
+    "previous_context_id",
+    "current_context_id",
+    "delta_status",
+    "material_changes",
+    "evidence_state_changes",
+    "contradiction_changes",
+    "unresolved_evidence_changes",
+    "freshness_changes",
+    "confidence_changes",
+    "provenance_changes",
+    "limitation_changes",
+    "limitations",
+    "authority_effect"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "resource_id": {"type": "string", "minLength": 1, "maxLength": 200},
+    "resource_type": {"const": "context_delta"},
+    "schema_version": {"const": "0.1.0"},
+    "subject": {"$ref": "#/$defs/subject"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "previous_context_id": {"type": "string", "minLength": 1, "maxLength": 200},
+    "current_context_id": {"type": "string", "minLength": 1, "maxLength": 200},
+    "delta_status": {"enum": ["changed", "unchanged", "indeterminate"]},
+    "material_changes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/materialChange"}
+    },
+    "evidence_state_changes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/evidenceChange"}
+    },
+    "contradiction_changes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/contradictionChange"}
+    },
+    "unresolved_evidence_changes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/unresolvedChange"}
+    },
+    "freshness_changes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/freshnessChange"}
+    },
+    "confidence_changes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/confidenceChange"}
+    },
+    "provenance_changes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/provenanceChange"}
+    },
+    "limitation_changes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/limitationChange"}
+    },
+    "limitations": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/limitation"}
+    },
+    "authority_effect": {"const": "none"}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"delta_status": {"const": "changed"}},
+        "required": ["delta_status"]
+      },
+      "then": {"properties": {"material_changes": {"minItems": 1}}}
+    },
+    {
+      "if": {
+        "properties": {
+          "delta_status": {"enum": ["unchanged", "indeterminate"]}
+        },
+        "required": ["delta_status"]
+      },
+      "then": {"properties": {"material_changes": {"maxItems": 0}}}
+    }
+  ],
+  "$defs": {
+    "subject": {
+      "type": "object",
+      "required": ["subject_id", "subject_type"],
+      "additionalProperties": false,
+      "properties": {
+        "subject_id": {"type": "string", "minLength": 1, "maxLength": 200},
+        "subject_type": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$"},
+        "label": {"type": "string", "minLength": 1, "maxLength": 200}
+      }
+    },
+    "nullableStatus": {
+      "enum": [
+        "observed",
+        "corroborated",
+        "contradicted",
+        "unresolved",
+        "partially_resolved",
+        "resolved",
+        "missing",
+        "unavailable",
+        null
+      ]
+    },
+    "comparisonValue": {
+      "oneOf": [
+        {"type": "string"},
+        {"type": "integer"},
+        {"type": "null"},
+        {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string"}
+        }
+      ]
+    },
+    "materialChange": {
+      "type": "object",
+      "required": ["change_id", "category", "change_type", "item_id", "field"],
+      "additionalProperties": false,
+      "properties": {
+        "change_id": {"type": "string", "minLength": 1, "maxLength": 200},
+        "category": {
+          "enum": [
+            "context_status",
+            "evidence",
+            "contradiction",
+            "unresolved_evidence",
+            "freshness",
+            "confidence",
+            "provenance",
+            "limitation"
+          ]
+        },
+        "change_type": {
+          "enum": ["added", "removed", "status_changed", "value_changed", "content_changed", "scope_changed"]
+        },
+        "item_id": {"type": ["string", "null"], "maxLength": 200},
+        "field": {"type": "string", "minLength": 1, "maxLength": 100},
+        "previous_value": {"$ref": "#/$defs/comparisonValue"},
+        "current_value": {"$ref": "#/$defs/comparisonValue"}
+      }
+    },
+    "evidenceChange": {
+      "type": "object",
+      "required": ["change_id", "evidence_id", "source_id", "change_type", "previous_status", "current_status"],
+      "additionalProperties": false,
+      "properties": {
+        "change_id": {"type": "string", "minLength": 1},
+        "evidence_id": {"type": "string", "minLength": 1},
+        "source_id": {"type": "string", "minLength": 1},
+        "change_type": {"enum": ["added", "removed", "status_changed", "content_changed"]},
+        "previous_status": {"$ref": "#/$defs/nullableStatus"},
+        "current_status": {"$ref": "#/$defs/nullableStatus"}
+      }
+    },
+    "contradictionChange": {
+      "type": "object",
+      "required": ["change_id", "contradiction_id", "change_type", "previous_status", "current_status", "treatment"],
+      "additionalProperties": false,
+      "properties": {
+        "change_id": {"type": "string", "minLength": 1},
+        "contradiction_id": {"type": "string", "minLength": 1},
+        "change_type": {"enum": ["added", "removed", "status_changed", "content_changed"]},
+        "previous_status": {"$ref": "#/$defs/nullableStatus"},
+        "current_status": {"$ref": "#/$defs/nullableStatus"},
+        "treatment": {"enum": ["structural_change_only", "removed_from_current_bounded_context"]}
+      }
+    },
+    "unresolvedChange": {
+      "type": "object",
+      "required": ["change_id", "issue_id", "change_type", "previous_status", "current_status", "treatment"],
+      "additionalProperties": false,
+      "properties": {
+        "change_id": {"type": "string", "minLength": 1},
+        "issue_id": {"type": "string", "minLength": 1},
+        "change_type": {"enum": ["added", "removed", "status_changed", "content_changed"]},
+        "previous_status": {"$ref": "#/$defs/nullableStatus"},
+        "current_status": {"$ref": "#/$defs/nullableStatus"},
+        "treatment": {"enum": ["structural_change_only", "removed_from_current_bounded_context"]}
+      }
+    },
+    "freshnessChange": {
+      "type": "object",
+      "required": ["change_id", "field", "previous_value", "current_value"],
+      "additionalProperties": false,
+      "properties": {
+        "change_id": {"type": "string", "minLength": 1},
+        "field": {"enum": ["freshness_status", "observed_at", "source_age_seconds"]},
+        "previous_value": {"$ref": "#/$defs/comparisonValue"},
+        "current_value": {"$ref": "#/$defs/comparisonValue"}
+      }
+    },
+    "confidenceChange": {
+      "type": "object",
+      "required": ["change_id", "field", "previous_value", "current_value"],
+      "additionalProperties": false,
+      "properties": {
+        "change_id": {"type": "string", "minLength": 1},
+        "field": {"enum": ["level", "basis"]},
+        "previous_value": {"type": "string", "minLength": 1},
+        "current_value": {"type": "string", "minLength": 1}
+      }
+    },
+    "provenanceChange": {
+      "type": "object",
+      "required": ["change_id", "source_id", "change_type", "field", "previous_value", "current_value"],
+      "additionalProperties": false,
+      "properties": {
+        "change_id": {"type": "string", "minLength": 1},
+        "source_id": {"type": "string", "minLength": 1},
+        "change_type": {
+          "enum": ["added", "removed", "source_status_changed", "claim_reconciliation_status_changed", "contribution_scope_changed", "source_type_changed", "observed_at_changed"]
+        },
+        "field": {"enum": ["source", "source_status", "claim_reconciliation_status", "contribution_scope", "source_type", "observed_at"]},
+        "previous_value": {"$ref": "#/$defs/comparisonValue"},
+        "current_value": {"$ref": "#/$defs/comparisonValue"}
+      }
+    },
+    "limitationChange": {
+      "type": "object",
+      "required": ["change_id", "limitation_id", "change_type", "previous_impact", "current_impact", "treatment"],
+      "additionalProperties": false,
+      "properties": {
+        "change_id": {"type": "string", "minLength": 1},
+        "limitation_id": {"type": "string", "minLength": 1},
+        "change_type": {"enum": ["added", "removed", "impact_changed", "content_changed"]},
+        "previous_impact": {"enum": ["none_known", "limited_scope", "material", "indeterminate", null]},
+        "current_impact": {"enum": ["none_known", "limited_scope", "material", "indeterminate", null]},
+        "treatment": {"enum": ["structural_change_only", "removed_from_current_bounded_context"]}
+      }
+    },
+    "limitation": {
+      "type": "object",
+      "required": ["limitation_id", "description", "impact"],
+      "additionalProperties": false,
+      "properties": {
+        "limitation_id": {"type": "string", "minLength": 1, "maxLength": 200},
+        "description": {"type": "string", "minLength": 1, "maxLength": 4000},
+        "impact": {"enum": ["none_known", "limited_scope", "material", "indeterminate"]}
+      }
+    }
+  }
+}
