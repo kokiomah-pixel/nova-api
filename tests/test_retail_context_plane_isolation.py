@@ -45,6 +45,11 @@ def test_institutional_state_modules_are_denied(module_name):
         "core.bazaar_metadata",
         "core.billing_config",
         "core.billing_state",
+        "core.telemetry_engine",
+        "core.usage_meter",
+        "core.cdp_auth",
+        "app",
+        "key_manager",
     ],
 )
 def test_legacy_runtime_modules_are_denied_as_direct_retail_dependencies(module_name):
