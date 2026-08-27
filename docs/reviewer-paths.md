@@ -213,6 +213,19 @@ It should not be interpreted as:
 - agent supervision
 - local authority replacement
 
+### Optional Governed-Abstraction Review
+
+This specialist path is intentionally separate from the default ten-minute
+public reader path:
+
+1. Reflex Memory specification: `docs/governance/reflex-memory-specification.md`
+2. Governed abstraction boundary: `docs/governance/governed-abstraction-boundary.md`
+3. Agent-memory comparison: `docs/architecture/reflex-memory-vs-agent-memory.md`
+4. Market-signal record: `docs/market/signals/2026/MSE-2026-08-06-038-plugmem-governed-abstraction.md`
+
+Internal accepted-entry structures, retrieval mechanics, lineage fixtures, and
+their implementation validators are intentionally outside the public path.
+
 ---
 
 ## Internal Operating Integrity Path
