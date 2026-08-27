@@ -82,6 +82,20 @@
           "unresolved_evidence": {"minItems": 1}
         }
       }
+    },
+    {
+      "if": {
+        "properties": {
+          "context_status": {"const": "resolved"}
+        },
+        "required": ["context_status"]
+      },
+      "then": {
+        "properties": {
+          "provenance": {"minItems": 1},
+          "evidence": {"minItems": 1}
+        }
+      }
     }
   ],
   "$defs": {
@@ -126,7 +140,31 @@
         "freshness_status": {
           "enum": ["fresh", "aging", "stale", "unknown"]
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "freshness_status": {
+                "enum": ["fresh", "aging", "stale"]
+              }
+            },
+            "required": ["freshness_status"]
+          },
+          "then": {
+            "properties": {
+              "observed_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "source_age_seconds": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      ]
     },
     "confidence": {
       "type": "object",
