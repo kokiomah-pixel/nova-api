@@ -17,6 +17,59 @@ External systems execute.
 Nova does not execute.
 ```
 
+## Repository architecture transition
+
+```yaml
+repository_architecture:
+
+  public_repository:
+    repository: nova-infrastructure-systems/sharpe-nova-os
+    role: approved_public_projection_and_current_governance_surface
+
+  private_repository:
+    repository: nova-infrastructure-systems/nova-core
+    visibility: private
+    provisioned: true
+    public_history_imported: true
+    migration_parity_verified: true
+    public_source_SHA: eeba729534088bdec705e84219188bb5aaaa14eb
+    private_bootstrap_merged: true
+    private_bootstrap_CI: passed
+    future_production_development_surface: true
+
+  accepted_state_authority:
+    current: nova-infrastructure-systems/sharpe-nova-os
+    transfer_status: PENDING_ARCHITECT_ACCEPTANCE
+
+  public_private_boundary:
+    governance_accepted: true
+    migration_in_progress: true
+    public_sanitization_complete: false
+
+  private_main_protection:
+    status: BLOCKED_BY_PLATFORM_POLICY
+    privacy_weakened_to_enable_protection: false
+
+deployment_reconciliation:
+  public_repository_dependency_recorded: true
+  provider_state_verified_during_repository_migration: false
+  private_repoint_required_before_runtime_removal: true
+  private_repoint_completed: false
+
+repository_transition_effects:
+  production_effect: none
+  retail_runtime_effect: none
+  payment_effect: none
+  institutional_Gate_5_effect: none
+  institutional_data_effect: none
+  chronology_effect: none
+  institutional_Reflex_Memory_effect: none
+```
+
+Private repository creation and verified history parity do not transfer
+accepted-state authority. The current public governance surface remains
+authoritative until the Architect explicitly accepts that transfer.
+
 ## Current product state
 
 ```yaml
