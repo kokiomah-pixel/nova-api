@@ -22,6 +22,11 @@ FORBIDDEN_IMPORT_PREFIXES = (
     "core.bazaar_metadata",
     "core.billing_config",
     "core.billing_state",
+    "core.telemetry_engine",
+    "core.usage_meter",
+    "core.cdp_auth",
+    "app",
+    "key_manager",
 )
 
 FORBIDDEN_PATH_FRAGMENTS = (

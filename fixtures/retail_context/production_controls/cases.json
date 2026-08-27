@@ -1,0 +1,16 @@
+{
+  "controlled_proof": {
+    "operating_mode": "controlled_proof",
+    "rate_limit_window_seconds": 60,
+    "state_ping_max_requests": 2,
+    "context_delta_max_requests": 1,
+    "expected_readiness": "ready_for_controlled_proof"
+  },
+  "disabled": {
+    "operating_mode": "disabled",
+    "rate_limit_window_seconds": 60,
+    "state_ping_max_requests": 2,
+    "context_delta_max_requests": 1,
+    "expected_readiness": "not_ready"
+  }
+}
