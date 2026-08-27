@@ -1,0 +1,42 @@
+{
+  "schema_version": "0.1.0",
+  "contract": "retail_context_plane_isolation",
+  "status": "implementation_contract",
+  "retail_plane": {
+    "code_namespace": "retail_context",
+    "endpoint_namespace": "/retail/v1/context",
+    "environment_prefix": "NOVA_RETAIL_",
+    "telemetry_namespace": "retail_context",
+    "source_namespace": "retail_public_sources",
+    "credential_namespace": "retail_context",
+    "persistence_default": ".nova_retail"
+  },
+  "institutional_access": {
+    "accepted_state": "prohibited",
+    "accepted_chronology": "prohibited",
+    "institutional_reflex_memory": "prohibited",
+    "institutional_constraints": "prohibited",
+    "institutional_action_proposals": "prohibited",
+    "institutional_credentials": "prohibited",
+    "institution_owned_telemetry": "prohibited_unless_separately_licensed_and_explicitly_authorized"
+  },
+  "shared_primitives": {
+    "allowed_only_when": [
+      "authority_neutral",
+      "state_neutral",
+      "does_not_create_cross_plane_identity",
+      "does_not_create_cross_plane_persistence",
+      "does_not_create_cross_plane_credentials"
+    ],
+    "legacy_x402": "protocol_reference_only_not_retail_product_contract"
+  },
+  "non_effects": {
+    "public_endpoint_effect": "none",
+    "payment_effect": "none",
+    "deployment_effect": "none",
+    "institutional_Gate_5_effect": "none",
+    "institutional_data_effect": "none",
+    "chronology_effect": "none",
+    "institutional_Reflex_Memory_effect": "none"
+  }
+}
