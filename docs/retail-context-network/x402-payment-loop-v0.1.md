@@ -14,7 +14,7 @@ context resource requested
 -> payment verified
 -> payment settled
 -> bounded settlement receipt reconciled
--> resource access permitted
+-> process-local resource access permitted
 ```
 
 The stages are deliberately separate:
@@ -65,16 +65,39 @@ payload, create an HTTP endpoint, configure settlement, or activate production.
 The v2 `PAYMENT-SIGNATURE` contract is exposed; legacy `X-PAYMENT` is not part
 of the retail contract.
 
-## Receipt and later replay control
+## Outcome, receipt, and later replay control
 
-A permitted receipt is possible only after verification, settlement, and
-bounded reconciliation. Its stable identity derives from the requirement ID,
-transaction reference, payer when present, network, and exact amount—not raw
-facilitator payloads.
+The successful verify -> settle -> reconcile function returns a process-local
+`RetailPaymentOutcome`. That outcome carries the schema-valid receipt together
+with a private in-process access capability that is never serialized.
+
+The serialized `payment_receipt` is an audit and reconciliation artifact only.
+Its stable identity derives from the requirement ID, transaction reference,
+payer when present, network, and exact amount—not raw facilitator payloads.
+Those deterministic IDs establish identity consistency; they do not establish
+receipt authenticity and are not bearer credentials.
+
+Consequently:
+
+```text
+successful in-process settlement outcome
+-> may permit resource access
+
+serialized or reconstructed payment receipt
+-> audit / reconciliation evidence
+!= independent resource-access proof
+```
+
+Copying, serializing, or deserializing a receipt does not reproduce the
+process-local access capability. A future HTTP/runtime layer must consume the
+successful in-process outcome or introduce a separately authorized durable
+access-proof mechanism; it must not treat a reconstructed RP6 receipt as proof
+that payment occurred.
 
 RP6 establishes receipt identity and reconciliation fields. Durable
 consumed-payment/replay state is a production-control concern for a later gate;
-RP6 does not claim replay protection.
+RP6 does not claim replay protection, receipt signing, or durable bearer-token
+authentication.
 
 ## Effects
 
