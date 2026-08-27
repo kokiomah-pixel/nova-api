@@ -24,10 +24,13 @@ observed is not verified; verified is not current; and current is not
 reconciled.
 
 `is_source_usable` is a fail-closed configuration eligibility check. It requires
-enablement, explicit authorization, configuration, provenance, and the matching
-public or retail-licensed licensing/credential combination. Its result does not
-assert runtime reachability, availability, observation, verification,
-freshness, or reconciliation.
+enablement, explicit authorization, configuration, provenance, and a matching
+non-fixture namespace/access/licensing/credential combination. Public sources
+must use `retail_public_sources`; retail-licensed sources must use
+`retail_licensed_sources`. Entries in `retail_fixture_sources` remain
+schema-valid test evidence but are never configuration-eligible for runtime
+consumption. The helper does not assert runtime reachability, availability,
+observation, verification, freshness, or reconciliation.
 
 The repository fixture registry contains only named fixtures/candidates. It
 carries no historical reliability scores, real credentials, live-provider
@@ -46,8 +49,12 @@ including `raw_payload`, are rejected.
 Positive `observed` or `stale` records require an observation time, a
 deterministically derived non-negative age input, at least one normalized
 claim, a provider observation reference, and a SHA-256 identity over the
-canonical normalized claims. The digest establishes content identity only; it
-does not establish source trust, authorization, currentness, or reconciliation.
+canonical normalized claims. When `derivation_status` is
+`derived_from_timestamps`, runtime validation requires `received_at` not to
+precede `observed_at` and requires `source_age_seconds` to equal the actual
+`received_at - observed_at` delta. The digest establishes content identity
+only; it does not establish source trust, authorization, currentness, or
+reconciliation.
 
 `unavailable` and `unknown` records require a null observation time, no claims,
 no content digest, and no freshness age. Rejected, unavailable, and unknown
