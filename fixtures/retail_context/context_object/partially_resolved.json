@@ -1,0 +1,55 @@
+{
+  "resource_id": "ctx-asset-context-20260826T140000Z",
+  "resource_type": "context_delta",
+  "subject": {
+    "subject_id": "ETH",
+    "subject_type": "asset"
+  },
+  "schema_version": "0.1.0",
+  "generated_at": "2026-08-26T14:00:00Z",
+  "context_status": "partially_resolved",
+  "freshness": {
+    "observed_at": "2026-08-26T13:50:00Z",
+    "source_age_seconds": 600,
+    "freshness_status": "aging"
+  },
+  "confidence": {
+    "level": "medium",
+    "basis": "One observation is verified while a second claim remains unresolved."
+  },
+  "provenance": [
+    {
+      "source_id": "public-source-a",
+      "source_type": "public_market_data",
+      "observed_at": "2026-08-26T13:50:00Z",
+      "source_status": "verified",
+      "claim_reconciliation_status": "reconciled",
+      "contribution_scope": ["market activity observation"]
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "ev-market-activity",
+      "source_id": "public-source-a",
+      "claim_or_observation": "The source reports elevated market activity.",
+      "evidence_status": "observed"
+    }
+  ],
+  "contradictions": [],
+  "unresolved_evidence": [
+    {
+      "issue_id": "gap-secondary-source",
+      "status": "missing",
+      "claim_scope": "independent corroboration",
+      "reason": "A second independent source was not present in the input."
+    }
+  ],
+  "limitations": [
+    {
+      "limitation_id": "limit-single-source",
+      "description": "The observation is based on one verified source.",
+      "impact": "limited_scope"
+    }
+  ],
+  "authority_effect": "none"
+}
