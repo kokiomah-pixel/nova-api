@@ -31,17 +31,25 @@ Every object requires:
 - `authority_effect`, fixed to `none`
 
 The canonical context states are `resolved`, `partially_resolved`, `unresolved`,
-and `insufficient_evidence`. An insufficient-evidence object must name at least
-one unresolved, missing, or unavailable evidence gap, but its provenance and
-evidence arrays may be empty. This makes absence explicit without manufacturing
-a positive observation.
+and `insufficient_evidence`.
+
+A `resolved` object must contain at least one provenance item and at least one
+evidence item. This prevents a structurally valid object from representing
+resolution without positive supporting evidence.
+
+An `insufficient_evidence` object must name at least one unresolved, missing, or
+unavailable evidence gap, but its provenance and evidence arrays may be empty.
+This makes absence explicit without manufacturing a positive observation.
 
 ## Independent state dimensions
 
 Freshness records `observed_at`, non-negative `source_age_seconds`, and one of
-`fresh`, `aging`, `stale`, or `unknown`. Null observation time and age are
-allowed when freshness is unknown. The schema intentionally defines no
-production age thresholds.
+`fresh`, `aging`, `stale`, or `unknown`.
+
+`fresh`, `aging`, and `stale` require both a non-null observation time and a
+non-null, non-negative source age. `unknown` may use null observation time and
+age. The schema intentionally defines no production age thresholds; threshold
+policy belongs to later resource and data gates.
 
 Confidence records a bounded level (`high`, `medium`, `low`, or
 `indeterminate`) and a written basis. It is descriptive and is not a
