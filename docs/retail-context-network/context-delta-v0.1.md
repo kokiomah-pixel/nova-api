@@ -45,6 +45,18 @@ Each change is recorded in a typed collection and summarized in
 contradiction, unresolved-evidence item, or limitation is labeled only as
 `removed_from_current_bounded_context`; removal never establishes resolution.
 
+For status, value, scope, impact, and bounded-content transitions, change
+identity is directional: the deterministic `change_id` includes the canonical
+previous and current values in order. Reversing a transition therefore produces
+a different change identity. This prevents distinct transitions from collapsing
+under downstream deduplication, caching, telemetry, or reconciliation.
+
+When bounded content changes under the same stable identity, the corresponding
+`material_changes` record carries narrow canonical `previous_value` and
+`current_value` representations of the compared bounded content. Consumers can
+therefore identify what changed without reacquiring whole source context
+objects. No whole-context blobs or semantic interpretations are introduced.
+
 No fuzzy matching or semantic interpretation occurs. Evidence,
 contradictions, unresolved evidence, provenance, and limitations are compared
 only by their stable RP2 identifiers. A content change accompanied by a new ID
