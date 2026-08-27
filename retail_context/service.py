@@ -36,13 +36,14 @@ from .request_binding import (
     prepare_context_delta_request,
     prepare_state_ping_request,
 )
-from .sources import validate_source_registry
 from .runtime_config import PROOF_ACCESS_HEADER, RetailRuntimeConfig
 from .runtime_delivery import (
     RetailDeliveryRecoveryError,
     claim_or_resume_retail_delivery,
     deliver_or_redeliver_retail_resource,
 )
+from .runtime_guard import SQLiteRetailRuntimeGuard
+from .sources import validate_source_registry
 from .x402_payment import (
     RetailX402Facilitator,
     build_retail_payment_challenge,
@@ -76,8 +77,10 @@ def _ensure_runtime_admission(
     *,
     prepared: PreparedRetailRequest,
     store: RetailProductionControlStore,
+    guard: SQLiteRetailRuntimeGuard,
     config: RetailRuntimeConfig,
     observed_at: str,
+    payment_present: bool,
 ) -> str | None:
     subject_hash = hash_retail_subject(prepared.subject_key)
     existing = store.get_runtime_request(prepared.request_id)
@@ -90,11 +93,31 @@ def _ensure_runtime_admission(
             existing["request_digest"] == prepared.request_digest
             and existing["subject_hash"] == subject_hash
             and existing["resource_type"] == prepared.resource_type
-            and existing["resource_uri"] == prepared.resource_uri
             and existing["authority_effect"] == "none"
         ):
             return "request_reconciliation_failed"
-        return None
+        if existing["resource_uri"] != prepared.resource_uri:
+            return (
+                "source_binding_reconciliation_failed"
+                if prepared.resource_type == "state_ping"
+                else "request_reconciliation_failed"
+            )
+        try:
+            retry = guard.consume_existing_attempt(
+                request_id=prepared.request_id,
+                source_binding_digest=prepared.source_binding_digest,
+                payment_present=payment_present,
+                observed_at=observed_at,
+                window_seconds=config.production_controls.rate_limit_window_seconds,
+                retry_limit=config.retry_max_requests,
+            )
+        except ValueError as exc:
+            if str(exc) == "source_binding_reconciliation_failed":
+                return "source_binding_reconciliation_failed"
+            return "request_reconciliation_failed"
+        except Exception:
+            return "control_store_unavailable"
+        return None if retry.permitted else "rate_limit_exceeded"
 
     admission = evaluate_retail_pre_payment_admission(
         subject_key=prepared.subject_key,
@@ -117,7 +140,20 @@ def _ensure_runtime_admission(
             "authority_effect": "none",
         }
     )
-    return None if recorded else "request_reconciliation_failed"
+    if not recorded:
+        return "request_reconciliation_failed"
+    try:
+        guard.initialize_request(
+            request_id=prepared.request_id,
+            source_binding_digest=prepared.source_binding_digest,
+            observed_at=observed_at,
+            payment_already_present=payment_present,
+        )
+    except ValueError:
+        return "source_binding_reconciliation_failed"
+    except Exception:
+        return "control_store_unavailable"
+    return None
 
 
 def create_retail_app(
@@ -131,6 +167,8 @@ def create_retail_app(
     """Create the isolated controlled-proof app without mounting Legacy routes."""
 
     store.initialize()
+    guard = SQLiteRetailRuntimeGuard(store.db_path)
+    guard.initialize()
     registry = copy.deepcopy(dict(source_registry))
     validate_source_registry(registry)
 
@@ -182,13 +220,16 @@ def create_retail_app(
         if not hmac.compare_digest(request_digest, prepared.request_digest):
             return _error(400, "request_digest_mismatch")
 
+        payment_header = request.headers.get(PAYMENT_SIGNATURE_HEADER)
         observed_at = clock()
         try:
             admission_failure = _ensure_runtime_admission(
                 prepared=prepared,
                 store=store,
+                guard=guard,
                 config=config,
                 observed_at=observed_at,
+                payment_present=bool(payment_header),
             )
         except Exception:
             admission_failure = "control_store_unavailable"
@@ -206,7 +247,6 @@ def create_retail_app(
         challenge_headers = {
             PAYMENT_REQUIRED_HEADER: challenge.payment_required_header
         }
-        payment_header = request.headers.get(PAYMENT_SIGNATURE_HEADER)
         if not payment_header:
             return _error(402, "payment_required", headers=challenge_headers)
         try:
