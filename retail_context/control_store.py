@@ -20,6 +20,7 @@ REQUIRED_TABLES = frozenset(
         "retail_payment_consumption",
         "retail_operational_telemetry",
         "retail_operational_incidents",
+        "retail_runtime_requests",
     }
 )
 POST_COMMIT_TELEMETRY_EVENT_TYPES = frozenset(
@@ -60,6 +61,7 @@ class RetailProductionControlStore(Protocol):
         observed_at: str,
     ) -> RateLimitDecision: ...
     def claim_payment(self, record: Mapping[str, Any]) -> PaymentClaimDecision: ...
+    def get_payment_claim(self, claim_id: str) -> Mapping[str, Any] | None: ...
     def mark_delivery(
         self,
         *,
@@ -74,6 +76,11 @@ class RetailProductionControlStore(Protocol):
     def record_telemetry(self, event: Mapping[str, Any]) -> None: ...
     def record_incident(self, incident: Mapping[str, Any]) -> None: ...
     def health_snapshot(self) -> Mapping[str, bool]: ...
+    def get_payment_claim_by_settlement(
+        self, *, network: str, transaction_reference: str
+    ) -> Mapping[str, Any] | None: ...
+    def get_runtime_request(self, request_id: str) -> Mapping[str, Any] | None: ...
+    def record_runtime_request(self, record: Mapping[str, Any]) -> bool: ...
 
 
 class SQLiteRetailProductionControlStore:
@@ -185,6 +192,17 @@ class SQLiteRetailProductionControlStore:
                     failure_reason TEXT NOT NULL,
                     details_json TEXT NOT NULL,
                     retail_namespace TEXT NOT NULL CHECK (retail_namespace = 'retail_production_controls'),
+                    authority_effect TEXT NOT NULL CHECK (authority_effect = 'none')
+                );
+
+                CREATE TABLE IF NOT EXISTS retail_runtime_requests (
+                    request_id TEXT PRIMARY KEY,
+                    request_digest TEXT NOT NULL UNIQUE,
+                    subject_hash TEXT NOT NULL,
+                    resource_type TEXT NOT NULL
+                        CHECK (resource_type IN ('state_ping', 'context_delta')),
+                    resource_uri TEXT NOT NULL UNIQUE,
+                    admitted_at TEXT NOT NULL,
                     authority_effect TEXT NOT NULL CHECK (authority_effect = 'none')
                 );
                 """
@@ -428,6 +446,55 @@ class SQLiteRetailProductionControlStore:
                 (claim_id,),
             ).fetchone()
         return self._payment_row(row)
+
+    def get_payment_claim_by_settlement(
+        self, *, network: str, transaction_reference: str
+    ) -> dict[str, Any] | None:
+        with self._connection() as connection:
+            row = connection.execute(
+                "SELECT * FROM retail_payment_consumption "
+                "WHERE network = ? AND transaction_reference = ?",
+                (network, transaction_reference),
+            ).fetchone()
+        return self._payment_row(row)
+
+    def get_runtime_request(self, request_id: str) -> dict[str, Any] | None:
+        with self._connection() as connection:
+            row = connection.execute(
+                "SELECT * FROM retail_runtime_requests WHERE request_id = ?",
+                (request_id,),
+            ).fetchone()
+        return None if row is None else dict(row)
+
+    def record_runtime_request(self, record: Mapping[str, Any]) -> bool:
+        columns = (
+            "request_id",
+            "request_digest",
+            "subject_hash",
+            "resource_type",
+            "resource_uri",
+            "admitted_at",
+            "authority_effect",
+        )
+        with self._connection() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            try:
+                connection.execute(
+                    f"INSERT INTO retail_runtime_requests ({', '.join(columns)}) "
+                    f"VALUES ({', '.join('?' for _ in columns)})",
+                    tuple(record[column] for column in columns),
+                )
+            except sqlite3.IntegrityError:
+                existing = connection.execute(
+                    "SELECT * FROM retail_runtime_requests WHERE request_id = ?",
+                    (record["request_id"],),
+                ).fetchone()
+                connection.rollback()
+                return existing is not None and all(
+                    existing[column] == record[column] for column in columns
+                )
+            connection.commit()
+        return True
 
     def mark_delivery(
         self,

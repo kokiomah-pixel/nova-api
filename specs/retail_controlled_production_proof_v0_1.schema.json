@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nova.example/specs/retail_controlled_production_proof_v0_1.schema.json",
+  "title": "Nova Retail Controlled Production Proof Evidence v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "evidence_state",
+    "evidence_origin",
+    "repository_commit",
+    "deployment_commit",
+    "commit_match",
+    "service_identifier",
+    "proof_mode",
+    "durable_storage_attested",
+    "restart_persistence_verified",
+    "proof_access_control_verified",
+    "public_discovery_disabled",
+    "state_ping_402_observed",
+    "state_ping_payment_verified",
+    "state_ping_settlement_observed",
+    "state_ping_delivery_observed",
+    "context_delta_402_observed",
+    "context_delta_payment_verified",
+    "context_delta_settlement_observed",
+    "context_delta_delivery_observed",
+    "network",
+    "asset",
+    "settlement_references",
+    "replay_denial_verified",
+    "cross_request_replay_denied",
+    "idempotent_redelivery_verified",
+    "kill_switch_verified",
+    "rollback_path_attested",
+    "telemetry_observed",
+    "incident_controls_observed",
+    "proof_started_at",
+    "proof_completed_at",
+    "authority_effect",
+    "public_activation_effect",
+    "buyer_demand_effect"
+  ],
+  "properties": {
+    "schema_version": { "const": "0.1.0" },
+    "evidence_state": {
+      "enum": ["proof_not_started", "proof_in_progress", "proof_complete"]
+    },
+    "evidence_origin": {
+      "enum": ["repository_template", "operator_observed_runtime"]
+    },
+    "repository_commit": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "deployment_commit": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "commit_match": { "type": "boolean" },
+    "service_identifier": { "type": ["string", "null"], "minLength": 1 },
+    "proof_mode": { "enum": ["disabled", "controlled_proof"] },
+    "durable_storage_attested": { "type": "boolean" },
+    "restart_persistence_verified": { "type": "boolean" },
+    "proof_access_control_verified": { "type": "boolean" },
+    "public_discovery_disabled": { "type": "boolean" },
+    "state_ping_402_observed": { "type": "boolean" },
+    "state_ping_payment_verified": { "type": "boolean" },
+    "state_ping_settlement_observed": { "type": "boolean" },
+    "state_ping_delivery_observed": { "type": "boolean" },
+    "context_delta_402_observed": { "type": "boolean" },
+    "context_delta_payment_verified": { "type": "boolean" },
+    "context_delta_settlement_observed": { "type": "boolean" },
+    "context_delta_delivery_observed": { "type": "boolean" },
+    "network": { "const": "eip155:8453" },
+    "asset": {
+      "const": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+    },
+    "settlement_references": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "replay_denial_verified": { "type": "boolean" },
+    "cross_request_replay_denied": { "type": "boolean" },
+    "idempotent_redelivery_verified": { "type": "boolean" },
+    "kill_switch_verified": { "type": "boolean" },
+    "rollback_path_attested": { "type": "boolean" },
+    "telemetry_observed": { "type": "boolean" },
+    "incident_controls_observed": { "type": "boolean" },
+    "proof_started_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "proof_completed_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "authority_effect": { "const": "none" },
+    "public_activation_effect": { "const": "none" },
+    "buyer_demand_effect": { "const": "none" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "evidence_origin": { "const": "repository_template" } },
+        "required": ["evidence_origin"]
+      },
+      "then": {
+        "properties": {
+          "evidence_state": { "const": "proof_not_started" },
+          "deployment_commit": { "type": "null" },
+          "service_identifier": { "type": "null" },
+          "proof_mode": { "const": "disabled" },
+          "settlement_references": { "maxItems": 0 },
+          "proof_started_at": { "type": "null" },
+          "proof_completed_at": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "evidence_state": { "const": "proof_complete" } },
+        "required": ["evidence_state"]
+      },
+      "then": {
+        "properties": {
+          "evidence_origin": { "const": "operator_observed_runtime" },
+          "repository_commit": { "type": "string" },
+          "deployment_commit": { "type": "string" },
+          "service_identifier": { "type": "string" },
+          "proof_mode": { "const": "controlled_proof" },
+          "commit_match": { "const": true },
+          "durable_storage_attested": { "const": true },
+          "restart_persistence_verified": { "const": true },
+          "proof_access_control_verified": { "const": true },
+          "public_discovery_disabled": { "const": true },
+          "state_ping_402_observed": { "const": true },
+          "state_ping_payment_verified": { "const": true },
+          "state_ping_settlement_observed": { "const": true },
+          "state_ping_delivery_observed": { "const": true },
+          "context_delta_402_observed": { "const": true },
+          "context_delta_payment_verified": { "const": true },
+          "context_delta_settlement_observed": { "const": true },
+          "context_delta_delivery_observed": { "const": true },
+          "settlement_references": { "minItems": 2 },
+          "replay_denial_verified": { "const": true },
+          "cross_request_replay_denied": { "const": true },
+          "idempotent_redelivery_verified": { "const": true },
+          "kill_switch_verified": { "const": true },
+          "rollback_path_attested": { "const": true },
+          "telemetry_observed": { "const": true },
+          "incident_controls_observed": { "const": true },
+          "proof_started_at": { "type": "string" },
+          "proof_completed_at": { "type": "string" }
+        }
+      }
+    }
+  ]
+}
