@@ -22,6 +22,10 @@ REQUIRED_TABLES = frozenset(
         "retail_operational_incidents",
     }
 )
+POST_COMMIT_TELEMETRY_EVENT_TYPES = frozenset(
+    {"payment_claimed", "delivery_completed", "delivery_failed"}
+)
+POST_COMMIT_INCIDENT_TYPES = frozenset({"delivery_failure"})
 
 
 @dataclass(frozen=True)
@@ -504,12 +508,22 @@ class SQLiteRetailProductionControlStore:
         return dict(row)
 
     def record_telemetry(self, event: Mapping[str, Any]) -> None:
-        with self._connection() as connection:
-            self._insert_telemetry(connection, event)
+        try:
+            with self._connection() as connection:
+                self._insert_telemetry(connection, event)
+        except (OSError, sqlite3.Error):
+            if event.get("event_type") in POST_COMMIT_TELEMETRY_EVENT_TYPES:
+                return
+            raise
 
     def record_incident(self, incident: Mapping[str, Any]) -> None:
-        with self._connection() as connection:
-            self._insert_incident(connection, incident)
+        try:
+            with self._connection() as connection:
+                self._insert_incident(connection, incident)
+        except (OSError, sqlite3.Error):
+            if incident.get("incident_type") in POST_COMMIT_INCIDENT_TYPES:
+                return
+            raise
 
     def list_telemetry(self) -> list[dict[str, Any]]:
         with self._connection() as connection:
