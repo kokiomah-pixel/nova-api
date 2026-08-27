@@ -56,6 +56,12 @@ RETAIL_RESOURCE_PRICE_CATALOG = MappingProxyType(
     }
 )
 
+# This process-local sentinel distinguishes an outcome that actually traversed
+# verify -> settle -> reconciliation from a serialized receipt that merely
+# contains the same public, deterministic audit fields. It is intentionally not
+# serialized, persisted, signed, or treated as durable replay protection.
+_ACCESS_CAPABILITY = object()
+
 
 class RetailX402PaymentError(ValueError):
     """A bounded, fail-closed retail payment contract error."""
@@ -98,6 +104,32 @@ class RetailPaymentChallenge:
         }
 
 
+class RetailPaymentOutcome(dict[str, Any]):
+    """Process-local payment outcome carrying a non-serialized access capability.
+
+    The mapping contents are the schema-valid payment receipt and remain a
+    deterministic audit/reconciliation artifact. The private capability is only
+    attached by the successful verify -> settle -> reconcile path. Rebuilding or
+    deserializing the receipt therefore does not recreate access permission.
+    """
+
+    __slots__ = ("_access_capability",)
+
+    def __init__(
+        self,
+        receipt: Mapping[str, Any],
+        *,
+        _access_capability: object | None = None,
+    ) -> None:
+        super().__init__(receipt)
+        self._access_capability = _access_capability
+
+    def to_receipt(self) -> dict[str, Any]:
+        """Return the serializable audit receipt without any access capability."""
+
+        return dict(self)
+
+
 def _canonical_json(value: object) -> str:
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
 
@@ -115,7 +147,7 @@ def load_retail_x402_payment_schema() -> dict[str, Any]:
 def retail_x402_payment_validator(record_type: str) -> Draft202012Validator:
     schema = load_retail_x402_payment_schema()
     try:
-        definition = schema["$defs"][record_type]
+        schema["$defs"][record_type]
     except KeyError as exc:
         raise ValueError(f"unknown retail x402 record type: {record_type}") from exc
     return Draft202012Validator({"$ref": f"#/$defs/{record_type}", "$defs": schema["$defs"]})
@@ -276,7 +308,7 @@ def _failure_receipt(
     settlement_status: str = "not_attempted",
     payer: str | None = None,
     transaction_reference: str | None = None,
-) -> dict[str, Any]:
+) -> RetailPaymentOutcome:
     receipt = {
         "schema_version": SCHEMA_VERSION,
         "record_type": "payment_receipt",
@@ -306,7 +338,7 @@ def _failure_receipt(
         "access_effect": ACCESS_EFFECT,
     }
     validate_retail_x402_payment_record(receipt, "payment_receipt")
-    return receipt
+    return RetailPaymentOutcome(receipt)
 
 
 def _parse_payload(payload: PaymentPayload | Mapping[str, Any]) -> PaymentPayload:
@@ -352,8 +384,8 @@ def process_retail_x402_payment(
     requirement: Mapping[str, Any],
     payment_payload: PaymentPayload | Mapping[str, Any],
     facilitator: RetailX402Facilitator,
-) -> dict[str, Any]:
-    """Verify, then settle, then reconcile before permitting resource access."""
+) -> RetailPaymentOutcome:
+    """Verify, settle, reconcile, and return a process-local payment outcome."""
 
     validate_retail_payment_requirement(requirement)
     requirements = _upstream_requirements(requirement)
@@ -462,15 +494,24 @@ def process_retail_x402_payment(
         "access_effect": ACCESS_EFFECT,
     }
     validate_retail_x402_payment_record(receipt, "payment_receipt")
-    return receipt
+    return RetailPaymentOutcome(receipt, _access_capability=_ACCESS_CAPABILITY)
 
 
 run_retail_x402_payment_loop = process_retail_x402_payment
 
 
 def payment_receipt_allows_resource_access(receipt: Mapping[str, Any]) -> bool:
-    """Evaluate payment state only; never inspect or mutate resource content."""
+    """Permit access only for the process-local successful payment outcome.
 
+    A serialized/deserialized receipt is an audit and reconciliation artifact,
+    not a bearer credential. Deterministic IDs prove identity consistency only;
+    they do not prove that facilitator verification and settlement occurred.
+    """
+
+    if not isinstance(receipt, RetailPaymentOutcome):
+        return False
+    if receipt._access_capability is not _ACCESS_CAPABILITY:
+        return False
     try:
         validate_retail_x402_payment_record(receipt, "payment_receipt")
     except Exception:
@@ -517,6 +558,9 @@ def payment_receipt_allows_resource_access(receipt: Mapping[str, Any]) -> bool:
         receipt["amount_atomic"],
     )
     return receipt["payment_receipt_id"] == expected_receipt_id
+
+
+payment_outcome_allows_resource_access = payment_receipt_allows_resource_access
 
 
 RETAIL_PAYMENT_HEADER_NAMES = MappingProxyType(
