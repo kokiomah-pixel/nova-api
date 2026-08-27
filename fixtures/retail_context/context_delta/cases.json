@@ -1,0 +1,34 @@
+{
+  "identical": {
+    "previous_state_ping_case": "multiple_positive",
+    "current_state_ping_case": "multiple_positive"
+  },
+  "status_and_evidence_removed": {
+    "previous_state_ping_case": "multiple_positive",
+    "current_state_ping_case": "single_verified_positive"
+  },
+  "evidence_added": {
+    "previous_state_ping_case": "single_verified_positive",
+    "current_state_ping_case": "multiple_positive"
+  },
+  "contradiction_added": {
+    "previous_state_ping_case": "multiple_positive",
+    "current_state_ping_case": "contradictory"
+  },
+  "contradiction_removed": {
+    "previous_state_ping_case": "contradictory",
+    "current_state_ping_case": "multiple_positive"
+  },
+  "freshness_changed": {
+    "previous_state_ping_case": "single_verified_positive",
+    "current_state_ping_case": "stale"
+  },
+  "indeterminate": {
+    "previous_state_ping_case": "unavailable_only",
+    "current_state_ping_case": "unavailable_only"
+  },
+  "subject_mismatch": {
+    "previous_state_ping_case": "single_verified_positive",
+    "current_state_ping_case": "single_unverified"
+  }
+}

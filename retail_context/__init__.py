@@ -7,6 +7,11 @@ constraints, and institutional Reflex Memory.
 
 from .boundaries import assert_retail_module_allowed, validate_retail_package_imports
 from .config import RetailContextConfig
+from .context_delta import (
+    build_context_delta,
+    load_context_delta_schema,
+    validate_context_delta,
+)
 from .schema import (
     SCHEMA_VERSION,
     load_retail_context_schema,
@@ -30,13 +35,16 @@ __all__ = [
     "RetailSourceAdapter",
     "SCHEMA_VERSION",
     "assert_retail_module_allowed",
+    "build_context_delta",
     "build_state_ping",
     "is_source_usable",
     "load_retail_context_schema",
+    "load_context_delta_schema",
     "load_source_observation_schema",
     "load_source_registry_schema",
     "retail_context_validator",
     "validate_retail_context_object",
+    "validate_context_delta",
     "validate_retail_package_imports",
     "validate_source_observation",
     "validate_source_registry",
