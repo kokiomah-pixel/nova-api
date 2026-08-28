@@ -1,8 +1,9 @@
 # Public / Private Repository Boundary v0.1
 
-**Status:** proposed transition contract  
-**Authority:** Architect-approved workstream  
-**Scope:** Sharpe Nova OS and Nova Infrastructure Systems Corporation repository exposure
+**Status:** effective repository boundary  
+**Authority:** Architect-approved and transfer-completed  
+**Scope:** Sharpe Nova OS and Nova Infrastructure Systems Corporation repository exposure  
+**Accepted-state authority transfer:** effective and repository-verified on August 28, 2026
 
 ## Governing principle
 
@@ -32,6 +33,8 @@ Repository exposure must never weaken that boundary.
 
 Purpose: approved external projection and integration surface.
 
+Current authority role: `NON_AUTHORITATIVE_GOVERNED_PROJECTION`.
+
 Permitted content includes:
 
 - category doctrine and non-authority boundary;
@@ -44,11 +47,22 @@ Permitted content includes:
 - public security and responsible-disclosure policy;
 - public changelog and externally supportable state claims.
 
-The public repository must not become the authoritative corporate accepted-state store after private corporate-state migration is completed.
+The public repository is not the authoritative corporate accepted-state store.
+Its retained accepted-state artifacts are historical governed projections only
+and must not be used to create current corporate accepted-state claims.
 
 ### Private Nova corporate / production repository
 
 Purpose: authoritative corporate operating state and production implementation.
+
+Current accepted-state role: `CANONICAL_CORPORATE_ACCEPTED_STATE_AUTHORITY`.
+
+Canonical accepted-state repository:
+
+```text
+nova-infrastructure-systems/nova-core
+governance/accepted-state/registry.yaml
+```
 
 Private-by-default content includes:
 
@@ -77,9 +91,9 @@ Provider-only state includes:
 - tenant secrets;
 - provider account secrets.
 
-## Transition authority rule
+## Accepted-state authority transfer
 
-The current public repository remains the canonical repository governance surface until a private corporate repository is provisioned, the required state is migrated, validation passes, and the Architect explicitly accepts the authority transfer.
+The transition rule was:
 
 ```text
 private repository created
@@ -92,17 +106,44 @@ public projection updated
 != corporate state changed
 ```
 
-After explicit migration acceptance:
+That separate transfer has now been explicitly authorized and completed under:
+
+```yaml
+authorization_reference: ARCHITECT-AUTH-CANONICAL-TRANSFER-2026-08-28-B3FB1A8-F50BC42
+authorized_starting_public_head: b3fb1a8fc0c395759c46e4cdc9c9fe4b07006317
+authorized_starting_private_head: f50bc4295b0463779f34c22219a64fc578656abd
+public_projection_merge_commit: 2b7c5361090f04de95b898f2bb8746ae86f305af
+private_effective_transfer_merge_commit: 037a24c68c0ecb4cb4a98354c5ec2667a1f75672
+private_completion_evidence_merge_commit: 052cdaf256c846489bc12b54a5b698411247fc90
+```
+
+Current topology:
 
 ```text
 Private corporate repository
 = authoritative corporate accepted state
 
 Public sharpe-nova-os repository
-= approved external projection
+= approved non-authoritative governed projection
 ```
 
-No authority gap is permitted during migration.
+No authority gap or dual undisputed authority was created by the transfer.
+Authority reversion would require a separate explicit Architect decision.
+
+## Public projection compatibility rule
+
+Historical public files may preserve pre-transfer facts and provenance, but
+active public current-state and compatibility surfaces must fail closed against
+current accepted-state claims.
+
+The retained public accepted-state registry may be used only for bounded
+historical context. Public compatibility code must not:
+
+- identify public `origin/main` as the current corporate accepted-state source;
+- create or imply current corporate accepted state;
+- create chronology or Reflex Memory acceptance;
+- request accepted-state mutation merely because private state is unavailable;
+- silently substitute a public mirror or checkout for the private canonical registry.
 
 ## Retail commercialization boundary
 
@@ -138,31 +179,39 @@ Already-published material must be treated as historically disclosed. Moving fut
 
 The objective is to protect future compounding intellectual property and production security, not to imply retroactive confidentiality.
 
-## Required migration sequence
+## Completed migration sequence and remaining hygiene
+
+The authority-bearing sequence is complete through explicit Architect transfer
+and repository verification. Remaining work is bounded projection hygiene and,
+separately, any future deletion-bearing sanitization that receives its own
+authority.
 
 ```text
-1. inventory current public exposure
-2. classify major paths as public / public-sanitized / private / provider-only
-3. provision private corporate repository
-4. copy and verify private-authority material before removing future public reliance
-5. establish private repository accepted-state controls
-6. migrate production/runtime/deployment internals
-7. retain public contracts, SDKs, schemas, examples, and approved proof
-8. update public CURRENT_STATE projection
-9. update validators for plane-specific commercialization authority
-10. perform public-history and PR exposure review
-11. Architect explicitly accepts authority transfer
-12. freeze ongoing publication policy
+1. inventory current public exposure                         complete
+2. classify major paths                                      complete
+3. provision private corporate repository                    complete
+4. copy and verify private-authority material                complete
+5. establish private repository accepted-state controls      complete
+6. migrate production/runtime custody                        operator-observed complete
+7. retain public contracts and approved proof                ongoing
+8. update public CURRENT_STATE projection                    ongoing hygiene
+9. update validators for projection authority                ongoing hygiene
+10. perform public-history and PR exposure review             bounded follow-up
+11. Architect explicitly accepts authority transfer           complete
+12. freeze ongoing publication policy                         continuing control
 ```
 
 ## Non-effects of this document
 
+This boundary document did not itself effect the accepted-state transfer. The
+transfer was separately authorized and repository-verified as recorded above.
 This document does not itself:
 
-- create a private repository;
-- transfer corporate accepted-state authority;
 - remove any file from public Git history;
+- authorize public-runtime deletion;
 - deploy or change production;
 - activate retail public service;
+- create chronology or Reflex Memory acceptance;
 - advance institutional Gate 5;
+- create payment, settlement, signing, or capital authority;
 - establish buyer demand, adoption, pricing power, or product-market fit.
