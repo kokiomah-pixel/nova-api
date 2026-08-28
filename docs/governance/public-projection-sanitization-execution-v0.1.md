@@ -1,6 +1,6 @@
 # Public Projection Sanitization Execution v0.1
 
-**Status:** inventory complete; production source cutover evidence submitted; removals blocked pending stabilization, validation, and Architect review  
+**Status:** inventory complete; production source cutover evidence submitted; repository validation complete; removals blocked pending stabilization, CCO review, and Architect deletion authority  
 **Baseline repository:** `nova-infrastructure-systems/sharpe-nova-os`  
 **Baseline branch:** `main`  
 **Baseline SHA:** `eeba729534088bdec705e84219188bb5aaaa14eb`  
@@ -60,9 +60,9 @@ deployment_reconciliation:
   intentional_cutover_complete: true
   public_repository_dependency_for_observed_active_production_runtime: false
   production_continuity_preserved: true
-  public_contract_validation_rerun: pending
-  private_implementation_validation_rerun: pending
-  removal_gate: BLOCKED_PENDING_STABILIZATION_VALIDATION_AND_ARCHITECT_REVIEW
+  public_contract_validation_rerun: passed_repository_verified
+  private_implementation_validation_rerun: passed_repository_verified
+  removal_gate: BLOCKED_PENDING_STABILIZATION_CCO_REVIEW_AND_ARCHITECT_DELETION_AUTHORITY
 ```
 
 The rollback exercise established that a provider `Live` state and healthy
@@ -76,10 +76,17 @@ source while preserving the tested Legacy external contract and the complete
 three-identity production credential set. This is operator-observed evidence,
 not independent provider verification.
 
+The post-cutover repository validation is recorded in
+[`docs/operations/post-cutover-repository-validation-2026-08-28.md`](../operations/post-cutover-repository-validation-2026-08-28.md).
+It verifies the current public contract suite, current private repository suite,
+the exact deployed private Legacy source CI result, and critical Legacy runtime
+blob identity. Repository validation does not convert operator-observed provider
+evidence into independent provider verification.
+
 No runtime, deployment, payment, control, telemetry, or provider-topology file
-may be removed from the public branch until stabilization, public/private
-validation reruns, CCO review, and explicit Architect authorization for
- deletion-bearing sanitization are complete.
+may be removed from the public branch until stabilization, CCO completion
+review, and explicit Architect authorization for deletion-bearing sanitization
+are complete.
 
 ## Exact classification rules
 
@@ -217,14 +224,14 @@ public_projection_sanitization:
   primary_production_source_private: true
   primary_post_cutover_proof_passed: true
   public_repository_dependency_for_observed_active_production_runtime: false
-  public_contract_validation_rerun: pending
-  private_implementation_validation_rerun: pending
+  public_contract_validation_rerun: passed_repository_verified
+  private_implementation_validation_rerun: passed_repository_verified
   private_target_files_removed_from_current_projection: 0
   public_contracts_removed: 0
   public_CI_weakened: false
   deletion_bearing_sanitization_started: false
   sanitization_complete: false
-  blocker: stabilization_validation_completion_review_and_architect_deletion_authority_required
+  blocker: stabilization_CCO_review_and_architect_deletion_authority_required
 ```
 
 ## Required unblocking evidence
@@ -238,12 +245,12 @@ Before a deletion-bearing sanitization commit:
 5. exercise rollback/recovery behavior on the bounded private continuity candidate — **evidence submitted**, with the material finding that provider-held credential state is not automatically preserved by rollback;
 6. preserve provider evidence separately from public repository configuration — **private evidence receipts updated; independent verification remains outstanding**;
 7. complete a stabilization observation with the primary service left unchanged unless an actual regression requires intervention — **in progress**;
-8. re-run the full public contract validation suite after cutover — **blocking / pending**;
-9. re-run the private implementation validation suite after cutover — **blocking / pending**;
+8. re-run the full public contract validation suite after cutover — **repository-verified complete**;
+9. re-run the private implementation validation suite after cutover — **repository-verified complete**;
 10. reconcile the transition artifacts to the post-cutover state and complete CCO review — **in progress**;
 11. obtain explicit Architect authority before any deletion-bearing public sanitization — **not yet granted**.
 
-Evidence submission is not independent verification. Production source migration
-and provider continuity evidence do not authorize payment or settlement change,
-retail RP8B completion, institutional Gate 5, chronology, institutional Reflex
-Memory mutation, accepted-state authority transfer, or public-runtime removal.
+Evidence submission is not independent verification. Repository validation does
+not authorize payment or settlement change, retail RP8B completion,
+institutional Gate 5, chronology, institutional Reflex Memory mutation,
+accepted-state mutation, or public-runtime removal.
