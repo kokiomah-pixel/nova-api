@@ -295,6 +295,67 @@ chronology_event
 -> execution elsewhere
 ```
 
+## Governed Abstraction Extension
+
+The governed-abstraction extension does not change Reflex Memory v0.1 runtime
+behavior.
+
+This public extension defines the doctrine and external trust boundary for
+governed abstraction. Versioned accepted-entry structures, retrieval mechanics,
+and cross-object lineage validation are private-target implementation material.
+
+### Governing transition
+
+```text
+reviewed chronology
+→ proposed abstraction candidate
+→ explicit governance review
+→ accepted or rejected disposition
+→ optional accepted Reflex Memory entry
+```
+
+### Required distinction
+
+```text
+Candidate is not memory.
+
+Memory is not policy.
+
+Similarity is not precedent.
+
+Accepted review context is not authority.
+```
+
+### State dimensions
+
+Lifecycle, epistemic, authority, and precedent treatment must remain separate.
+
+### Implicit policy conversion
+
+Repeated operator behavior, model summaries, prior outcomes, or semantic
+similarity must not become institutional policy without explicit local
+authority treatment.
+
+### Runtime boundary
+
+This public doctrine does not define or publish the internal accepted-entry,
+retrieval, or promotion implementation. It does not authorize:
+
+* runtime extraction;
+* runtime candidate creation;
+* automatic acceptance;
+* production retrieval;
+* policy mutation;
+* constraint mutation;
+* authority-map mutation.
+
+Public boundary reference:
+
+- `docs/governance/governed-abstraction-boundary.md`
+
+Publication of doctrine does not establish that any internal versioned object,
+runtime, accepted memory, or retrieval system exists or is active.
+
 ## Failure Modes
 
 Known failure modes include:

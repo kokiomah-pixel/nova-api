@@ -125,6 +125,34 @@ The Deep Scenario Validation Layer provides internal evidence that Nova's review
 
 ## Reflex Memory Current State
 
+```yaml
+governed_abstraction_evidence:
+  market_signal:
+    - docs/market/signals/2026/MSE-2026-08-06-038-plugmem-governed-abstraction.md
+
+  specification:
+    - docs/governance/governed-abstraction-boundary.md
+    - docs/governance/reflex-memory-specification.md
+    - docs/architecture/reflex-memory-vs-agent-memory.md
+
+  public_evidence_scope:
+    - doctrine
+    - non_authority_boundary
+    - lineage_principles
+
+  intentionally_not_public:
+    - accepted_entry_structure
+    - retrieval_mechanics
+    - cross_object_lineage_implementation
+
+  claim_boundary:
+    production_runtime: not_established
+    automatic_learning: prohibited
+    accepted_state_change: false
+    chronology_change: false
+    Reflex_Memory_object_created: false
+```
+
 Reflex Memory should be understood as:
 
 ```text
