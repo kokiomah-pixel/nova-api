@@ -1,7 +1,7 @@
 # Sharpe Nova OS — Current State
 
 **Effective date:** August 25, 2026  
-**Reconciliation date:** August 27, 2026  
+**Reconciliation date:** August 28, 2026  
 **Authority:** Architect  
 **Coherence review:** Jarvis-Nova CCO
 
@@ -36,6 +36,7 @@ repository_architecture:
     public_source_SHA: eeba729534088bdec705e84219188bb5aaaa14eb
     private_bootstrap_merged: true
     private_bootstrap_CI: passed
+    current_production_implementation_source_observed: true
     future_production_development_surface: true
 
   accepted_state_authority:
@@ -45,6 +46,7 @@ repository_architecture:
   public_private_boundary:
     governance_accepted: true
     migration_in_progress: true
+    production_source_cutover_observed_complete: true
     public_sanitization_complete: false
 
   private_main_protection:
@@ -52,25 +54,50 @@ repository_architecture:
     privacy_weakened_to_enable_protection: false
 
 deployment_reconciliation:
-  public_repository_dependency_recorded: true
-  private_continuity_candidate_deployed: true
-  private_source_alignment_observed: true
-  health_and_tested_containment_parity_observed: true
-  credential_state_parity_observed: true
-  credential_authentication_3_of_3_observed: true
-  rollback_mechanism_exercised: true
-  rollback_auto_credential_preservation: false
-  post_rollback_recovery_observed: true
-  evidence_level: operator_observed
+  public_repository_dependency_recorded_historically: true
+
+  primary_continuity_service:
+    service: nova-api
+    source_repository: nova-infrastructure-systems/nova-core
+    source_branch: main
+    deployed_source_commit: d64e7523177f666a7d549a087fc763b5edc4e957
+    source_main_match_at_observation: true
+    manual_deploy_observed: true
+    provider_live_observed: true
+    existing_hostname_preserved: true
+    auto_deploy: Off
+    post_cutover_health_200_observed: true
+    post_cutover_tested_containment_observed: true
+    post_cutover_active_identity_count: 3
+    post_cutover_credential_fingerprint_parity_observed: true
+    post_cutover_authentication_3_of_3_observed: true
+    evidence_level: operator_observed
+
+  parallel_private_continuity_candidate:
+    deployed: true
+    private_source_alignment_observed: true
+    health_and_tested_containment_parity_observed: true
+    credential_state_parity_observed: true
+    credential_authentication_3_of_3_observed: true
+    rollback_mechanism_exercised: true
+    rollback_auto_credential_preservation: false
+    post_rollback_recovery_observed: true
+    evidence_level: operator_observed
+
   provider_evidence_receipt_state: evidence_submitted_private
   private_repoint_required_before_runtime_removal: true
-  private_repoint_completed: false
-  public_repository_dependency_still_active: true
-  removal_gate: BLOCKED_PENDING_INTENTIONAL_CUTOVER_AND_VERIFICATION
+  private_repoint_completed: true
+  intentional_cutover_completed: true
+  public_repository_dependency_for_observed_active_production_runtime: false
+  post_cutover_public_contract_validation: pending
+  post_cutover_private_implementation_validation: pending
+  removal_gate: BLOCKED_PENDING_STABILIZATION_VALIDATION_AND_ARCHITECT_REVIEW
 
 repository_transition_effects:
   parallel_provider_continuity_candidate_effect: observed_live
-  canonical_production_cutover_effect: none
+  canonical_production_cutover_effect: operator_observed_private_source_live
+  public_runtime_removal_effect: none
+  accepted_state_authority_transfer_effect: none
   retail_runtime_effect: none
   payment_effect: none
   institutional_Gate_5_effect: none
@@ -79,14 +106,16 @@ repository_transition_effects:
   institutional_Reflex_Memory_effect: none
 ```
 
-Private repository creation, verified history parity, or a live private
-continuity candidate do not transfer accepted-state authority. The current
-public governance surface remains authoritative until the Architect explicitly
-accepts that transfer.
+Private repository creation, verified history parity, a live private continuity
+candidate, or production source cutover do not transfer accepted-state
+authority. The current public governance surface remains authoritative until the
+Architect explicitly accepts that separate transfer.
 
 The rollback exercise established that provider recovery and authenticated
 continuity are separate controls: provider-held identity state was not
 automatically preserved by rollback and required restoration plus revalidation.
+The primary cutover therefore preserved a recovery rule that requires provider
+identity-state verification after any future rollback.
 
 ## Current product state
 
@@ -104,18 +133,22 @@ current_product_state:
 
   production_custody:
     GitHub_corporate_repository: verified
-    Render_source_alignment: Architect_attested
-    Render_post_merge_deployment: Architect_attested_live
-    Render_service_health: Architect_attested_healthy
-    private_continuity_candidate: operator_observed_live
-    private_source_alignment: operator_observed
-    tested_containment_parity: operator_observed
-    active_credential_set_parity: operator_observed_3_of_3
-    active_credential_authentication_parity: operator_observed_3_of_3
+    active_primary_service: nova-api
+    active_primary_source_repository: nova-infrastructure-systems/nova-core
+    active_primary_source_branch: main
+    active_primary_source_commit: d64e7523177f666a7d549a087fc763b5edc4e957
+    private_source_cutover: operator_observed_live
+    primary_hostname_continuity: operator_observed
+    primary_health_post_cutover: operator_observed_200
+    primary_tested_containment_post_cutover: operator_observed
+    active_credential_set_post_cutover: operator_observed_3_of_3
+    active_credential_authentication_post_cutover: operator_observed_3_of_3
+    parallel_private_continuity_candidate: operator_observed_live
     rollback_mechanism_exercised: true
     rollback_auto_credential_preservation: false
     post_rollback_recovery: operator_observed
-    intentional_private_cutover_complete: false
+    public_repository_dependency_for_observed_active_production_runtime: false
+    post_cutover_repository_validation: pending
     CDP_custody: Architect_attested_Admin_Owner
     CDP_API_key_management: true
     CDP_active_API_keys: 1
@@ -201,14 +234,16 @@ The repository and current evidence establish:
 * a bounded stablecoin-treasury workflow definition;
 * production-readiness and incident-control gates;
 * a corporate GitHub repository at `nova-infrastructure-systems/sharpe-nova-os`;
+* a private implementation repository at `nova-infrastructure-systems/nova-core`;
 * verified repository identity reconciliation through PR #38;
 * merged readiness reconciliation through PR #39;
-* Architect-attested Render source alignment to the corporate repository;
-* Architect-attested post-merge live deployment of closure evidence-capture commit `f313d57a5b2b120a22ba981ba9e9d65771a401ae`;
-* Architect-attested healthy `nova-api` service;
-* a live private continuity candidate observed at the operator level;
-* operator-observed private-source alignment and tested containment parity;
-* operator-observed parity of the complete three-identity active production credential set across the public-backed and private-backed continuity services;
+* an operator-observed in-place source repoint of the existing `nova-api` Render service to private `nova-core/main`;
+* an operator-observed manual production deployment of private commit `d64e7523177f666a7d549a087fc763b5edc4e957` on the preserved primary hostname;
+* operator-observed post-cutover `/health` HTTP 200 on the primary service;
+* operator-observed post-cutover containment on `/openapi.json`, `/docs`, `/redoc`, `/services.json`, the tested constraint-pressure feed, and unauthenticated context/proof routes;
+* operator-observed post-cutover parity of the complete three-identity active production credential set;
+* operator-observed post-cutover three-of-three authenticated HTTP 200 behavior;
+* a live parallel private continuity candidate retained as a comparison/fallback reference during stabilization;
 * an exercised provider rollback on the private continuity candidate;
 * a demonstrated rollback failure mode in which provider-held credential state was not automatically preserved;
 * successful operator-observed restoration of credential state and three-of-three authenticated continuity after rollback;
@@ -230,10 +265,11 @@ The repository and current evidence establish:
 
 The available evidence does not establish:
 
-* intentional cutover of the public-repository-backed continuity service to the private continuity candidate;
 * authorization to remove the public runtime or its production-supporting implementation surface;
-* independently verified full provider-side continuity or rollback attestation;
+* completed post-cutover public/private repository validation reruns;
+* independently verified full provider-side cutover or rollback attestation;
 * automatic provider-held credential preservation across rollback;
+* accepted-state authority transfer from the public governance surface to the private repository;
 * a deployed target v2 runtime;
 * a production-active target v2 endpoint;
 * independently verified full provider-side production-custody attestation;
@@ -255,9 +291,10 @@ The Readiness Gate Baseline is closed, Gate 3 is complete, and Gate 4 establishe
 only the canonical private synthetic reference adapter. Gate 5 remains not
 started and has no implementation or production-activation authority.
 
-The repository-transition priority is now intentional cutover design and
-post-cutover verification. Public deletion-bearing sanitization remains blocked
-until that work is complete and applicable public/private validation is rerun.
+The repository-transition priority is now post-cutover stabilization, public
+contract validation, private implementation validation, and governance
+reconciliation. Public deletion-bearing sanitization remains blocked until
+those checks are complete and the Architect separately authorizes removal.
 
 ```yaml
 current_readiness_priority:
@@ -267,7 +304,7 @@ current_readiness_priority:
       - provider_control_planes_not_independently_verified
       - founder_concentration_remains
       - CDP_business_verification_pending
-      - private_cutover_not_complete
+      - post_cutover_repository_validation_pending
       - rollback_requires_provider_identity_state_revalidation
 
   Gate_2_Legacy_v1_dependency:
@@ -279,8 +316,12 @@ current_readiness_priority:
   repository_transition:
     status: in_progress
     provider_continuity_evidence: evidence_submitted
-    intentional_cutover: not_complete
-    public_runtime_removal: blocked
+    intentional_cutover: operator_observed_complete
+    primary_source_private: true
+    public_repository_dependency_for_observed_active_production_runtime: false
+    public_contract_validation: pending
+    private_implementation_validation: pending
+    public_runtime_removal: blocked_pending_validation_and_architect_authority
 
   production_incident:
     status: contained_historically_unattested
@@ -369,13 +410,15 @@ These evidence receipts are intentionally not part of the public entry-link surf
 ## Evidence boundary
 
 Repository ownership and merged repository state are independently verified
-through GitHub. Render, Legacy v1, private continuity, rollback, and CDP
+through GitHub. Render, Legacy v1, private continuity, rollback, cutover, and CDP
 control-plane observations in the current reconciliation are Architect-attested
 or operator-observed unless separately identified as independently verified.
 
-The private continuity proof establishes submitted evidence for tested source
-alignment, containment, credential parity, rollback mechanics, and recovery. It
-does not establish intentional cutover or independent provider verification.
+The private continuity and immediate cutover proof establish submitted evidence
+for tested private-source alignment, preserved hostname, containment, complete
+credential parity, three-of-three authentication, rollback mechanics, and
+recovery. They do not establish independent provider verification, accepted-state
+authority transfer, or authority to remove the public implementation surface.
 The rollback exercise specifically demonstrated that provider-held credential
 state may require restoration and revalidation even when the provider reports
 the service Live and `/health` remains healthy.
@@ -396,8 +439,8 @@ institutional adoption, buyer validation, or enterprise readiness.
 ## Claim rule
 
 A repository artifact, passing test suite, design approval, offline proof,
-Architect-attested provider observation, operator-observed continuity test,
-closed readiness baseline, or contained incident does not independently
+Architect-attested provider observation, operator-observed continuity or cutover
+test, closed readiness baseline, or contained incident does not independently
 establish system-wide production readiness, institutional use, buyer demand,
-adoption, pricing power, product-market fit, or accepted-state authority
-transfer.
+adoption, pricing power, product-market fit, accepted-state authority transfer,
+or authority to remove public implementation surfaces.
