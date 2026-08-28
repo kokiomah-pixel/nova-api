@@ -57,8 +57,9 @@ sources:
 
   - source_id: corporate_accepted_state_registry
     source_type: private_canonical_accepted_state_registry
-    repository: nova-infrastructure-systems/nova-core
-    repository_path: governance/accepted-state/registry.yaml
+    repository_path:
+    external_repository: nova-infrastructure-systems/nova-core
+    external_repository_path: governance/accepted-state/registry.yaml
     authority_owner: Architect
     public_repository_direct_access: not_assumed
     authoritative_for:
