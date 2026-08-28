@@ -16,6 +16,12 @@ REGISTRY_CHECKPOINT_PATH = Path("agent_files/state/accepted-state-checkpoint.yam
 ARCHIVE_RECORD_PATH = Path("archive/governance/architect-data-operations-stage-a-acceptance-2026-07-17.yaml")
 CHRONOLOGY_PATH = Path("chronology/governance/governance-events.jsonl")
 REGISTRY_SCHEMA_PATH = Path("schemas/accepted-state-registry.schema.json")
+AUTHORITY_TRANSFER_ACTIVATION_PATH = Path(
+    "docs/governance/canonical-authority-transfer-activation-2026-08-28.yaml"
+)
+PUBLIC_PROJECTION_REPOSITORY = "nova-infrastructure-systems/sharpe-nova-os"
+PRIVATE_CANONICAL_REPOSITORY = "nova-infrastructure-systems/nova-core"
+PRIVATE_CANONICAL_REGISTRY_PATH = "governance/accepted-state/registry.yaml"
 ACCEPTED_STATE_ID = "architect_data_operations_stage_a_policy_2026_07_17"
 CHRONOLOGY_EVENT_ID = "GOV-20260717-STAGE-A-GOVERNANCE-INFRA-ACCEPTED"
 
@@ -53,6 +59,71 @@ def _write_yaml_atomic(path: Path, payload: Mapping[str, Any]) -> None:
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(yaml.safe_dump(dict(payload), sort_keys=False), encoding="utf-8")
     temporary.replace(path)
+
+
+def authority_transfer_activation(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
+    """Resolve the public projection activation without creating authority.
+
+    The activation marker records an already-effected, separately authorized
+    repository transition. Its presence only changes how this public
+    compatibility module may interpret retained public accepted-state files.
+    """
+
+    path = repo_root / AUTHORITY_TRANSFER_ACTIVATION_PATH
+    if not path.exists():
+        return {
+            "effective": False,
+            "status": "not_present",
+            "canonical_repository": PUBLIC_PROJECTION_REPOSITORY,
+            "canonical_registry_path": str(REGISTRY_PATH),
+            "private_effective_transfer_merge_commit": None,
+            "private_completion_evidence_merge_commit": None,
+            "public_projection_merge_commit": None,
+        }
+
+    payload = _read_yaml(path)
+    authority_state = payload.get("authority_state", {})
+    transfer_evidence = payload.get("transfer_evidence", {})
+    if not isinstance(authority_state, Mapping):
+        authority_state = {}
+    if not isinstance(transfer_evidence, Mapping):
+        transfer_evidence = {}
+
+    effective = bool(
+        payload.get("status") == "EFFECTIVE_REPOSITORY_VERIFIED"
+        and authority_state.get("canonical_corporate_accepted_state_authority")
+        == PRIVATE_CANONICAL_REPOSITORY
+        and authority_state.get("canonical_private_registry_path")
+        == PRIVATE_CANONICAL_REGISTRY_PATH
+        and authority_state.get("public_repository_role")
+        == "NON_AUTHORITATIVE_GOVERNED_PROJECTION"
+        and authority_state.get("public_current_accepted_state_claim_use") == "prohibited"
+        and transfer_evidence.get("private_effective_transfer_merge_commit")
+        and transfer_evidence.get("public_projection_merge_commit")
+    )
+
+    return {
+        "effective": effective,
+        "status": payload.get("status"),
+        "canonical_repository": PRIVATE_CANONICAL_REPOSITORY
+        if effective
+        else PUBLIC_PROJECTION_REPOSITORY,
+        "canonical_registry_path": PRIVATE_CANONICAL_REGISTRY_PATH
+        if effective
+        else str(REGISTRY_PATH),
+        "private_effective_transfer_merge_commit": transfer_evidence.get(
+            "private_effective_transfer_merge_commit"
+        ),
+        "private_completion_evidence_merge_commit": transfer_evidence.get(
+            "private_completion_evidence_merge_commit"
+        ),
+        "public_projection_merge_commit": transfer_evidence.get(
+            "public_projection_merge_commit"
+        ),
+        "authorization_reference": payload.get("authorization", {}).get("reference")
+        if isinstance(payload.get("authorization", {}), Mapping)
+        else None,
+    }
 
 
 def _read_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -199,6 +270,8 @@ def _canonical_registry_for_state(
     *,
     repository_state_override: Mapping[str, Any] | None = None,
 ) -> Mapping[str, Any] | None:
+    if authority_transfer_activation(repo_root)["effective"]:
+        return None
     if not repository_state.get("canonical_main_verified"):
         return None
     text = (
@@ -255,23 +328,33 @@ def resolve_registry_source(
     canonical_main_commit = repository_state["canonical_main_commit"]
     canonical_main_verified = repository_state["canonical_main_verified"]
     checkout_is_canonical_main = repository_state["checkout_is_canonical_main"]
+    activation = authority_transfer_activation(repo_root)
+    projection_effective = bool(activation["effective"])
 
     checkout_available = checkout_registry_path.exists()
     checkout_schema_valid = _validate_registry_schema(checkout_registry_path, repo_root) if checkout_available else False
     checkout_hash = sha256_path(checkout_registry_path)
-    canonical_text = (
-        checkout_registry_path.read_text(encoding="utf-8")
-        if canonical_main_verified and repository_state_override is not None and checkout_available
-        else git_file_text(repo_root, "origin/main", REGISTRY_PATH)
-        if canonical_main_verified
-        else None
-    )
-    canonical_registry = _registry_from_text(canonical_text)
-    canonical_schema_valid = bool(
-        canonical_registry is not None and _validate_registry_payload(canonical_registry, repo_root)
-    )
-    canonical_hash = sha256_text(canonical_text)
-    canonical_available = canonical_main_verified and canonical_schema_valid
+
+    if projection_effective:
+        canonical_text = None
+        canonical_registry = None
+        canonical_schema_valid = False
+        canonical_hash = None
+        canonical_available = False
+    else:
+        canonical_text = (
+            checkout_registry_path.read_text(encoding="utf-8")
+            if canonical_main_verified and repository_state_override is not None and checkout_available
+            else git_file_text(repo_root, "origin/main", REGISTRY_PATH)
+            if canonical_main_verified
+            else None
+        )
+        canonical_registry = _registry_from_text(canonical_text)
+        canonical_schema_valid = bool(
+            canonical_registry is not None and _validate_registry_payload(canonical_registry, repo_root)
+        )
+        canonical_hash = sha256_text(canonical_text)
+        canonical_available = canonical_main_verified and canonical_schema_valid
 
     mirror_present = bool(mirror_path and mirror_path.exists())
     mirror_schema_valid = _validate_registry_schema(mirror_path, repo_root) if mirror_present and mirror_path else False
@@ -283,17 +366,36 @@ def resolve_registry_source(
         if canonical_registry is not None
         else []
     )
+    projection_ids = _registry_entry_ids(checkout_registry_path) if checkout_available else []
     mirror_ids = _registry_entry_ids(mirror_path) if mirror_path else []
-    mirror_in_sync = bool(
-        canonical_available
-        and mirror_present
-        and mirror_schema_valid
-        and mirror_hash == canonical_hash
-        and (not mirror_commit or mirror_commit == canonical_main_commit)
-    )
-    mirror_lag = bool(canonical_available and mirror_present and not mirror_in_sync)
 
-    if canonical_available:
+    if projection_effective:
+        mirror_in_sync = False
+        mirror_lag = False
+    else:
+        mirror_in_sync = bool(
+            canonical_available
+            and mirror_present
+            and mirror_schema_valid
+            and mirror_hash == canonical_hash
+            and (not mirror_commit or mirror_commit == canonical_main_commit)
+        )
+        mirror_lag = bool(canonical_available and mirror_present and not mirror_in_sync)
+
+    if projection_effective:
+        canonical_source_state = "private_canonical_external_to_public_projection"
+        selected_path = (
+            checkout_registry_path
+            if checkout_available and checkout_schema_valid
+            else mirror_path
+            if mirror_present and mirror_schema_valid
+            else None
+        )
+        registry_usage = {
+            "allowed": "bounded_historical_context_only",
+            "current_accepted_state_claim_allowed": False,
+        }
+    elif canonical_available:
         canonical_source_state = "verified_repository_main"
         selected_path = checkout_registry_path
         registry_usage = {
@@ -323,41 +425,96 @@ def resolve_registry_source(
         }
 
     delta = (
-        accepted_state_delta(registry=canonical_registry, checkpoint_path=checkpoint)
+        {"newly_accepted": [], "stable_accepted_state": [], "checkpoint_path": str(checkpoint)}
+        if projection_effective
+        else accepted_state_delta(registry=canonical_registry, checkpoint_path=checkpoint)
         if canonical_available and canonical_registry is not None
         else {"newly_accepted": [], "stable_accepted_state": [], "checkpoint_path": str(checkpoint)}
+    )
+
+    canonical_repository = (
+        PRIVATE_CANONICAL_REPOSITORY if projection_effective else PUBLIC_PROJECTION_REPOSITORY
+    )
+    canonical_registry_path = (
+        PRIVATE_CANONICAL_REGISTRY_PATH if projection_effective else str(checkout_registry_path)
+    )
+    canonical_commit = (
+        activation["private_completion_evidence_merge_commit"]
+        or activation["private_effective_transfer_merge_commit"]
+        if projection_effective
+        else canonical_main_commit
     )
 
     return {
         "source_resolution": {
             "local_runtime_root": str(repo_root.resolve()),
             "local_registry_absolute_path": str(checkout_registry_path.resolve()),
-            "remote_repository": "nova-infrastructure-systems/sharpe-nova-os",
-            "remote_registry_commit": canonical_main_commit,
-            "canonical_registry_standard": "repository_main_unless_governing_standard_designates_external_store",
-            "configured_registry_source": "origin/main" if canonical_available else "repository_checkout",
-            "source_selection_logic": "prefer_verified_origin_main_registry; feature_branch_checkout_is_not_canonical_main; stale_mirror_is_historical_only",
+            "remote_repository": canonical_repository,
+            "remote_registry_commit": canonical_commit,
+            "canonical_registry_path": canonical_registry_path,
+            "projection_repository": PUBLIC_PROJECTION_REPOSITORY,
+            "projection_registry_path": str(REGISTRY_PATH),
+            "canonical_registry_standard": "private_repository_registry_after_explicit_transfer"
+            if projection_effective
+            else "repository_main_unless_governing_standard_designates_external_store",
+            "configured_registry_source": (
+                f"{PRIVATE_CANONICAL_REPOSITORY}:{PRIVATE_CANONICAL_REGISTRY_PATH}"
+                if projection_effective
+                else "origin/main"
+                if canonical_available
+                else "repository_checkout"
+            ),
+            "source_selection_logic": (
+                "require_private_canonical_registry_for_current_state; public_registry_is_historical_projection_only; do_not_substitute_public_checkout_or_mirror"
+                if projection_effective
+                else "prefer_verified_origin_main_registry; feature_branch_checkout_is_not_canonical_main; stale_mirror_is_historical_only"
+            ),
+            "authority_transfer_effective": projection_effective,
+            "authorization_reference": activation.get("authorization_reference"),
         },
         "repository_state": repository_state,
         "registry_operating_model": {
-            "canonical_source": "repository_main",
+            "canonical_source": "private_repository_registry"
+            if projection_effective
+            else "repository_main",
             "local_mirror_required": False,
-            "read_mode": "read_only",
-            "fallback_behavior": "source_unavailable",
+            "read_mode": "historical_projection_only"
+            if projection_effective
+            else "read_only",
+            "fallback_behavior": "bounded_public_projection_only"
+            if projection_effective
+            else "source_unavailable",
             "local_mirror_authoritative": False,
         },
         "registry_state": {
             "canonical_source_state": canonical_source_state,
             "canonical_source_available": canonical_available,
-            "canonical_commit": canonical_main_commit,
-            "canonical_registry_path": str(checkout_registry_path),
+            "canonical_commit": canonical_commit,
+            "canonical_registry_path": canonical_registry_path,
             "selected_registry_path": str(selected_path) if selected_path else None,
+            "projection_registry_path": str(checkout_registry_path),
+            "projection_registry_content_hash": checkout_hash,
             "local_mirror_present": mirror_present,
             "local_mirror_commit": mirror_commit,
             "local_mirror_in_sync": mirror_in_sync,
             "mirror_lag_detected": mirror_lag,
-            "registry_schema_valid": canonical_schema_valid if canonical_available else checkout_schema_valid if checkout_available else mirror_schema_valid,
-            "registry_entry_count": len(canonical_ids if canonical_available and canonical_registry is not None else mirror_ids),
+            "registry_schema_valid": (
+                checkout_schema_valid
+                if projection_effective and checkout_available
+                else canonical_schema_valid
+                if canonical_available
+                else checkout_schema_valid
+                if checkout_available
+                else mirror_schema_valid
+            ),
+            "registry_entry_count": (
+                len(projection_ids)
+                if projection_effective
+                else len(canonical_ids if canonical_available and canonical_registry is not None else mirror_ids)
+            ),
+            "authority_role": "historical_governed_projection_only"
+            if projection_effective
+            else "candidate_current_source",
         },
         "registry_ingestion": {
             "canonical_source_state": canonical_source_state,
@@ -366,12 +523,32 @@ def resolve_registry_source(
             "checkout_is_canonical_main": checkout_is_canonical_main,
             "canonical_main_verified": canonical_main_verified,
             "canonical_registry_loaded": canonical_available,
-            "canonical_source": "repository_main",
-            "canonical_commit": canonical_main_commit,
-            "schema_valid": canonical_schema_valid if canonical_available else checkout_schema_valid,
-            "registry_schema_valid": canonical_schema_valid if canonical_available else checkout_schema_valid,
-            "current_accepted_state_claim_allowed": registry_usage["current_accepted_state_claim_allowed"],
-            "mirror_status": "not_required"
+            "canonical_source": "private_repository_registry"
+            if projection_effective
+            else "repository_main",
+            "canonical_repository": canonical_repository,
+            "canonical_commit": canonical_commit,
+            "schema_valid": (
+                checkout_schema_valid
+                if projection_effective
+                else canonical_schema_valid
+                if canonical_available
+                else checkout_schema_valid
+            ),
+            "registry_schema_valid": (
+                checkout_schema_valid
+                if projection_effective
+                else canonical_schema_valid
+                if canonical_available
+                else checkout_schema_valid
+            ),
+            "current_accepted_state_claim_allowed": registry_usage[
+                "current_accepted_state_claim_allowed"
+            ],
+            "projection_activation_effective": projection_effective,
+            "mirror_status": "historical_only"
+            if projection_effective and mirror_present
+            else "not_required"
             if not mirror_present
             else ("in_sync" if mirror_in_sync else "lag_detected"),
             "checkpoint_status": "available" if checkpoint.exists() else "missing",
@@ -553,6 +730,22 @@ def build_action_state(
     local_mirror_root: Path | None = None,
     repository_state_override: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
+    activation = authority_transfer_activation(repo_root)
+    if activation["effective"]:
+        return {
+            "system_maintenance_action_required": False,
+            "Architect_decision_required": False,
+            "external_dependency_action_required": False,
+            "assigned_to": [],
+            "action_type": "none",
+            "blocking_state": "non_blocking",
+            "rationale": (
+                "Public repository is a non-authoritative governed projection; "
+                "current accepted-state maintenance belongs to nova-core and this "
+                "compatibility surface cannot request accepted-state or chronology mutation."
+            ),
+        }
+
     registry_resolution = resolve_registry_source(
         repo_root,
         local_mirror_root=local_mirror_root,
@@ -629,6 +822,8 @@ def synchronization_state(
     local_mirror_root: Path | None = None,
     repository_state_override: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
+    activation = authority_transfer_activation(repo_root)
+    projection_effective = bool(activation["effective"])
     registry_resolution = resolve_registry_source(
         repo_root,
         local_mirror_root=local_mirror_root,
@@ -640,15 +835,35 @@ def synchronization_state(
         repository_state_override=repository_state_override,
     )
     entry = _accepted_state_entry_from_registry(canonical_registry)
+    projection_entry = load_accepted_state_entry(repo_root)
     archive_record = load_archive_record(repo_root)
     event_written = chronology_event_present(repo_root)
     archive_completion = archive_record.get("completion", {}) if archive_record else {}
     repo_movement = classify_repo_movement_acceptance(entry)
+
+    if projection_effective:
+        historical = classify_repo_movement_acceptance(projection_entry)
+        repo_movement = {
+            "current_repo_movement_reviewed": historical["current_repo_movement_reviewed"],
+            "current_repo_movement_accepted": False,
+            "accepted_remote_head": historical["accepted_remote_head"],
+            "rationale": (
+                "Public retained accepted-state material is historical governed projection only; "
+                "current corporate accepted-state authority resides in nova-core."
+            ),
+        }
+
+    projected_entry_present = projection_entry is not None if projection_effective else entry is not None
+
     return {
-        "operating_state": "bounded_infrastructure_accepted"
+        "operating_state": "historical_projection_only"
+        if projection_effective
+        else "bounded_infrastructure_accepted"
         if repo_movement["current_repo_movement_accepted"]
         else "source_incomplete",
-        "evidence_coverage": "source_incomplete",
+        "evidence_coverage": "bounded_historical_projection"
+        if projection_effective
+        else "source_incomplete",
         "contradiction_detected": False,
         "action_state": build_action_state(
             repo_root,
@@ -658,10 +873,16 @@ def synchronization_state(
         "repository": repo_movement,
         "accepted_state_registry": {
             "path": str(REGISTRY_PATH),
-            "updated": entry is not None,
-            "accepted_entry_id": ACCEPTED_STATE_ID if entry else None,
+            "updated": projected_entry_present,
+            "accepted_entry_id": ACCEPTED_STATE_ID if projected_entry_present else None,
             "schema_valid": registry_resolution["registry_state"]["registry_schema_valid"],
             "duplicate_entry_created": False,
+            "authority_role": "historical_governed_projection_only"
+            if projection_effective
+            else "repository_registry",
+            "current_accepted_state_claim_allowed": registry_resolution["registry_usage"][
+                "current_accepted_state_claim_allowed"
+            ],
         },
         "registry_source_resolution": registry_resolution["source_resolution"],
         "repository_state": registry_resolution["repository_state"],
@@ -672,15 +893,25 @@ def synchronization_state(
         "Accepted_state_delta": registry_resolution["accepted_state_delta"],
         "chronology": {
             "store": str(CHRONOLOGY_PATH),
-            "canonical_event_required": not event_written,
-            "canonical_event_status": "written" if event_written else "pending",
+            "canonical_event_required": False if projection_effective else not event_written,
+            "canonical_event_status": "historical_projection_preserved"
+            if projection_effective and event_written
+            else "historical_projection_absent"
+            if projection_effective
+            else "written"
+            if event_written
+            else "pending",
             "event_id": CHRONOLOGY_EVENT_ID,
+            "authority_effect": "none",
         },
         "durable_archive": {
             "record_path": str(ARCHIVE_RECORD_PATH),
             "status": archive_completion.get("status", "pending_external_write"),
             "archive_reference": archive_completion.get("receipt_or_reference"),
             "verified": archive_completion.get("status") == "completed_and_verified",
+            "authority_role": "historical_projection_evidence"
+            if projection_effective
+            else "governed_archive_evidence",
         },
         "runtime_evidence": {
             "Stage_A_policy_and_ingestion_path": "validated",
@@ -688,4 +919,5 @@ def synchronization_state(
             "Stage_B": "locked",
             "production_health_claim": "prohibited",
         },
+        "authority_transfer": activation,
     }
