@@ -1,6 +1,6 @@
 # Public Projection Sanitization Execution v0.1
 
-**Status:** inventory complete; provider continuity evidence submitted; removals blocked pending intentional cutover and verification  
+**Status:** inventory complete; production source cutover evidence submitted; removals blocked pending stabilization, validation, and Architect review  
 **Baseline repository:** `nova-infrastructure-systems/sharpe-nova-os`  
 **Baseline branch:** `main`  
 **Baseline SHA:** `eeba729534088bdec705e84219188bb5aaaa14eb`  
@@ -28,11 +28,23 @@ deployment_reconciliation:
   repository_dependency_found: true
   dependent_provider: Render
 
-  public_continuity_service:
-    public_repository_dependency_still_active: true
-    intentional_cutover_complete: false
+  primary_continuity_service:
+    service: nova-api
+    source_repository_repointed_to_private: true
+    source_repository: nova-infrastructure-systems/nova-core
+    source_branch: main
+    deployed_source_commit: d64e7523177f666a7d549a087fc763b5edc4e957
+    source_main_match_at_observation: true
+    existing_hostname_preserved: true
+    auto_deploy: Off
+    immediate_post_cutover_health_200: true
+    immediate_post_cutover_containment_passed: true
+    active_identity_count: 3
+    credential_fingerprint_set_matches_pre_cutover: true
+    credential_authentication_3_of_3_observed: true
+    evidence_level: operator_observed
 
-  private_continuity_candidate:
+  parallel_private_continuity_candidate:
     deployed: true
     private_source_alignment_observed: true
     health_and_tested_containment_parity_observed: true
@@ -44,9 +56,13 @@ deployment_reconciliation:
     evidence_level: operator_observed
 
   private_repoint_required_before_runtime_removal: true
-  private_repoint_completed: false
+  private_repoint_completed: true
+  intentional_cutover_complete: true
+  public_repository_dependency_for_observed_active_production_runtime: false
   production_continuity_preserved: true
-  removal_gate: BLOCKED_PENDING_INTENTIONAL_CUTOVER_AND_VERIFICATION
+  public_contract_validation_rerun: pending
+  private_implementation_validation_rerun: pending
+  removal_gate: BLOCKED_PENDING_STABILIZATION_VALIDATION_AND_ARCHITECT_REVIEW
 ```
 
 The rollback exercise established that a provider `Live` state and healthy
@@ -54,9 +70,16 @@ The rollback exercise established that a provider `Live` state and healthy
 recovery sequence must verify provider-held identity state and authenticated
 behavior after rollback before service recovery can be declared.
 
+The immediate production cutover proof establishes submitted evidence that the
+active `nova-api` service now uses private `nova-core` as its implementation
+source while preserving the tested Legacy external contract and the complete
+three-identity production credential set. This is operator-observed evidence,
+not independent provider verification.
+
 No runtime, deployment, payment, control, telemetry, or provider-topology file
-may be removed from the public branch while the recorded production service may
-still depend on it.
+may be removed from the public branch until stabilization, public/private
+validation reruns, CCO review, and explicit Architect authorization for
+ deletion-bearing sanitization are complete.
 
 ## Exact classification rules
 
@@ -176,7 +199,7 @@ path_classification:
       security posture, and approved proof; remove or reduce production
       topology, proprietary derivation, operating evidence, accepted-state
       mechanics, and private Reflex Memory mechanics only after continuity is
-      verified.
+      verified and deletion-bearing sanitization is separately authorized.
 ```
 
 ## Current execution result
@@ -190,13 +213,18 @@ public_projection_sanitization:
   private_bootstrap_merged: true
   provider_continuity_evidence_state: evidence_submitted
   private_continuity_candidate_observed_live: true
-  intentional_cutover_complete: false
+  intentional_cutover_complete: true
+  primary_production_source_private: true
+  primary_post_cutover_proof_passed: true
+  public_repository_dependency_for_observed_active_production_runtime: false
+  public_contract_validation_rerun: pending
+  private_implementation_validation_rerun: pending
   private_target_files_removed_from_current_projection: 0
   public_contracts_removed: 0
   public_CI_weakened: false
   deletion_bearing_sanitization_started: false
   sanitization_complete: false
-  blocker: intentional_cutover_post_cutover_verification_and_validation_rerun_required
+  blocker: stabilization_validation_completion_review_and_architect_deletion_authority_required
 ```
 
 ## Required unblocking evidence
@@ -204,15 +232,18 @@ public_projection_sanitization:
 Before a deletion-bearing sanitization commit:
 
 1. connect the production provider to the private implementation source — **evidence submitted**;
-2. verify private deployed source alignment — **evidence submitted**;
-3. verify health and the existing external containment contract — **evidence submitted**;
-4. exercise rollback and verify credential continuity/recovery behavior — **evidence submitted**, with the material finding that provider-held credential state is not automatically preserved by rollback;
-5. preserve provider evidence separately from public repository configuration — **private evidence receipt opened; independent verification remains outstanding**;
-6. intentionally resolve the public-service to private-service cutover and verify the resulting external behavior — **blocking / not complete**;
-7. re-run the full public contract and private implementation validation suites after the cutover decision — **blocking / not complete**.
+2. verify the deployed private source alignment on the primary production service — **evidence submitted**;
+3. verify health and the existing external containment contract after cutover — **evidence submitted**;
+4. verify provider identity state, exact three-credential fingerprint parity, and three-of-three authenticated behavior after cutover — **evidence submitted**;
+5. exercise rollback/recovery behavior on the bounded private continuity candidate — **evidence submitted**, with the material finding that provider-held credential state is not automatically preserved by rollback;
+6. preserve provider evidence separately from public repository configuration — **private evidence receipts updated; independent verification remains outstanding**;
+7. complete a stabilization observation with the primary service left unchanged unless an actual regression requires intervention — **in progress**;
+8. re-run the full public contract validation suite after cutover — **blocking / pending**;
+9. re-run the private implementation validation suite after cutover — **blocking / pending**;
+10. reconcile the transition artifacts to the post-cutover state and complete CCO review — **in progress**;
+11. obtain explicit Architect authority before any deletion-bearing public sanitization — **not yet granted**.
 
-Evidence submission is not independent verification. Repository migration and
-provider continuity evidence do not authorize production activation, payment or
-settlement change, retail behavior change, institutional Gate 5, chronology,
-institutional Reflex Memory mutation, accepted-state authority transfer, or
-public-runtime removal.
+Evidence submission is not independent verification. Production source migration
+and provider continuity evidence do not authorize payment or settlement change,
+retail RP8B completion, institutional Gate 5, chronology, institutional Reflex
+Memory mutation, accepted-state authority transfer, or public-runtime removal.
