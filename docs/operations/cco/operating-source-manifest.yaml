@@ -22,9 +22,10 @@ sources:
     repository_path:
     authoritative_for:
       - merged_repository_state
-      - canonical_file_presence
+      - canonical_file_presence_within_the_repository_being_checked
       - current_remote_head
     not_authoritative_for:
+      - corporate_accepted_state_across_repository_authority_boundaries
       - local_working_tree
       - deployed_runtime
       - production_posture
@@ -43,20 +44,23 @@ sources:
       - production_state
 
   - source_id: current_product_state
-    source_type: canonical_repository_source
+    source_type: governed_public_projection
     repository_path: CURRENT_STATE.md
     authority_owner: Architect
     authoritative_for:
-      - compressed_current_product_state
-      - canonical_product_direction
+      - compressed_public_current_state_projection
+      - externally_supportable_product_direction
     not_authoritative_for:
+      - canonical_corporate_accepted_state
       - deployed_runtime
       - live_control_plane
 
   - source_id: corporate_accepted_state_registry
-    source_type: accepted_state_registry
-    repository_path: agent_files/state/accepted-state-registry.yaml
+    source_type: private_canonical_accepted_state_registry
+    repository: nova-infrastructure-systems/nova-core
+    repository_path: governance/accepted-state/registry.yaml
     authority_owner: Architect
+    public_repository_direct_access: not_assumed
     authoritative_for:
       - corporate_accepted_state_entries_within_recorded_scope
     not_authoritative_for:
@@ -64,23 +68,53 @@ sources:
       - deployed_runtime
       - production_state
 
+  - source_id: public_historical_accepted_state_projection
+    source_type: governed_historical_projection
+    repository: nova-infrastructure-systems/sharpe-nova-os
+    repository_path: agent_files/state/accepted-state-registry.yaml
+    authoritative_for:
+      - preserved_historical_public_accepted_state_payload
+      - historical_public_provenance
+    not_authoritative_for:
+      - current_corporate_accepted_state
+      - accepted_state_mutation
+      - chronology_creation
+      - Reflex_Memory_acceptance
+      - implementation_authority
+      - production_state
+
+  - source_id: accepted_state_authority_transfer_activation
+    source_type: governed_public_projection_control
+    repository_path: docs/governance/canonical-authority-transfer-activation-2026-08-28.yaml
+    authoritative_for:
+      - public_projection_role_after_transfer
+      - public_current_accepted_state_claim_prohibition
+      - private_canonical_repository_identity_as_projected_publicly
+    not_authoritative_for:
+      - future_private_registry_entries_after_its_recorded_verification_window
+      - deployed_runtime
+      - production_state
+      - capital_authority
+
   - source_id: governed_chronology_records
     source_type: governed_chronology
     repository_path: chronology
     authoritative_for:
-      - schema_valid_governed_chronology_events
+      - schema_valid_governed_chronology_events_within_their_recorded_scope
     not_authoritative_for:
       - unrecorded_events
       - automatic_Reflex_Memory
       - authority_not_present_in_the_event_record
+      - current_corporate_accepted_state_after_private_transfer
 
   - source_id: production_readiness
-    source_type: canonical_repository_source
+    source_type: governed_public_projection
     repository_path: docs/operations/production-readiness-register.md
     authoritative_for:
-      - gate_level_readiness_state
+      - publicly_projected_gate_level_readiness_state
       - readiness_evidence_requirements
     not_authoritative_for:
+      - canonical_corporate_accepted_state
       - current_live_production_state
       - system_wide_readiness_from_one_READY_subcomponent
 
@@ -88,9 +122,9 @@ sources:
     source_type: cco_operating_coordination_source
     repository_path: docs/operations/cco/current-priority-register.yaml
     authoritative_for:
-      - current_CCO_operating_questions
-      - current_priority_sequence
-      - unresolved_CCO_items
+      - current_CCO_operating_questions_within_the_public_projection_workstream
+      - current_priority_sequence_within_recorded_scope
+      - unresolved_CCO_items_within_recorded_scope
     not_authoritative_for:
       - corporate_accepted_state
       - product_implementation_authority
@@ -98,13 +132,14 @@ sources:
       - buyer_demand
 
   - source_id: target_v2_contract
-    source_type: canonical_repository_source
+    source_type: governed_public_contract
     repository_path: docs/target-v2/README.md
     authoritative_for:
-      - canonical_future_external_model
-      - target_v2_contract_state
-      - target_v2_progression_sequence
+      - public_target_v2_contract_projection
+      - canonical_future_external_model_as_publicly_approved
+      - target_v2_progression_sequence_as_publicly_approved
     not_authoritative_for:
+      - canonical_corporate_accepted_state
       - target_v2_runtime_existence
       - target_v2_production_activity
 
@@ -122,11 +157,12 @@ sources:
       - production_authority
 
   - source_id: nova_api_repository_implementation
-    source_type: repository_implementation_source
+    source_type: historical_public_repository_implementation_source
     repository_path: app.py
     authoritative_for:
-      - repository_API_implementation
+      - retained_public_repository_API_implementation_history
     not_authoritative_for:
+      - current_private_production_implementation
       - deployed_commit
       - production_runtime
       - active_production_configuration
