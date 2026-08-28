@@ -1,0 +1,72 @@
+schema_version: "1.0.0"
+transition_id: canonical-authority-public-projection-2026-08-28
+transition_role: conditional_public_authority_reconciliation
+status: AUTHORIZED_PENDING_PRIVATE_EFFECTIVE_TRANSFER
+authorization_reference: ARCHITECT-AUTH-CANONICAL-TRANSFER-2026-08-28-B3FB1A8-F50BC42
+authorized_by: Architect
+authorized_at: "2026-08-28T12:50:00-05:00"
+authorized_starting_heads:
+  source_public_repository: nova-infrastructure-systems/sharpe-nova-os
+  source_public_head: b3fb1a8fc0c395759c46e4cdc9c9fe4b07006317
+  destination_private_repository: nova-infrastructure-systems/nova-core
+  destination_private_head: f50bc4295b0463779f34c22219a64fc578656abd
+private_authorization_receipt:
+  repository: nova-infrastructure-systems/nova-core
+  commit: ff168003a545ffba08d57780c5a8deaa44705dd8
+  path: docs/governance/canonical-authority-transfer-authorization-receipt-2026-08-28.yaml
+current_authority_before_activation:
+  repository: nova-infrastructure-systems/sharpe-nova-os
+  status: CURRENT_CANONICAL_GOVERNANCE_AUTHORITY
+  public_registry_path: agent_files/state/accepted-state-registry.yaml
+  public_registry_content_sha256: ed369e92b3c8a53405b5a3417c4599ab510c4477b5a3033ac16fda8850a91a20
+activation_condition:
+  all_required: true
+  private_repository: nova-infrastructure-systems/nova-core
+  private_registry_path: governance/accepted-state/registry.yaml
+  private_registry_role: canonical_private_accepted_state_registry
+  private_transfer_status: EFFECTIVE
+  Architect_transfer_authorization_reference: ARCHITECT-AUTH-CANONICAL-TRANSFER-2026-08-28-B3FB1A8-F50BC42
+  source_public_head: b3fb1a8fc0c395759c46e4cdc9c9fe4b07006317
+  destination_private_head: f50bc4295b0463779f34c22219a64fc578656abd
+  private_transfer_receipt_commit: ff168003a545ffba08d57780c5a8deaa44705dd8
+  public_projection_reconciliation_commit: must_resolve_to_commit_containing_this_transition_artifact
+authority_semantics:
+  before_activation:
+    public_repository_role: CURRENT_CANONICAL_GOVERNANCE_AUTHORITY
+    private_repository_role: DESIGNATED_FUTURE_AUTHORITY
+  after_activation:
+    public_repository_role: NON_AUTHORITATIVE_GOVERNED_PROJECTION
+    private_repository_role: CANONICAL_CORPORATE_ACCEPTED_STATE_AUTHORITY
+    retained_public_registry_role: historical_governed_projection_only
+    retained_public_registry_current_claim_use: prohibited
+    legacy_public_accepted_state_synchronization_role: historical_compatibility_only_non_authoritative
+    CURRENT_STATE_authority_section: superseded_by_this_transition_and_verified_private_effective_registry
+atomicity:
+  zero_authority_period_allowed: false
+  dual_undisputed_authority_period_allowed: false
+  rule: >-
+    This public repository remains canonical until the private effective registry
+    satisfying every activation condition is merged and remotely verified. At
+    that exact condition, this public repository becomes a non-authoritative
+    governed projection without requiring deletion of historical public files.
+failure_rule:
+  if_any_activation_condition_is_missing: public_repository_remains_canonical
+  if_private_effective_transfer_is_reverted: separate_Architect_authority_reversion_decision_required
+public_projection_preservation:
+  retain_historical_provenance: true
+  retain_archived_acceptance_evidence: true
+  retain_doctrine_contracts_schemas_interoperability_and_approved_proof: true
+  public_runtime_deletion_required: false
+  public_runtime_deletion_authorized: false
+non_authorizations:
+  public_runtime_deletion: false
+  chronology: false
+  Reflex_Memory_acceptance: false
+  payment_or_settlement: false
+  institutional_Gate_5: false
+  capital_movement: false
+  production_runtime_change: false
+repository_effect_of_this_commit:
+  repository_governance_surface_changed: true
+  canonical_corporate_state_changed_before_activation: false
+  cross_agent_current_use_set_changed: false
