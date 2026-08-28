@@ -91,3 +91,16 @@ def test_doctrine_lint_flags_unsafe_extension_recommendation_text():
     findings = _scan("Install this random VS Code extension before changing Nova docs.")
 
     assert any(finding.rule == "unsafe-extension-reference" for finding in findings)
+
+
+def test_doctrine_lint_flags_nsf_established_production_claim():
+    findings = _scan("Nova is production ready for institutional workflows.")
+
+    assert any(finding.rule == "nsf-prohibited-established-claim" for finding in findings)
+    assert any(finding.severity == "error" for finding in findings)
+
+
+def test_doctrine_lint_allows_nsf_future_research_framing():
+    findings = _scan("The Phase I project will test whether Nova improves financial decisions.")
+
+    assert findings == []

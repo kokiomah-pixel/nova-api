@@ -1,0 +1,87 @@
+research_program:
+  title: >
+    Reconstructable pre-execution review-state construction for
+    agentic financial workflows
+
+  foundational_question: >
+    Can heterogeneous and asynchronously changing financial-workflow
+    evidence be transformed into a minimal, reproducible review state
+    that preserves provenance, temporal ordering, constraint context
+    and accountable local authority?
+
+  threshold_status: to_be_set_from_baseline_experiments
+
+hypotheses:
+  H1_review_context_sufficiency:
+    hypothesis: >
+      A bounded context schema can retain materially necessary review
+      information while excluding raw operational payloads and
+      irrelevant execution exhaust.
+    technical_risk:
+      - material_context_may_be_omitted
+      - unnecessary_context_may_create_review_noise
+      - heterogeneous_sources_may_not_normalize_reliably
+    measures:
+      - material_context_recall
+      - irrelevant_context_inclusion_rate
+      - prohibited_payload_exposure_count
+      - review_package_size
+    preliminary_success_direction:
+      material_context_recall: maximize
+      irrelevant_context_inclusion_rate: minimize
+      prohibited_payload_exposure_count: zero
+    threshold_status: to_be_set_from_baseline_experiments
+
+  H2_temporal_coherence:
+    hypothesis: >
+      Temporal and provenance constraints can identify when a proposed
+      review state is stale, contradictory or not safely reconstructable.
+    technical_risk:
+      - asynchronous_source_arrival
+      - stale_evidence
+      - conflicting_timestamps
+      - governance_epoch_changes
+      - late_arriving_context
+    measures:
+      - stale_source_detection_rate
+      - contradiction_detection_rate
+      - unsafe_reconstruction_detection_rate
+      - false_healthy_classification_rate
+    preliminary_success_direction:
+      unsafe_reconstruction_detection_rate: maximize
+      false_healthy_classification_rate: approach_zero
+    threshold_status: to_be_set_from_baseline_experiments
+
+  H3_deterministic_reconstruction:
+    hypothesis: >
+      Independent reviewers or validators can reconstruct materially
+      equivalent review states from the same bounded evidence package.
+    technical_risk:
+      - ambiguous_classification
+      - incomplete_chronology
+      - source_order_sensitivity
+      - implementation_specific_interpretation
+    measures:
+      - reconstruction_success_rate
+      - inter_reviewer_agreement
+      - chronology_link_integrity
+      - materially_equivalent_state_rate
+    threshold_status: to_be_set_from_baseline_experiments
+
+  H4_authority_boundary:
+    hypothesis: >
+      Nova can provide useful constraint and risk context without being
+      interpreted as an approval, denial or execution authority.
+    technical_risk:
+      - interface_language_may_imply_permission
+      - machine_states_may_be_treated_as_authoritative
+      - operators_may_confuse_context_with_approval
+    measures:
+      - authority_role_confusion_rate
+      - unauthorized_approval_language_count
+      - execution_effect_violation_count
+      - correct_local_authority_identification_rate
+    preliminary_success_direction:
+      execution_effect_violation_count: zero
+      unauthorized_approval_language_count: zero
+    threshold_status: to_be_set_from_baseline_experiments
