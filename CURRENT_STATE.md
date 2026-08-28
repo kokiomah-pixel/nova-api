@@ -108,9 +108,9 @@ deployment_reconciliation:
   private_repoint_completed: true
   intentional_cutover_completed: true
   public_repository_dependency_for_observed_active_production_runtime: false
-  post_cutover_public_contract_validation: pending
-  post_cutover_private_implementation_validation: pending
-  removal_gate: BLOCKED_PENDING_STABILIZATION_VALIDATION_AND_ARCHITECT_REVIEW
+  post_cutover_public_contract_validation: repository_verified_complete
+  post_cutover_private_implementation_validation: repository_verified_complete
+  removal_gate: BLOCKED_PENDING_STABILIZATION_CCO_REVIEW_AND_ARCHITECT_DELETION_AUTHORITY
 
 repository_transition_effects:
   parallel_provider_continuity_candidate_effect: observed_live
@@ -179,7 +179,7 @@ current_product_state:
     rollback_auto_credential_preservation: false
     post_rollback_recovery: operator_observed
     public_repository_dependency_for_observed_active_production_runtime: false
-    post_cutover_repository_validation: pending
+    post_cutover_repository_validation: repository_verified_complete
     CDP_custody: Architect_attested_Admin_Owner
     CDP_API_key_management: true
     CDP_active_API_keys: 1
@@ -284,6 +284,7 @@ The repository and current evidence establish:
 * an exercised provider rollback on the private continuity candidate;
 * a demonstrated rollback failure mode in which provider-held credential state was not automatically preserved;
 * successful operator-observed restoration of credential state and three-of-three authenticated continuity after rollback;
+* repository-verified completion of the post-cutover public-contract and private-implementation validation gate, recorded in `docs/operations/post-cutover-repository-validation-2026-08-28.md`;
 * Architect-attested CDP Admin/Owner access with project-setting and API-key management authority;
 * one active CDP API key classified founder/internal;
 * Architect-attested current CDP x402/facilitator disabled state;
@@ -303,7 +304,6 @@ The repository and current evidence establish:
 The available evidence does not establish:
 
 * authorization to remove the public runtime or its production-supporting implementation surface;
-* completed post-cutover public/private repository validation reruns;
 * independently verified full provider-side cutover or rollback attestation;
 * automatic provider-held credential preservation across rollback;
 * a deployed target v2 runtime;
@@ -323,11 +323,11 @@ The available evidence does not establish:
 
 ## Current implementation priority
 
-The accepted-state authority transfer is complete. The remaining repository
-transition work is projection hygiene, post-cutover public-contract validation,
-private-implementation validation, and bounded sanitization review. Public
-deletion-bearing sanitization remains blocked until those checks are complete
-and the Architect separately authorizes removal.
+The accepted-state authority transfer and post-cutover repository validation are
+complete. The remaining repository-transition work is stabilization, projection
+hygiene reconciliation, CCO completion review, and bounded sanitization review.
+Public deletion-bearing sanitization remains blocked until stabilization and CCO
+review are complete and the Architect separately authorizes removal.
 
 Gate 5 remains not started and has no implementation or production-activation
 authority.
@@ -340,7 +340,6 @@ current_readiness_priority:
       - provider_control_planes_not_independently_verified
       - founder_concentration_remains
       - CDP_business_verification_pending
-      - post_cutover_repository_validation_pending
       - rollback_requires_provider_identity_state_revalidation
 
   Gate_2_Legacy_v1_dependency:
@@ -350,16 +349,16 @@ current_readiness_priority:
       - historical_retention_not_proven_complete
 
   repository_transition:
-    status: authority_transfer_complete_projection_hygiene_in_progress
+    status: authority_transfer_complete_repository_validation_complete_stabilization_in_progress
     accepted_state_authority: nova-infrastructure-systems/nova-core
     public_repository_role: NON_AUTHORITATIVE_GOVERNED_PROJECTION
     provider_continuity_evidence: evidence_submitted
     intentional_cutover: operator_observed_complete
     primary_source_private: true
     public_repository_dependency_for_observed_active_production_runtime: false
-    public_contract_validation: pending
-    private_implementation_validation: pending
-    public_runtime_removal: blocked_pending_validation_and_architect_authority
+    public_contract_validation: repository_verified_complete
+    private_implementation_validation: repository_verified_complete
+    public_runtime_removal: blocked_pending_stabilization_CCO_review_and_architect_authority
 
   production_incident:
     status: contained_historically_unattested
@@ -443,18 +442,19 @@ See:
 The readiness evidence chain is maintained under:
 
 * `docs/operations/readiness-reconciliation-2026-08-19.md`;
-* `docs/operations/incident-closure-receipt-2026-08-24.md`.
+* `docs/operations/incident-closure-receipt-2026-08-24.md`;
+* `docs/operations/post-cutover-repository-validation-2026-08-28.md`.
 
 These evidence receipts are intentionally not part of the public entry-link surface.
 
 ## Evidence boundary
 
-Repository ownership, protected public merges, private transfer merges, and the
-canonical accepted-state authority transition described above are independently
-verified through GitHub repository evidence. Render, Legacy v1, private
-continuity, rollback, cutover, and CDP control-plane observations remain
-Architect-attested or operator-observed unless separately identified as
-independently verified.
+Repository ownership, protected public merges, private transfer merges, the
+canonical accepted-state authority transition, and the post-cutover repository
+validation described above are independently verified through GitHub repository
+evidence. Render, Legacy v1, private continuity, rollback, cutover, and CDP
+control-plane observations remain Architect-attested or operator-observed unless
+separately identified as independently verified.
 
 The private continuity and immediate cutover proof establish submitted evidence
 for tested private-source alignment, preserved hostname, containment, complete
