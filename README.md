@@ -11,6 +11,11 @@ External systems execute.
 Nova does not execute.
 ```
 
+> **Repository role:** this repository is the governed public projection of
+> Sharpe Nova OS. The canonical corporate accepted-state authority is the
+> private `nova-infrastructure-systems/nova-core` repository. Public retained
+> accepted-state artifacts are historical projection only.
+
 ## The problem
 
 A transaction system can preserve what ultimately moved while the institution
@@ -38,6 +43,9 @@ Nova does not approve, authorize, sign, settle, or move capital.
 
 ## Current state
 
+* The accepted-state authority transfer to private `nova-core` is effective and
+  repository-verified; this repository is the non-authoritative governed public
+  projection.
 * Legacy v1 is implemented but is not the canonical future external model.
 * New external integrations against Legacy v1 admission semantics are prohibited.
 * The target v2 non-authority review-context contract is canonical at design-v2.1.
@@ -48,7 +56,7 @@ Nova does not approve, authorize, sign, settle, or move capital.
 * Production readiness, institutional use, buyer validation, and adoption are
   not established.
 
-Read the authoritative current-state summary:
+Read the approved public current-state projection:
 
 * [Current State](CURRENT_STATE.md)
 
@@ -185,7 +193,7 @@ python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements-dev.txt
 ```
 
-Run the canonical repository verification:
+Run the public repository verification:
 
 ```bash
 make verify
@@ -193,7 +201,7 @@ make verify
 
 The verification chain includes doctrine, scenarios, tests, chronology,
 whitespace, and public-surface coherence checks. The repository `.venv` is the
-canonical local validation environment.
+canonical local validation environment for this public projection.
 
 ## Developer environment and continuity
 
