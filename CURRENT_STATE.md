@@ -205,7 +205,8 @@ current_product_state:
       runtime_effect: none
       public_endpoint_effect: none
       production_effect: none
-      canonicality_source: private_authoritative_repository_main
+      canonicality_source: authoritative_repository_main
+      canonicality_repository: nova-infrastructure-systems/nova-core
 
     Gate_4: complete
 
@@ -213,7 +214,8 @@ current_product_state:
       status: COMPLETE
       artifact: institutional_exposure_contract_v0.1
       scope: institutional_exposure_contract_only
-      canonicality_source: private_authoritative_repository_main
+      canonicality_source: authoritative_repository_main
+      canonicality_repository: nova-infrastructure-systems/nova-core
 
     Gate_5_authorization_preconditions:
       status: NOT_YET_SATISFIED
@@ -379,7 +381,8 @@ current_readiness_priority:
     status: complete
     artifact: private_synthetic_reference_adapter
     scope: private_synthetic_reference_only
-    canonicality_source: private_authoritative_repository_main
+    canonicality_source: authoritative_repository_main
+    canonicality_repository: nova-infrastructure-systems/nova-core
     runtime_effect: none
     public_endpoint_effect: none
     production_effect: none
@@ -392,7 +395,8 @@ current_readiness_priority:
     status: COMPLETE
     artifact: institutional_exposure_contract_v0.1
     scope: institutional_exposure_contract_only
-    canonicality_source: private_authoritative_repository_main
+    canonicality_source: authoritative_repository_main
+    canonicality_repository: nova-infrastructure-systems/nova-core
 
   Gate_5_authorization_preconditions:
     status: NOT_YET_SATISFIED
