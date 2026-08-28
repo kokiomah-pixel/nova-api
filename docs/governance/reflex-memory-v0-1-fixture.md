@@ -172,6 +172,18 @@ This validation is fixture-backed.
 
 It does not claim production persistence, dynamic storage, autonomous memory mutation, compliance review, audit reporting, or external integration.
 
+## Governed Abstraction Extension
+
+The v0.1 fixture continues to demonstrate the existing accepted-memory lifecycle.
+
+The public repository documents the governed-abstraction and implicit-policy-
+conversion boundaries without publishing internal accepted-entry, promotion,
+retrieval, or cross-object lineage fixtures.
+
+Future public synthetic vectors may illustrate candidate/non-authority behavior
+only after separate exposure review. They would not create accepted Reflex
+Memory, chronology, production state, or runtime behavior.
+
 ## Replayability
 
 Reflex Memory v0.1 includes a fixture-backed replay artifact that reconstructs API-emitted Reflex Memory context back to accepted Reflex Memory entries and source chronology IDs.
