@@ -1,0 +1,46 @@
+schema_version: "1.0.0"
+activation_id: canonical-authority-transfer-activation-2026-08-28
+status: EFFECTIVE_REPOSITORY_VERIFIED
+activated_at: "2026-08-28T13:16:14-05:00"
+authorization:
+  reference: ARCHITECT-AUTH-CANONICAL-TRANSFER-2026-08-28-B3FB1A8-F50BC42
+  authorized_by: Architect
+  authorized_starting_public_head: b3fb1a8fc0c395759c46e4cdc9c9fe4b07006317
+  authorized_starting_private_head: f50bc4295b0463779f34c22219a64fc578656abd
+transfer_evidence:
+  private_authorization_receipt_commit: ff168003a545ffba08d57780c5a8deaa44705dd8
+  public_projection_reconciliation_commit: 845730b68fec4ff4a9c10047ca20de371a121e82
+  public_projection_merge_commit: 2b7c5361090f04de95b898f2bb8746ae86f305af
+  private_effective_transfer_merge_commit: 037a24c68c0ecb4cb4a98354c5ec2667a1f75672
+  private_completion_evidence_merge_commit: 052cdaf256c846489bc12b54a5b698411247fc90
+  private_exact_head_CI_run: 33198325133
+  private_exact_head_CI_conclusion: success
+authority_state:
+  canonical_corporate_accepted_state_authority: nova-infrastructure-systems/nova-core
+  canonical_private_registry_path: governance/accepted-state/registry.yaml
+  public_repository: nova-infrastructure-systems/sharpe-nova-os
+  public_repository_role: NON_AUTHORITATIVE_GOVERNED_PROJECTION
+  public_retained_registry_path: agent_files/state/accepted-state-registry.yaml
+  public_retained_registry_role: historical_governed_projection_only
+  public_current_accepted_state_claim_use: prohibited
+  legacy_public_accepted_state_synchronization_role: historical_compatibility_only_non_authoritative
+  exactly_one_undisputed_canonical_authority: true
+state_separation:
+  repository_governance_surface_changed: true
+  canonical_corporate_state_changed: true
+  cross_agent_current_use_set_changed: false
+non_authorizations:
+  public_runtime_deletion: false
+  chronology: false
+  Reflex_Memory_acceptance: false
+  payment_or_settlement: false
+  institutional_Gate_5: false
+  production_runtime_change: false
+  capital_movement: false
+projection_rules:
+  CURRENT_STATE_role: public_current_state_projection
+  private_registry_required_for_current_corporate_accepted_state: true
+  public_registry_may_support_current_corporate_accepted_state_claims: false
+  public_compatibility_code_may_create_authority: false
+  public_compatibility_code_may_request_chronology_or_accepted_state_mutation: false
+  historical_payload_and_provenance_must_be_preserved: true

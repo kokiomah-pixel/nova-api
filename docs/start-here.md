@@ -15,7 +15,15 @@ External systems execute.
 Nova does not execute.
 ```
 
-## 3. One example
+## 3. Repository role
+
+This public repository is the governed external projection of Sharpe Nova OS.
+The canonical corporate accepted-state authority is the private
+`nova-infrastructure-systems/nova-core` repository. Public retained
+accepted-state artifacts are historical projection only and cannot establish
+current corporate accepted state.
+
+## 4. One example
 
 The first bounded workflow is an agent-prepared stablecoin treasury action.
 
@@ -28,10 +36,13 @@ or unavailable at that moment.
 Nova structures that review context. Local authority decides, and external
 systems execute.
 
-## 4. What exists today
+## 5. What exists today
 
-See the authoritative [Current State](../CURRENT_STATE.md).
+See the approved public [Current State](../CURRENT_STATE.md) projection.
 
+* The accepted-state authority transfer to private `nova-core` is effective and
+  repository-verified.
+* This public repository is a non-authoritative governed projection.
 * Legacy v1 is implemented.
 * Legacy v1 is not the canonical future external model.
 * Target v2 is approved in design.
@@ -39,7 +50,7 @@ See the authoritative [Current State](../CURRENT_STATE.md).
 * Phase 1 is offline and repository-validated.
 * Institutional production readiness is not established.
 
-## 5. Choose a review path
+## 6. Choose a review path
 
 ### Ten-minute public review
 
@@ -69,7 +80,7 @@ See the authoritative [Current State](../CURRENT_STATE.md).
 Use the [NSF reviewer path](reviewer-paths.md#nsf-reviewer-path). Research
 materials do not establish current production readiness or institutional use.
 
-## 6. Important non-claims
+## 7. Important non-claims
 
 This repository does not establish a deployed or production-active target v2
 runtime, attested production custody, a completed Legacy v1 consumer inventory,

@@ -3,7 +3,15 @@
 **Effective date:** August 25, 2026  
 **Reconciliation date:** August 28, 2026  
 **Authority:** Architect  
-**Coherence review:** Jarvis-Nova CCO
+**Coherence review:** Jarvis-Nova CCO  
+**Repository role:** governed public current-state projection  
+**Canonical corporate accepted-state authority:** `nova-infrastructure-systems/nova-core`
+
+This file is the approved public projection of current Sharpe Nova OS state. It
+is not the canonical corporate accepted-state store. Current corporate accepted
+state is authoritative only in the private `nova-infrastructure-systems/nova-core`
+registry after the exact-head Architect-authorized transfer completed on
+August 28, 2026.
 
 ## What Nova is
 
@@ -25,11 +33,14 @@ repository_architecture:
 
   public_repository:
     repository: nova-infrastructure-systems/sharpe-nova-os
-    role: approved_public_projection_and_current_governance_surface
+    role: NON_AUTHORITATIVE_GOVERNED_PROJECTION
+    current_corporate_accepted_state_claims_permitted: false
+    historical_governance_and_public_contracts_retained: true
 
   private_repository:
     repository: nova-infrastructure-systems/nova-core
     visibility: private
+    role: CANONICAL_CORPORATE_ACCEPTED_STATE_AUTHORITY
     provisioned: true
     public_history_imported: true
     migration_parity_verified: true
@@ -40,18 +51,26 @@ repository_architecture:
     future_production_development_surface: true
 
   accepted_state_authority:
-    current: nova-infrastructure-systems/sharpe-nova-os
-    transfer_status: PENDING_ARCHITECT_ACCEPTANCE
+    current: nova-infrastructure-systems/nova-core
+    transfer_status: EFFECTIVE_REPOSITORY_VERIFIED
+    authorization_reference: ARCHITECT-AUTH-CANONICAL-TRANSFER-2026-08-28-B3FB1A8-F50BC42
+    authorized_starting_public_head: b3fb1a8fc0c395759c46e4cdc9c9fe4b07006317
+    authorized_starting_private_head: f50bc4295b0463779f34c22219a64fc578656abd
+    public_projection_merge_commit: 2b7c5361090f04de95b898f2bb8746ae86f305af
+    private_effective_transfer_merge_commit: 037a24c68c0ecb4cb4a98354c5ec2667a1f75672
+    private_completion_evidence_merge_commit: 052cdaf256c846489bc12b54a5b698411247fc90
 
   public_private_boundary:
     governance_accepted: true
-    migration_in_progress: true
+    authority_transfer_complete: true
     production_source_cutover_observed_complete: true
+    public_projection_hygiene: in_progress
     public_sanitization_complete: false
 
   private_main_protection:
     status: BLOCKED_BY_PLATFORM_POLICY
     privacy_weakened_to_enable_protection: false
+    compensating_controls_required: true
 
 deployment_reconciliation:
   public_repository_dependency_recorded_historically: true
@@ -97,7 +116,9 @@ repository_transition_effects:
   parallel_provider_continuity_candidate_effect: observed_live
   canonical_production_cutover_effect: operator_observed_private_source_live
   public_runtime_removal_effect: none
-  accepted_state_authority_transfer_effect: none
+  accepted_state_authority_transfer_effect: effective_repository_verified
+  canonical_corporate_state_changed: true
+  cross_agent_current_use_set_changed: false
   retail_runtime_effect: none
   payment_effect: none
   institutional_Gate_5_effect: none
@@ -106,10 +127,18 @@ repository_transition_effects:
   institutional_Reflex_Memory_effect: none
 ```
 
-Private repository creation, verified history parity, a live private continuity
-candidate, or production source cutover do not transfer accepted-state
-authority. The current public governance surface remains authoritative until the
-Architect explicitly accepts that separate transfer.
+The accepted-state authority transfer is complete at the repository-governance
+layer. The private `nova-core` registry is the sole canonical corporate
+accepted-state authority. This public repository is now a governed projection:
+it may publish approved doctrine, contracts, schemas, interoperability material,
+and externally supportable state, but its retained accepted-state registry is
+historical projection only and must not be used for current corporate
+accepted-state claims.
+
+The transfer did not authorize deletion of the public runtime or any public
+production-supporting surface. It did not create chronology, Reflex Memory
+acceptance, payment or settlement authority, institutional Gate 5 authority,
+production runtime changes, or capital authority.
 
 The rollback exercise established that provider recovery and authenticated
 continuity are separate controls: provider-held identity state was not
@@ -121,6 +150,8 @@ identity-state verification after any future rollback.
 
 ```yaml
 current_product_state:
+  projection_role: governed_public_projection
+  canonical_corporate_accepted_state_source: nova-infrastructure-systems/nova-core
   canonical_direction: target_v2_non_authority_review_context
 
   Legacy_v1:
@@ -132,7 +163,7 @@ current_product_state:
     safe_to_retire: false
 
   production_custody:
-    GitHub_corporate_repository: verified
+    GitHub_corporate_repository: nova-infrastructure-systems/nova-core
     active_primary_service: nova-api
     active_primary_source_repository: nova-infrastructure-systems/nova-core
     active_primary_source_branch: main
@@ -175,6 +206,7 @@ current_product_state:
       public_endpoint_effect: none
       production_effect: none
       canonicality_source: authoritative_repository_main
+      canonicality_repository: nova-infrastructure-systems/nova-core
 
     Gate_4: complete
 
@@ -183,6 +215,7 @@ current_product_state:
       artifact: institutional_exposure_contract_v0.1
       scope: institutional_exposure_contract_only
       canonicality_source: authoritative_repository_main
+      canonicality_repository: nova-infrastructure-systems/nova-core
 
     Gate_5_authorization_preconditions:
       status: NOT_YET_SATISFIED
@@ -233,8 +266,12 @@ The repository and current evidence establish:
 * governance, chronology, source, and authority specifications;
 * a bounded stablecoin-treasury workflow definition;
 * production-readiness and incident-control gates;
-* a corporate GitHub repository at `nova-infrastructure-systems/sharpe-nova-os`;
-* a private implementation repository at `nova-infrastructure-systems/nova-core`;
+* a governed public projection repository at `nova-infrastructure-systems/sharpe-nova-os`;
+* a private implementation and canonical corporate accepted-state repository at `nova-infrastructure-systems/nova-core`;
+* an exact-head Architect-authorized accepted-state authority transfer from public starting head `b3fb1a8fc0c395759c46e4cdc9c9fe4b07006317` to private starting head `f50bc4295b0463779f34c22219a64fc578656abd`;
+* GitHub-verified public projection merge `2b7c5361090f04de95b898f2bb8746ae86f305af`;
+* GitHub-verified private effective-transfer merge `037a24c68c0ecb4cb4a98354c5ec2667a1f75672` and completion-evidence merge `052cdaf256c846489bc12b54a5b698411247fc90`;
+* preservation of the accepted-state payload and historical provenance through the transfer;
 * verified repository identity reconciliation through PR #38;
 * merged readiness reconciliation through PR #39;
 * an operator-observed in-place source repoint of the existing `nova-api` Render service to private `nova-core/main`;
@@ -269,7 +306,6 @@ The available evidence does not establish:
 * completed post-cutover public/private repository validation reruns;
 * independently verified full provider-side cutover or rollback attestation;
 * automatic provider-held credential preservation across rollback;
-* accepted-state authority transfer from the public governance surface to the private repository;
 * a deployed target v2 runtime;
 * a production-active target v2 endpoint;
 * independently verified full provider-side production-custody attestation;
@@ -287,14 +323,14 @@ The available evidence does not establish:
 
 ## Current implementation priority
 
-The Readiness Gate Baseline is closed, Gate 3 is complete, and Gate 4 establishes
-only the canonical private synthetic reference adapter. Gate 5 remains not
-started and has no implementation or production-activation authority.
+The accepted-state authority transfer is complete. The remaining repository
+transition work is projection hygiene, post-cutover public-contract validation,
+private-implementation validation, and bounded sanitization review. Public
+deletion-bearing sanitization remains blocked until those checks are complete
+and the Architect separately authorizes removal.
 
-The repository-transition priority is now post-cutover stabilization, public
-contract validation, private implementation validation, and governance
-reconciliation. Public deletion-bearing sanitization remains blocked until
-those checks are complete and the Architect separately authorizes removal.
+Gate 5 remains not started and has no implementation or production-activation
+authority.
 
 ```yaml
 current_readiness_priority:
@@ -314,7 +350,9 @@ current_readiness_priority:
       - historical_retention_not_proven_complete
 
   repository_transition:
-    status: in_progress
+    status: authority_transfer_complete_projection_hygiene_in_progress
+    accepted_state_authority: nova-infrastructure-systems/nova-core
+    public_repository_role: NON_AUTHORITATIVE_GOVERNED_PROJECTION
     provider_continuity_evidence: evidence_submitted
     intentional_cutover: operator_observed_complete
     primary_source_private: true
@@ -344,6 +382,7 @@ current_readiness_priority:
     artifact: private_synthetic_reference_adapter
     scope: private_synthetic_reference_only
     canonicality_source: authoritative_repository_main
+    canonicality_repository: nova-infrastructure-systems/nova-core
     runtime_effect: none
     public_endpoint_effect: none
     production_effect: none
@@ -357,6 +396,7 @@ current_readiness_priority:
     artifact: institutional_exposure_contract_v0.1
     scope: institutional_exposure_contract_only
     canonicality_source: authoritative_repository_main
+    canonicality_repository: nova-infrastructure-systems/nova-core
 
   Gate_5_authorization_preconditions:
     status: NOT_YET_SATISFIED
@@ -409,16 +449,21 @@ These evidence receipts are intentionally not part of the public entry-link surf
 
 ## Evidence boundary
 
-Repository ownership and merged repository state are independently verified
-through GitHub. Render, Legacy v1, private continuity, rollback, cutover, and CDP
-control-plane observations in the current reconciliation are Architect-attested
-or operator-observed unless separately identified as independently verified.
+Repository ownership, protected public merges, private transfer merges, and the
+canonical accepted-state authority transition described above are independently
+verified through GitHub repository evidence. Render, Legacy v1, private
+continuity, rollback, cutover, and CDP control-plane observations remain
+Architect-attested or operator-observed unless separately identified as
+independently verified.
 
 The private continuity and immediate cutover proof establish submitted evidence
 for tested private-source alignment, preserved hostname, containment, complete
 credential parity, three-of-three authentication, rollback mechanics, and
-recovery. They do not establish independent provider verification, accepted-state
-authority transfer, or authority to remove the public implementation surface.
+recovery. They do not establish independent provider verification or authority
+to remove the public implementation surface. Accepted-state authority transfer
+is established separately by the explicit exact-head Architect authorization
+and the verified public/private transfer chain.
+
 The rollback exercise specifically demonstrated that provider-held credential
 state may require restoration and revalidation even when the provider reports
 the service Live and `/health` remains healthy.
@@ -438,9 +483,11 @@ institutional adoption, buyer validation, or enterprise readiness.
 
 ## Claim rule
 
-A repository artifact, passing test suite, design approval, offline proof,
-Architect-attested provider observation, operator-observed continuity or cutover
-test, closed readiness baseline, or contained incident does not independently
-establish system-wide production readiness, institutional use, buyer demand,
-adoption, pricing power, product-market fit, accepted-state authority transfer,
-or authority to remove public implementation surfaces.
+A generic repository artifact, passing test suite, design approval, offline
+proof, Architect-attested provider observation, operator-observed continuity or
+cutover test, closed readiness baseline, or contained incident does not
+independently establish system-wide production readiness, institutional use,
+buyer demand, adoption, pricing power, product-market fit, or authority to
+remove public implementation surfaces. Accepted-state authority transfer
+requires its own explicit Architect authorization and verified transfer
+evidence; that requirement was satisfied by the transfer recorded above.
