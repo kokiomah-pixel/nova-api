@@ -43,7 +43,7 @@ Nova does not approve, authorize, sign, settle, or move capital.
 
 ## Current state
 
-* The accepted-state authority transfer to private `nova-core` is effective and
+* The accepted-state authority migration to private `nova-core` is effective and
   repository-verified; this repository is the non-authoritative governed public
   projection.
 * Legacy v1 is implemented but is not the canonical future external model.
